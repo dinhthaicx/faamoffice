@@ -201,6 +201,85 @@ describe('createDefaultAppService', () => {
     expect(openExternal).toHaveBeenCalledWith('ms-settings:defaultapps')
   })
 
+  describe('windows: Default apps deep link', () => {
+    const HKCU_APPS = 'HKCU\\Software\\RegisteredApplications'
+    const HKLM_APPS = 'HKLM\\Software\\RegisteredApplications'
+    const registered = (hive: string) =>
+      [
+        '',
+        `${hive}\\Software\\RegisteredApplications`,
+        '    FaamOffice    REG_SZ    Software\\FaamOffice\\Capabilities',
+        '',
+      ].join('\r\n')
+    const notFound = () =>
+      Promise.reject(
+        new Error('ERROR: The system was unable to find the specified registry key or value.'),
+      )
+
+    /** registry: answer for a RegisteredApplications query; every other key is absent */
+    function winSet(registry: (key: string) => Promise<string>) {
+      const queries: string[][] = []
+      const run = vi.fn<RunCommand>((cmd, args) => {
+        if (!args[1].endsWith('\\RegisteredApplications')) return notFound()
+        expect(cmd).toBe('reg')
+        queries.push(args)
+        return registry(args[1])
+      })
+      const openExternal = vi.fn(async (_url: string) => {})
+      const svc = createDefaultAppService({ ...base, platform: 'win32', run, openExternal })
+      return { svc, openExternal, queries }
+    }
+
+    it('opens our own page for a per-user registration', async () => {
+      const { svc, openExternal, queries } = winSet(async (key) => registered(key.slice(0, 4)))
+      expect((await svc.set()).manualOnly).toBe(true)
+      expect(openExternal).toHaveBeenCalledExactlyOnceWith(
+        'ms-settings:defaultapps?registeredAppUser=FaamOffice',
+      )
+      // HKCU wins; the machine hive is not consulted
+      expect(queries).toEqual([['query', HKCU_APPS, '/v', 'FaamOffice']])
+    })
+
+    it('opens our own page for a per-machine registration', async () => {
+      const { svc, openExternal, queries } = winSet((key) =>
+        key === HKLM_APPS ? Promise.resolve(registered('HKLM')) : notFound(),
+      )
+      await svc.set()
+      expect(openExternal).toHaveBeenCalledExactlyOnceWith(
+        'ms-settings:defaultapps?registeredAppMachine=FaamOffice',
+      )
+      expect(queries).toEqual([
+        ['query', HKCU_APPS, '/v', 'FaamOffice'],
+        ['query', HKLM_APPS, '/v', 'FaamOffice'],
+      ])
+    })
+
+    it('opens the generic page for an install without the registration', async () => {
+      const { svc, openExternal, queries } = winSet(notFound)
+      expect((await svc.set()).manualOnly).toBe(true)
+      expect(openExternal).toHaveBeenCalledExactlyOnceWith('ms-settings:defaultapps')
+      expect(queries).toHaveLength(2)
+    })
+
+    it('treats unreadable registry answers as unregistered and never throws', async () => {
+      const { svc, openExternal } = winSet((key) => {
+        // reg itself missing / blocked: the runner throws before returning a promise
+        if (key === HKLM_APPS) throw new Error('spawn reg ENOENT')
+        // a value-less answer is no registration
+        return Promise.resolve(`\r\n${HKCU_APPS}\r\n\r\n`)
+      })
+      await expect(svc.set()).resolves.toMatchObject({ manualOnly: true })
+      expect(openExternal).toHaveBeenCalledExactlyOnceWith('ms-settings:defaultapps')
+    })
+
+    it('still resolves with the status when Settings cannot be opened', async () => {
+      const { svc, openExternal } = winSet(async () => registered('HKCU'))
+      openExternal.mockRejectedValueOnce(new Error('no handler for ms-settings'))
+      await expect(svc.set()).resolves.toEqual({ state: 'unknown', others: [], manualOnly: true })
+      expect(openExternal).toHaveBeenCalledTimes(1)
+    })
+  })
+
   it('reports unknown instead of throwing when the probe fails', async () => {
     const run = vi.fn<RunCommand>(async () => {
       throw new Error('osascript missing')

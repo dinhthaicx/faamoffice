@@ -50,6 +50,17 @@ export const OFFICE_TYPES: readonly OfficeType[] = [
 
 const LINUX_DESKTOP_ID = 'faamoffice.desktop'
 const WINDOWS_DEFAULT_APPS_URL = 'ms-settings:defaultapps'
+/**
+ * Our value name under Software\RegisteredApplications, written by
+ * build/installer.nsh as electron-builder's PRODUCT_NAME (= productName in
+ * electron-builder.cjs; tests/installer-capabilities.test.ts keeps them equal).
+ */
+export const WINDOWS_REGISTERED_APP_NAME = 'FaamOffice'
+/** where the installer registered us (its own hive) → the Default apps deep-link parameter */
+const WINDOWS_REGISTRATIONS = [
+  { hive: 'HKCU', param: 'registeredAppUser' },
+  { hive: 'HKLM', param: 'registeredAppMachine' },
+] as const
 
 export type RunCommand = (cmd: string, args: string[]) => Promise<string>
 
@@ -273,6 +284,32 @@ export function createDefaultAppService(deps: DefaultAppDeps): DefaultAppService
     }
   }
 
+  /**
+   * Our own page under Default apps when the installer registered us with
+   * Default Programs, else the generic page (installs that predate the
+   * registration). Windows builds without this deep link (it arrived in a 2023
+   * Windows 11 update) ignore the parameter and show the generic page. Never
+   * throws.
+   */
+  async function windowsDefaultAppsUrl(): Promise<string> {
+    for (const { hive, param } of WINDOWS_REGISTRATIONS) {
+      try {
+        const out = await deps.run('reg', [
+          'query',
+          `${hive}\\Software\\RegisteredApplications`,
+          '/v',
+          WINDOWS_REGISTERED_APP_NAME,
+        ])
+        if (parseRegValue(out)) {
+          return `${WINDOWS_DEFAULT_APPS_URL}?${param}=${encodeURIComponent(WINDOWS_REGISTERED_APP_NAME)}`
+        }
+      } catch {
+        // not registered in this hive (reg exits 1 for a missing value)
+      }
+    }
+    return WINDOWS_DEFAULT_APPS_URL
+  }
+
   async function set(): Promise<DefaultAppStatus> {
     if (!deps.packaged) return UNSUPPORTED
     try {
@@ -282,7 +319,7 @@ export function createDefaultAppService(deps: DefaultAppDeps): DefaultAppService
         if (!linuxDesktopInstalled(readFile)) return UNSUPPORTED
         await deps.run('xdg-mime', ['default', LINUX_DESKTOP_ID, ...mimes])
       } else if (deps.platform === 'win32') {
-        await deps.openExternal(WINDOWS_DEFAULT_APPS_URL)
+        await deps.openExternal(await windowsDefaultAppsUrl())
       }
     } catch {
       // status() below reports whatever actually stuck

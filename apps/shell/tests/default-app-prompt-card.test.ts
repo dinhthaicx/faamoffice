@@ -190,7 +190,7 @@ describe('DefaultAppPromptCard', () => {
     expect(card()!.textContent).not.toContain('Currently opened by')
     expect(card()!.textContent).not.toContain('Microsoft Word Document')
     expect(card()!.textContent).toContain(
-      'Windows will open its Default apps page. Search there for each file type (.docx, .xlsx, .xls, .xlsm, .pptx) and choose FaamOffice.',
+      'Windows will open the Default apps page. Choose FaamOffice for .docx, .xlsx, .xls, .xlsm and .pptx.',
     )
     expect(
       Array.from(host.querySelectorAll('button')).some((b) => b.textContent === 'Set as default'),
@@ -199,7 +199,7 @@ describe('DefaultAppPromptCard', () => {
     await click(button('Open Default apps'))
     expect(action).toHaveBeenCalledWith('set')
     expect(statusText()).toBe(
-      'On the Default apps page, search for .docx, .xlsx, .xls, .xlsm and .pptx, and choose FaamOffice for each.',
+      'On the Default apps page, choose FaamOffice for .docx, .xlsx, .xls, .xlsm and .pptx.',
     )
     expect(card()!.textContent).not.toContain("Couldn't set it")
 
