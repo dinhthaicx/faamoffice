@@ -117,14 +117,31 @@ describe('Settings default-app row', () => {
     expect(row()?.textContent).toContain('Could not change it.')
   })
 
-  it('offers the system settings page on Windows', async () => {
-    const set = vi.fn(
-      async () => ({ state: 'other', others: ['Word'], manualOnly: true }) as DefaultAppStatus,
-    )
+  it("lists several owners in the UI language's list style", async () => {
     await openGeneral({
-      getDefaultAppStatus: async () => ({ state: 'other', others: ['Word'], manualOnly: true }),
+      getDefaultAppStatus: async () => ({
+        state: 'other',
+        others: ['WPS Office', 'LibreOffice'],
+        manualOnly: false,
+      }),
+    })
+    expect(row()?.textContent).toContain('Current default: WPS Office and LibreOffice')
+  })
+
+  it('offers the system settings page on Windows', async () => {
+    // HKCR\<ProgId> defaults are file-type descriptions, not app names
+    const winOther: DefaultAppStatus = {
+      state: 'other',
+      others: ['Microsoft Word Document'],
+      manualOnly: true,
+    }
+    const set = vi.fn(async () => winOther)
+    await openGeneral({
+      getDefaultAppStatus: async () => winOther,
       setDefaultApp: set,
     })
+    expect(row()?.textContent).not.toContain('Current default')
+    expect(row()?.textContent).toContain('Open .docx, .xlsx and .pptx files in FaamOffice')
     const button = row()!.querySelector<HTMLButtonElement>('button')!
     expect(button.textContent).toBe('Open system settings')
     await click(button)

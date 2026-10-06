@@ -169,13 +169,35 @@ export function parseRegValue(output: string): string | null {
   return null
 }
 
-function linuxDesktopName(id: string, readFile: (p: string) => string): string {
-  const dirs = [
+/** where installed launchers (.desktop entries) live */
+function linuxApplicationDirs(): string[] {
+  return [
     join(homedir(), '.local/share/applications'),
     '/usr/local/share/applications',
     '/usr/share/applications',
   ]
-  for (const dir of dirs) {
+}
+
+/**
+ * Whether our launcher is installed. Only the deb/rpm packages ship
+ * faamoffice.desktop; an AppImage installs none, so xdg-mime cannot point the
+ * Office types at it (desktops that resolve installed IDs ignore the
+ * association, others report it while double-click still fails).
+ */
+function linuxDesktopInstalled(readFile: (p: string) => string): boolean {
+  for (const dir of linuxApplicationDirs()) {
+    try {
+      readFile(join(dir, LINUX_DESKTOP_ID))
+      return true
+    } catch {
+      // not installed there
+    }
+  }
+  return false
+}
+
+function linuxDesktopName(id: string, readFile: (p: string) => string): string {
+  for (const dir of linuxApplicationDirs()) {
     try {
       const m = /^Name=(.+)$/m.exec(readFile(join(dir, id)))
       if (m) return m[1].trim()
@@ -209,6 +231,7 @@ export function createDefaultAppService(deps: DefaultAppDeps): DefaultAppService
         return parseMacStatus(out)
       }
       if (deps.platform === 'linux') {
+        if (!linuxDesktopInstalled(readFile)) return UNSUPPORTED
         const outs = await Promise.all(
           mimes.map((m) => deps.run('xdg-mime', ['query', 'default', m])),
         )
@@ -256,6 +279,7 @@ export function createDefaultAppService(deps: DefaultAppDeps): DefaultAppService
       if (deps.platform === 'darwin' && macBundle) {
         await deps.run('osascript', ['-l', 'JavaScript', '-e', MAC_SET_SCRIPT, macBundle, ...utis])
       } else if (deps.platform === 'linux') {
+        if (!linuxDesktopInstalled(readFile)) return UNSUPPORTED
         await deps.run('xdg-mime', ['default', LINUX_DESKTOP_ID, ...mimes])
       } else if (deps.platform === 'win32') {
         await deps.openExternal(WINDOWS_DEFAULT_APPS_URL)

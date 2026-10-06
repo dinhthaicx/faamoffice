@@ -1,10 +1,19 @@
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it, vi } from 'vitest'
+import {
+  createDefaultAppPromptController,
+  createHomePromptSlot,
+  type HomePromptSlot,
+} from '../src/main/default-app-prompt'
+import { pickHomePrompt } from '../src/renderer/src/home-prompt'
+import type { DefaultAppStatus } from '../src/shared/home-api'
 import {
   MAX_SHOWS,
   MIN_AGE_MS,
   MIN_DOC_OPENS,
   RESHOW_AFTER_MS,
   asStarPromptState,
+  createStarPromptController,
+  isStarPromptAction,
   isUpgradeLaunch,
   shouldShowStarPrompt,
   shouldShowUpgradeStarPrompt,
@@ -12,6 +21,7 @@ import {
   withFirstRun,
   withResolved,
   withShown,
+  type StarPromptState,
 } from '../src/main/star-prompt'
 
 const NOW = 1_700_000_000_000
@@ -141,5 +151,146 @@ describe('transitions', () => {
   it('withResolved silences the prompt for good', () => {
     const state = withResolved(eligible())
     expect(shouldShowStarPrompt(state, NOW + 365 * 24 * 60 * 60 * 1000)).toBe(false)
+  })
+})
+
+function starHarness(
+  opts: {
+    state?: StarPromptState
+    slot?: HomePromptSlot
+    upgrade?: boolean
+    forcePreview?: boolean
+  } = {},
+) {
+  let stored: StarPromptState = opts.state ?? eligible()
+  const writes: StarPromptState[] = []
+  let upgrade = opts.upgrade ?? false
+  const takeUpgradeLaunch = vi.fn(() => {
+    const pending = upgrade
+    upgrade = false
+    return pending
+  })
+  const slot = opts.slot ?? createHomePromptSlot()
+  const controller = createStarPromptController({
+    readState: () => stored,
+    writeState: (next) => {
+      writes.push(next)
+      stored = next
+    },
+    slot,
+    now: () => NOW,
+    takeUpgradeLaunch,
+    forcePreview: opts.forcePreview,
+  })
+  return { controller, slot, writes, takeUpgradeLaunch, stored: () => stored }
+}
+
+describe('star prompt controller (IPC logic)', () => {
+  it('grants once per session, counts the display and claims the home-prompt slot', () => {
+    const h = starHarness()
+    expect(h.controller.shouldShow()).toEqual({ show: true, docOpens: MIN_DOC_OPENS })
+    expect(h.stored().shownCount).toBe(1)
+    expect(h.stored().lastShownAt).toBe(NOW)
+    expect(h.slot.available('star')).toBe(true)
+    expect(h.slot.available('defaultApp')).toBe(false)
+    // repeated queries (StrictMode / remount) reuse the grant without counting again
+    expect(h.controller.shouldShow().show).toBe(true)
+    expect(h.writes).toHaveLength(1)
+  })
+
+  it('stays out of a session whose slot the default-app prompt claimed', () => {
+    const slot = createHomePromptSlot()
+    slot.claim('defaultApp')
+    // even an upgrade launch (which skips the value gates) must wait
+    const h = starHarness({ slot, upgrade: true })
+    expect(h.controller.shouldShow()).toEqual({ show: false, docOpens: MIN_DOC_OPENS })
+    expect(h.writes).toHaveLength(0)
+  })
+
+  it('an upgrade launch skips the value gates once for a never-prompted user', () => {
+    const h = starHarness({ state: { firstRunAt: NOW }, upgrade: true })
+    expect(h.controller.shouldShow().show).toBe(true)
+    expect(h.takeUpgradeLaunch).toHaveBeenCalledTimes(1)
+  })
+
+  it('without the upgrade bonus the value gates apply', () => {
+    const h = starHarness({ state: { firstRunAt: NOW } })
+    expect(h.controller.shouldShow()).toEqual({ show: false, docOpens: 0 })
+    expect(h.writes).toHaveLength(0)
+    expect(h.slot.available('defaultApp')).toBe(true)
+  })
+
+  it('the dev preview shows without recording or claiming anything', () => {
+    const h = starHarness({ state: {}, forcePreview: true })
+    expect(h.controller.shouldShow().show).toBe(true)
+    expect(h.writes).toHaveLength(0)
+    expect(h.slot.available('defaultApp')).toBe(true)
+  })
+
+  it("'starred' resolves for good, 'later' only drops the session grant", () => {
+    const later = starHarness()
+    later.controller.shouldShow()
+    later.controller.action('later')
+    // snoozed by the display just counted
+    expect(later.controller.shouldShow().show).toBe(false)
+    expect(later.stored().resolved).toBeUndefined()
+
+    const starred = starHarness()
+    starred.controller.shouldShow()
+    starred.controller.action('starred')
+    expect(starred.stored().resolved).toBe(true)
+  })
+
+  it('ignores unknown actions and keeps the grant', () => {
+    const h = starHarness()
+    h.controller.shouldShow()
+    h.controller.action('never')
+    h.controller.action(undefined)
+    expect(h.writes).toHaveLength(1)
+    expect(h.controller.shouldShow().show).toBe(true)
+    expect(isStarPromptAction('starred')).toBe(true)
+    expect(isStarPromptAction('set')).toBe(false)
+  })
+})
+
+describe('one home-screen prompt per session (both controllers, one slot)', () => {
+  const OTHER: DefaultAppStatus = { state: 'other', others: ['Microsoft Word'], manualOnly: false }
+
+  function session(starOpts: { upgrade?: boolean } = {}) {
+    const slot = createHomePromptSlot()
+    let defaultAppState = {}
+    const defaultApp = createDefaultAppPromptController({
+      readState: () => defaultAppState,
+      writeState: (next) => {
+        defaultAppState = next
+      },
+      status: async () => OTHER,
+      set: async () => OTHER,
+      slot,
+      now: () => NOW,
+    })
+    const star = starHarness({ slot, ...starOpts })
+    const api = {
+      defaultAppPromptShouldShow: () => defaultApp.shouldShow(),
+      starPromptShouldShow: async () => star.controller.shouldShow(),
+    }
+    return { defaultApp, star, api }
+  }
+
+  it('a reopened shell window after "Later" shows no star card (macOS dock reopen)', async () => {
+    const s = session({ upgrade: true })
+    expect(await pickHomePrompt(s.api)).toEqual({ kind: 'defaultApp', status: OTHER })
+    await s.defaultApp.action('later')
+    // the window is closed and reopened: AppFrame remounts and asks again; the
+    // default-app prompt is snoozed now, and the star prompt must still wait
+    expect(await pickHomePrompt(s.api)).toBeNull()
+    expect(s.star.writes).toHaveLength(0)
+  })
+
+  it('a star card that showed first keeps the default-app prompt out', async () => {
+    const s = session()
+    const slotFirst = s.star.controller.shouldShow()
+    expect(slotFirst.show).toBe(true)
+    expect((await s.defaultApp.shouldShow()).show).toBe(false)
   })
 })

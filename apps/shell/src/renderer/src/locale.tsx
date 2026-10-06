@@ -45,6 +45,18 @@ export interface I18n {
   dateLocale: string
 }
 
+/**
+ * "A, B and C" in the locale's own list style (CJK 、, Arabic و, …). Falls back
+ * to a comma join where Intl.ListFormat is unavailable.
+ */
+export function formatList(locale: string, items: readonly string[]): string {
+  try {
+    return new Intl.ListFormat(locale, { style: 'long', type: 'conjunction' }).format(items)
+  } catch {
+    return items.join(', ')
+  }
+}
+
 /** BCP-47 locale per UI language, for date/number formatting */
 const DATE_LOCALES: Record<Lang, string> = {
   zh: 'zh-CN',

@@ -336,6 +336,12 @@ export interface HomeApi {
   starPromptShouldShow(): Promise<StarPromptShow>
   /** user reacted to the star prompt; 'starred' resolves it permanently */
   starPromptAction(action: StarPromptAction): Promise<void>
+  /** whether the "open Office files with FaamOffice?" prompt should show now (decided once
+   * per session; show:true also counts as shown); status is the live default-app ownership */
+  defaultAppPromptShouldShow(): Promise<DefaultAppPromptShow>
+  /** user reacted to the default-app prompt; 'set' claims the types (or opens the Windows
+   * Default apps page) and resolves to the refreshed status */
+  defaultAppPromptAction(action: DefaultAppPromptAction): Promise<DefaultAppStatus>
   /** AI settings (userData/ai-settings.json, shared by every editor) */
   getAiSettings(): Promise<AiSettings>
   /** persist AI settings; open editors pick the change up on their next settings read */
@@ -378,6 +384,18 @@ export interface StarPromptShow {
   show: boolean
   /** lifetime documents opened — drives the personalized card title */
   docOpens: number
+}
+
+/** 'set' = claim the Office types now (Windows: open the Default apps page);
+ * 'later' = dismissed this time (already counted as shown by the query);
+ * 'never' = don't ask again */
+export type DefaultAppPromptAction = 'set' | 'later' | 'never'
+
+/** answer to defaultAppPromptShouldShow */
+export interface DefaultAppPromptShow {
+  show: boolean
+  /** live default-app ownership (meaningful when show is true) */
+  status: DefaultAppStatus
 }
 
 /** the local profile; FaamOffice has no account, everything stays on this machine */
@@ -549,4 +567,6 @@ export const HOME_CHANNELS = {
   githubStars: 'home:github-stars',
   starPromptShouldShow: 'home:star-prompt-should-show',
   starPromptAction: 'home:star-prompt-action',
+  defaultAppPromptShouldShow: 'home:default-app-prompt-should-show',
+  defaultAppPromptAction: 'home:default-app-prompt-action',
 } as const

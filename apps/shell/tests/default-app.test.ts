@@ -136,6 +136,8 @@ describe('createDefaultAppService', () => {
       platform: 'linux',
       run,
       readFile: (p) => {
+        if (p.endsWith('/usr/share/applications/faamoffice.desktop'))
+          return '[Desktop Entry]\nName=FaamOffice\n'
         if (p.endsWith('/usr/share/applications/wps-office-et.desktop'))
           return '[Desktop Entry]\nName=WPS Spreadsheets\n'
         throw new Error('ENOENT')
@@ -153,6 +155,25 @@ describe('createDefaultAppService', () => {
       'faamoffice.desktop',
       ...OFFICE_TYPES.map((t) => t.mime),
     ])
+  })
+
+  it('linux: unsupported without an installed faamoffice.desktop (AppImage)', async () => {
+    const run = vi.fn<RunCommand>(async () => 'wps-office-wps.desktop\n')
+    const readFile = vi.fn((_p: string): string => {
+      throw new Error('ENOENT')
+    })
+    const svc = createDefaultAppService({ ...base, platform: 'linux', run, readFile })
+    const unsupported = { state: 'unsupported', others: [], manualOnly: false }
+    expect(await svc.status()).toEqual(unsupported)
+    expect(await svc.set()).toEqual(unsupported)
+    // never asked xdg-mime, never wrote a dangling association
+    expect(run).not.toHaveBeenCalled()
+    const probed = readFile.mock.calls.map(([p]) => p)
+    expect(probed).toContain('/usr/share/applications/faamoffice.desktop')
+    expect(probed).toContain('/usr/local/share/applications/faamoffice.desktop')
+    expect(probed.some((p) => p.endsWith('.local/share/applications/faamoffice.desktop'))).toBe(
+      true,
+    )
   })
 
   it('windows: reads UserChoice ProgIds, names them, and only opens the settings page', async () => {

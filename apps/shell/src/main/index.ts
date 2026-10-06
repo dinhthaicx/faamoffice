@@ -78,6 +78,12 @@ import { startControlServer, type ControlServer } from './control-server'
 import { controlHandler } from './control-handlers'
 import { installCliLinkBestEffort } from './cli-link'
 import { createDefaultAppService, execFileRunner } from './default-app'
+import {
+  DEFAULT_APP_PROMPT_KEY,
+  asDefaultAppPromptState,
+  createDefaultAppPromptController,
+  createHomePromptSlot,
+} from './default-app-prompt'
 import { registerIntegrationsIpc } from './integrations-ipc'
 import {
   ANALYTICS_ENABLED_KEY,
@@ -92,13 +98,10 @@ import {
   LAST_RUN_VERSION_KEY,
   STAR_PROMPT_KEY,
   asStarPromptState,
+  createStarPromptController,
   isUpgradeLaunch,
-  shouldShowStarPrompt,
-  shouldShowUpgradeStarPrompt,
   withDocOpen,
   withFirstRun,
-  withResolved,
-  withShown,
 } from './star-prompt'
 import { handleDroppedFiles } from './dropped-files'
 import {
@@ -259,6 +262,7 @@ import type {
   RecentPage,
   RenameResult,
   DocTheme,
+  DefaultAppPromptShow,
   StarPromptShow,
   UiTheme,
   FileSearchPage,
@@ -709,13 +713,19 @@ const writeStarPrompt = (state: ReturnType<typeof readStarPrompt>) =>
   writeAppSetting(APP_SETTINGS_PATH(), STAR_PROMPT_KEY, state)
 
 /** set at startup when this is the first launch after an upgrade; consumed by
- * the first starPromptShouldShow query of the session */
+ * the first starPromptShouldShow query that gets past the home-prompt slot */
 let upgradeStarPromptPending = false
 
-/** a granted show, cached for the session: repeated queries (React StrictMode
- * double-effects, AppFrame remounts) must return the same answer instead of
- * burning another lifetime show or flipping to a snoozed "false" */
-let starPromptSessionGrant: StarPromptShow | null = null
+/** one home-screen prompt per session: the default-app prompt (asked first by
+ * the renderer) or the star invitation, never both */
+const homePromptSlot = createHomePromptSlot()
+
+// ---- "open Office files with FaamOffice?" prompt (see default-app-prompt.ts) ----
+
+const readDefaultAppPrompt = () =>
+  asDefaultAppPromptState(readAppSettings(APP_SETTINGS_PATH())[DEFAULT_APP_PROMPT_KEY])
+const writeDefaultAppPrompt = (state: ReturnType<typeof readDefaultAppPrompt>) =>
+  writeAppSetting(APP_SETTINGS_PATH(), DEFAULT_APP_PROMPT_KEY, state)
 
 /** every successful document open counts toward the prompt's value threshold */
 function recordStarPromptDocOpen(): void {
@@ -4423,6 +4433,33 @@ function registerHomeIpc(): void {
   ipcMain.handle(HOME_CHANNELS.getDefaultAppStatus, () => defaultApp.status())
   ipcMain.handle(HOME_CHANNELS.setDefaultApp, () => defaultApp.set())
 
+  const defaultAppPrompt = createDefaultAppPromptController({
+    readState: readDefaultAppPrompt,
+    writeState: writeDefaultAppPrompt,
+    status: () => defaultApp.status(),
+    set: () => defaultApp.set(),
+    slot: homePromptSlot,
+    now: () => Date.now(),
+  })
+  // returning show:true also counts as shown (the renderer displays it unconditionally)
+  ipcMain.handle(
+    HOME_CHANNELS.defaultAppPromptShouldShow,
+    (): Promise<DefaultAppPromptShow> | DefaultAppPromptShow => {
+      // dev preview of the card (dev builds report 'unsupported'); nothing is recorded
+      if (!app.isPackaged && process.env.GENOFFICE_FORCE_DEFAULT_APP_PROMPT) {
+        homePromptSlot.claim('defaultApp')
+        return {
+          show: true,
+          status: { state: 'other', others: ['Preview'], manualOnly: process.platform === 'win32' },
+        }
+      }
+      return defaultAppPrompt.shouldShow()
+    },
+  )
+  ipcMain.handle(HOME_CHANNELS.defaultAppPromptAction, (_event, action: unknown) =>
+    defaultAppPrompt.action(action),
+  )
+
   ipcMain.handle(HOME_CHANNELS.pickDefaultSaveDir, async (): Promise<string | null> => {
     const result = await showOpenDialogWithMemory(dialog, shellWindow, {
       title: tm('dlgPickSaveDir'),
@@ -4459,38 +4496,25 @@ function registerHomeIpc(): void {
 
   ipcMain.handle(HOME_CHANNELS.githubStars, () => fetchGithubStars())
 
-  // returning true also counts as "shown": the renderer displays it
-  // unconditionally, so no separate mark-shown round-trip is needed
-  ipcMain.handle(HOME_CHANNELS.starPromptShouldShow, (): StarPromptShow => {
-    if (starPromptSessionGrant) return starPromptSessionGrant
-    const now = Date.now()
-    const state = readStarPrompt()
-    const docOpens = state.docOpens ?? 0
+  const starPrompt = createStarPromptController({
+    readState: readStarPrompt,
+    writeState: writeStarPrompt,
+    slot: homePromptSlot,
+    now: () => Date.now(),
+    takeUpgradeLaunch: () => {
+      const pending = upgradeStarPromptPending
+      upgradeStarPromptPending = false
+      return pending
+    },
     // dev preview of the card without waiting out the value thresholds
     // (same pattern as GENOFFICE_FAKE_UPDATE); nothing is recorded
-    if (!app.isPackaged && process.env.GENOFFICE_FORCE_STAR_PROMPT) return { show: true, docOpens }
-    const grant = (): StarPromptShow => {
-      writeStarPrompt(withShown(state, now))
-      starPromptSessionGrant = { show: true, docOpens }
-      return starPromptSessionGrant
-    }
-    // first launch after an upgrade: skip the value gates once for a
-    // never-prompted user (they are a proven repeat user already)
-    if (upgradeStarPromptPending) {
-      upgradeStarPromptPending = false
-      if (shouldShowUpgradeStarPrompt(state)) return grant()
-    }
-    if (!shouldShowStarPrompt(state, now)) return { show: false, docOpens }
-    return grant()
+    forcePreview: !app.isPackaged && !!process.env.GENOFFICE_FORCE_STAR_PROMPT,
   })
-
+  // returning true also counts as "shown": the renderer displays it
+  // unconditionally, so no separate mark-shown round-trip is needed
+  ipcMain.handle(HOME_CHANNELS.starPromptShouldShow, (): StarPromptShow => starPrompt.shouldShow())
   ipcMain.handle(HOME_CHANNELS.starPromptAction, (_event, action: unknown) => {
-    if (action !== 'starred' && action !== 'later') return
-    // the card was reacted to — drop the session grant so a later query (new
-    // shell window on macOS) re-evaluates the real rules (snooze / resolved)
-    starPromptSessionGrant = null
-    // 'later' needs no write: the display was already counted by the query
-    if (action === 'starred') writeStarPrompt(withResolved(readStarPrompt()))
+    starPrompt.action(action)
   })
 }
 

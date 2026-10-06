@@ -1,0 +1,81 @@
+/* "Open Office files with FaamOffice?" card: reuses the star invitation's
+ * .star-prompt shell (position, surface, buttons) and adds only its own
+ * lines. Chrome-colored via semantic tokens (light/dark follow the UI theme). */
+
+.default-app-prompt {
+  /* --danger keeps one value in every theme and is too dark for small text on
+   * the dark surface (about 3.4:1); the error line gets a lighter dark value */
+  --default-app-prompt-error: var(--danger);
+  width: 340px;
+  max-width: calc(100vw - 40px);
+}
+
+[data-theme='dark'] .default-app-prompt {
+  --default-app-prompt-error: #f1707a;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme='light']):not([data-theme='dark']) .default-app-prompt {
+    --default-app-prompt-error: #f1707a;
+  }
+}
+
+/* keep the title clear of the close button */
+.default-app-prompt .star-prompt-title {
+  padding-right: 24px;
+}
+
+.default-app-prompt-meta {
+  margin: -6px 0 12px;
+  font-size: 12px;
+  line-height: 1.5;
+  color: var(--text-muted);
+}
+
+.default-app-prompt-status {
+  margin: 0 0 12px;
+  font-size: 12.5px;
+  line-height: 1.5;
+}
+
+/* the live regions stay mounted while empty (so their text is announced);
+ * an empty one takes no room */
+.default-app-prompt-status:empty {
+  margin: 0;
+}
+
+.default-app-prompt-status.is-ok {
+  color: var(--success);
+}
+
+.default-app-prompt-status.is-error {
+  color: var(--default-app-prompt-error);
+}
+
+.default-app-prompt-actions {
+  flex-wrap: wrap;
+}
+
+.default-app-prompt .star-prompt-go:disabled {
+  opacity: 0.6;
+  cursor: progress;
+}
+
+.default-app-prompt .star-prompt-go:disabled:hover {
+  background: var(--accent);
+}
+
+.default-app-prompt-never {
+  margin-left: auto;
+  padding: 7px 4px;
+  border: none;
+  background: none;
+  color: var(--text-muted);
+  font-size: 12.5px;
+  cursor: pointer;
+}
+
+.default-app-prompt-never:hover {
+  color: var(--text);
+  text-decoration: underline;
+}

@@ -5,7 +5,8 @@
   position: fixed;
   right: 20px;
   bottom: 20px;
-  z-index: 60;
+  /* above home menus (20/30), below the Settings (60) and other modal overlays */
+  z-index: 50;
   width: 320px;
   padding: 16px 16px 14px;
   background: var(--surface);

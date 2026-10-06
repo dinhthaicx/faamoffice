@@ -315,6 +315,21 @@ export const strings = {
     starPromptGo: '去点 Star',
     starPromptDone: '已经点过了',
     starPromptLater: '以后再说',
+    defaultAppPromptTitle: '用 FaamOffice 打开 Office 文档？',
+    defaultAppPromptBody:
+      '将 FaamOffice 设为这台电脑上 Word（.docx）、Excel（.xlsx、.xls、.xlsm）和 PowerPoint（.pptx）文件的默认打开程序。',
+    defaultAppPromptCurrent: '当前打开方式：{apps}',
+    defaultAppPromptWinNote:
+      'Windows 将打开“默认应用”页面。请在其中逐个搜索文件类型（.docx、.xlsx、.xls、.xlsm、.pptx），并选择 FaamOffice。',
+    defaultAppPromptSet: '设为默认',
+    defaultAppPromptOpenSettings: '打开“默认应用”',
+    defaultAppPromptLater: '以后再说',
+    defaultAppPromptClose: '关闭',
+    defaultAppPromptNever: '不再询问',
+    defaultAppPromptDone: '已将 FaamOffice 设为默认程序。',
+    defaultAppPromptFailed: '未能完成设置。你可以在“设置 → 通用”中重试。',
+    defaultAppPromptWinFollowUp:
+      '请在刚打开的“默认应用”页面中逐个搜索 .docx、.xlsx、.xls、.xlsm、.pptx，并为每种类型选择 FaamOffice。',
     onbStarHint: '如果你喜欢 FaamOffice，欢迎到 GitHub 给我们一个 Star。',
     setChange: '更改',
     // Dates
@@ -698,6 +713,21 @@ export const strings = {
     starPromptGo: 'Star on GitHub',
     starPromptDone: 'Already starred',
     starPromptLater: 'Maybe later',
+    defaultAppPromptTitle: 'Open Office files with FaamOffice?',
+    defaultAppPromptBody:
+      'Make FaamOffice the default app for Word (.docx), Excel (.xlsx, .xls, .xlsm) and PowerPoint (.pptx) files on this computer.',
+    defaultAppPromptCurrent: 'Currently opened by: {apps}',
+    defaultAppPromptWinNote:
+      'Windows will open its Default apps page. Search there for each file type (.docx, .xlsx, .xls, .xlsm, .pptx) and choose FaamOffice.',
+    defaultAppPromptSet: 'Set as default',
+    defaultAppPromptOpenSettings: 'Open Default apps',
+    defaultAppPromptLater: 'Later',
+    defaultAppPromptClose: 'Close',
+    defaultAppPromptNever: "Don't ask again",
+    defaultAppPromptDone: 'FaamOffice is now your default app.',
+    defaultAppPromptFailed: "Couldn't set it. You can try again in Settings → General.",
+    defaultAppPromptWinFollowUp:
+      'On the Default apps page, search for .docx, .xlsx, .xls, .xlsm and .pptx, and choose FaamOffice for each.',
     onbStarHint: 'If you like FaamOffice, give us a star on GitHub.',
     setChange: 'Change',
     today: 'Today',
@@ -1089,6 +1119,21 @@ export const strings = {
     starPromptGo: 'Gắn sao trên GitHub',
     starPromptDone: 'Đã gắn sao',
     starPromptLater: 'Để sau',
+    defaultAppPromptTitle: 'Mở tài liệu Office bằng FaamOffice?',
+    defaultAppPromptBody:
+      'Đặt FaamOffice làm ứng dụng mặc định để mở Word (.docx), Excel (.xlsx, .xls, .xlsm) và PowerPoint (.pptx) trên máy này.',
+    defaultAppPromptCurrent: 'Hiện đang mở bằng: {apps}',
+    defaultAppPromptWinNote:
+      'Windows sẽ mở trang Ứng dụng mặc định. Tại đó, hãy tìm từng loại tệp (.docx, .xlsx, .xls, .xlsm, .pptx) và chọn FaamOffice.',
+    defaultAppPromptSet: 'Đặt làm mặc định',
+    defaultAppPromptOpenSettings: 'Mở Ứng dụng mặc định',
+    defaultAppPromptLater: 'Để sau',
+    defaultAppPromptClose: 'Đóng',
+    defaultAppPromptNever: 'Không hỏi lại',
+    defaultAppPromptDone: 'Đã đặt FaamOffice làm ứng dụng mặc định.',
+    defaultAppPromptFailed: 'Chưa đặt được. Bạn có thể thử lại trong Cài đặt → Chung.',
+    defaultAppPromptWinFollowUp:
+      'Trong trang Ứng dụng mặc định vừa mở, hãy tìm lần lượt .docx, .xlsx, .xls, .xlsm, .pptx và chọn FaamOffice cho từng loại.',
     onbStarHint: 'Nếu bạn yêu thích FaamOffice, hãy tặng chúng tôi một sao trên GitHub.',
     setChange: 'Thay đổi',
     today: 'Hôm nay',
@@ -1487,6 +1532,21 @@ export const strings = {
     starPromptGo: 'スターを付ける',
     starPromptDone: 'スター済み',
     starPromptLater: 'あとで',
+    defaultAppPromptTitle: 'Office ファイルを FaamOffice で開きますか？',
+    defaultAppPromptBody:
+      'このコンピューターで Word（.docx）、Excel（.xlsx、.xls、.xlsm）、PowerPoint（.pptx）ファイルを開く既定のアプリを FaamOffice にします。',
+    defaultAppPromptCurrent: '現在は {apps} で開きます',
+    defaultAppPromptWinNote:
+      'Windows の「既定のアプリ」ページが開きます。ファイルの種類（.docx、.xlsx、.xls、.xlsm、.pptx）をそれぞれ検索し、FaamOffice を選択してください。',
+    defaultAppPromptSet: '既定に設定',
+    defaultAppPromptOpenSettings: '「既定のアプリ」を開く',
+    defaultAppPromptLater: 'あとで',
+    defaultAppPromptClose: '閉じる',
+    defaultAppPromptNever: '今後表示しない',
+    defaultAppPromptDone: 'FaamOffice を既定のアプリに設定しました。',
+    defaultAppPromptFailed: '設定できませんでした。「設定 → 一般」から再度お試しください。',
+    defaultAppPromptWinFollowUp:
+      '開いた「既定のアプリ」ページで .docx、.xlsx、.xls、.xlsm、.pptx をそれぞれ検索し、FaamOffice を選択してください。',
     onbStarHint: 'FaamOffice が気に入ったら、GitHub でスターをお願いします。',
     setChange: '変更',
     // Dates
@@ -1882,6 +1942,21 @@ export const strings = {
     starPromptGo: '스타 누르기',
     starPromptDone: '이미 눌렀어요',
     starPromptLater: '나중에',
+    defaultAppPromptTitle: 'Office 파일을 FaamOffice로 여시겠어요?',
+    defaultAppPromptBody:
+      '이 컴퓨터에서 Word(.docx), Excel(.xlsx, .xls, .xlsm), PowerPoint(.pptx) 파일을 여는 기본 앱을 FaamOffice로 설정합니다.',
+    defaultAppPromptCurrent: '현재 여는 앱: {apps}',
+    defaultAppPromptWinNote:
+      "Windows의 '기본 앱' 페이지가 열립니다. 파일 형식(.docx, .xlsx, .xls, .xlsm, .pptx)을 하나씩 검색해 FaamOffice를 선택하세요.",
+    defaultAppPromptSet: '기본 앱으로 설정',
+    defaultAppPromptOpenSettings: "'기본 앱' 열기",
+    defaultAppPromptLater: '나중에',
+    defaultAppPromptClose: '닫기',
+    defaultAppPromptNever: '다시 묻지 않기',
+    defaultAppPromptDone: 'FaamOffice를 기본 앱으로 설정했습니다.',
+    defaultAppPromptFailed: '설정하지 못했습니다. 설정 → 일반에서 다시 시도할 수 있습니다.',
+    defaultAppPromptWinFollowUp:
+      "방금 열린 '기본 앱' 페이지에서 .docx, .xlsx, .xls, .xlsm, .pptx를 하나씩 검색해 FaamOffice를 선택하세요.",
     onbStarHint: 'FaamOffice가 마음에 들면 GitHub에서 스타를 눌러 주세요.',
     setChange: '변경',
     // Dates
@@ -2287,6 +2362,22 @@ export const strings = {
     starPromptGo: 'Mettre une étoile',
     starPromptDone: 'Déjà fait',
     starPromptLater: 'Plus tard',
+    defaultAppPromptTitle: 'Ouvrir les fichiers Office avec FaamOffice ?',
+    defaultAppPromptBody:
+      'Faites de FaamOffice l’application par défaut pour les fichiers Word (.docx), Excel (.xlsx, .xls, .xlsm) et PowerPoint (.pptx) sur cet ordinateur.',
+    defaultAppPromptCurrent: 'Actuellement ouverts avec : {apps}',
+    defaultAppPromptWinNote:
+      'Windows va ouvrir la page Applications par défaut. Recherchez-y chaque type de fichier (.docx, .xlsx, .xls, .xlsm, .pptx) et choisissez FaamOffice.',
+    defaultAppPromptSet: 'Définir par défaut',
+    defaultAppPromptOpenSettings: 'Ouvrir Applications par défaut',
+    defaultAppPromptLater: 'Plus tard',
+    defaultAppPromptClose: 'Fermer',
+    defaultAppPromptNever: 'Ne plus demander',
+    defaultAppPromptDone: 'FaamOffice est désormais votre application par défaut.',
+    defaultAppPromptFailed:
+      'Impossible de le définir. Vous pouvez réessayer dans Paramètres → Général.',
+    defaultAppPromptWinFollowUp:
+      'Dans la page Applications par défaut qui vient de s’ouvrir, recherchez .docx, .xlsx, .xls, .xlsm et .pptx, et choisissez FaamOffice pour chacun.',
     onbStarHint: 'Si FaamOffice vous plaît, mettez-nous une étoile sur GitHub.',
     setChange: 'Modifier',
     // Dates
@@ -2696,6 +2787,22 @@ export const strings = {
     starPromptGo: 'Stern geben',
     starPromptDone: 'Schon erledigt',
     starPromptLater: 'Später',
+    defaultAppPromptTitle: 'Office-Dateien mit FaamOffice öffnen?',
+    defaultAppPromptBody:
+      'Machen Sie FaamOffice auf diesem Computer zur Standard-App für Word- (.docx), Excel- (.xlsx, .xls, .xlsm) und PowerPoint-Dateien (.pptx).',
+    defaultAppPromptCurrent: 'Derzeit geöffnet mit: {apps}',
+    defaultAppPromptWinNote:
+      'Windows öffnet die Seite „Standard-Apps“. Suchen Sie dort nach jedem Dateityp (.docx, .xlsx, .xls, .xlsm, .pptx) und wählen Sie FaamOffice aus.',
+    defaultAppPromptSet: 'Als Standard festlegen',
+    defaultAppPromptOpenSettings: 'Standard-Apps öffnen',
+    defaultAppPromptLater: 'Später',
+    defaultAppPromptClose: 'Schließen',
+    defaultAppPromptNever: 'Nicht mehr fragen',
+    defaultAppPromptDone: 'FaamOffice ist jetzt Ihre Standard-App.',
+    defaultAppPromptFailed:
+      'Das hat nicht geklappt. Sie können es unter Einstellungen → Allgemein erneut versuchen.',
+    defaultAppPromptWinFollowUp:
+      'Suchen Sie auf der gerade geöffneten Seite „Standard-Apps“ nach .docx, .xlsx, .xls, .xlsm und .pptx und wählen Sie jeweils FaamOffice aus.',
     onbStarHint: 'Wenn Ihnen FaamOffice gefällt, geben Sie uns einen Stern auf GitHub.',
     setChange: 'Ändern',
     // Dates
@@ -3104,6 +3211,22 @@ export const strings = {
     starPromptGo: 'Dar una estrella',
     starPromptDone: 'Ya la di',
     starPromptLater: 'Más tarde',
+    defaultAppPromptTitle: '¿Abrir los archivos de Office con FaamOffice?',
+    defaultAppPromptBody:
+      'Haz de FaamOffice la aplicación predeterminada para los archivos de Word (.docx), Excel (.xlsx, .xls, .xlsm) y PowerPoint (.pptx) en este equipo.',
+    defaultAppPromptCurrent: 'Ahora se abren con: {apps}',
+    defaultAppPromptWinNote:
+      'Windows abrirá la página Aplicaciones predeterminadas. Busca allí cada tipo de archivo (.docx, .xlsx, .xls, .xlsm, .pptx) y elige FaamOffice.',
+    defaultAppPromptSet: 'Establecer como predeterminada',
+    defaultAppPromptOpenSettings: 'Abrir Aplicaciones predeterminadas',
+    defaultAppPromptLater: 'Más tarde',
+    defaultAppPromptClose: 'Cerrar',
+    defaultAppPromptNever: 'No volver a preguntar',
+    defaultAppPromptDone: 'FaamOffice ya es tu aplicación predeterminada.',
+    defaultAppPromptFailed:
+      'No se pudo establecer. Puedes volver a intentarlo en Configuración → General.',
+    defaultAppPromptWinFollowUp:
+      'En la página Aplicaciones predeterminadas que se acaba de abrir, busca .docx, .xlsx, .xls, .xlsm y .pptx, y elige FaamOffice para cada uno.',
     onbStarHint: 'Si te gusta FaamOffice, danos una estrella en GitHub.',
     setChange: 'Cambiar',
     // Dates
@@ -3497,6 +3620,21 @@ export const strings = {
     starPromptGo: 'กดดาวเลย',
     starPromptDone: 'กดแล้ว',
     starPromptLater: 'ไว้ทีหลัง',
+    defaultAppPromptTitle: 'เปิดไฟล์ Office ด้วย FaamOffice ไหม?',
+    defaultAppPromptBody:
+      'ตั้ง FaamOffice เป็นแอปเริ่มต้นสำหรับเปิดไฟล์ Word (.docx), Excel (.xlsx, .xls, .xlsm) และ PowerPoint (.pptx) บนคอมพิวเตอร์เครื่องนี้',
+    defaultAppPromptCurrent: 'ขณะนี้เปิดด้วย: {apps}',
+    defaultAppPromptWinNote:
+      'Windows จะเปิดหน้า “แอปเริ่มต้น” ให้ค้นหาไฟล์แต่ละประเภท (.docx, .xlsx, .xls, .xlsm, .pptx) แล้วเลือก FaamOffice',
+    defaultAppPromptSet: 'ตั้งเป็นค่าเริ่มต้น',
+    defaultAppPromptOpenSettings: 'เปิดแอปเริ่มต้น',
+    defaultAppPromptLater: 'ไว้ทีหลัง',
+    defaultAppPromptClose: 'ปิด',
+    defaultAppPromptNever: 'ไม่ต้องถามอีก',
+    defaultAppPromptDone: 'ตั้ง FaamOffice เป็นแอปเริ่มต้นแล้ว',
+    defaultAppPromptFailed: 'ตั้งค่าไม่สำเร็จ คุณลองอีกครั้งได้ที่การตั้งค่า → ทั่วไป',
+    defaultAppPromptWinFollowUp:
+      'ในหน้า “แอปเริ่มต้น” ที่เพิ่งเปิดขึ้น ให้ค้นหา .docx, .xlsx, .xls, .xlsm และ .pptx ทีละรายการ แล้วเลือก FaamOffice',
     onbStarHint: 'ถ้าชอบ FaamOffice ฝากกดดาวให้เราบน GitHub ด้วยนะ',
     setChange: 'เปลี่ยน',
     // Dates
@@ -3895,6 +4033,21 @@ export const strings = {
     starPromptGo: 'Beri Bintang',
     starPromptDone: 'Sudah',
     starPromptLater: 'Nanti saja',
+    defaultAppPromptTitle: 'Buka file Office dengan FaamOffice?',
+    defaultAppPromptBody:
+      'Jadikan FaamOffice aplikasi default untuk file Word (.docx), Excel (.xlsx, .xls, .xlsm), dan PowerPoint (.pptx) di komputer ini.',
+    defaultAppPromptCurrent: 'Saat ini dibuka dengan: {apps}',
+    defaultAppPromptWinNote:
+      'Windows akan membuka halaman Aplikasi default. Di sana, cari setiap jenis file (.docx, .xlsx, .xls, .xlsm, .pptx), lalu pilih FaamOffice.',
+    defaultAppPromptSet: 'Jadikan default',
+    defaultAppPromptOpenSettings: 'Buka Aplikasi default',
+    defaultAppPromptLater: 'Nanti saja',
+    defaultAppPromptClose: 'Tutup',
+    defaultAppPromptNever: 'Jangan tanya lagi',
+    defaultAppPromptDone: 'FaamOffice kini menjadi aplikasi default Anda.',
+    defaultAppPromptFailed: 'Gagal mengaturnya. Anda dapat mencoba lagi di Pengaturan → Umum.',
+    defaultAppPromptWinFollowUp:
+      'Di halaman Aplikasi default yang baru terbuka, cari .docx, .xlsx, .xls, .xlsm, dan .pptx satu per satu, lalu pilih FaamOffice.',
     onbStarHint: 'Jika Anda menyukai FaamOffice, beri kami bintang di GitHub.',
     setChange: 'Ubah',
     // Dates
@@ -4295,6 +4448,22 @@ export const strings = {
     starPromptGo: 'Поставить звезду',
     starPromptDone: 'Уже поставлена',
     starPromptLater: 'Позже',
+    defaultAppPromptTitle: 'Открывать файлы Office в FaamOffice?',
+    defaultAppPromptBody:
+      'Сделайте FaamOffice приложением по умолчанию для файлов Word (.docx), Excel (.xlsx, .xls, .xlsm) и PowerPoint (.pptx) на этом компьютере.',
+    defaultAppPromptCurrent: 'Сейчас открываются в: {apps}',
+    defaultAppPromptWinNote:
+      'Windows откроет страницу «Приложения по умолчанию». Найдите там каждый тип файлов (.docx, .xlsx, .xls, .xlsm, .pptx) и выберите FaamOffice.',
+    defaultAppPromptSet: 'Сделать по умолчанию',
+    defaultAppPromptOpenSettings: 'Открыть «Приложения по умолчанию»',
+    defaultAppPromptLater: 'Позже',
+    defaultAppPromptClose: 'Закрыть',
+    defaultAppPromptNever: 'Больше не спрашивать',
+    defaultAppPromptDone: 'FaamOffice теперь приложение по умолчанию.',
+    defaultAppPromptFailed:
+      'Не удалось изменить. Попробуйте ещё раз в разделе «Настройки → Общие».',
+    defaultAppPromptWinFollowUp:
+      'На открывшейся странице «Приложения по умолчанию» найдите по очереди .docx, .xlsx, .xls, .xlsm и .pptx и для каждого выберите FaamOffice.',
     onbStarHint: 'Если вам нравится FaamOffice, поставьте нам звезду на GitHub.',
     setChange: 'Изменить',
     // Dates
@@ -4690,6 +4859,21 @@ export const strings = {
     starPromptGo: 'ضع نجمة',
     starPromptDone: 'وضعتها بالفعل',
     starPromptLater: 'لاحقًا',
+    defaultAppPromptTitle: 'هل تريد فتح ملفات Office باستخدام FaamOffice؟',
+    defaultAppPromptBody:
+      'اجعل FaamOffice التطبيق الافتراضي لملفات Word (.docx) وExcel (.xlsx و.xls و.xlsm) وPowerPoint (.pptx) على هذا الكمبيوتر.',
+    defaultAppPromptCurrent: 'تُفتح حاليًا باستخدام: {apps}',
+    defaultAppPromptWinNote:
+      'سيفتح Windows صفحة “التطبيقات الافتراضية”. ابحث فيها عن كل نوع ملف (.docx و.xlsx و.xls و.xlsm و.pptx) واختر FaamOffice.',
+    defaultAppPromptSet: 'تعيين كافتراضي',
+    defaultAppPromptOpenSettings: 'فتح التطبيقات الافتراضية',
+    defaultAppPromptLater: 'لاحقًا',
+    defaultAppPromptClose: 'إغلاق',
+    defaultAppPromptNever: 'عدم السؤال مجددًا',
+    defaultAppPromptDone: 'أصبح FaamOffice التطبيق الافتراضي لديك.',
+    defaultAppPromptFailed: 'تعذّر التعيين. يمكنك المحاولة مرة أخرى من الإعدادات ← عام.',
+    defaultAppPromptWinFollowUp:
+      'في صفحة “التطبيقات الافتراضية” التي فُتحت للتو، ابحث عن .docx و.xlsx و.xls و.xlsm و.pptx واختر FaamOffice لكل منها.',
     onbStarHint: 'إذا أعجبك FaamOffice، ضع لنا نجمة على GitHub.',
     setChange: 'تغيير',
     // Dates
@@ -5084,6 +5268,22 @@ export const strings = {
     starPromptGo: 'Dar uma estrela',
     starPromptDone: 'Já dei',
     starPromptLater: 'Mais tarde',
+    defaultAppPromptTitle: 'Abrir arquivos do Office com o FaamOffice?',
+    defaultAppPromptBody:
+      'Torne o FaamOffice o aplicativo padrão para arquivos do Word (.docx), Excel (.xlsx, .xls, .xlsm) e PowerPoint (.pptx) neste computador.',
+    defaultAppPromptCurrent: 'Atualmente abertos com: {apps}',
+    defaultAppPromptWinNote:
+      'O Windows abrirá a página Aplicativos padrão. Lá, pesquise cada tipo de arquivo (.docx, .xlsx, .xls, .xlsm, .pptx) e escolha o FaamOffice.',
+    defaultAppPromptSet: 'Definir como padrão',
+    defaultAppPromptOpenSettings: 'Abrir Aplicativos padrão',
+    defaultAppPromptLater: 'Mais tarde',
+    defaultAppPromptClose: 'Fechar',
+    defaultAppPromptNever: 'Não perguntar novamente',
+    defaultAppPromptDone: 'O FaamOffice agora é o seu aplicativo padrão.',
+    defaultAppPromptFailed:
+      'Não foi possível definir. Você pode tentar novamente em Configurações → Geral.',
+    defaultAppPromptWinFollowUp:
+      'Na página Aplicativos padrão que acabou de abrir, pesquise .docx, .xlsx, .xls, .xlsm e .pptx e escolha o FaamOffice para cada um.',
     onbStarHint: 'Se você gosta do FaamOffice, deixe uma estrela no GitHub.',
     setChange: 'Alterar',
     today: 'Hoje',
@@ -5479,6 +5679,21 @@ export const strings = {
     starPromptGo: 'Metti una stella',
     starPromptDone: 'Già fatto',
     starPromptLater: 'Più tardi',
+    defaultAppPromptTitle: 'Aprire i file di Office con FaamOffice?',
+    defaultAppPromptBody:
+      'Imposta FaamOffice come app predefinita per i file Word (.docx), Excel (.xlsx, .xls, .xlsm) e PowerPoint (.pptx) su questo computer.',
+    defaultAppPromptCurrent: 'Attualmente si aprono con: {apps}',
+    defaultAppPromptWinNote:
+      'Windows aprirà la pagina App predefinite. Lì cerca ogni tipo di file (.docx, .xlsx, .xls, .xlsm, .pptx) e scegli FaamOffice.',
+    defaultAppPromptSet: 'Imposta come predefinita',
+    defaultAppPromptOpenSettings: 'Apri App predefinite',
+    defaultAppPromptLater: 'Più tardi',
+    defaultAppPromptClose: 'Chiudi',
+    defaultAppPromptNever: 'Non chiedere più',
+    defaultAppPromptDone: "FaamOffice ora è l'app predefinita.",
+    defaultAppPromptFailed: 'Impossibile impostarla. Puoi riprovare in Impostazioni → Generale.',
+    defaultAppPromptWinFollowUp:
+      'Nella pagina App predefinite appena aperta, cerca .docx, .xlsx, .xls, .xlsm e .pptx e scegli FaamOffice per ciascuno.',
     onbStarHint: 'Se ti piace FaamOffice, lasciaci una stella su GitHub.',
     setChange: 'Cambia',
     today: 'Oggi',
@@ -5872,6 +6087,22 @@ export const strings = {
     starPromptGo: 'Daj gwiazdkę',
     starPromptDone: 'Już zrobione',
     starPromptLater: 'Później',
+    defaultAppPromptTitle: 'Otwierać pliki Office w FaamOffice?',
+    defaultAppPromptBody:
+      'Ustaw FaamOffice jako domyślną aplikację dla plików Word (.docx), Excel (.xlsx, .xls, .xlsm) i PowerPoint (.pptx) na tym komputerze.',
+    defaultAppPromptCurrent: 'Obecnie otwierane w: {apps}',
+    defaultAppPromptWinNote:
+      'Windows otworzy stronę Aplikacje domyślne. Wyszukaj tam każdy typ pliku (.docx, .xlsx, .xls, .xlsm, .pptx) i wybierz FaamOffice.',
+    defaultAppPromptSet: 'Ustaw jako domyślną',
+    defaultAppPromptOpenSettings: 'Otwórz Aplikacje domyślne',
+    defaultAppPromptLater: 'Później',
+    defaultAppPromptClose: 'Zamknij',
+    defaultAppPromptNever: 'Nie pytaj ponownie',
+    defaultAppPromptDone: 'FaamOffice jest teraz domyślną aplikacją.',
+    defaultAppPromptFailed:
+      'Nie udało się tego ustawić. Możesz spróbować ponownie w Ustawienia → Ogólne.',
+    defaultAppPromptWinFollowUp:
+      'Na właśnie otwartej stronie Aplikacje domyślne wyszukaj po kolei .docx, .xlsx, .xls, .xlsm i .pptx i dla każdego wybierz FaamOffice.',
     onbStarHint: 'Jeśli podoba Ci się FaamOffice, zostaw nam gwiazdkę na GitHubie.',
     setChange: 'Zmień',
     today: 'Dzisiaj',
@@ -6233,6 +6464,21 @@ export const strings = {
     starPromptGo: 'Dát hvězdičku na GitHubu',
     starPromptDone: 'Hvězdička už udělena',
     starPromptLater: 'Možná později',
+    defaultAppPromptTitle: 'Otevírat soubory Office v FaamOffice?',
+    defaultAppPromptBody:
+      'Nastavte FaamOffice jako výchozí aplikaci pro soubory Word (.docx), Excel (.xlsx, .xls, .xlsm) a PowerPoint (.pptx) na tomto počítači.',
+    defaultAppPromptCurrent: 'Nyní se otevírají v: {apps}',
+    defaultAppPromptWinNote:
+      'Windows otevře stránku Výchozí aplikace. Vyhledejte tam každý typ souboru (.docx, .xlsx, .xls, .xlsm, .pptx) a vyberte FaamOffice.',
+    defaultAppPromptSet: 'Nastavit jako výchozí',
+    defaultAppPromptOpenSettings: 'Otevřít Výchozí aplikace',
+    defaultAppPromptLater: 'Později',
+    defaultAppPromptClose: 'Zavřít',
+    defaultAppPromptNever: 'Už se neptat',
+    defaultAppPromptDone: 'FaamOffice je teď vaší výchozí aplikací.',
+    defaultAppPromptFailed: 'Nastavení se nezdařilo. Můžete to zkusit znovu v Nastavení → Obecné.',
+    defaultAppPromptWinFollowUp:
+      'Na právě otevřené stránce Výchozí aplikace vyhledejte postupně .docx, .xlsx, .xls, .xlsm a .pptx a u každého vyberte FaamOffice.',
     onbStarHint: 'Pokud se vám FaamOffice líbí, dejte nám hvězdičku na GitHubu.',
     setChange: 'Změnit',
     today: 'Dnes',
@@ -6654,6 +6900,22 @@ export const strings = {
     starPromptGo: 'Geef een ster',
     starPromptDone: 'Al gedaan',
     starPromptLater: 'Later',
+    defaultAppPromptTitle: 'Office-bestanden openen met FaamOffice?',
+    defaultAppPromptBody:
+      'Maak FaamOffice de standaard-app voor Word- (.docx), Excel- (.xlsx, .xls, .xlsm) en PowerPoint-bestanden (.pptx) op deze computer.',
+    defaultAppPromptCurrent: 'Nu geopend met: {apps}',
+    defaultAppPromptWinNote:
+      'Windows opent de pagina Standaard-apps. Zoek daar elk bestandstype op (.docx, .xlsx, .xls, .xlsm, .pptx) en kies FaamOffice.',
+    defaultAppPromptSet: 'Als standaard instellen',
+    defaultAppPromptOpenSettings: 'Standaard-apps openen',
+    defaultAppPromptLater: 'Later',
+    defaultAppPromptClose: 'Sluiten',
+    defaultAppPromptNever: 'Niet meer vragen',
+    defaultAppPromptDone: 'FaamOffice is nu je standaard-app.',
+    defaultAppPromptFailed:
+      'Instellen is niet gelukt. Je kunt het opnieuw proberen via Instellingen → Algemeen.',
+    defaultAppPromptWinFollowUp:
+      'Zoek op de zojuist geopende pagina Standaard-apps naar .docx, .xlsx, .xls, .xlsm en .pptx en kies telkens FaamOffice.',
     onbStarHint: 'Als FaamOffice je bevalt, geef ons dan een ster op GitHub.',
     setChange: 'Wijzigen',
     today: 'Vandaag',
@@ -7050,6 +7312,21 @@ export const strings = {
     starPromptGo: 'Beri Bintang',
     starPromptDone: 'Sudah',
     starPromptLater: 'Kemudian',
+    defaultAppPromptTitle: 'Buka fail Office dengan FaamOffice?',
+    defaultAppPromptBody:
+      'Jadikan FaamOffice apl lalai untuk fail Word (.docx), Excel (.xlsx, .xls, .xlsm) dan PowerPoint (.pptx) pada komputer ini.',
+    defaultAppPromptCurrent: 'Kini dibuka dengan: {apps}',
+    defaultAppPromptWinNote:
+      'Windows akan membuka halaman Apl lalai. Di situ, cari setiap jenis fail (.docx, .xlsx, .xls, .xlsm, .pptx) dan pilih FaamOffice.',
+    defaultAppPromptSet: 'Jadikan lalai',
+    defaultAppPromptOpenSettings: 'Buka Apl lalai',
+    defaultAppPromptLater: 'Kemudian',
+    defaultAppPromptClose: 'Tutup',
+    defaultAppPromptNever: 'Jangan tanya lagi',
+    defaultAppPromptDone: 'FaamOffice kini apl lalai anda.',
+    defaultAppPromptFailed: 'Tidak dapat menetapkannya. Anda boleh cuba lagi di Tetapan → Umum.',
+    defaultAppPromptWinFollowUp:
+      'Pada halaman Apl lalai yang baru dibuka, cari .docx, .xlsx, .xls, .xlsm dan .pptx satu demi satu, kemudian pilih FaamOffice.',
     onbStarHint: 'Jika anda suka FaamOffice, beri kami bintang di GitHub.',
     setChange: 'Tukar',
     today: 'Hari ini',
@@ -7434,6 +7711,21 @@ export const strings = {
     starPromptGo: 'לתת כוכב',
     starPromptDone: 'כבר נתתי',
     starPromptLater: 'אחר כך',
+    defaultAppPromptTitle: 'לפתוח קובצי Office באמצעות FaamOffice?',
+    defaultAppPromptBody:
+      'הגדירו את FaamOffice כאפליקציית ברירת המחדל לקובצי Word (.docx), Excel (.xlsx, .xls, .xlsm) ו-PowerPoint (.pptx) במחשב הזה.',
+    defaultAppPromptCurrent: 'נפתחים כעת באמצעות: {apps}',
+    defaultAppPromptWinNote:
+      'Windows תפתח את הדף “אפליקציות ברירת מחדל”. חפשו שם כל סוג קובץ (.docx, .xlsx, .xls, .xlsm, .pptx) ובחרו ב-FaamOffice.',
+    defaultAppPromptSet: 'הגדרה כברירת מחדל',
+    defaultAppPromptOpenSettings: 'פתיחת אפליקציות ברירת מחדל',
+    defaultAppPromptLater: 'אחר כך',
+    defaultAppPromptClose: 'סגירה',
+    defaultAppPromptNever: 'לא לשאול שוב',
+    defaultAppPromptDone: 'FaamOffice היא עכשיו אפליקציית ברירת המחדל.',
+    defaultAppPromptFailed: 'ההגדרה לא הצליחה. אפשר לנסות שוב בהגדרות ← כללי.',
+    defaultAppPromptWinFollowUp:
+      'בדף “אפליקציות ברירת מחדל” שנפתח עכשיו, חפשו את .docx, .xlsx, .xls, .xlsm ו-.pptx ובחרו ב-FaamOffice לכל אחד מהם.',
     onbStarHint: 'אם FaamOffice מוצא חן בעיניכם, תנו לנו כוכב ב-GitHub.',
     setChange: 'שינוי',
     today: 'היום',
@@ -7817,6 +8109,21 @@ export const strings = {
     starPromptGo: 'स्टार दें',
     starPromptDone: 'पहले ही दे दिया',
     starPromptLater: 'बाद में',
+    defaultAppPromptTitle: 'Office फ़ाइलें FaamOffice से खोलें?',
+    defaultAppPromptBody:
+      'इस कंप्यूटर पर Word (.docx), Excel (.xlsx, .xls, .xlsm) और PowerPoint (.pptx) फ़ाइलों के लिए FaamOffice को डिफ़ॉल्ट ऐप बनाएँ।',
+    defaultAppPromptCurrent: 'अभी इनसे खुलती हैं: {apps}',
+    defaultAppPromptWinNote:
+      'Windows “डिफ़ॉल्ट ऐप्स” पेज खोलेगा। वहाँ हर फ़ाइल प्रकार (.docx, .xlsx, .xls, .xlsm, .pptx) खोजें और FaamOffice चुनें।',
+    defaultAppPromptSet: 'डिफ़ॉल्ट बनाएँ',
+    defaultAppPromptOpenSettings: 'डिफ़ॉल्ट ऐप्स खोलें',
+    defaultAppPromptLater: 'बाद में',
+    defaultAppPromptClose: 'बंद करें',
+    defaultAppPromptNever: 'दोबारा न पूछें',
+    defaultAppPromptDone: 'FaamOffice अब आपका डिफ़ॉल्ट ऐप है।',
+    defaultAppPromptFailed: 'सेट नहीं हो सका। आप सेटिंग्स → सामान्य में फिर से कोशिश कर सकते हैं।',
+    defaultAppPromptWinFollowUp:
+      'अभी खुले “डिफ़ॉल्ट ऐप्स” पेज में .docx, .xlsx, .xls, .xlsm और .pptx को एक-एक करके खोजें और हर एक के लिए FaamOffice चुनें।',
     onbStarHint: 'अगर आपको FaamOffice पसंद है, तो हमें GitHub पर स्टार दें।',
     setChange: 'बदलें',
     today: 'आज',
@@ -8193,6 +8500,21 @@ export const strings = {
     starPromptGo: '去給星星',
     starPromptDone: '已經給過了',
     starPromptLater: '以後再說',
+    defaultAppPromptTitle: '要用 FaamOffice 開啟 Office 文件嗎？',
+    defaultAppPromptBody:
+      '將 FaamOffice 設為這台電腦上 Word（.docx）、Excel（.xlsx、.xls、.xlsm）和 PowerPoint（.pptx）檔案的預設開啟程式。',
+    defaultAppPromptCurrent: '目前開啟方式：{apps}',
+    defaultAppPromptWinNote:
+      'Windows 會開啟「預設應用程式」頁面。請在其中逐一搜尋檔案類型（.docx、.xlsx、.xls、.xlsm、.pptx），並選擇 FaamOffice。',
+    defaultAppPromptSet: '設為預設',
+    defaultAppPromptOpenSettings: '開啟「預設應用程式」',
+    defaultAppPromptLater: '以後再說',
+    defaultAppPromptClose: '關閉',
+    defaultAppPromptNever: '不再詢問',
+    defaultAppPromptDone: '已將 FaamOffice 設為預設應用程式。',
+    defaultAppPromptFailed: '無法完成設定。你可以在「設定 → 一般」中重試。',
+    defaultAppPromptWinFollowUp:
+      '請在剛開啟的「預設應用程式」頁面中逐一搜尋 .docx、.xlsx、.xls、.xlsm、.pptx，並為每種類型選擇 FaamOffice。',
     onbStarHint: '如果你喜歡 FaamOffice，歡迎到 GitHub 給我們一顆星。',
     setChange: '變更',
     today: '今天',

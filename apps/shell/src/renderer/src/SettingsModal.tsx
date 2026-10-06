@@ -25,7 +25,7 @@ import type {
   AiSearchSettings,
   AiSettings,
 } from '@genoffice/ai-provider'
-import { useI18n } from './locale'
+import { formatList, useI18n } from './locale'
 import type { StringKey, TFunc } from './locale'
 import type {
   AiCatalogEntry,
@@ -1511,7 +1511,7 @@ export function SettingsModal({
   onSkillUpdateDue,
   target,
 }: SettingsModalProps) {
-  const { lang, setLang, t } = useI18n()
+  const { lang, setLang, t, dateLocale } = useI18n()
   const [section, setSection] = useState<SectionId>(target?.section ?? 'profile')
   const [theme, setTheme] = useState<UiTheme>('system')
   const [docTheme, setDocTheme] = useState<DocTheme>('follow')
@@ -1638,8 +1638,10 @@ export function SettingsModal({
     if (!defaultApp) return ''
     if (defaultAppFailed) return t('setDefaultAppFailed')
     if (defaultApp.state === 'default') return t('setDefaultAppIs')
-    if (defaultApp.state === 'other' && defaultApp.others.length > 0)
-      return t('setDefaultAppOther', { app: defaultApp.others.join(', ') })
+    // Windows reports ProgId descriptions ("Microsoft Word Document"), not app
+    // names, so only name the owner where the names are real
+    if (defaultApp.state === 'other' && defaultApp.others.length > 0 && !defaultApp.manualOnly)
+      return t('setDefaultAppOther', { app: formatList(dateLocale, defaultApp.others) })
     return t('setDefaultAppDesc')
   })()
 

@@ -1,5 +1,7 @@
 import { useEffect, useState } from 'react'
+import { DefaultAppPromptCard } from './DefaultAppPromptCard'
 import { Home } from './Home'
+import { pickHomePrompt, type HomePrompt } from './home-prompt'
 import { Onboarding } from './Onboarding'
 import { StarPromptCard } from './StarPromptCard'
 import { TabBar } from './TabBar'
@@ -12,7 +14,7 @@ interface AppFrameProps {
 export function AppFrame({ initialOnboardingSeen }: AppFrameProps) {
   const [homeActive, setHomeActive] = useState(true)
   const [showOnboarding, setShowOnboarding] = useState(!initialOnboardingSeen)
-  const [starPromptDocOpens, setStarPromptDocOpens] = useState<number | null>(null)
+  const [prompt, setPrompt] = useState<HomePrompt | null>(null)
 
   useEffect(() => {
     const applyTabs = (tabs: Awaited<ReturnType<typeof window.aiOfficeTabs.list>>) => {
@@ -23,14 +25,14 @@ export function AppFrame({ initialOnboardingSeen }: AppFrameProps) {
     return window.aiOfficeTabs.onChanged(applyTabs)
   }, [])
 
-  // The "star us" invitation is decided (and counted as shown) by the main
-  // process; ask once per session, and never while onboarding is up — a
-  // first-run user can't have met the value threshold anyway.
+  // Home-screen prompts (default app, "star us") are decided (and counted as
+  // shown) by the main process; ask once per session, never while onboarding
+  // is up, and show at most one — the default-app prompt takes precedence.
   useEffect(() => {
     if (showOnboarding) return
     let alive = true
-    void window.aiOffice.starPromptShouldShow?.().then((result) => {
-      if (alive && result.show) setStarPromptDocOpens(result.docOpens)
+    void pickHomePrompt(window.aiOffice).then((next) => {
+      if (alive && next) setPrompt(next)
     })
     return () => {
       alive = false
@@ -48,6 +50,9 @@ export function AppFrame({ initialOnboardingSeen }: AppFrameProps) {
     }
   }
 
+  const closePrompt = () => setPrompt(null)
+  const promptVisible = prompt !== null && !showOnboarding && homeActive
+
   return (
     <div className="app-frame">
       <TabBar />
@@ -59,8 +64,11 @@ export function AppFrame({ initialOnboardingSeen }: AppFrameProps) {
       {/* editor WebContentsViews paint above ALL shell DOM, so the overlay only
        * renders while the home tab is active — it comes back when home does */}
       {showOnboarding && homeActive && <Onboarding onDone={finishOnboarding} />}
-      {starPromptDocOpens !== null && !showOnboarding && homeActive && (
-        <StarPromptCard docOpens={starPromptDocOpens} onClose={() => setStarPromptDocOpens(null)} />
+      {promptVisible && prompt.kind === 'defaultApp' && (
+        <DefaultAppPromptCard status={prompt.status} onClose={closePrompt} />
+      )}
+      {promptVisible && prompt.kind === 'star' && (
+        <StarPromptCard docOpens={prompt.docOpens} onClose={closePrompt} />
       )}
     </div>
   )

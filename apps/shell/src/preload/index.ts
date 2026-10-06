@@ -477,6 +477,19 @@ const homeApi: HomeApi = {
     if (action !== 'starred' && action !== 'later') throw new Error('Invalid star prompt action.')
     await ipcRenderer.invoke(HOME_CHANNELS.starPromptAction, action)
   },
+  async defaultAppPromptShouldShow() {
+    const result: unknown = await ipcRenderer.invoke(HOME_CHANNELS.defaultAppPromptShouldShow)
+    const raw = (result ?? {}) as { show?: unknown; status?: unknown }
+    return { show: raw.show === true, status: normalizeDefaultAppStatus(raw.status) }
+  },
+  async defaultAppPromptAction(action) {
+    if (action !== 'set' && action !== 'later' && action !== 'never') {
+      throw new Error('Invalid default-app prompt action.')
+    }
+    return normalizeDefaultAppStatus(
+      await ipcRenderer.invoke(HOME_CHANNELS.defaultAppPromptAction, action),
+    )
+  },
   // AI settings channels are registered once by the shell's aggregated docs handlers
   async getAiSettings() {
     return (await ipcRenderer.invoke('ai:get-settings')) as AiSettings

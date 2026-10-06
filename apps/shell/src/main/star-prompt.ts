@@ -10,6 +10,9 @@
  * page counts as resolved — never nag someone who probably already clicked.
  */
 
+import type { StarPromptShow } from '../shared/home-api'
+import type { HomePromptSlot } from './default-app-prompt'
+
 export const STAR_PROMPT_KEY = 'starPrompt'
 /** app-settings key remembering which version last ran (upgrade detection) */
 export const LAST_RUN_VERSION_KEY = 'lastRunVersion'
@@ -110,4 +113,69 @@ export function withShown(state: StarPromptState, now: number): StarPromptState 
 /** the user reacted (opened the repo page or said "already starred") */
 export function withResolved(state: StarPromptState): StarPromptState {
   return { ...state, resolved: true }
+}
+
+export function isStarPromptAction(value: unknown): value is 'starred' | 'later' {
+  return value === 'starred' || value === 'later'
+}
+
+// ---- IPC-facing controller ----
+
+export interface StarPromptDeps {
+  readState(): StarPromptState
+  writeState(state: StarPromptState): void
+  /** one home-screen prompt per session, shared with the default-app prompt */
+  slot: HomePromptSlot
+  now(): number
+  /** returns (and clears) the "first launch after an upgrade" flag */
+  takeUpgradeLaunch(): boolean
+  /** dev preview: show without the value gates and without recording anything */
+  forcePreview?: boolean
+}
+
+export interface StarPromptController {
+  /** decided once per session; show:true is already counted as shown */
+  shouldShow(): StarPromptShow
+  /** the user reacted; unknown actions are ignored */
+  action(action: unknown): void
+}
+
+export function createStarPromptController(deps: StarPromptDeps): StarPromptController {
+  /** a granted show, cached for the session: repeated queries (React StrictMode
+   * double-effects, AppFrame remounts) must return the same answer instead of
+   * burning another lifetime show or flipping to a snoozed "false" */
+  let grant: StarPromptShow | null = null
+
+  return {
+    shouldShow() {
+      if (grant) return grant
+      const now = deps.now()
+      const state = deps.readState()
+      const docOpens = state.docOpens ?? 0
+      // another home-screen prompt (the default-app prompt) displayed this
+      // session: the invitation waits for a later session
+      if (!deps.slot.available('star')) return { show: false, docOpens }
+      if (deps.forcePreview) return { show: true, docOpens }
+      const granted = (): StarPromptShow => {
+        deps.writeState(withShown(state, now))
+        deps.slot.claim('star')
+        grant = { show: true, docOpens }
+        return grant
+      }
+      // first launch after an upgrade: skip the value gates once for a
+      // never-prompted user (they are a proven repeat user already)
+      if (deps.takeUpgradeLaunch() && shouldShowUpgradeStarPrompt(state)) return granted()
+      if (!shouldShowStarPrompt(state, now)) return { show: false, docOpens }
+      return granted()
+    },
+
+    action(action) {
+      if (!isStarPromptAction(action)) return
+      // the card was reacted to — drop the session grant so a later query (new
+      // shell window on macOS) re-evaluates the real rules (snooze / resolved)
+      grant = null
+      // 'later' needs no write: the display was already counted by the query
+      if (action === 'starred') deps.writeState(withResolved(deps.readState()))
+    },
+  }
 }
