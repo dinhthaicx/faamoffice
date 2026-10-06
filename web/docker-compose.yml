@@ -1,0 +1,40 @@
+# FaamOffice web with SQLite stored in a named volume.
+#   cp .env.example .env    # set SITE_URL, SMTP_*, FAAM_AI_* …
+#   docker compose up -d --build
+#   docker compose exec web npm run make-admin -- you@example.com
+
+services:
+  web:
+    build:
+      context: .
+      args:
+        SITE_URL: ${SITE_URL:-http://localhost:3000}
+        NEXT_PUBLIC_GITHUB_REPO: ${NEXT_PUBLIC_GITHUB_REPO:-faamoffice/faamoffice}
+    env_file:
+      - path: .env
+        required: false
+    environment:
+      NODE_ENV: production
+      DATABASE_URL: file:/app/data/faamoffice.db
+    ports:
+      - "${PORT:-3000}:3000"
+    volumes:
+      - faam-data:/app/data
+    restart: unless-stopped
+
+  # PostgreSQL instead of SQLite: follow README.md → "Switching to PostgreSQL",
+  # uncomment this service, remove the faam-data volume line above and set
+  # DATABASE_URL: postgresql://faam:faam@db:5432/faamoffice
+  # db:
+  #   image: postgres:17
+  #   environment:
+  #     POSTGRES_USER: faam
+  #     POSTGRES_PASSWORD: faam
+  #     POSTGRES_DB: faamoffice
+  #   volumes:
+  #     - faam-pg:/var/lib/postgresql/data
+  #   restart: unless-stopped
+
+volumes:
+  faam-data:
+  # faam-pg:

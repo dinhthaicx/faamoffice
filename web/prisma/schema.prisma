@@ -1,0 +1,175 @@
+// FaamOffice web backend data model.
+//
+// SQLite is the default datasource for local development. To switch to
+// PostgreSQL, change `provider` below to "postgresql", swap the driver adapter
+// in src/lib/db.ts (see README.md → "Switching to PostgreSQL") and create a
+// fresh migration history with `npx prisma migrate dev`.
+
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "sqlite"
+}
+
+enum Role {
+  USER
+  ADMIN
+}
+
+enum EmailTokenKind {
+  verify
+  reset
+}
+
+enum DeviceCodeStatus {
+  pending
+  approved
+  denied
+  consumed
+}
+
+enum CreditReason {
+  signup_bonus
+  admin_adjust
+  ai_usage
+}
+
+model User {
+  id              String    @id @default(cuid())
+  /// Always stored lowercase and trimmed.
+  email           String    @unique
+  name            String
+  passwordHash    String
+  emailVerifiedAt DateTime?
+  role            Role      @default(USER)
+  disabledAt      DateTime?
+  /// Current Faam AI Cloud credit balance (may go slightly negative after the last request).
+  credits         Int       @default(0)
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  sessions           Session[]
+  emailTokens        EmailToken[]
+  deviceCodes        DeviceCode[]
+  apiTokens          ApiToken[]
+  creditTransactions CreditTransaction[] @relation("CreditOwner")
+  actedTransactions  CreditTransaction[] @relation("CreditActor")
+  usageRecords       UsageRecord[]
+
+  @@index([createdAt])
+  @@index([name])
+}
+
+/// Web browser sessions (httpOnly cookie). Only the SHA-256 hash of the cookie value is stored.
+model Session {
+  id         String   @id @default(cuid())
+  tokenHash  String   @unique
+  userId     String
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userAgent  String?
+  ip         String?
+  createdAt  DateTime @default(now())
+  expiresAt  DateTime
+
+  @@index([userId])
+  @@index([expiresAt])
+}
+
+/// Single-use email verification and password reset tokens (hashed).
+model EmailToken {
+  id        String         @id @default(cuid())
+  userId    String
+  user      User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  kind      EmailTokenKind
+  tokenHash String         @unique
+  expiresAt DateTime
+  usedAt    DateTime?
+  createdAt DateTime       @default(now())
+
+  @@index([userId, kind])
+  @@index([expiresAt])
+}
+
+/// RFC 8628 device authorization requests from the desktop app.
+model DeviceCode {
+  id             String           @id @default(cuid())
+  deviceCodeHash String           @unique
+  /// Normalized form "ABCD-EFGH".
+  userCode       String           @unique
+  clientId       String
+  deviceName     String
+  status         DeviceCodeStatus @default(pending)
+  userId         String?
+  user           User?            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  /// Minimum polling interval in seconds (raised by 5 on every slow_down).
+  interval       Int              @default(5)
+  expiresAt      DateTime
+  lastPolledAt   DateTime?
+  approvedAt     DateTime?
+  /// The API token issued when the device code was consumed.
+  tokenId        String?
+  createdAt      DateTime         @default(now())
+
+  @@index([expiresAt])
+  @@index([userId])
+}
+
+/// Bearer tokens for signed-in desktop apps ("fo_..."). Only the SHA-256 hash is stored.
+model ApiToken {
+  id         String    @id @default(cuid())
+  userId     String
+  user       User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  name       String
+  tokenHash  String    @unique
+  createdAt  DateTime  @default(now())
+  lastUsedAt DateTime?
+  revokedAt  DateTime?
+
+  usageRecords UsageRecord[]
+
+  @@index([userId, revokedAt])
+}
+
+/// Credit ledger. The sum of `delta` for a user equals `User.credits`.
+model CreditTransaction {
+  id            String       @id @default(cuid())
+  userId        String
+  user          User         @relation("CreditOwner", fields: [userId], references: [id], onDelete: Cascade)
+  delta         Int
+  balanceAfter  Int
+  reason        CreditReason
+  note          String?
+  actorId       String?
+  actor         User?        @relation("CreditActor", fields: [actorId], references: [id], onDelete: SetNull)
+  usageRecordId String?      @unique
+  usageRecord   UsageRecord? @relation(fields: [usageRecordId], references: [id], onDelete: SetNull)
+  createdAt     DateTime     @default(now())
+
+  @@index([userId, createdAt])
+  @@index([reason, createdAt])
+}
+
+/// One billed Faam AI Cloud request.
+model UsageRecord {
+  id               String    @id @default(cuid())
+  userId           String
+  user             User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  tokenId          String?
+  token            ApiToken? @relation(fields: [tokenId], references: [id], onDelete: SetNull)
+  /// Public model id (e.g. "faam-fast").
+  model            String
+  promptTokens     Int
+  completionTokens Int
+  credits          Int
+  /// True when the upstream did not report usage and tokens were estimated (chars ÷ 4).
+  estimated        Boolean   @default(false)
+  createdAt        DateTime  @default(now())
+
+  transaction CreditTransaction?
+
+  @@index([userId, createdAt])
+  @@index([createdAt])
+}

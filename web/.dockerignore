@@ -1,0 +1,14 @@
+node_modules
+.next
+data
+*.db
+*.db-journal
+.env
+.env.*
+!.env.example
+src/generated
+coverage
+.DS_Store
+npm-debug.log*
+Dockerfile
+docker-compose.yml
