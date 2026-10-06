@@ -474,7 +474,7 @@ describe('manual download fallback', () => {
     const actions = await failTwiceIntoManual(macFiles)
     actions.onOpenDownload()
     expect(openExternal).toHaveBeenCalledWith(
-      'https://github.com/faamoffice/faamoffice/releases/latest',
+      'https://github.com/dinhthaicx/faamoffice/releases/latest',
     )
   })
 
@@ -485,7 +485,7 @@ describe('manual download fallback', () => {
     ])
     actions.onOpenDownload()
     expect(openExternal).toHaveBeenCalledWith(
-      'https://github.com/faamoffice/faamoffice/releases/latest',
+      'https://github.com/dinhthaicx/faamoffice/releases/latest',
     )
   })
 })
@@ -543,7 +543,7 @@ describe('checkForUpdatesNow (r148 manual check)', () => {
     expect(showMessageBox).toHaveBeenCalledTimes(1)
     expect(lastDialogOpts().buttons.length).toBe(2)
     expect(openExternal).toHaveBeenCalledWith(
-      'https://github.com/faamoffice/faamoffice/releases/latest',
+      'https://github.com/dinhthaicx/faamoffice/releases/latest',
     )
     expect(checkForUpdates).not.toHaveBeenCalled()
   })

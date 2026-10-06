@@ -1939,8 +1939,8 @@ export function SettingsModal({
                   label={t('setGithub')}
                   value={
                     githubStars === null
-                      ? 'github.com/faamoffice/faamoffice'
-                      : `github.com/faamoffice/faamoffice · ★ ${formatStars(githubStars)}`
+                      ? 'github.com/dinhthaicx/faamoffice'
+                      : `github.com/dinhthaicx/faamoffice · ★ ${formatStars(githubStars)}`
                   }
                   action={
                     <button

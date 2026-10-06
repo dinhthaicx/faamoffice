@@ -75,12 +75,12 @@
           "type": "extra-data",
           "filename": "genoffice.deb",
           "only-arches": ["x86_64"],
-          "url": "https://github.com/faamoffice/faamoffice/releases/download/v0.11.0/genoffice_0.11.0_amd64.deb",
+          "url": "https://github.com/dinhthaicx/faamoffice/releases/download/v0.11.0/genoffice_0.11.0_amd64.deb",
           "sha256": "a59241bd30dcee12314990f7d438ec2bc4a5e93c5c1c242b203361529dc44c29",
           "size": 147161680,
           "x-checker-data": {
             "type": "json",
-            "url": "https://api.github.com/repos/faamoffice/faamoffice/releases/latest",
+            "url": "https://api.github.com/repos/dinhthaicx/faamoffice/releases/latest",
             "version-query": ".tag_name | sub(\"^v\"; \"\")",
             "url-query": ".assets[] | select(.name | endswith(\"_amd64.deb\")) | .browser_download_url"
           }

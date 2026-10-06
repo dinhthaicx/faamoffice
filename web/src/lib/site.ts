@@ -1,6 +1,6 @@
 // Public site constants (safe for client bundles: only NEXT_PUBLIC_* values).
 
-const DEFAULT_REPO = "faamoffice/faamoffice";
+const DEFAULT_REPO = "dinhthaicx/faamoffice";
 
 function repo(): string {
   const value = (process.env.NEXT_PUBLIC_GITHUB_REPO || DEFAULT_REPO).trim();

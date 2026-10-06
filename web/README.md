@@ -45,7 +45,7 @@ inlined into static pages at build time — rebuild after changing them.
 | Variable | Default | Purpose |
 | --- | --- | --- |
 | `SITE_URL` [build] | `http://localhost:3000` | Public base URL: canonical/hreflang/OG/sitemap, email links, `verification_uri` |
-| `NEXT_PUBLIC_GITHUB_REPO` [build] | `faamoffice/faamoffice` | Repo whose GitHub Releases provide installers |
+| `NEXT_PUBLIC_GITHUB_REPO` [build] | `dinhthaicx/faamoffice` | Repo whose GitHub Releases provide installers |
 | `GITHUB_TOKEN` | – | Optional, avoids GitHub API rate limits for the download page |
 | `DATABASE_URL` | `file:./data/faamoffice.db` | SQLite file (or PostgreSQL URL after switching) |
 | `SIGNUP_BONUS_CREDITS` | `100` | Credits for new accounts (ledger reason `signup_bonus`) |

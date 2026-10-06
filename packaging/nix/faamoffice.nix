@@ -18,7 +18,7 @@
 let
   version = "0.11.0";
   src = fetchurl {
-    url = "https://github.com/faamoffice/faamoffice/releases/download/v${version}/FaamOffice-${version}.AppImage";
+    url = "https://github.com/dinhthaicx/faamoffice/releases/download/v${version}/FaamOffice-${version}.AppImage";
     hash = "sha256-iYKCjYfFFe4YzfezxahhCbwMl+FvkBkogZGSnhxOQWw=";
   };
 in
@@ -60,7 +60,7 @@ appimageTools.wrapType2 {
 
   meta = with lib; {
     description = "AI-native office suite: Word, Excel, PowerPoint, PDF and Markdown in one local app";
-    homepage = "https://github.com/faamoffice/faamoffice";
+    homepage = "https://github.com/dinhthaicx/faamoffice";
     license = licenses.asl20;
     mainProgram = "faamoffice";
     platforms = [ "x86_64-linux" ];

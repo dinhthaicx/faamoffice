@@ -35,7 +35,7 @@ const root = join(dirname(fileURLToPath(import.meta.url)), '..')
 const args = process.argv.slice(2)
 const dryRun = args.includes('--dry-run')
 const ownerIdx = args.indexOf('--owner')
-const owner = ownerIdx >= 0 ? args[ownerIdx + 1] : 'faamoffice'
+const owner = ownerIdx >= 0 ? args[ownerIdx + 1] : 'dinhthaicx'
 if (!owner || !/^[A-Za-z0-9-]+$/.test(owner)) throw new Error('--owner must be a GitHub login')
 
 const SKIP_PATHS = [
@@ -47,6 +47,8 @@ const SKIP_PATHS = [
   /^CONTRIBUTING\.md$/,
   /^README\.md$/,
   /^ee\//,
+  // the website keeps its own copy (it credits GenOffice by name)
+  /^web\//,
   /^docs\//,
   /^fixtures\//,
   /\/fixtures\//,
@@ -106,6 +108,7 @@ const RULES = [
   [/skills add genspark-ai\/genoffice(?![\w-])/g, `skills add ${owner}/faamoffice`],
   // `genoffice#123` comments cite upstream issues and keep doing so
   [/\bfaamoffice#(?=\d)/g, 'genoffice#'],
+  [/github\.com\/(?!genspark-ai\/)[\w-]+\/faamoffice(?![\w-])/g, REPO_URL],
   // app id (mac bundle id, Windows AppUserModelID, flatpak id)
   [/\bcom\.genoffice\.app\b/g, 'com.faamoffice.app'],
   // per-user config dir

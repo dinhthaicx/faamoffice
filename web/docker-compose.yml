@@ -9,7 +9,7 @@ services:
       context: .
       args:
         SITE_URL: ${SITE_URL:-http://localhost:3000}
-        NEXT_PUBLIC_GITHUB_REPO: ${NEXT_PUBLIC_GITHUB_REPO:-faamoffice/faamoffice}
+        NEXT_PUBLIC_GITHUB_REPO: ${NEXT_PUBLIC_GITHUB_REPO:-dinhthaicx/faamoffice}
     env_file:
       - path: .env
         required: false

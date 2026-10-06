@@ -19,7 +19,7 @@ RUN npm ci
 # ---- build
 FROM deps AS build
 ARG SITE_URL=http://localhost:3000
-ARG NEXT_PUBLIC_GITHUB_REPO=faamoffice/faamoffice
+ARG NEXT_PUBLIC_GITHUB_REPO=dinhthaicx/faamoffice
 ENV SITE_URL=$SITE_URL \
     NEXT_PUBLIC_GITHUB_REPO=$NEXT_PUBLIC_GITHUB_REPO
 COPY . .

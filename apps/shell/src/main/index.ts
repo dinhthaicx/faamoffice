@@ -687,7 +687,7 @@ function initAnalytics(): void {
 // ---- first-run onboarding ----
 // The feedback page opened from the onboarding's second slide (the fork's
 // GitHub issues).
-const GENTEAM_URL = 'https://github.com/faamoffice/faamoffice/issues'
+const GENTEAM_URL = 'https://github.com/dinhthaicx/faamoffice/issues'
 
 // Download pages of the local AI servers and API-key pages of hosted vendors,
 // opened from Settings → AI Model. Main-side so the renderer never supplies a URL.
@@ -746,7 +746,7 @@ let cachedGithubStars: number | null = null
 async function fetchGithubStars(): Promise<number | null> {
   if (cachedGithubStars !== null) return cachedGithubStars
   try {
-    const response = await fetch('https://api.github.com/repos/faamoffice/faamoffice', {
+    const response = await fetch('https://api.github.com/repos/dinhthaicx/faamoffice', {
       headers: { Accept: 'application/vnd.github+json' },
       signal: AbortSignal.timeout(5000),
     })

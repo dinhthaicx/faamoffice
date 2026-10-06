@@ -28,7 +28,7 @@ interface Pending {
   agentId?: AgentId
 }
 
-export const NPX_INSTALL_COMMAND = 'npx skills add faamoffice/faamoffice'
+export const NPX_INSTALL_COMMAND = 'npx skills add dinhthaicx/faamoffice'
 
 /** some detected assistant holds an older copy of the skill than the bundled one */
 export const skillUpdateDue = (s: IntegrationsStatus): boolean =>

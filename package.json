@@ -10,7 +10,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/faamoffice/faamoffice.git"
+    "url": "git+https://github.com/dinhthaicx/faamoffice.git"
   },
   "workspaces": [
     "apps/*",

@@ -24,7 +24,7 @@ ARG GENOFFICE_DEB_SHA256=a59241bd30dcee12314990f7d438ec2bc4a5e93c5c1c242b2033615
 RUN apt-get update \
   && apt-get install -y --no-install-recommends curl ca-certificates \
   && curl -fsSL -o /tmp/genoffice.deb \
-       "https://github.com/faamoffice/faamoffice/releases/download/v${GENOFFICE_VERSION}/faamoffice_${GENOFFICE_VERSION}_amd64.deb" \
+       "https://github.com/dinhthaicx/faamoffice/releases/download/v${GENOFFICE_VERSION}/faamoffice_${GENOFFICE_VERSION}_amd64.deb" \
   && echo "${GENOFFICE_DEB_SHA256}  /tmp/genoffice.deb" | sha256sum -c - \
   && apt-get install -y --no-install-recommends /tmp/genoffice.deb \
   && rm -f /tmp/genoffice.deb \
