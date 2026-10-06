@@ -9,7 +9,7 @@ export const es = {
   aiStarterContinue: 'Continúa escribiendo desde donde termina el documento',
   aiStarterFillTemplate: 'Encuentra y completa los marcadores de posición del documento',
   aiGskLoginBtn: 'Iniciar sesión en Genspark',
-  aiPanelTitle: 'Genspark',
+  aiPanelTitle: 'Faam AI',
   aiOpenAssistant: 'Abrir el asistente de IA',
   aiSummarizeBtn: 'Resumen IA',
   aiSummarizePrompt: 'Resume el contenido principal y los puntos clave de este documento',

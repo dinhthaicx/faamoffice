@@ -197,7 +197,7 @@
  * at a 1em advance and would swallow Latin punctuation ahead of the generic
  * face, shifting every wrap. CJK-named unknown fonts keep the full subsets
  * (fullwidth quotes are correct inside CJK body text). Same ranges as the
- * 'GenOffice Hiragino/Batang…' local() aliases below. */
+ * 'FaamOffice Hiragino/Batang…' local() aliases below. */
 @font-face {
   font-family: 'Noto Sans CJK GO';
   src: url('./NotoSansCJKsc-Regular-subset.woff2') format('woff2');

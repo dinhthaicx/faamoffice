@@ -757,7 +757,7 @@ button {
   color: var(--text-primary);
 }
 
-/* Home-tab Genspark AI entry: black circular "+" badge with a dropdown caret,
+/* Home-tab Faam AI entry: black circular "+" badge with a dropdown caret,
    brand label below (mirrors the sheets Home ribbon). */
 /* AI feature buttons next to the entry: purple glyphs, label below */
 .ai-feature-icon {
@@ -803,7 +803,7 @@ button {
   background: var(--active-bg);
 }
 
-/* The Genspark AI entry keeps a black label even while the panel is open. */
+/* The Faam AI entry keeps a black label even while the panel is open. */
 .rb-big.ai-entry.active {
   color: var(--text);
 }
@@ -5587,7 +5587,7 @@ body.vib .slide-list {
 }
 
 /* AI quick actions anchored right above the slide card (mirrors the Home-tab
-   Genspark AI group); absolute so it doesn't distort the zoom-box extent.
+   Faam AI group); absolute so it doesn't distort the zoom-box extent.
    z-index lifts it over the Konva stage's transparent 160px bleed, which
    otherwise swallows the clicks */
 /* Genspark SAS floating toolbar, matched to the reference stage-toolbar:

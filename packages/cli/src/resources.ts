@@ -5,7 +5,7 @@ import { dirname, join, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
 
 /**
- * Two layouts: packaged (Resources/cli/genoffice.cjs next to Resources/wasm,
+ * Two layouts: packaged (Resources/cli/faamoffice.cjs next to Resources/wasm,
  * Resources/native, Resources/ocr — see apps/shell/electron-builder.cjs) and
  * the dev checkout (packages/cli/{src,dist} inside the monorepo).
  */
@@ -30,7 +30,7 @@ export function repoRoot(): string | null {
     const pkg = join(dir, 'package.json')
     if (existsSync(pkg)) {
       try {
-        if (JSON.parse(readFileSync(pkg, 'utf-8')).name === 'genoffice') {
+        if (JSON.parse(readFileSync(pkg, 'utf-8')).name === 'faamoffice') {
           cachedRepo = dir
           return dir
         }
@@ -80,12 +80,12 @@ export function ocrHelperPath(): string | null {
   return candidates.find((p) => existsSync(p)) ?? null
 }
 
-/** skills/genoffice/SKILL.md as shipped beside this bundle (Resources/cli/skills) or in the checkout. */
+/** skills/faamoffice/SKILL.md as shipped beside this bundle (Resources/cli/skills) or in the checkout. */
 export function bundledSkillPath(): string | null {
   const packaged = packagedResourcesDir()
   const candidates = [
-    ...(packaged ? [join(packaged, 'cli', 'skills', 'genoffice', 'SKILL.md')] : []),
-    ...(repoRoot() ? [join(repoRoot()!, 'skills', 'genoffice', 'SKILL.md')] : []),
+    ...(packaged ? [join(packaged, 'cli', 'skills', 'faamoffice', 'SKILL.md')] : []),
+    ...(repoRoot() ? [join(repoRoot()!, 'skills', 'faamoffice', 'SKILL.md')] : []),
   ]
   return candidates.find((p) => existsSync(p)) ?? null
 }
@@ -95,7 +95,7 @@ export interface AppLaunch {
   args: string[]
 }
 
-/** How to start the GenOffice GUI: the app binary that hosts this CLI, an installed app, or the dev checkout. */
+/** How to start the FaamOffice GUI: the app binary that hosts this CLI, an installed app, or the dev checkout. */
 export function appLaunch(env: NodeJS.ProcessEnv = process.env): AppLaunch | null {
   if (env.GENOFFICE_APP_BIN) return { command: env.GENOFFICE_APP_BIN, args: [] }
   if (packagedResourcesDir() && process.versions.electron) {
@@ -122,25 +122,25 @@ function installedAppBinaries(
     case 'darwin':
       return [
         ...(shipped ? [shipped] : []),
-        '/Applications/GenOffice.app/Contents/MacOS/GenOffice',
-        join(homedir(), 'Applications/GenOffice.app/Contents/MacOS/GenOffice'),
+        '/Applications/FaamOffice.app/Contents/MacOS/FaamOffice',
+        join(homedir(), 'Applications/FaamOffice.app/Contents/MacOS/FaamOffice'),
       ]
     case 'win32':
       return [
         ...(shipped ? [shipped] : []),
-        env.LOCALAPPDATA ? join(env.LOCALAPPDATA, 'Programs', 'GenOffice', 'GenOffice.exe') : '',
-        env.ProgramFiles ? join(env.ProgramFiles, 'GenOffice', 'GenOffice.exe') : '',
+        env.LOCALAPPDATA ? join(env.LOCALAPPDATA, 'Programs', 'FaamOffice', 'FaamOffice.exe') : '',
+        env.ProgramFiles ? join(env.ProgramFiles, 'FaamOffice', 'FaamOffice.exe') : '',
       ].filter(Boolean)
     default:
-      return [...(shipped ? [shipped] : []), '/opt/GenOffice/genoffice', '/usr/bin/genoffice']
+      return [...(shipped ? [shipped] : []), '/opt/FaamOffice/faamoffice', '/usr/bin/faamoffice']
   }
 }
 
 export function appBinaryForResources(resources: string, platform: NodeJS.Platform): string {
   const install = dirname(resources)
-  if (platform === 'darwin') return join(install, 'MacOS', 'GenOffice')
-  if (platform === 'win32') return join(install, 'GenOffice.exe')
-  return join(install, 'genoffice')
+  if (platform === 'darwin') return join(install, 'MacOS', 'FaamOffice')
+  if (platform === 'win32') return join(install, 'FaamOffice.exe')
+  return join(install, 'faamoffice')
 }
 
 /**

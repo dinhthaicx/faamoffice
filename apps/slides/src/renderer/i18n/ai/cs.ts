@@ -19,7 +19,7 @@ export const cs = {
   aiQcStopped: 'Kontrola rozložení zastavena',
   aiQcCapped: 'Dalších {count} stránek nebylo zkontrolováno (limit na jedno spuštění)',
   aiGskLoginBtn: 'Přihlásit se ke Genspark',
-  aiPanelTitle: 'Genspark',
+  aiPanelTitle: 'Faam AI',
   aiOpenAssistant: 'Otevřít asistenta AI',
   aiFactCheckBtn: 'Ověření faktů AI',
   aiFactCheckPrompt:

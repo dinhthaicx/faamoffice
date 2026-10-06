@@ -78,7 +78,7 @@ const HOME_ID = 'home'
  */
 export class TabManager {
   private readonly tabs: TabRecord[] = [
-    { id: HOME_ID, kind: 'home', view: null, title: 'GenOffice' },
+    { id: HOME_ID, kind: 'home', view: null, title: 'FaamOffice' },
   ]
   private activeId: string = HOME_ID
   private nextId = 1
@@ -290,7 +290,7 @@ export class TabManager {
       id,
       kind: 'docs',
       view,
-      title: openPath ? basename(openPath) : this.untitled('docs', 'GenOffice Docs'),
+      title: openPath ? basename(openPath) : this.untitled('docs', 'FaamOffice Docs'),
       filePath: openPath,
     })
     this.activateTab(id)

@@ -19,7 +19,7 @@ export const de = {
   aiQcStopped: 'Layoutprüfung gestoppt',
   aiQcCapped: '{count} weitere Seite(n) nicht geprüft (Limit pro Lauf)',
   aiGskLoginBtn: 'Bei Genspark anmelden',
-  aiPanelTitle: 'Genspark',
+  aiPanelTitle: 'Faam AI',
   aiOpenAssistant: 'KI-Assistenten öffnen',
   aiFactCheckBtn: 'KI-Faktencheck',
   aiFactCheckPrompt:

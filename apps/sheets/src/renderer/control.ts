@@ -1,6 +1,6 @@
 import type { FWorkbook, FWorksheet } from '@univerjs/sheets/facade'
 
-/** Request/reply the shell relays from `genoffice open --range` and `genoffice selection`. */
+/** Request/reply the shell relays from `faamoffice open --range` and `faamoffice selection`. */
 export type ControlRequest =
   { cmd: 'goto'; target: { kind: string; sheet?: string; range?: string } } | { cmd: 'selection' }
 

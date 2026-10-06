@@ -181,7 +181,7 @@ export const he = {
   ribbonReplaceTip: 'חיפוש והחלפה של טקסט',
   ribbonSelectAll: 'בחר הכול',
   ribbonSelectAllTip: 'בחירת המסמך כולו',
-  ribbonAiAssistant: 'Genspark',
+  ribbonAiAssistant: 'Faam AI',
   ribbonAiAssistantTip: 'פתח את עוזר ה-AI',
   ribbonRemoveTableStyleTip: 'הסר סגנון טבלה',
   ribbonNoStyle: 'ללא סגנון',

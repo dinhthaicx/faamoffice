@@ -18,7 +18,7 @@ export const es = {
   aiQcStopped: 'Comprobación de diseño detenida',
   aiQcCapped: '{count} página(s) más sin comprobar (límite por ejecución)',
   aiGskLoginBtn: 'Iniciar sesión en Genspark',
-  aiPanelTitle: 'Genspark',
+  aiPanelTitle: 'Faam AI',
   aiOpenAssistant: 'Abrir el asistente de IA',
   aiFactCheckBtn: 'Verificación IA',
   aiFactCheckPrompt:

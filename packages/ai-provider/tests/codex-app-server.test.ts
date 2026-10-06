@@ -109,9 +109,9 @@ describe('Codex app-server bridge', () => {
     expect(params).not.toHaveProperty('sandbox')
     expect(params.approvalPolicy).toBe('never')
     expect(params.config).toEqual({
-      default_permissions: 'genoffice',
+      default_permissions: 'faamoffice',
       permissions: {
-        genoffice: {
+        faamoffice: {
           filesystem: { ':minimal': 'read', '/tmp/genoffice-codex-x': 'read' },
         },
       },
@@ -119,8 +119,8 @@ describe('Codex app-server bridge', () => {
     expect(codexThreadStartParams(config, '/tmp/genoffice-codex-x', 'read-only')).toMatchObject({
       sandbox: 'read-only',
     })
-    expect(activePermissionProfileId({ activePermissionProfile: { id: 'genoffice' } })).toBe(
-      'genoffice',
+    expect(activePermissionProfileId({ activePermissionProfile: { id: 'faamoffice' } })).toBe(
+      'faamoffice',
     )
     expect(activePermissionProfileId({ activePermissionProfile: null })).toBeUndefined()
   })
@@ -156,7 +156,7 @@ describe('Codex app-server bridge', () => {
     expect(prompt).toContain('8192 output tokens')
   })
 
-  it('parses text and JSON-encoded GenOffice tool arguments', () => {
+  it('parses text and JSON-encoded FaamOffice tool arguments', () => {
     expect(
       parseCodexAppServerTurn(
         JSON.stringify({

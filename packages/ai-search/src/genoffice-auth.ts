@@ -1,8 +1,8 @@
 /**
- * GenOffice's own Genspark identity: device-code login (office_addin_auth,
+ * FaamOffice's own Genspark identity: device-code login (office_addin_auth,
  * app_type=genoffice) minting a gsk API key named "genoffice" — the key_name
  * lands in billing as billing_tag, attributing all traffic (incl. gsk CLI
- * subprocesses) to GenOffice. Stored in ~/.genoffice/auth.json, deliberately
+ * subprocesses) to FaamOffice. Stored in ~/.faamoffice/auth.json, deliberately
  * NOT the shared config.json that Claw Desktop overwrites on every launch.
  *
  * Flow: POST /device_code → browser approve → poll /token for a 30-day Bearer
@@ -135,7 +135,7 @@ async function loginFetchChannels(): Promise<(typeof fetch)[]> {
 
 /** Override dir via GENOFFICE_AUTH_DIR (test isolation). */
 export function genofficeAuthPath(): string {
-  return join(process.env.GENOFFICE_AUTH_DIR || join(homedir(), '.genoffice'), 'auth.json')
+  return join(process.env.GENOFFICE_AUTH_DIR || join(homedir(), '.faamoffice'), 'auth.json')
 }
 
 export interface GenofficeAuth {
@@ -172,7 +172,7 @@ export function reloadGenofficeAuth(): void {
   cachedAuth = undefined
 }
 
-/** The GenOffice-named api key; '' when not signed in. Cached (invalidated by login/logout). */
+/** The FaamOffice-named api key; '' when not signed in. Cached (invalidated by login/logout). */
 export function genofficeApiKey(): string {
   return loadGenofficeAuth()?.apiKey ?? ''
 }
@@ -401,7 +401,7 @@ async function runDeviceLogin(
 let activeLogin: { cancel: () => void } | null = null
 
 /**
- * Starts the GenOffice device-code login, cancelling a previous in-flight one
+ * Starts the FaamOffice device-code login, cancelling a previous in-flight one
  * (its device code would otherwise be approved into a dead flow). The caller
  * opens `url` in the system browser. Returns whether the flow was started.
  */
@@ -455,8 +455,8 @@ export function ensureGenofficeLogin(openUrl: (url: string) => void): void {
 }
 
 /**
- * Signs out of GenOffice only: best-effort server-side revoke of the
- * genoffice key, then local removal. The shared gsk CLI login
+ * Signs out of FaamOffice only: best-effort server-side revoke of the
+ * faamoffice key, then local removal. The shared gsk CLI login
  * (~/.genspark-tool-cli) is untouched — terminal gsk and Claw keep working.
  */
 export async function genofficeLogout(): Promise<void> {

@@ -1877,16 +1877,16 @@ describe('AgentLoop compaction', () => {
       invalidArgumentFields(readCells, { addresses: ['A1', 'B2'], sheetId: 'Sheet1' }),
     ).toEqual([])
     expect(invalidArgumentFields(readCells, { addresses: [] })).toEqual([])
-    expect(invalidArgumentFields(webSearch, { query: 'genoffice', maxResults: 6 })).toEqual([])
+    expect(invalidArgumentFields(webSearch, { query: 'faamoffice', maxResults: 6 })).toEqual([])
     // omitted optional field, and an undeclared extra key, are both fine
-    expect(invalidArgumentFields(webSearch, { query: 'genoffice' })).toEqual([])
+    expect(invalidArgumentFields(webSearch, { query: 'faamoffice' })).toEqual([])
     expect(invalidArgumentFields(webSearch, { query: 'x', page: 2 })).toEqual([])
     expect(invalidArgumentFields(loadGuides, { guides: ['writing', 'formatting'] })).toEqual([])
     // the same tools do catch a mangled argument
     expect(invalidArgumentFields(readCells, { addresses: 'A1:D20' })).toEqual([
       '"addresses" expected array',
     ])
-    expect(invalidArgumentFields(webSearch, { query: 'genoffice', maxResults: '6' })).toEqual([
+    expect(invalidArgumentFields(webSearch, { query: 'faamoffice', maxResults: '6' })).toEqual([
       '"maxResults" expected integer',
     ])
   })

@@ -6,7 +6,7 @@ import type { CSSProperties, MouseEvent as ReactMouseEvent } from 'react'
 import { GlobalWorkerOptions, getDocument } from 'pdfjs-dist/legacy/build/pdf.mjs'
 import type { PDFDocumentProxy } from 'pdfjs-dist'
 import workerUrl from 'pdfjs-dist/legacy/build/pdf.worker.min.mjs?url'
-import { AiPanel, GensparkMark } from './ai/AiPanel'
+import { AiPanel, FaamAiMark } from './ai/AiPanel'
 import { AiAskPopover, type AskAnchorRect } from './AiAskPopover'
 import {
   createSavedAnnotCountsLoader,
@@ -1563,7 +1563,7 @@ export default function App() {
     el.scrollTop = rowTop(rowOfVis(target - 1)) - PAGE_GAP / 2
   }
 
-  // genoffice CLI (`open --page`, `selection`): the shell evaluates this hook
+  // faamoffice CLI (`open --page`, `selection`): the shell evaluates this hook
   useEffect(() => {
     ;(window as unknown as Record<string, unknown>).__genofficeControl = (req: ControlRequest) =>
       handlePdfControl(req, {
@@ -6327,7 +6327,7 @@ export default function App() {
         <div className="ribbon-body" data-ribbon-body="">
           {ribbonTab === 'home' && (
             <>
-              {/* ---- Genspark AI (first slot: entry + one-click AI actions, docs parity) ---- */}
+              {/* ---- Faam AI (first slot: entry + one-click AI actions, docs parity) ---- */}
               <div className="ribbon-group">
                 <div className="ribbon-group-items">
                   <button
@@ -6336,9 +6336,9 @@ export default function App() {
                     onClick={() => setAiCollapsed((v) => !v)}
                   >
                     <span className="rb-big-icon">
-                      <GensparkMark size={26} />
+                      <FaamAiMark size={26} />
                     </span>
-                    <span>Genspark AI</span>
+                    <span>Faam AI</span>
                   </button>
                   <button
                     className="rb-big ai-entry"
@@ -6478,7 +6478,7 @@ export default function App() {
                   >
                     <span className="rb-big-icon">
                       <span className="ai-feature-icon" aria-hidden="true">
-                        <GensparkMark size={20} />
+                        <FaamAiMark size={20} />
                       </span>
                     </span>
                     <span>{t('aiProcessNotesBtn')}</span>
@@ -6659,7 +6659,7 @@ export default function App() {
                   >
                     <span className="rb-big-icon">
                       <span className="ai-feature-icon" aria-hidden="true">
-                        <GensparkMark size={20} />
+                        <FaamAiMark size={20} />
                       </span>
                     </span>
                     <span>{t('aiFillFormBtn')}</span>
@@ -6988,7 +6988,7 @@ export default function App() {
               aria-label={t('aiOpenAssistant')}
               onClick={() => setAiCollapsed(false)}
             >
-              <GensparkMark size={22} />
+              <FaamAiMark size={22} />
             </button>
           )}
           <AiPanel

@@ -18,7 +18,7 @@ export const pt = {
   aiQcStopped: 'Verificação de layout interrompida',
   aiQcCapped: 'Mais {count} página(s) não verificada(s) (limite por execução)',
   aiGskLoginBtn: 'Entrar no Genspark',
-  aiPanelTitle: 'Genspark',
+  aiPanelTitle: 'Faam AI',
   aiOpenAssistant: 'Abrir assistente de IA',
   aiFactCheckBtn: 'Checagem IA',
   aiFactCheckPrompt:

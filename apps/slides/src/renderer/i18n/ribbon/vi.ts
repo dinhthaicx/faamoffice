@@ -179,7 +179,7 @@ export const vi = {
   ribbonFlipH: 'Lật ngang',
   ribbonFlipV: 'Lật dọc',
   ribbonDistributeHint: '{title} (chọn từ 3 phần tử trở lên)',
-  ribbonAiAssistant: 'Genspark',
+  ribbonAiAssistant: 'Faam AI',
   ribbonAiAssistantTip: 'Hiện hoặc ẩn ngăn Trợ lý AI',
   ribbonGroupTable: 'Bảng',
   ribbonInsertTableTip: 'Chèn bảng (kiểu mặc định; chọn số hàng và cột)',

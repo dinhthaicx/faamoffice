@@ -32,7 +32,7 @@ vi.mock('@genoffice/cli/agent-skills', () => {
   const skillsDir = '/home/me/.claude/skills'
   return {
     LEDGER_KEY: 'agentSkillInstalls',
-    bundledSkillFrom: () => ({ name: 'genoffice', version: '1.0.0', text: 'x' }),
+    bundledSkillFrom: () => ({ name: 'faamoffice', version: '1.0.0', text: 'x' }),
     buildSkillZip: async () => Buffer.alloc(0),
     detectAgents: () => [{ id: 'claude-code', label: 'Claude Code', skillsDir }],
     agentTarget: (id: string) =>
@@ -42,7 +42,7 @@ vi.mock('@genoffice/cli/agent-skills', () => {
     },
     uninstallSkill: () => false,
     ledgerFromSettings: () => ({ version: '1.0.0', installs: {} }),
-    readInstallState: (dir: string) => ({ status: 'missing', path: `${dir}/genoffice/SKILL.md` }),
+    readInstallState: (dir: string) => ({ status: 'missing', path: `${dir}/faamoffice/SKILL.md` }),
   }
 })
 
@@ -66,7 +66,7 @@ beforeEach(() => {
   h.installed.length = 0
   h.dialogResult = { canceled: true, filePaths: [] }
   dir = mkdtempSync(join(tmpdir(), 'genoffice-integrations-'))
-  writeFileSync(join(dir, 'SKILL.md'), '---\nname: genoffice\n---\n')
+  writeFileSync(join(dir, 'SKILL.md'), '---\nname: faamoffice\n---\n')
   writeFileSync(join(dir, 'package.json'), JSON.stringify({ version: '0.0.0' }))
   registerIntegrationsIpc({
     settingsPath: () => join(dir, 'app-settings.json'),

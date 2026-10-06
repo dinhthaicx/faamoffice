@@ -18,7 +18,7 @@ export const en = {
   aiQcStopped: 'Layout check stopped',
   aiQcCapped: '{count} more page(s) not checked (per-run cap)',
   aiGskLoginBtn: 'Sign in to Genspark',
-  aiPanelTitle: 'Genspark',
+  aiPanelTitle: 'Faam AI',
   aiOpenAssistant: 'Open AI assistant',
   aiFactCheckBtn: 'AI Fact Check',
   aiFactCheckPrompt:

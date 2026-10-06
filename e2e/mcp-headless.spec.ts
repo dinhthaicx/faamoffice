@@ -11,7 +11,7 @@ import http, { createServer } from 'node:http'
 /**
  * MCP headless generation against the real built app.
  *
- * The headless tools delegate to the bundled `genoffice` CLI, which the app
+ * The headless tools delegate to the bundled `faamoffice` CLI, which the app
  * spawns on its own Node runtime (ELECTRON_RUN_AS_NODE) — this is the only test
  * that exercises that spawn path end to end: the app has to locate and run the
  * CLI, and the produced files are reparsed with the real engines.

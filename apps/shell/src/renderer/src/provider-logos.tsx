@@ -112,6 +112,26 @@ const opencodeLogo = (
   </svg>
 )
 
+// Local servers share one mark: a box with a status light, i.e. "runs on this machine".
+function localServerLogo(accent: string): ReactNode {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.8"
+      strokeLinecap="round"
+      aria-hidden="true"
+    >
+      <rect x="3" y="4" width="18" height="7" rx="2" />
+      <rect x="3" y="13" width="18" height="7" rx="2" />
+      <path d="M7 7.5h5M7 16.5h5" />
+      <circle cx="17" cy="7.5" r="1.4" fill={accent} stroke="none" />
+      <circle cx="17" cy="16.5" r="1.4" fill={accent} stroke="none" />
+    </svg>
+  )
+}
+
 const LOGOS: Record<AiProviderId, ReactNode> = {
   genspark: (
     <svg viewBox="0 0 24 24" fill="currentColor" fillRule="evenodd" aria-hidden="true">
@@ -277,6 +297,18 @@ const LOGOS: Record<AiProviderId, ReactNode> = {
       <path d="M8.5 14.2c.9-1 2.2-1.5 3.5-1.5s2.6.5 3.5 1.5" strokeLinecap="round" />
     </svg>
   ),
+  groq: (
+    <svg viewBox="0 0 24 24" aria-hidden="true">
+      <circle cx="12" cy="12" r="11" fill="#F55036" />
+      <path
+        d="M12.2 6.2a5.4 5.4 0 100 10.8h2.6v-4.6h-3.3v2.1h1.1v.4h-.4a3.2 3.2 0 110-6.4 3.1 3.1 0 012.4 1.1l1.6-1.4a5.3 5.3 0 00-4-1.9z"
+        fill="#fff"
+      />
+    </svg>
+  ),
+  ollama: localServerLogo('#22c55e'),
+  lmstudio: localServerLogo('#6366f1'),
+  llamacpp: localServerLogo('#f59e0b'),
   custom: (
     <svg
       viewBox="0 0 24 24"

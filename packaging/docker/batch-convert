@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# GenOffice headless batch conversion (packaging/docker, genoffice#1808's
+# FaamOffice headless batch conversion (packaging/docker, genoffice#1808's
 # batch slice). Walks /data for convertible documents and drives the app's
 # own --headless-export entry point once per file, so every conversion is
 # exactly what the File menu's export produces (same pipeline, no drift).
@@ -31,7 +31,7 @@ PARALLEL="${GENOFFICE_PARALLEL:-1}"
 INCLUDE="${GENOFFICE_INCLUDE:-}"
 EXCLUDE="${GENOFFICE_EXCLUDE:-}"
 XVFB="${GENOFFICE_XVFB:-1}"
-APP="${GENOFFICE_BIN:-/opt/GenOffice/genoffice}"
+APP="${GENOFFICE_BIN:-/opt/FaamOffice/faamoffice}"
 
 if [ ! -x "$APP" ]; then
   echo "batch-convert: $APP is not executable — is the deb installed?" >&2

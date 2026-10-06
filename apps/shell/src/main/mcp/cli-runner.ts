@@ -1,7 +1,7 @@
 import { spawn } from 'node:child_process'
 
 /**
- * Shell-main half of the MCP → `genoffice` CLI delegation.
+ * Shell-main half of the MCP → `faamoffice` CLI delegation.
  *
  * The app already ships the CLI (`@genoffice/cli`) and runs it on its own Node
  * runtime, so the headless MCP tools do not reimplement document engines: they
@@ -50,14 +50,14 @@ export interface CliRunOptions {
 }
 
 export interface CliRunner {
-  /** run `genoffice <args> --json`; never rejects — failures come back as `ok:false` */
+  /** run `faamoffice <args> --json`; never rejects — failures come back as `ok:false` */
   run(args: string[], options?: CliRunOptions): Promise<CliRunOutcome>
 }
 
 export interface CliRunnerPaths {
   /** node/electron executable that runs the CLI entry */
   executable: string
-  /** absolute path to the bundled CLI entry (dist/genoffice.cjs) */
+  /** absolute path to the bundled CLI entry (dist/faamoffice.cjs) */
   entry: string
   /** extra environment (the runner adds ELECTRON_RUN_AS_NODE when needed) */
   env?: NodeJS.ProcessEnv
@@ -146,5 +146,5 @@ export function createCliRunner(paths: CliRunnerPaths): CliRunner {
 export function cliErrorMessage(outcome: CliRunOutcome): string {
   if (outcome.json && outcome.json.status === 'error') return outcome.json.message
   const detail = outcome.stderr.trim() || outcome.stdout.trim()
-  return detail ? `genoffice failed: ${detail}` : `genoffice exited with code ${outcome.code}`
+  return detail ? `faamoffice failed: ${detail}` : `faamoffice exited with code ${outcome.code}`
 }

@@ -4,7 +4,7 @@
   "license": "Apache-2.0",
   "private": true,
   "type": "module",
-  "description": "Electron-free generation stages and agent guides shared by the apps' AI pipelines and the genoffice CLI (slides today; docs and html to follow)",
+  "description": "Electron-free generation stages and agent guides shared by the apps' AI pipelines and the faamoffice CLI (slides today; docs and html to follow)",
   "exports": {
     ".": "./src/index.ts",
     "./slides": "./src/slides/index.ts",

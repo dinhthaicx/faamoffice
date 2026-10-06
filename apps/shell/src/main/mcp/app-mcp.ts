@@ -35,7 +35,7 @@ export interface McpRuntimeDeps {
   slidesControl?: SlidesControl
   /** drive a visible sheets grid (renderer workbook session); absent in headless runs */
   sheetsControl?: SheetsControl
-  /** the bundled genoffice CLI, backing the headless create/read tools; absent when unavailable */
+  /** the bundled faamoffice CLI, backing the headless create/read tools; absent when unavailable */
   cliRunner?: CliRunner
   /**
    * documents the user has open (list/read/close); absent in headless runs,
@@ -145,7 +145,7 @@ function buildTools(): McpToolDefinition[] {
         openInTab: (filePath) => {
           if (!deps) return
           const opened = deps.openPath(filePath)
-          if (!opened) throw new Error(`could not open ${filePath} in GenOffice`)
+          if (!opened) throw new Error(`could not open ${filePath} in FaamOffice`)
         },
         docs: deps.docsControl,
         extraFormats,

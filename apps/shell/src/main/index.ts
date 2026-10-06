@@ -359,7 +359,7 @@ import { applyUpdateChannel, checkForUpdatesNow, initAutoUpdater } from './updat
 import { isUpdateChannel, type UpdateChannel } from '../shared/update-api'
 
 /**
- * GenOffice unified shell: ONE Electron app, ONE BrowserWindow, hosting the
+ * FaamOffice unified shell: ONE Electron app, ONE BrowserWindow, hosting the
  * docs and sheets modules as WebContentsView tabs behind a WPS-style tab
  * strip. The shell owns the lifecycle — single-instance lock, file-
  * association routing by extension, and per-active-tab menu switching.
@@ -369,13 +369,13 @@ import { isUpdateChannel, type UpdateChannel } from '../shared/update-api'
 
 // ANY unpacked run (`npm run shell`, `npm run dev`, `npx electron .`) must not
 // share the installed app's userData or single-instance lock — otherwise a dev
-// run silently quits and forwards its argv to the running installed GenOffice.
+// run silently quits and forwards its argv to the running installed FaamOffice.
 // GENOFFICE_USER_DATA: test drivers point this at a scratch dir so an
 // automated instance can run alongside the dev instance (separate lock).
 if (!app.isPackaged)
   app.setPath(
     'userData',
-    process.env.GENOFFICE_USER_DATA ?? join(app.getPath('appData'), 'GenOffice Dev'),
+    process.env.GENOFFICE_USER_DATA ?? join(app.getPath('appData'), 'FaamOffice Dev'),
   )
 
 /**
@@ -390,7 +390,7 @@ if (headlessArgv.kind !== 'none') {
   app.dock?.hide()
 }
 
-// The product rename from "AI Office" to GenOffice changed the userData path; migrate old user data once
+// The product rename from "AI Office" to FaamOffice changed the userData path; migrate old user data once
 if (app.isPackaged) {
   const oldDir = join(app.getPath('appData'), 'AI Office')
   const newDir = app.getPath('userData')
@@ -652,7 +652,7 @@ function initAnalytics(): void {
 // The GenTeam community page opened from the onboarding's second slide.
 // Stable short link served by the genoffice.ai site; it 302s to the tokened
 // invite link, which stays out of this repo and rotates server-side.
-const GENTEAM_URL = 'https://genoffice.ai/join'
+const GENTEAM_URL = 'https://github.com/faamoffice/faamoffice/issues'
 
 // Genspark credit-usage page opened from the account menu's credits row.
 // Kept main-side so the renderer never supplies the URL.
@@ -693,7 +693,7 @@ let cachedGithubStars: number | null = null
 async function fetchGithubStars(): Promise<number | null> {
   if (cachedGithubStars !== null) return cachedGithubStars
   try {
-    const response = await fetch('https://api.github.com/repos/genspark-ai/genoffice', {
+    const response = await fetch('https://api.github.com/repos/faamoffice/faamoffice', {
       headers: { Accept: 'application/vnd.github+json' },
       signal: AbortSignal.timeout(5000),
     })
@@ -3074,7 +3074,7 @@ function createShellWindow(): void {
     height: 900,
     minWidth: 720,
     minHeight: 550,
-    title: 'GenOffice',
+    title: 'FaamOffice',
     // vibrancy: editor modules punch translucent regions (e.g. the slides
     // thumbnail pane) through to the desktop
     ...(process.platform === 'darwin'
@@ -3544,7 +3544,7 @@ function newDocTab(): void {
 
 /** MCP: open a blank docs tab and return its webContents id, for the visible-editor bridge */
 function openBlankDocsTabForMcp(): number {
-  if (!tabManager) throw new Error('GenOffice is not ready')
+  if (!tabManager) throw new Error('FaamOffice is not ready')
   const tabId = tabManager.openDocsTab(undefined, { newBlank: true })
   const view = tabManager.docsTabs().find((t) => t.id === tabId)
   if (!view) throw new Error('the new document tab could not be opened')
@@ -3561,7 +3561,7 @@ function openBlankDocsTabForMcp(): number {
  * marking is skipped, the file name is the agent's business.
  */
 async function openBlankSheetsTabForMcp(): Promise<number> {
-  if (!tabManager) throw new Error('GenOffice is not ready')
+  if (!tabManager) throw new Error('FaamOffice is not ready')
   const filePath = uniquePathIn(defaultSaveDir(), `${tm('untitledSheet')}.xlsx`)
   await atomicWriteFile(filePath, await blankXlsxBuffer())
   const tabId = tabManager.openSheetsTab(filePath)
@@ -3632,7 +3632,7 @@ function abandonBlankTabForMcp(
 
 /** MCP: open a blank slides tab and return its webContents id, for the visible-deck bridge */
 function openBlankSlidesTabForMcp(): number {
-  if (!tabManager) throw new Error('GenOffice is not ready')
+  if (!tabManager) throw new Error('FaamOffice is not ready')
   const tabId = tabManager.openSlidesTab()
   const view = tabManager.slidesTabs().find((t) => t.id === tabId)
   if (!view) throw new Error('the new presentation tab could not be opened')
@@ -3727,7 +3727,7 @@ function statEntries(paths: string[]): RecentEntry[] {
 }
 
 function registerHomeIpc(): void {
-  // signed-in means GenOffice's own device-code login; the shared gsk CLI key
+  // signed-in means FaamOffice's own device-code login; the shared gsk CLI key
   // is only a silent fallback, deliberately not shown here to nudge users onto our key
   ipcMain.handle(HOME_CHANNELS.accountStatus, async () => {
     if (!loadGenofficeAuth()) return { loggedIn: false }
@@ -5537,8 +5537,18 @@ async function installMainProcessProxy(): Promise<void> {
   // the dispatcher below — forward the proxy to them via env
   setGskProxyUrl(proxyUrl)
   try {
-    const { ProxyAgent, setGlobalDispatcher } = await import('undici')
-    setGlobalDispatcher(new ProxyAgent(proxyUrl))
+    const { EnvHttpProxyAgent, setGlobalDispatcher } = await import('undici')
+    // loopback and .local hosts stay direct so local AI servers (Ollama,
+    // LM Studio, llama.cpp) answer even behind a system proxy
+    const noProxy = [
+      process.env.NO_PROXY ?? process.env.no_proxy,
+      'localhost,127.0.0.1,[::1],.local',
+    ]
+      .filter(Boolean)
+      .join(',')
+    setGlobalDispatcher(
+      new EnvHttpProxyAgent({ httpProxy: proxyUrl, httpsProxy: proxyUrl, noProxy }),
+    )
     // strip user:pass credentials before logging
     console.log('[proxy] main-process fetch via', proxyUrl.replace(/\/\/[^@/]*@/, '//***@'))
   } catch (e) {
@@ -5599,8 +5609,8 @@ registerIntegrationsIpc({
     ? join(process.resourcesPath, 'cli')
     : join(APPS_ROOT, '..', 'packages', 'cli', 'bin'),
   skillPath: app.isPackaged
-    ? join(process.resourcesPath, 'cli', 'skills', 'genoffice', 'SKILL.md')
-    : join(APPS_ROOT, '..', 'skills', 'genoffice', 'SKILL.md'),
+    ? join(process.resourcesPath, 'cli', 'skills', 'faamoffice', 'SKILL.md')
+    : join(APPS_ROOT, '..', 'skills', 'faamoffice', 'SKILL.md'),
   cliPackageJson: app.isPackaged
     ? join(process.resourcesPath, 'cli', 'package.json')
     : join(APPS_ROOT, '..', 'packages', 'cli', 'package.json'),
@@ -5626,7 +5636,7 @@ const headlessExporters: HeadlessExporters = {
 /**
  * The whole `--headless-export` run: no shell window, no menus, no updater,
  * no single-instance lock (a GUI instance may well be running). Prints
- * exactly one line and exits with the genoffice convention (0/1/2/3).
+ * exactly one line and exits with the faamoffice convention (0/1/2/3).
  */
 async function runHeadlessExportEntry(
   parsed: Exclude<HeadlessArgvParse, { kind: 'none' }>,
@@ -5648,7 +5658,7 @@ async function runHeadlessExportEntry(
       resolve()
     })
   })
-  // app.quit() always exits 0; the genoffice envelope needs the real code, and
+  // app.quit() always exits 0; the faamoffice envelope needs the real code, and
   // every teardown this run owns has already happened.
   app.exit(headlessExitCode(outcome))
 }
@@ -5700,7 +5710,7 @@ app.whenReady().then(async () => {
     app.quit()
     return
   }
-  // another GenOffice-family app re-logging in rotates the shared key; the
+  // another FaamOffice-family app re-logging in rotates the shared key; the
   // home page re-reads its account status. A logout that leaves only the
   // gsk CLI fallback key is not a login
   stopAuthWatch = watchGskApiKey(() => {
@@ -5708,7 +5718,7 @@ app.whenReady().then(async () => {
     for (const w of BrowserWindow.getAllWindows())
       w.webContents.send(HOME_CHANNELS.accountLoginEvent, { phase: 'success' })
   })
-  // a registry left by a crashed instance must not block genoffice writes
+  // a registry left by a crashed instance must not block faamoffice writes
   ownsOpenDocumentsRegistry = true
   publishOpenDocuments(OPEN_DOCUMENTS_PATH(), [])
   if (!app.isPackaged) {
@@ -5816,14 +5826,14 @@ app.whenReady().then(async () => {
         discard: htmlDiscardPendingAssets,
       },
     }),
-    // the headless create_*/read_* tools delegate to the bundled genoffice CLI
+    // the headless create_*/read_* tools delegate to the bundled faamoffice CLI
     // (the same engines, no second implementation); it runs on the app's own
     // Node runtime via ELECTRON_RUN_AS_NODE
     cliRunner: createCliRunner({
       executable: process.execPath,
       entry: app.isPackaged
-        ? join(process.resourcesPath, 'cli', 'genoffice.cjs')
-        : join(APPS_ROOT, '..', 'packages', 'cli', 'dist', 'genoffice.cjs'),
+        ? join(process.resourcesPath, 'cli', 'faamoffice.cjs')
+        : join(APPS_ROOT, '..', 'packages', 'cli', 'dist', 'faamoffice.cjs'),
     }),
     // lets the content tools take a `document` argument (tab id or path) and edit
     // a tab the *user* has open, with no create_session involved

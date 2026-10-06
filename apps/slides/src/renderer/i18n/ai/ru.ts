@@ -18,7 +18,7 @@ export const ru = {
   aiQcStopped: 'Проверка макета остановлена',
   aiQcCapped: 'Ещё {count} стр. не проверено (лимит за один запуск)',
   aiGskLoginBtn: 'Войти в Genspark',
-  aiPanelTitle: 'Genspark',
+  aiPanelTitle: 'Faam AI',
   aiOpenAssistant: 'Открыть ИИ-помощника',
   aiFactCheckBtn: 'ИИ-фактчекинг',
   aiFactCheckPrompt:

@@ -1,0 +1,151 @@
+name: Release
+
+# Builds the FaamOffice installers for every platform on its native runner.
+#   - Run manually (Actions → Release → Run workflow) for test builds: the
+#     installers are attached to the run as artifacts.
+#   - Push a tag like v0.11.0-faam.1 to also publish a GitHub Release.
+# No signing secrets are needed: macOS builds are ad-hoc signed (see
+# apps/shell/electron-builder.cjs) and Windows builds are unsigned.
+
+on:
+  workflow_dispatch:
+  push:
+    tags: ['v*']
+
+permissions:
+  contents: write
+
+concurrency:
+  group: release-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  build:
+    name: build (${{ matrix.platform }})
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - platform: mac
+            os: macos-14
+          - platform: win
+            os: windows-2022
+          - platform: linux
+            os: ubuntu-22.04
+    runs-on: ${{ matrix.os }}
+    env:
+      # GitHub-hosted mac runners carry no Developer ID; keep electron-builder
+      # from searching the keychain for one
+      CSC_IDENTITY_AUTO_DISCOVERY: 'false'
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - name: Setup Node
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: package-lock.json
+
+      - name: Setup Rust
+        uses: dtolnay/rust-toolchain@4cda84d5c5c54efe2404f9d843567869ab1699d4 # stable branch, 2026-07
+        with:
+          toolchain: stable
+          targets: ${{ matrix.platform == 'mac' && 'aarch64-apple-darwin,x86_64-apple-darwin' || '' }}
+
+      - name: Cache cargo (xlsx-sidecar)
+        uses: Swatinem/rust-cache@c19371144df3bb44fab255c43d04cbc2ab54d1c4 # v2.9.1
+        with:
+          workspaces: apps/sheets/native/xlsx-engine
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Release version
+        id: version
+        shell: bash
+        run: |
+          if [[ "$GITHUB_REF" == refs/tags/v* ]]; then
+            version="${GITHUB_REF#refs/tags/v}"
+          else
+            version="$(node -p 'require("./apps/shell/package.json").version')"
+          fi
+          echo "version=$version" >> "$GITHUB_OUTPUT"
+          # the packaged app, its installers and the bundled CLI all read this
+          npm pkg set version="$version" -w @genoffice/shell
+
+      # ---- macOS: arm64 + Intel dmg/zip, universal xlsx sidecar ----
+      - name: Package (mac)
+        if: matrix.platform == 'mac'
+        env:
+          GENOFFICE_MAC_X64: '1'
+        run: npm run dist:mac
+
+      # ---- Windows: x64 NSIS installer ----
+      # electron-builder takes the x64 sidecar from the x86_64-pc-windows-gnu
+      # target dir (upstream cross-compiles it); on a Windows runner the MSVC
+      # build with a static CRT is the native equivalent, so it is copied there.
+      - name: Build xlsx sidecar (win)
+        if: matrix.platform == 'win'
+        shell: bash
+        run: |
+          engine=apps/sheets/native/xlsx-engine
+          cargo build --release --manifest-path $engine/Cargo.toml \
+            --config $engine/.cargo/config.toml --target x86_64-pc-windows-msvc
+          mkdir -p $engine/target/x86_64-pc-windows-gnu/release
+          cp $engine/target/x86_64-pc-windows-msvc/release/xlsx-sidecar.exe \
+            $engine/target/x86_64-pc-windows-gnu/release/xlsx-sidecar.exe
+
+      - name: Package (win)
+        if: matrix.platform == 'win'
+        run: npm run dist:win
+
+      # ---- Linux: AppImage + deb + rpm ----
+      - name: Install rpmbuild (linux)
+        if: matrix.platform == 'linux'
+        run: sudo apt-get update && sudo apt-get install -y --no-install-recommends rpm
+
+      - name: Build xlsx sidecar (linux)
+        if: matrix.platform == 'linux'
+        run: npm run native:build -w @genoffice/sheets
+
+      - name: Package (linux)
+        if: matrix.platform == 'linux'
+        run: npm run dist:linux
+
+      - name: Upload installers
+        uses: actions/upload-artifact@v4
+        with:
+          name: faamoffice-${{ matrix.platform }}-${{ steps.version.outputs.version }}
+          if-no-files-found: error
+          path: |
+            apps/shell/release/*.dmg
+            apps/shell/release/*.zip
+            apps/shell/release/*.exe
+            apps/shell/release/*.AppImage
+            apps/shell/release/*.deb
+            apps/shell/release/*.rpm
+
+  publish:
+    name: publish GitHub Release
+    needs: build
+    if: startsWith(github.ref, 'refs/tags/v')
+    runs-on: ubuntu-22.04
+    steps:
+      - name: Download installers
+        uses: actions/download-artifact@v4
+        with:
+          path: dist
+          merge-multiple: true
+
+      - name: Create release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ github.ref_name }}
+        run: |
+          ls -la dist
+          gh release create "$TAG" dist/* \
+            --repo "$GITHUB_REPOSITORY" \
+            --title "FaamOffice ${TAG#v}" \
+            --generate-notes

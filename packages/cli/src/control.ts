@@ -77,9 +77,9 @@ export function controlRequest(
     const unavailable = (why: string) =>
       settle(() =>
         reject(
-          new CliError(EXIT.app, `GenOffice did not answer: ${why}`, undefined, {
+          new CliError(EXIT.app, `FaamOffice did not answer: ${why}`, undefined, {
             reason: 'app_unavailable',
-            suggestion: 'start GenOffice (or `genoffice open <file>`) and retry',
+            suggestion: 'start FaamOffice (or `faamoffice open <file>`) and retry',
           }),
         ),
       )
@@ -135,7 +135,7 @@ function defaultSuggestion(reason: ErrorReason, detail: Record<string, unknown>)
     case 'sheet_not_found':
       return 'use one of `detail.sheets` verbatim'
     case 'file_not_open_in_gui':
-      return 'run `genoffice open <file>` first'
+      return 'run `faamoffice open <file>` first'
     default:
       return 'check the target and retry'
   }

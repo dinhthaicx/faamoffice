@@ -71,7 +71,7 @@ export const mergeCommand: CommandDef = {
     { name: 'out', value: 'path', description: 'output file (required)' },
     {
       name: 'force',
-      description: 'overwrite an existing output file, or write while GenOffice has the file open',
+      description: 'overwrite an existing output file, or write while FaamOffice has the file open',
     },
     {
       name: 'strict',

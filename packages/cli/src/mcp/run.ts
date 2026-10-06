@@ -58,7 +58,7 @@ function allowScratch(env: NodeJS.ProcessEnv, scratchDir: string): NodeJS.Proces
   return { ...env, GENOFFICE_ALLOWED_ROOTS: `${roots}${delimiter}${scratchDir}` }
 }
 
-/** One command, as `genoffice <argv> --json` would run it, with the JSON envelope parsed back. */
+/** One command, as `faamoffice <argv> --json` would run it, with the JSON envelope parsed back. */
 export async function runJson(argv: string[], ctx: McpContext): Promise<Outcome> {
   const out: string[] = []
   await runCli([...argv, '--json'], {
@@ -77,7 +77,7 @@ export async function runJson(argv: string[], ctx: McpContext): Promise<Outcome>
         command: argv[0] ?? null,
         code: 3,
         error: 'conversion_failed',
-        message: `genoffice printed no JSON: ${text.slice(0, 200)}`,
+        message: `faamoffice printed no JSON: ${text.slice(0, 200)}`,
       },
     }
   }

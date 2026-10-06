@@ -12,7 +12,7 @@ import {
 
 /** argv as Electron delivers it: binary first, then the app's own switches. */
 const argv = (...rest: string[]): string[] => [
-  '/Applications/GenOffice.app/Contents/MacOS/GenOffice',
+  '/Applications/FaamOffice.app/Contents/MacOS/FaamOffice',
   ...rest,
 ]
 
@@ -135,7 +135,7 @@ describe('formatHeadlessEnvelope', () => {
 })
 
 describe('headlessExitCode', () => {
-  it('maps outcomes to the genoffice exit-code convention', () => {
+  it('maps outcomes to the faamoffice exit-code convention', () => {
     expect(headlessExitCode({ ok: true, input: '/a', outPath: '/b' })).toBe(0)
     expect(headlessExitCode({ ok: false, code: HEADLESS_EXIT.badArgs, message: 'x' })).toBe(1)
     expect(headlessExitCode({ ok: false, code: HEADLESS_EXIT.inputError, message: 'x' })).toBe(2)

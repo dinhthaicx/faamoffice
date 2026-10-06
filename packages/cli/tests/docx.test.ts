@@ -12,7 +12,7 @@ async function documentXml(path: string): Promise<string> {
   return zip.file('word/document.xml')!.async('string')
 }
 
-describe('genoffice docx (docs editor under jsdom)', () => {
+describe('faamoffice docx (docs editor under jsdom)', () => {
   it('creates a document from markdown and from a restricted-HTML fragment', async () => {
     const dir = tempDir()
     const md = join(dir, 'report.md')
@@ -31,7 +31,7 @@ describe('genoffice docx (docs editor under jsdom)', () => {
     const html = join(dir, 'brief.html')
     writeFileSync(
       html,
-      '<h1>Brief</h1><p>Hello <strong>genoffice</strong>.</p><ul><li>one</li><li>two</li></ul>',
+      '<h1>Brief</h1><p>Hello <strong>faamoffice</strong>.</p><ul><li>one</li><li>two</li></ul>',
     )
     const fromHtml = join(dir, 'brief.docx')
     const h = await run(['create', '--type', 'docx', '--from', html, '--out', fromHtml, '--json'])
@@ -483,7 +483,7 @@ describe('genoffice docx (docs editor under jsdom)', () => {
   })
 })
 
-describe('genoffice convert docx → md', () => {
+describe('faamoffice convert docx → md', () => {
   it('round-trips headings, marks, lists and tables through the two editors', async () => {
     const dir = tempDir()
     const md = join(dir, 'in.md')
@@ -615,7 +615,7 @@ async function zipOf(path: string): Promise<JSZip> {
   return JSZip.loadAsync(readFileSync(path))
 }
 
-describe('genoffice docs: comments, revisions, header/footer, images, charts', () => {
+describe('faamoffice docs: comments, revisions, header/footer, images, charts', () => {
   it('reads comment threads and tracked changes with block indexes', async () => {
     const dir = tempDir()
     const path = await reviewFixture(dir)

@@ -31,3 +31,12 @@ Part 4, Transitional) XML Schema files for PresentationML and DrawingML, as
 distributed in the python-docx repository (ref/xsd), with one marked local
 amendment (see tools/ooxml-validate/README.md). They are used only by tests
 and development tooling and are not shipped in the application.
+
+FaamOffice
+
+FaamOffice is a modified version of GenOffice
+(https://github.com/genspark-ai/genoffice), Copyright 2026 Mainfunc, Inc.,
+licensed under the Apache License 2.0. Modifications Copyright 2026 the
+FaamOffice contributors: the FaamOffice and Faam AI branding, local AI
+providers (Ollama, LM Studio, llama.cpp) and Groq, and release packaging.
+FaamOffice is not affiliated with or endorsed by Mainfunc, Inc.

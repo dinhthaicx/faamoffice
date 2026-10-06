@@ -1,11 +1,11 @@
 {
-  "id": "com.genoffice.app",
+  "id": "com.faamoffice.app",
   "runtime": "org.freedesktop.Platform",
   "runtime-version": "24.08",
   "sdk": "org.freedesktop.Sdk",
   "base": "org.electronjs.Electron2.BaseApp",
   "base-version": "24.08",
-  "command": "genoffice",
+  "command": "faamoffice",
   "separate-locales": false,
   "finish-args": [
     "--share=ipc",
@@ -20,7 +20,7 @@
   ],
   "modules": [
     {
-      "name": "genoffice",
+      "name": "faamoffice",
       "buildsystem": "simple",
       "sources": [
         {
@@ -33,11 +33,11 @@
         },
         {
           "type": "file",
-          "path": "com.genoffice.app.desktop"
+          "path": "com.faamoffice.app.desktop"
         },
         {
           "type": "file",
-          "path": "com.genoffice.app.metainfo.xml"
+          "path": "com.faamoffice.app.metainfo.xml"
         },
         {
           "type": "file",
@@ -75,30 +75,30 @@
           "type": "extra-data",
           "filename": "genoffice.deb",
           "only-arches": ["x86_64"],
-          "url": "https://github.com/genspark-ai/genoffice/releases/download/v0.11.0/genoffice_0.11.0_amd64.deb",
+          "url": "https://github.com/faamoffice/faamoffice/releases/download/v0.11.0/genoffice_0.11.0_amd64.deb",
           "sha256": "a59241bd30dcee12314990f7d438ec2bc4a5e93c5c1c242b203361529dc44c29",
           "size": 147161680,
           "x-checker-data": {
             "type": "json",
-            "url": "https://api.github.com/repos/genspark-ai/genoffice/releases/latest",
+            "url": "https://api.github.com/repos/faamoffice/faamoffice/releases/latest",
             "version-query": ".tag_name | sub(\"^v\"; \"\")",
             "url-query": ".assets[] | select(.name | endswith(\"_amd64.deb\")) | .browser_download_url"
           }
         }
       ],
       "build-commands": [
-        "install -Dm755 genoffice.sh /app/bin/genoffice",
+        "install -Dm755 genoffice.sh /app/bin/faamoffice",
         "install -Dm755 apply_extra /app/bin/apply_extra",
-        "install -Dm644 com.genoffice.app.desktop /app/share/applications/com.genoffice.app.desktop",
-        "install -Dm644 com.genoffice.app.metainfo.xml /app/share/metainfo/com.genoffice.app.metainfo.xml",
-        "install -Dm644 16x16.png /app/share/icons/hicolor/16x16/apps/com.genoffice.app.png",
-        "install -Dm644 32x32.png /app/share/icons/hicolor/32x32/apps/com.genoffice.app.png",
-        "install -Dm644 48x48.png /app/share/icons/hicolor/48x48/apps/com.genoffice.app.png",
-        "install -Dm644 64x64.png /app/share/icons/hicolor/64x64/apps/com.genoffice.app.png",
-        "install -Dm644 128x128.png /app/share/icons/hicolor/128x128/apps/com.genoffice.app.png",
-        "install -Dm644 256x256.png /app/share/icons/hicolor/256x256/apps/com.genoffice.app.png",
-        "install -Dm644 512x512.png /app/share/icons/hicolor/512x512/apps/com.genoffice.app.png",
-        "install -Dm644 1024x1024.png /app/share/icons/hicolor/1024x1024/apps/com.genoffice.app.png"
+        "install -Dm644 com.faamoffice.app.desktop /app/share/applications/com.faamoffice.app.desktop",
+        "install -Dm644 com.faamoffice.app.metainfo.xml /app/share/metainfo/com.faamoffice.app.metainfo.xml",
+        "install -Dm644 16x16.png /app/share/icons/hicolor/16x16/apps/com.faamoffice.app.png",
+        "install -Dm644 32x32.png /app/share/icons/hicolor/32x32/apps/com.faamoffice.app.png",
+        "install -Dm644 48x48.png /app/share/icons/hicolor/48x48/apps/com.faamoffice.app.png",
+        "install -Dm644 64x64.png /app/share/icons/hicolor/64x64/apps/com.faamoffice.app.png",
+        "install -Dm644 128x128.png /app/share/icons/hicolor/128x128/apps/com.faamoffice.app.png",
+        "install -Dm644 256x256.png /app/share/icons/hicolor/256x256/apps/com.faamoffice.app.png",
+        "install -Dm644 512x512.png /app/share/icons/hicolor/512x512/apps/com.faamoffice.app.png",
+        "install -Dm644 1024x1024.png /app/share/icons/hicolor/1024x1024/apps/com.faamoffice.app.png"
       ]
     }
   ]

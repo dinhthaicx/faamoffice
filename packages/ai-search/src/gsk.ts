@@ -26,7 +26,7 @@ import {
   type WebSearchResult,
 } from './shared'
 import { genofficeApiKey, genofficeAuthPath, reloadGenofficeAuth } from './genoffice-auth'
-// deep import: the package root re-exports Electron-bound modules, and this file also runs in the genoffice CLI
+// deep import: the package root re-exports Electron-bound modules, and this file also runs in the faamoffice CLI
 import { readBodyCapped } from '@genoffice/electron-utils/remote-image'
 import { createStreamWatchdog } from '@genoffice/ai-provider'
 import { fetchWithSsrfGuard } from '@genoffice/electron-utils/safe-remote-url'
@@ -71,7 +71,7 @@ function electronCompatArgs(): string[] {
   if (!process.versions.electron) return []
   if (compatPath === undefined) {
     try {
-      const dir = join(homedir(), '.genoffice', 'bin')
+      const dir = join(homedir(), '.faamoffice', 'bin')
       mkdirSync(dir, { recursive: true })
       compatPath = join(dir, 'electron-compat.js')
       writeFileSync(compatPath, 'delete process.versions.electron;\n')
@@ -84,7 +84,7 @@ function electronCompatArgs(): string[] {
 
 /**
  * API key for Genspark LLM proxy / tool_cli auth; '' when not logged in.
- * Priority: GSK_API_KEY env → GenOffice's own key (bills to us via its
+ * Priority: GSK_API_KEY env → FaamOffice's own key (bills to us via its
  * key_name) → shared gsk CLI login (bills to the Claw bucket).
  */
 export function gskApiKey(): string {
@@ -102,7 +102,7 @@ export function gskApiKey(): string {
 }
 
 /**
- * Fires when the effective gsk key changes on disk — another GenOffice-family
+ * Fires when the effective gsk key changes on disk — another FaamOffice-family
  * app re-logging in mints a new key and revokes the one this process holds.
  * Polls by path (watchFile): auth.json is replaced whole, and fs.watch misses
  * events for a moment after it is armed.

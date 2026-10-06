@@ -9,7 +9,7 @@ export const ru = {
   aiStarterContinue: 'Продолжи текст с того места, где он обрывается',
   aiStarterFillTemplate: 'Найди и заполни местозаполнители в документе',
   aiGskLoginBtn: 'Войти в Genspark',
-  aiPanelTitle: 'Genspark',
+  aiPanelTitle: 'Faam AI',
   aiOpenAssistant: 'Открыть ИИ-помощника',
   aiSummarizeBtn: 'ИИ-резюме',
   aiSummarizePrompt: 'Кратко изложите основное содержание и ключевые моменты этого документа',

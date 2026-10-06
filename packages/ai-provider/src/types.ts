@@ -25,6 +25,10 @@ export type AiProviderId =
   | 'cheaperinference'
   | 'opencode-zen'
   | 'opencode-go'
+  | 'groq'
+  | 'ollama'
+  | 'lmstudio'
+  | 'llamacpp'
   | 'custom'
 
 /** Genspark account status (gsk login state; the sole auth source for AI features) */
@@ -56,6 +60,14 @@ export interface AiProviderMeta {
   keyPlaceholder: string
   needsBaseUrl?: boolean
   needsCliPath?: boolean
+  /**
+   * A server on this machine or the LAN (Ollama, LM Studio, llama.cpp): the
+   * key is optional, the base URL defaults to the usual local port, and the
+   * model list is read live from the server's GET /models.
+   */
+  local?: boolean
+  /** the model list is read live from GET /models instead of the static `models` */
+  liveModels?: boolean
 }
 
 /** Image generation / media analysis backends (separate from the chat provider) */

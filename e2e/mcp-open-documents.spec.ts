@@ -213,7 +213,7 @@ test.describe('MCP open documents', () => {
     execFileSync(
       process.execPath,
       [
-        join(APP_ROOT, 'packages', 'cli', 'dist', 'genoffice.cjs'),
+        join(APP_ROOT, 'packages', 'cli', 'dist', 'faamoffice.cjs'),
         'create',
         '--type',
         'docx',

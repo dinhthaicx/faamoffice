@@ -4,7 +4,7 @@ import { join } from 'node:path'
 import { cliErrorMessage, type CliRunOutcome, type CliRunner } from './cli-runner'
 
 /**
- * Thin helpers that turn an MCP tool's arguments into a `genoffice` CLI
+ * Thin helpers that turn an MCP tool's arguments into a `faamoffice` CLI
  * invocation. The headless MCP tools are a client of the CLI, not a second
  * implementation of the engines: input that arrives inline (markdown, a row
  * matrix, an ops array) is staged to a temp file, the CLI writes the output,

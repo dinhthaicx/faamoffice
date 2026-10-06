@@ -231,7 +231,7 @@ test.describe('MCP sheet values and addressing', () => {
     execFileSync(
       process.execPath,
       [
-        join(APP_ROOT, 'packages', 'cli', 'dist', 'genoffice.cjs'),
+        join(APP_ROOT, 'packages', 'cli', 'dist', 'faamoffice.cjs'),
         'create',
         '--type',
         'xlsx',

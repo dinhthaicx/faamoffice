@@ -55,7 +55,7 @@ const fontCdnUrl = normalizeHttpsBaseUrl(
 // arm64. Off by default: Intel packages must only ever ship signed with the
 // company certificate (planned dual-track pipeline), so the current release
 // pipeline stays arm64-only and never produces a personally-signed Intel
-// artifact. The downstream layout (feed archive name, GenOffice-intel.dmg
+// artifact. The downstream layout (feed archive name, FaamOffice-intel.dmg
 // alias) keys off which dmgs exist, so flipping this flag is the single
 // switch.
 const includeMacX64 = process.env.GENOFFICE_MAC_X64 === '1'
@@ -69,7 +69,7 @@ const includeMacX64 = process.env.GENOFFICE_MAC_X64 === '1'
 const winArm64 = process.env.GENOFFICE_WIN_ARM64 === '1'
 // 7-Zip packs ARM64 executables with its ARM64 branch filter, which the NSIS
 // install-time extractor (Nsis7z) cannot decode: it silently skips
-// GenOffice.exe and every dll (electron-builder#9983). BCJ it can decode.
+// FaamOffice.exe and every dll (electron-builder#9983). BCJ it can decode.
 if (winArm64 && !process.env.ELECTRON_BUILDER_7Z_FILTER) {
   process.env.ELECTRON_BUILDER_7Z_FILTER = 'BCJ'
 }
@@ -211,7 +211,7 @@ function assertModuleTreesPresent() {
     '../pdf/out',
     '../markdown/out',
     '../html/out',
-    '../../packages/cli/dist/genoffice.cjs',
+    '../../packages/cli/dist/faamoffice.cjs',
     '../../packages/cli/dist/node_modules/jsdom',
   ]) {
     if (!existsSync(join(__dirname, rel))) {
@@ -222,7 +222,7 @@ function assertModuleTreesPresent() {
   }
 }
 
-const CLI_BUNDLE_REL = '../../packages/cli/dist/genoffice.cjs'
+const CLI_BUNDLE_REL = '../../packages/cli/dist/faamoffice.cjs'
 const CLI_BUILD_REL = '../../packages/cli/build.mjs'
 const CLI_VERSION_ENV = 'GENOFFICE_APP_VERSION'
 const CLI_VERSION_BANNER = /^const __cliAppVersion = ("(?:[^"\\]|\\.)*");$/m
@@ -248,7 +248,7 @@ function bundledCliVersion(bundlePath) {
 }
 
 /**
- * `genoffice --version` is baked into the CLI bundle, which is built before
+ * `faamoffice --version` is baked into the CLI bundle, which is built before
  * electron-builder runs and therefore before a release version is known. Rebuild
  * it here with the app version whenever the two disagree, so the packaged
  * command line can never answer with the workspace CLI version.
@@ -264,7 +264,7 @@ function ensureCliBundleCarriesAppVersion() {
   const baked = bundledCliVersion(bundlePath)
   if (baked !== appVersion) {
     throw new Error(
-      `packaged genoffice CLI reports ${baked ?? 'no version'} but the app ships ${appVersion} ` +
+      `packaged faamoffice CLI reports ${baked ?? 'no version'} but the app ships ${appVersion} ` +
         `(rebuild it with ${CLI_VERSION_ENV}=${appVersion})`,
     )
   }
@@ -296,8 +296,8 @@ function ensureThirdPartyNotices() {
 
 /** @type {import('electron-builder').Configuration} */
 const config = {
-  appId: 'com.genoffice.app',
-  productName: 'GenOffice',
+  appId: 'com.faamoffice.app',
+  productName: 'FaamOffice',
   // Resolved from the installed electron package so dependency bumps can
   // never leave a stale hard-coded pin behind (packaging would silently ship
   // the old runtime).
@@ -364,21 +364,21 @@ const config = {
       from: '../../node_modules/@genspark/cli',
       to: 'gsk/node_modules/@genspark/cli',
     },
-    // genoffice command line: runs on the app binary with ELECTRON_RUN_AS_NODE (as
+    // faamoffice command line: runs on the app binary with ELECTRON_RUN_AS_NODE (as
     // the gsk CLI above already does), so the RunAsNode fuse must stay enabled.
     // Layout (Resources/cli next to wasm/, native/, ocr/) is what
     // packages/cli/src/resources.ts expects.
     {
-      from: '../../packages/cli/dist/genoffice.cjs',
-      to: 'cli/genoffice.cjs',
+      from: '../../packages/cli/dist/faamoffice.cjs',
+      to: 'cli/faamoffice.cjs',
     },
     {
-      from: '../../packages/cli/bin/genoffice',
-      to: 'cli/genoffice',
+      from: '../../packages/cli/bin/faamoffice',
+      to: 'cli/faamoffice',
     },
     {
-      from: '../../packages/cli/bin/genoffice.cmd',
-      to: 'cli/genoffice.cmd',
+      from: '../../packages/cli/bin/faamoffice.cmd',
+      to: 'cli/faamoffice.cmd',
     },
     // the CLI's version (Settings → Integrations shows it) and the agent skill
     // the same pane installs into Claude Code / Codex / …; bytes identical to the repo file
@@ -387,10 +387,10 @@ const config = {
       to: 'cli/package.json',
     },
     {
-      from: '../../skills/genoffice/SKILL.md',
-      to: 'cli/skills/genoffice/SKILL.md',
+      from: '../../skills/faamoffice/SKILL.md',
+      to: 'cli/skills/faamoffice/SKILL.md',
     },
-    // runtime deps the genoffice bundle leaves external (jsdom for the Word/Markdown
+    // runtime deps the faamoffice bundle leaves external (jsdom for the Word/Markdown
     // paths); collected by packages/cli/collect-deps.mjs during its build
     {
       from: '../../packages/cli/dist/node_modules',
@@ -413,7 +413,7 @@ const config = {
   // build/ as <icon>.icns for the mac CFBundleDocumentTypes entry and
   // <icon>.ico for the NSIS DefaultIcon registry value. Without it both
   // platforms fall back to the app icon, so every associated file shows the
-  // bare GenOffice logo instead of a per-type document icon. The icns/ico
+  // bare FaamOffice logo instead of a per-type document icon. The icns/ico
   // pairs are generated from the shell renderer's file-type tiles by
   // tools/gen-file-association-icons.mjs.
   fileAssociations: [
@@ -511,8 +511,8 @@ const config = {
     // Two separate arch packages (NOT universal): arm64 keeps the exact
     // artifact names and update-feed entries it always had, x64 (opt-in via
     // GENOFFICE_MAC_X64=1, see includeMacX64 above) adds Intel support with
-    // electron-builder's default arch-less names (GenOffice-<v>.dmg /
-    // GenOffice-<v>-mac.zip). Both zips land in one latest-mac.yml and
+    // electron-builder's default arch-less names (FaamOffice-<v>.dmg /
+    // FaamOffice-<v>-mac.zip). Both zips land in one latest-mac.yml and
     // electron-updater picks by process.arch. Dual-arch packs ship the same
     // lipo fat xlsx-sidecar (see assertUniversalSidecar above).
     target: [
@@ -561,7 +561,7 @@ const config = {
     // AppImage (self-contained, any distro) + deb (apt install, pulls in the
     // GTK/NSS runtime deps) + rpm (dnf/zypper install on Fedora / RHEL /
     // openSUSE). Default artifact names are kept on purpose —
-    // GenOffice-<v>.AppImage / genoffice_<v>_amd64.deb — because the public
+    // FaamOffice-<v>.AppImage / genoffice_<v>_amd64.deb — because the public
     // README download links and the already-published linux-v0.5.149 release
     // use them.
     target: [
@@ -573,27 +573,27 @@ const config = {
     // so apt sees the new packages as the same lineage. Homepage comes from
     // package.json "homepage"; the Package field is pinned in the deb block
     // below (packageName is a per-target option, rejected here by the schema).
-    maintainer: 'Mainfunc, Inc. <team@genspark.ai>',
-    vendor: 'Mainfunc, Inc. <team@genspark.ai>',
+    maintainer: 'FaamOffice <faamoffice@users.noreply.github.com>',
+    vendor: 'FaamOffice <faamoffice@users.noreply.github.com>',
     category: 'Office',
     // Icon SET directory, not the single 1024px png: electron-builder does
     // not resize a lone png, so deb/rpm would install only
-    // hicolor/1024x1024/apps/genoffice.png — a size absent from the hicolor
+    // hicolor/1024x1024/apps/faamoffice.png — a size absent from the hicolor
     // theme index, leaving GNOME/KDE launchers on the generic fallback icon
     // (genspark-ai/genoffice#90). The set ships every standard raster size.
     icon: 'build/icons',
     // mac and win name the binary from productName; linux instead derives it
     // from package.json "name", and "@genoffice/shell" sanitizes to the
     // invalid "@genofficeshell". Setting it explicitly also makes the
-    // generated genoffice.desktop match the WM_CLASS Electron reports (it
+    // generated faamoffice.desktop match the WM_CLASS Electron reports (it
     // takes that from the executable basename), so the running window links
     // back to its launcher entry.
-    executableName: 'genoffice',
+    executableName: 'faamoffice',
     // Electron takes its X11 app_id from package.json "desktopName"
-    // (genoffice.desktop); syncDesktopName makes electron-builder name the
+    // (faamoffice.desktop); syncDesktopName makes electron-builder name the
     // .desktop file and its StartupWMClass from the same value. Without it
-    // StartupWMClass falls back to productName ("GenOffice"), which does not
-    // match the "genoffice" WM_CLASS the window actually reports — and X11
+    // StartupWMClass falls back to productName ("FaamOffice"), which does not
+    // match the "faamoffice" WM_CLASS the window actually reports — and X11
     // compares case-sensitively, so the taskbar shows an unlinked window.
     syncDesktopName: true,
     extraResources: [
@@ -610,11 +610,11 @@ const config = {
   // packageName pins the control Package field to the same value the 0.5.149
   // deb shipped with — apt treats a different Package name as an unrelated
   // install, breaking upgrades. Without it, fpm receives productName
-  // "GenOffice" and only happens to downcase it to the right value.
+  // "FaamOffice" and only happens to downcase it to the right value.
   deb: {
-    artifactName: 'genoffice_${version}_${arch}.deb',
-    packageName: 'genoffice',
-    // expose the genoffice command line shipped inside the app
+    artifactName: 'faamoffice_${version}_${arch}.deb',
+    packageName: 'faamoffice',
+    // expose the faamoffice command line shipped inside the app
     afterInstall: 'build/linux-after-install.sh',
     afterRemove: 'build/linux-after-remove.sh',
   },
@@ -630,8 +630,8 @@ const config = {
   // latest-linux.yml keeps listing exactly what the CDN pipeline uploads
   // (AppImage + deb) and the promote workflow needs no rpm alias.
   rpm: {
-    artifactName: 'genoffice-${version}.${arch}.rpm',
-    packageName: 'genoffice',
+    artifactName: 'faamoffice-${version}.${arch}.rpm',
+    packageName: 'faamoffice',
     publish: null,
     afterInstall: 'build/linux-after-install.sh',
     afterRemove: 'build/linux-after-remove.sh',
@@ -676,7 +676,7 @@ const config = {
 // signed. When CI exports GENOFFICE_WIN_SIGN_MODE ("test" = alpha
 // self-signed PFX, "production" = DigiCert KeyLocker — the two modes of
 // scripts/win-sign.cjs, whose env-var contract applies here too), every
-// binary electron-builder signs for win (GenOffice.exe, the NSIS
+// binary electron-builder signs for win (FaamOffice.exe, the NSIS
 // uninstaller, and the installer) goes through that script. The static
 // extraResources binaries (xlsx-sidecar.exe, win-ocr.exe) are signed by the
 // workflow before packaging since electron-builder does not sign
@@ -710,6 +710,19 @@ if (updateUrl) {
       channel: 'latest',
     },
   ]
+}
+
+// FaamOffice builds without an Apple Developer ID (CSC_LINK / CSC_NAME unset)
+// are ad-hoc signed so the app still launches on Apple Silicon, where macOS
+// refuses unsigned arm64 code. Ad-hoc code carries no team id, so the hardened
+// runtime's library validation would reject Electron's own frameworks: it is
+// switched off together with notarization and dmg signing, which need the
+// certificate anyway.
+if (!process.env.CSC_LINK && !process.env.CSC_NAME) {
+  config.mac.identity = '-'
+  config.mac.hardenedRuntime = false
+  config.mac.notarize = false
+  config.dmg.sign = false
 }
 
 // CI's "-c.extraMetadata.version=..." CLI override deep-merges with this block,

@@ -95,7 +95,7 @@ function makeRealUpdater(): { updater: AppUpdater; stockDownloads: string[] } {
   const bag = updater as unknown as Record<string, unknown>
   bag._logger = new NoOpLogger()
   bag._events = {}
-  bag.app = { baseCachePath: dir, name: 'genoffice' }
+  bag.app = { baseCachePath: dir, name: 'faamoffice' }
   bag.configOnDisk = { value: Promise.resolve({ updaterCacheDirName: 'updater-cache' }) }
   bag.httpExecutor = stockExecutor
   // 50 ms stall window so a wedged stream fails fast; the response window is

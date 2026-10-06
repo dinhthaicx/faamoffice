@@ -77,6 +77,7 @@ import {
   type AiStreamChunk,
   type GenSparkAccountStatus,
   type LegacyAiSettings,
+  providerRequiresApiKey,
 } from '@genoffice/ai-provider'
 import { shutdownCodexAppServers } from '@genoffice/ai-provider/codex-app-server'
 import {
@@ -1526,7 +1527,7 @@ interface SheetsRuntimeConfig {
   rendererFile: string
   /** absolute path to the Rust xlsx-sidecar binary */
   sidecarPath?: string | undefined
-  /** Shell router used to open exported/AI-generated files in a new GenOffice tab. */
+  /** Shell router used to open exported/AI-generated files in a new FaamOffice tab. */
   openGeneratedPath?: (path: string) => boolean
   /** Host-owned cross-app document creator (the shell routes docx/pdf/md into Docs). */
   createDocument?: (request: SheetsAiHostDocumentRequest) => Promise<WorkbookCreateDocumentResult>
@@ -1586,7 +1587,7 @@ async function createStandaloneSheetsDocument(
   request: SheetsAiHostDocumentRequest,
 ): Promise<WorkbookCreateDocumentResult> {
   if (request.type === 'docx') {
-    return { ok: false, error: 'Creating DOCX files requires the GenOffice shell or Docs app.' }
+    return { ok: false, error: 'Creating DOCX files requires the FaamOffice shell or Docs app.' }
   }
   const title = sanitizeGeneratedFileBase(request.title)
   try {
@@ -2172,7 +2173,7 @@ export async function createSheetsWindow(
     minWidth: 720,
     minHeight: 550,
     show: false,
-    title: 'GenOffice Sheets',
+    title: 'FaamOffice Sheets',
     // Traffic lights sit inside the toolbar row.
     ...(process.platform === 'darwin' ? { titleBarStyle: 'hiddenInset' as const } : {}),
     webPreferences: {
@@ -3593,7 +3594,7 @@ export function registerSheetsAiIpc(): void {
 
   // Node fetch (undici) direct connections get reset under VPN/tun setups; retry over Chromium's stack
   setRescueFetch((url, init) => net.fetch(url, init))
-  setAiUserAgent(`GenOffice/${app.getVersion()}`)
+  setAiUserAgent(`FaamOffice/${app.getVersion()}`)
 
   ipcMain.handle(IPC_CHANNELS.aiGetSettings, (event): AiSettings => {
     sessionFor(event)
@@ -3634,7 +3635,7 @@ export function registerSheetsAiIpc(): void {
     if (provider === 'genspark' && config && !config.apiKey) {
       config = { ...config, apiKey: gskApiKey() }
     }
-    if (!config || (provider !== 'codex' && !config.apiKey)) {
+    if (!config || (providerRequiresApiKey(provider) && !config.apiKey)) {
       return {
         ok: false,
         error: provider === 'genspark' ? tm('errGskNotLoggedIn') : tm('errNoApiKey', { provider }),
@@ -3670,7 +3671,7 @@ export function registerSheetsAiIpc(): void {
     const send = (chunk: AiStreamChunk) => {
       if (!event.sender.isDestroyed()) event.sender.send(IPC_CHANNELS.aiStreamChunk, chunk)
     }
-    if (!config || (provider !== 'codex' && !config.apiKey)) {
+    if (!config || (providerRequiresApiKey(provider) && !config.apiKey)) {
       send({
         requestId,
         type: 'error',
@@ -4592,8 +4593,18 @@ async function applyMainProcessProxy(): Promise<void> {
     // dispatcher below — forward the proxy to them via env
     setGskProxyUrl(proxyUrl)
     try {
-      const { ProxyAgent, setGlobalDispatcher } = await import('undici')
-      setGlobalDispatcher(new ProxyAgent(proxyUrl))
+      const { EnvHttpProxyAgent, setGlobalDispatcher } = await import('undici')
+      // loopback and .local hosts stay direct so local AI servers (Ollama,
+      // LM Studio, llama.cpp) answer even behind a system proxy
+      const noProxy = [
+        process.env.NO_PROXY ?? process.env.no_proxy,
+        'localhost,127.0.0.1,[::1],.local',
+      ]
+        .filter(Boolean)
+        .join(',')
+      setGlobalDispatcher(
+        new EnvHttpProxyAgent({ httpProxy: proxyUrl, httpsProxy: proxyUrl, noProxy }),
+      )
       // strip user:pass credentials before logging
       console.log('[proxy] main-process fetch via', proxyUrl.replace(/\/\/[^@/]*@/, '//***@'))
     } catch (e) {

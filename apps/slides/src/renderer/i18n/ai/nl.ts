@@ -18,7 +18,7 @@ export const nl = {
   aiQcStopped: 'Lay-outcontrole gestopt',
   aiQcCapped: 'Nog {count} pagina(’s) niet gecontroleerd (limiet per run)',
   aiGskLoginBtn: 'Aanmelden bij Genspark',
-  aiPanelTitle: 'Genspark',
+  aiPanelTitle: 'Faam AI',
   aiOpenAssistant: 'AI-assistent openen',
   aiFactCheckBtn: 'AI-factcheck',
   aiFactCheckPrompt:

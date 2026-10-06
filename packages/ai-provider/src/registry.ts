@@ -385,6 +385,28 @@ export const AI_PROVIDER_ADAPTERS: Record<AiProviderId, ProviderAdapter> = {
       anthropic: /^(minimax-|qwen3\.8-flash$)/,
     }),
   },
+  groq: {
+    meta: metaOf('groq'),
+    capabilities: { auth: 'api-key', vision: false },
+    resolveEndpoint: fixedEndpoint('openai-compatible', 'https://api.groq.com/openai/v1'),
+  },
+  // Local servers: vision is not assumed (most local chat models are text-only),
+  // and a stored base URL points the preset at another host or port.
+  ollama: {
+    meta: metaOf('ollama'),
+    capabilities: { auth: 'api-key', vision: false },
+    resolveEndpoint: fixedEndpoint('openai-compatible', 'http://localhost:11434/v1'),
+  },
+  lmstudio: {
+    meta: metaOf('lmstudio'),
+    capabilities: { auth: 'api-key', vision: false },
+    resolveEndpoint: fixedEndpoint('openai-compatible', 'http://localhost:1234/v1'),
+  },
+  llamacpp: {
+    meta: metaOf('llamacpp'),
+    capabilities: { auth: 'api-key', vision: false },
+    resolveEndpoint: fixedEndpoint('openai-compatible', 'http://localhost:8080/v1'),
+  },
   custom: {
     meta: metaOf('custom'),
     capabilities: { auth: 'api-key', vision: true },

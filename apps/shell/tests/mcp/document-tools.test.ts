@@ -18,7 +18,7 @@ import { fakeCli } from './fake-cli'
 /**
  * The docx tool surface over a real MCP session. Files are written to a temp dir
  * that stands in for the app default save folder. The headless tools delegate to
- * the bundled genoffice CLI (a fake here), so these assert the argv/stdin the
+ * the bundled faamoffice CLI (a fake here), so these assert the argv/stdin the
  * tools build — document fidelity is the CLI's own test surface.
  */
 

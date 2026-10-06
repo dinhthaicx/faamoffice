@@ -338,11 +338,15 @@ function AiModelPane({ t }: { t: TFunc }) {
   // the literal 'custom' id, so it follows the slot rather than the name, and
   // stays a no-op while any other provider is selected — a local server saved
   // months ago is never contacted while Genspark is in use.
-  const endpointProvider = catalog.find(
-    (entry) => entry.id === settings?.provider && entry.needsBaseUrl,
-  )?.id
+  // Local presets and live-catalog vendors ride the same path, falling back to
+  // their default address while the Base URL field is left empty.
+  const endpointEntry = catalog.find(
+    (entry) => entry.id === settings?.provider && (entry.needsBaseUrl || entry.liveModels),
+  )
+  const endpointProvider = endpointEntry?.id
   const endpointConfig = settings ? settings.providers[settings.provider] : undefined
-  const endpointBaseUrl = (endpointConfig?.baseUrl ?? '').trim()
+  const endpointBaseUrl =
+    (endpointConfig?.baseUrl ?? '').trim() || (endpointEntry?.defaultBaseUrl ?? '')
   const endpointApiKey = endpointConfig?.apiKey ?? ''
   // The stored model decides where the pin goes below, but changing it must not
   // send another request, so it is read when the reply lands rather than keyed on.
@@ -1732,8 +1736,8 @@ export function SettingsModal({
                   label={t('setGithub')}
                   value={
                     githubStars === null
-                      ? 'github.com/genspark-ai/genoffice'
-                      : `github.com/genspark-ai/genoffice · ★ ${formatStars(githubStars)}`
+                      ? 'github.com/faamoffice/faamoffice'
+                      : `github.com/faamoffice/faamoffice · ★ ${formatStars(githubStars)}`
                   }
                   action={
                     <button

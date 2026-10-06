@@ -1,7 +1,7 @@
 /**
  * Gate for the skill-install IPC (apps/shell/src/main/integrations-ipc.ts).
  *
- * installSkill writes `<dir>/genoffice/SKILL.md`, and the only directory the
+ * installSkill writes `<dir>/faamoffice/SKILL.md`, and the only directory the
  * renderer ever names is the one it got back from the folder dialog. A
  * compromised renderer can pass any path instead, so the write is constrained
  * to the directories the main process vouched for: the agents' own skills

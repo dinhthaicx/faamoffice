@@ -18,7 +18,7 @@ export const pl = {
   aiQcStopped: 'Sprawdzanie układu zatrzymane',
   aiQcCapped: 'Pozostałe {count} stron(y) nie sprawdzono (limit na uruchomienie)',
   aiGskLoginBtn: 'Zaloguj się do Genspark',
-  aiPanelTitle: 'Genspark',
+  aiPanelTitle: 'Faam AI',
   aiOpenAssistant: 'Otwórz asystenta AI',
   aiFactCheckBtn: 'Weryfikacja AI',
   aiFactCheckPrompt:

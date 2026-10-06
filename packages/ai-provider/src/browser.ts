@@ -9,6 +9,7 @@ export type {
 export {
   AI_PROVIDERS,
   activeProvider,
+  providerRequiresApiKey,
   cloudToolsEnabled,
   DEFAULT_MAX_OUTPUT_TOKENS,
   MAX_MAX_OUTPUT_TOKENS,

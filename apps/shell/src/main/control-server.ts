@@ -13,7 +13,7 @@ import {
 } from '@genoffice/cli/control-protocol'
 
 /**
- * Local request/reply channel for the genoffice CLI (`open --slide`,
+ * Local request/reply channel for the faamoffice CLI (`open --slide`,
  * `selection`). Security model: the socket lives in userData (per-user
  * directory, 0600 on POSIX; a per-user named pipe on Windows), every request
  * must carry the random token from userData/control.json (0600), one request

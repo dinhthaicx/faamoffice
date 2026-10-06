@@ -4,7 +4,7 @@
   "license": "Apache-2.0",
   "private": true,
   "type": "module",
-  "description": "xlsx write gateway and workbook domain logic (OOXML patching, CSV import, workbook DSL, pivots, charts) shared by the sheets app and the genoffice CLI; no Electron, no Univer",
+  "description": "xlsx write gateway and workbook domain logic (OOXML patching, CSV import, workbook DSL, pivots, charts) shared by the sheets app and the faamoffice CLI; no Electron, no Univer",
   "exports": {
     "./*": "./src/*.ts"
   },

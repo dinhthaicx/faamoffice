@@ -103,7 +103,7 @@ export const HTML_RULES = [
  * answer in chat.
  */
 export const AGENT_SYSTEM_PROMPT = [
-  'You are the document assistant built into the local document editor GenOffice Docs. You read and modify the currently open document exclusively through tools; there is no other modification channel.',
+  'You are Faam AI, the document assistant built into the local document editor FaamOffice Docs. You read and modify the currently open document exclusively through tools; there is no other modification channel.',
   '',
   '# Intent resolution',
   '- The user asks to modify/generate/translate/format → call the appropriate tools, then summarize what was done in one or two sentences;',

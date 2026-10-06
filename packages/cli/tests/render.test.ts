@@ -3,7 +3,7 @@ import { join } from 'node:path'
 import { describe, expect, it } from 'vitest'
 import { run, tempDir, writeMinimalPdf } from './helpers'
 
-/** A stand-in for the GenOffice binary: copies a prepared PDF to --out and prints the envelope. */
+/** A stand-in for the FaamOffice binary: copies a prepared PDF to --out and prints the envelope. */
 function fakeApp(dir: string, pdf: string): string {
   const fake = join(dir, 'fake-genoffice.sh')
   writeFileSync(
@@ -14,7 +14,7 @@ function fakeApp(dir: string, pdf: string): string {
   return fake
 }
 
-describe('genoffice render', () => {
+describe('faamoffice render', () => {
   it('rasterizes a PDF directly, one PNG per page, 1-based names and --page', async () => {
     const dir = tempDir()
     const pdf = writeMinimalPdf(join(dir, 'report.pdf'))

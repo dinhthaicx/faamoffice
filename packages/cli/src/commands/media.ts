@@ -41,7 +41,7 @@ export const mediaCommand: CommandDef = {
     if (r.text === undefined)
       throw new CliError(EXIT.app, r.error ?? 'media analysis failed', undefined, {
         suggestion:
-          'retry once later; if it persists, check the Genspark login in the GenOffice app or configure a BYOK analysis provider under Settings (AI Media)',
+          'retry once later; if it persists, check the Genspark login in the FaamOffice app or configure a BYOK analysis provider under Settings (AI Media)',
       })
     const failure = providerFailure(r.text)
     if (failure) throw new CliError(EXIT.conversion, `media analysis failed: ${failure}`)

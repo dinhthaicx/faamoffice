@@ -18,7 +18,7 @@ export const id = {
   aiQcStopped: 'Pemeriksaan tata letak dihentikan',
   aiQcCapped: '{count} halaman lagi tidak diperiksa (batas per proses)',
   aiGskLoginBtn: 'Masuk ke Genspark',
-  aiPanelTitle: 'Genspark',
+  aiPanelTitle: 'Faam AI',
   aiOpenAssistant: 'Buka asisten AI',
   aiFactCheckBtn: 'Cek Fakta AI',
   aiFactCheckPrompt:

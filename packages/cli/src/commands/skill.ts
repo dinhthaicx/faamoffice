@@ -32,7 +32,7 @@ import { didYouMean } from '../suggest'
 export const skillCommand: CommandDef = {
   name: 'skill',
   summary:
-    'List the coding agents found on this machine and install or update the bundled genoffice skill for them.',
+    'List the coding agents found on this machine and install or update the bundled faamoffice skill for them.',
   usage: 'skill list | skill install <agent|all> [--dir <path>] [--force] | skill path',
   options: [
     { name: 'list', description: 'same as `skill list`' },
@@ -214,7 +214,7 @@ function install(
 }
 
 function refusal(state: SkillInstallState, force: boolean): string | null {
-  if (state.status === 'occupied') return 'the genoffice folder there holds something else'
+  if (state.status === 'occupied') return 'the faamoffice folder there holds something else'
   if (force) return null
   if (state.status === 'newer')
     return `a newer skill ${state.installedVersion} is installed; not downgrading`
@@ -232,7 +232,7 @@ function row(target: AgentTarget | null, detected: boolean, state: SkillInstallS
     agent: target?.id ?? null,
     label: target?.label ?? state.path,
     detected,
-    skills_dir: target?.skillsDir ?? state.path.replace(/[\\/]genoffice[\\/]SKILL\.md$/, ''),
+    skills_dir: target?.skillsDir ?? state.path.replace(/[\\/]faamoffice[\\/]SKILL\.md$/, ''),
     status: state.status,
     installed_version: state.installedVersion ?? null,
     up_to_date: state.status === 'installed' || state.status === 'newer',
@@ -247,7 +247,7 @@ function home(env: NodeJS.ProcessEnv): string {
 function skillFile(): string {
   const path = bundledSkillPath()
   if (!path)
-    throw new CliError(EXIT.app, 'the bundled skill (skills/genoffice/SKILL.md) was not found')
+    throw new CliError(EXIT.app, 'the bundled skill (skills/faamoffice/SKILL.md) was not found')
   return path
 }
 

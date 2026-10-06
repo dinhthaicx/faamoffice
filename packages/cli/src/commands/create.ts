@@ -46,13 +46,13 @@ export const createCommand: CommandDef = {
       name: 'ops',
       value: 'file',
       description:
-        'pptx: JSON array of ops (or {"ops":[...]}) applied one by one to a blank one-slide deck (later ops can target slides added earlier); "-" reads stdin. See `genoffice guide slides`.',
+        'pptx: JSON array of ops (or {"ops":[...]}) applied one by one to a blank one-slide deck (later ops can target slides added earlier); "-" reads stdin. See `faamoffice guide slides`.',
     },
     {
       name: 'spec',
       value: 'file',
       description:
-        'pptx: a deck spec (pages of px-positioned text, shapes and images on a 1280x720 canvas) built into one slide per page, or a directory of one-page spec files taken in name order; "-" reads stdin. See `genoffice guide slides spec` and `genoffice guide slides design`.',
+        'pptx: a deck spec (pages of px-positioned text, shapes and images on a 1280x720 canvas) built into one slide per page, or a directory of one-page spec files taken in name order; "-" reads stdin. See `faamoffice guide slides spec` and `faamoffice guide slides design`.',
     },
     {
       name: 'outline',
@@ -64,7 +64,7 @@ export const createCommand: CommandDef = {
       name: 'from',
       value: 'file',
       description:
-        'xlsx: a .csv, or a .json holding a 2-D array of cell values or { "sheets": [{ "name", "rows" }] }; strings starting with "=" are formulas. docx: a .md file, or a .html file holding a restricted-HTML fragment (see `genoffice guide docs`). pdf: any .md/.html/.docx/.xlsx/.pptx file, printed by the GenOffice renderer',
+        'xlsx: a .csv, or a .json holding a 2-D array of cell values or { "sheets": [{ "name", "rows" }] }; strings starting with "=" are formulas. docx: a .md file, or a .html file holding a restricted-HTML fragment (see `faamoffice guide docs`). pdf: any .md/.html/.docx/.xlsx/.pptx file, printed by the FaamOffice renderer',
     },
     {
       name: 'header',
@@ -83,7 +83,7 @@ export const createCommand: CommandDef = {
       name: 'render',
       value: 'dir',
       description:
-        'pptx: after writing, render one PNG per slide into <dir> (default: <output name>-previews beside the file) and list them in detail.previews; starts a hidden GenOffice process for a few seconds',
+        'pptx: after writing, render one PNG per slide into <dir> (default: <output name>-previews beside the file) and list them in detail.previews; starts a hidden FaamOffice process for a few seconds',
     },
     {
       name: 'audit',
@@ -128,7 +128,7 @@ export const createCommand: CommandDef = {
       return {
         summary: `created ${basename(output)}`,
         outputPath: output,
-        detail: { via: 'genoffice --headless-export', summary: r.summary },
+        detail: { via: 'faamoffice --headless-export', summary: r.summary },
       }
     }
     if (type === 'docx') {
@@ -219,7 +219,7 @@ async function createPptxFromSpec(
 ): Promise<{ bytes: Uint8Array; slides: number; detail: CommandResult['detail'] }> {
   const spec = flagString(args, 'spec')!
   const next =
-    'genoffice slides audit <file> for the geometry audit; genoffice slides render <file> --out <dir> for PNGs; genoffice slides replace <file> --slide n --spec <page.json> to rebuild one page'
+    'faamoffice slides audit <file> for the geometry audit; faamoffice slides render <file> --out <dir> for PNGs; faamoffice slides replace <file> --slide n --spec <page.json> to rebuild one page'
   const outlinePath = flagString(args, 'outline')
   const dir = spec === '-' ? null : specDirectory(spec, ctx)
   if (dir) {

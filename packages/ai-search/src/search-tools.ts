@@ -54,7 +54,7 @@ export async function testSearchProvider(
     firecrawlKey: provider === 'firecrawl' ? apiKey : '',
     prefer: provider,
   }
-  const r = await webSearch('GenOffice', 1, options)
+  const r = await webSearch('FaamOffice', 1, options)
   if (r.method === provider) return { ok: true }
   return {
     ok: false,

@@ -42,7 +42,7 @@ export function controlHandler(host: ControlHost): (req: ControlRequest) => Prom
       const existing = host.findTab(req.path)
       if (existing) host.activateTab(existing.id)
       else if (!host.openDocument(req.path)) {
-        return fail('unsupported', `GenOffice cannot open ${req.path}`)
+        return fail('unsupported', `FaamOffice cannot open ${req.path}`)
       }
       if (!req.target) return { ok: true, result: { opened: req.path } }
       const tab = existing ?? host.findTab(req.path)
@@ -57,8 +57,8 @@ export function controlHandler(host: ControlHost): (req: ControlRequest) => Prom
     }
     const tab = host.findTab(req.path)
     if (!tab) {
-      return fail('file_not_open_in_gui', `GenOffice does not have ${req.path} open`, {
-        suggestion: `genoffice open ${req.path}`,
+      return fail('file_not_open_in_gui', `FaamOffice does not have ${req.path} open`, {
+        suggestion: `faamoffice open ${req.path}`,
       })
     }
     return ask(tab.webContents, { cmd: 'selection' }, host.readyTimeoutMs)

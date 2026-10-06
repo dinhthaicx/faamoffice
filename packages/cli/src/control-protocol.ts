@@ -1,5 +1,5 @@
 /**
- * Wire format between the genoffice CLI and the running GenOffice shell.
+ * Wire format between the faamoffice CLI and the running FaamOffice shell.
  *
  * The shell listens on a local socket (unix socket in userData, named pipe on
  * Windows) and publishes its endpoint plus a per-run token in

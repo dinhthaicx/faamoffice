@@ -20,17 +20,17 @@ const BUILD = join(__dirname, '..', 'build')
 /** The scripts hardcode the package paths; a copy with the two roots swapped runs against a temp tree. */
 function makeRoot() {
   const root = mkdtempSync(join(tmpdir(), 'genoffice-postinst-'))
-  const opt = join(root, 'opt', 'GenOffice')
+  const opt = join(root, 'opt', 'FaamOffice')
   const bin = join(root, 'usr', 'bin')
   mkdirSync(join(opt, 'resources', 'cli'), { recursive: true })
   mkdirSync(bin, { recursive: true })
-  const launcher = join(opt, 'resources', 'cli', 'genoffice')
+  const launcher = join(opt, 'resources', 'cli', 'faamoffice')
   writeFileSync(launcher, '#!/bin/sh\n')
   chmodSync(launcher, 0o755)
   const script = (name: string) => {
     const file = join(root, name)
     const body = readFileSync(join(BUILD, name), 'utf-8')
-      .replaceAll('/opt/GenOffice', opt)
+      .replaceAll('/opt/FaamOffice', opt)
       .replaceAll('/usr/bin/', `${bin}/`)
     writeFileSync(file, body)
     return (arg = '') => {
@@ -40,7 +40,7 @@ function makeRoot() {
   }
   return {
     launcher,
-    link: join(bin, 'genoffice'),
+    link: join(bin, 'faamoffice'),
     install: script('linux-after-install.sh'),
     remove: script('linux-after-remove.sh'),
   }
@@ -54,7 +54,7 @@ describe.skipIf(process.platform === 'win32')('linux cli link scripts (genoffice
 
     expect(t.remove('remove').code).toBe(0)
     expect(existsSync(t.link)).toBe(false)
-    symlinkSync('/nowhere/cli/genoffice', t.link)
+    symlinkSync('/nowhere/cli/faamoffice', t.link)
     expect(t.install()).toEqual({ code: 0, stderr: '' })
     expect(readlinkSync(t.link)).toBe(t.launcher)
 
@@ -76,7 +76,7 @@ describe.skipIf(process.platform === 'win32')('linux cli link scripts (genoffice
     expect(existsSync(t.link)).toBe(true)
 
     rmSync(t.link)
-    const vendor = join(t.launcher, '..', '..', '..', '..', 'vendor', 'cli', 'genoffice')
+    const vendor = join(t.launcher, '..', '..', '..', '..', 'vendor', 'cli', 'faamoffice')
     mkdirSync(join(vendor, '..'), { recursive: true })
     writeFileSync(vendor, '#!/bin/sh\n')
     symlinkSync(vendor, t.link)

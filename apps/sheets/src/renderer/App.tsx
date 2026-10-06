@@ -125,7 +125,11 @@ import {
   composeSkills,
   type AgentImage,
 } from '@genoffice/agent-core'
-import { imageGenerationAvailable, type AiSettings } from '@genoffice/ai-provider/browser'
+import {
+  imageGenerationAvailable,
+  providerRequiresApiKey,
+  type AiSettings,
+} from '@genoffice/ai-provider/browser'
 import { type WorkbookOperation } from '@genoffice/xlsx-gateway/domain/workbook-dsl'
 import {
   columnLabel,
@@ -1418,7 +1422,8 @@ export function App({
           void window.desktopApi
             .aiGskStatus()
             .then((status) => {
-              if (status.loggedIn) return
+              // only a Genspark selection can be fixed by signing in
+              if (status.loggedIn || aiSettingsRef.current?.provider !== 'genspark') return
               setChat((previous) => {
                 const next = [...previous]
                 const last = next.at(-1)
@@ -1443,8 +1448,13 @@ export function App({
     if (!config?.model) return false
     // Genspark's key never lands in the settings file; the main process injects
     // it from the gsk login state. When logged out, requests return an error
-    // guiding sign-in — not intercepted here.
-    return settings.provider === 'genspark' || !!config.apiKey
+    // guiding sign-in — not intercepted here. Codex, custom and local servers
+    // run without a key.
+    return (
+      settings.provider === 'genspark' ||
+      !providerRequiresApiKey(settings.provider) ||
+      !!config.apiKey
+    )
   }
 
   /** Image attachments read as base64 and sent multimodal with this user message
@@ -4562,7 +4572,7 @@ export function App({
     }
   })()
 
-  // genoffice CLI (`open --range`, `selection`): the shell evaluates this hook
+  // faamoffice CLI (`open --range`, `selection`): the shell evaluates this hook
   useEffect(() => {
     ;(window as unknown as Record<string, unknown>).__genofficeControl = (req: ControlRequest) =>
       handleSheetsControl(

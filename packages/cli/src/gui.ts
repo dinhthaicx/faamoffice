@@ -16,7 +16,7 @@ export function genofficeUserDataDir(env: NodeJS.ProcessEnv): string {
       : process.platform === 'win32'
         ? env.APPDATA || join(home, 'AppData', 'Roaming')
         : env.XDG_CONFIG_HOME || join(home, '.config')
-  return join(base, 'GenOffice')
+  return join(base, 'FaamOffice')
 }
 
 export interface GuiOpenDocuments {
@@ -25,7 +25,7 @@ export interface GuiOpenDocuments {
 }
 
 /**
- * Files the running GenOffice shell has open, from the registries it publishes
+ * Files the running FaamOffice shell has open, from the registries it publishes
  * on every tab change (apps/shell/src/main/open-documents.ts). Empty when no
  * shell is running: a registry whose pid is gone is a crash leftover.
  */
@@ -70,12 +70,12 @@ export function assertNotOpenInGui(abs: string, env: NodeJS.ProcessEnv): void {
     if (!open.paths.some((p) => realizedPath(p) === target)) continue
     throw new CliError(
       EXIT.file,
-      `GenOffice has this file open: ${abs}`,
+      `FaamOffice has this file open: ${abs}`,
       { gui_pid: open.pid },
       {
         reason: 'file_open_in_gui',
         suggestion:
-          'close the tab in GenOffice first, or pass --force to write anyway (the editor may overwrite your change on its next save)',
+          'close the tab in FaamOffice first, or pass --force to write anyway (the editor may overwrite your change on its next save)',
       },
     )
   }

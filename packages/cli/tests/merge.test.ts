@@ -54,7 +54,7 @@ async function templateDocx(dir: string): Promise<string> {
   return out
 }
 
-describe('genoffice merge', () => {
+describe('faamoffice merge', () => {
   it('fills a docx template, keeps table cells and reports split and unknown placeholders', async () => {
     const dir = tempDir()
     const template = await templateDocx(dir)

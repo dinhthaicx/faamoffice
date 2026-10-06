@@ -181,8 +181,8 @@ describe('audit log', () => {
     expect(redactArgv(['info', 'a.pdf', '--password'])).toEqual(['info', 'a.pdf', '--password'])
   })
 
-  it('defaults under ~/.genoffice and honours GENOFFICE_AUDIT_LOG', () => {
-    expect(auditLogPath({})).toMatch(/[\\/]\.genoffice[\\/]cli-audit\.jsonl$/)
+  it('defaults under ~/.faamoffice and honours GENOFFICE_AUDIT_LOG', () => {
+    expect(auditLogPath({})).toMatch(/[\\/]\.faamoffice[\\/]cli-audit\.jsonl$/)
     expect(auditLogPath({ GENOFFICE_AUDIT_LOG: 'off' })).toBeNull()
     expect(auditLogPath({ GENOFFICE_AUDIT_LOG: '/x/y.jsonl' })).toBe('/x/y.jsonl')
   })

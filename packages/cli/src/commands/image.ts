@@ -110,7 +110,7 @@ export const imageCommand: CommandDef = {
     if (!r.url)
       throw new CliError(EXIT.app, r.error ?? 'image generation failed', undefined, {
         suggestion:
-          'retry once later; if it persists, check the Genspark login in the GenOffice app, configure a BYOK image provider under Settings (AI Media), or continue without generated images',
+          'retry once later; if it persists, check the Genspark login in the FaamOffice app, configure a BYOK image provider under Settings (AI Media), or continue without generated images',
       })
     const image = await loadImage(r.url)
     const ext = EXTS_BY_MIME[image.mime]?.[0] ?? 'png'

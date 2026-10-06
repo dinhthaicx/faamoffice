@@ -13,7 +13,7 @@ export const GENSPARK_LLM_BASE_URLS = {
 } as const
 
 /**
- * Splits GenOffice usage out of the proxy's default "Claw" billing bucket
+ * Splits FaamOffice usage out of the proxy's default "Claw" billing bucket
  * (the backend attributes gsk-key traffic by X-Agent-Type). Only sent to the
  * Genspark proxy — never to direct vendor APIs.
  */
@@ -429,6 +429,42 @@ export const AI_PROVIDERS: AiProviderMeta[] = [
     keyPlaceholder: 'API Key',
   },
   {
+    id: 'groq',
+    label: 'Groq',
+    // Groq rotates its catalog often; the picker fills from GET /models once a key is entered
+    models: [],
+    defaultModel: '',
+    keyPlaceholder: 'gsk_...',
+    liveModels: true,
+  },
+  {
+    id: 'ollama',
+    label: 'Ollama (local)',
+    models: [],
+    defaultModel: '',
+    keyPlaceholder: 'API Key (optional)',
+    local: true,
+    liveModels: true,
+  },
+  {
+    id: 'lmstudio',
+    label: 'LM Studio (local)',
+    models: [],
+    defaultModel: '',
+    keyPlaceholder: 'API Key (optional)',
+    local: true,
+    liveModels: true,
+  },
+  {
+    id: 'llamacpp',
+    label: 'llama.cpp server (local)',
+    models: [],
+    defaultModel: '',
+    keyPlaceholder: 'API Key (optional)',
+    local: true,
+    liveModels: true,
+  },
+  {
     id: 'custom',
     label: 'Custom',
     models: [],
@@ -494,8 +530,21 @@ export function activeProvider(settings: AiSettings): AiProviderId {
     if (!config.baseUrl?.trim()) return 'genspark'
     return provider
   }
+  // local presets carry a default base URL and need no key
+  if (meta.local) return provider
   if (!config.apiKey?.trim()) return 'genspark'
   return provider
+}
+
+/**
+ * Whether a request to this provider is refused without an API key. Codex
+ * signs in through its own CLI, custom and local servers accept anonymous
+ * requests; every hosted vendor API needs a key.
+ */
+export function providerRequiresApiKey(provider: AiProviderId): boolean {
+  if (provider === 'codex') return false
+  const meta = AI_PROVIDERS.find((m) => m.id === provider)
+  return !(meta?.needsBaseUrl || meta?.local)
 }
 
 /**

@@ -34,7 +34,7 @@ export const pdfCommand: CommandDef = {
     if (verb !== 'read') {
       throw new CliError(EXIT.usage, 'expected "pdf read <file.pdf>"', undefined, {
         reason: verb === undefined ? 'missing_argument' : 'invalid_argument',
-        suggestion: 'run `genoffice help pdf`',
+        suggestion: 'run `faamoffice help pdf`',
       })
     }
     return read(file, args, ctx)

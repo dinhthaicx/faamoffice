@@ -171,7 +171,7 @@ describe('open / selection through the control channel', () => {
             error: {
               reason: 'file_not_open_in_gui',
               message: 'not open',
-              detail: { suggestion: 'genoffice open x' },
+              detail: { suggestion: 'faamoffice open x' },
             },
           },
     )
@@ -185,7 +185,7 @@ describe('open / selection through the control channel', () => {
     expect(notOpen.code).toBe(2)
     expect(notOpen.json()).toMatchObject({
       error: 'file_not_open_in_gui',
-      suggestion: 'genoffice open x',
+      suggestion: 'faamoffice open x',
     })
   })
 
@@ -197,7 +197,7 @@ describe('open / selection through the control channel', () => {
     expect(r.code).toBe(4)
     expect(r.json()).toMatchObject({
       error: 'app_unavailable',
-      suggestion: expect.stringContaining(`genoffice open ${DOCX}`),
+      suggestion: expect.stringContaining(`faamoffice open ${DOCX}`),
     })
   })
 })

@@ -1,7 +1,7 @@
 import { aiPanelWidthAtPointer, AiPanelSideButton } from '@genoffice/ui'
 import React, { useEffect, useRef, useState } from 'react'
 import { AiComposer, AiScopeQuote, AiTypingIndicator, type AiScopeQuoteData } from '@genoffice/ui'
-import { GensparkMark } from '../ribbon-icons'
+import { FaamAiMark } from '../ribbon-icons'
 import type { ChangePlan } from '@genoffice/xlsx-gateway/domain/workbook.types'
 import { ATTACHMENT_IMAGE_EXTS, type AttachmentMeta } from '../../shared/desktop-api'
 import { useI18n, type TFunc } from '../i18n/locale'
@@ -445,7 +445,7 @@ export function AiChatPanel({
           data-tip={t('aiOpenAssistant')}
           aria-label={t('aiOpenAssistant')}
         >
-          <GensparkMark size={22} />
+          <FaamAiMark size={22} />
         </button>
       </aside>
     )
@@ -514,8 +514,8 @@ export function AiChatPanel({
       />
       <header className="ai-panel-header">
         <span className="ai-panel-title">
-          <GensparkMark size={22} />
-          Genspark
+          <FaamAiMark size={22} />
+          Faam AI
         </span>
         <div className="ai-panel-header-actions">
           <AiPanelSideButton

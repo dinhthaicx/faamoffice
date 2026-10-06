@@ -175,7 +175,7 @@ export function canvasMetrics(): FontMetricsProvider | null {
 
 /** Korean font names (Windows/Noto/Source Han/Nanum faces + bundled subsets) */
 const KO_FONT_RE =
-  /malgun|맑은|batang|바탕|myeongjo|myungjo|명조|gungsuh|궁서|gulim|굴림|dotum|돋움|nanum|나눔|genoffice (sans|serif) kr|(noto|source han) (sans|serif)[^,]*\bk(r|orean)?\b/i
+  /malgun|맑은|batang|바탕|myeongjo|myungjo|명조|gungsuh|궁서|gulim|굴림|dotum|돋움|nanum|나눔|faamoffice (sans|serif) kr|(noto|source han) (sans|serif)[^,]*\bk(r|orean)?\b/i
 
 /**
  * Per-font single-spacing line-height factor. Re-baselined against Word for
@@ -953,7 +953,7 @@ export function cssFontFamily(font: string, followAltName = true): string {
   if (f.includes('隶书') || f.includes('lisu'))
     return `${chain(font, 'Baoli SC', 'LiSu', CJK_SERIF)},serif`
   // Japanese/Korean/Traditional Chinese: fall back within the same script (win/mac family names as mutual backups) so Han glyphs don't render with Simplified forms.
-  // 'GenOffice *' entries are CJK-only local() aliases (fonts.css): the underlying
+  // 'FaamOffice *' entries are CJK-only local() aliases (fonts.css): the underlying
   // system faces draw Cyrillic/Greek fullwidth, so those scripts must pass through
   const JA_SANS = ['Yu Gothic', 'GenOffice Hiragino Sans', 'Meiryo', 'Noto Sans JP']
   const JA_SERIF = [

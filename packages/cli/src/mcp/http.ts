@@ -13,7 +13,7 @@ import { createContext, disposeContext, type McpContext } from './run'
 import { createMcpServer, type ServeOptions } from './server'
 
 /**
- * `genoffice mcp --http <port>`: the same tools over Streamable HTTP for clients
+ * `faamoffice mcp --http <port>`: the same tools over Streamable HTTP for clients
  * on other machines. Routes:
  *   POST /mcp            the MCP session (GET for the notification stream, DELETE to end it)
  *   PUT  /files/<name>   upload a file (also POST /files?name=), reply { url, name, size }
@@ -248,7 +248,7 @@ export async function startHttp(opts: HttpServeOptions): Promise<HttpHandle> {
   const route = async (req: IncomingMessage, res: ServerResponse): Promise<void> => {
     const url = new URL(req.url ?? '/', 'http://placeholder')
     if (url.pathname === '/health' && req.method === 'GET') {
-      json(res, 200, { status: 'ok', server: 'genoffice', sessions: sessions.size })
+      json(res, 200, { status: 'ok', server: 'faamoffice', sessions: sessions.size })
       return
     }
     // no token and a loopback bind: refuse Host headers a rebound DNS name would carry

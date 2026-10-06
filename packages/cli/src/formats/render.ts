@@ -58,7 +58,7 @@ export function outputDirectory(spec: string | undefined, ctx: PathContext): str
 
 /**
  * One PNG per page: the document is printed to a temporary PDF by the hidden
- * GenOffice process (a PDF input skips that step) and rasterized with pdfium.
+ * FaamOffice process (a PDF input skips that step) and rasterized with pdfium.
  * Files are `<stem>-NN.png`, NN 1-based, in `outDir`.
  */
 export async function renderToPngs(
