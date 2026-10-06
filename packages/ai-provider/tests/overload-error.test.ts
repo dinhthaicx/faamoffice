@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest'
 import { isAiOverloadedError } from '../src/overload-error'
 
 describe('isAiOverloadedError', () => {
-  it('matches the Genspark gateway 429 engine-overloaded body', () => {
+  it('matches a gateway 429 engine-overloaded body', () => {
     expect(
       isAiOverloadedError(
         new Error(
@@ -33,7 +33,7 @@ describe('isAiOverloadedError', () => {
   it('never claims credits-exhausted notices (a separate error class)', () => {
     expect(
       isAiOverloadedError(
-        new Error('Your Genspark credits have been exhausted. Visit genspark.ai/pricing to top up'),
+        new Error('Your credits have been exhausted. Visit example.com/pricing to top up'),
       ),
     ).toBe(false)
   })
@@ -44,7 +44,7 @@ describe('isAiOverloadedError', () => {
     // billing notice, so the exhausted wording has to win over the status marker.
     expect(
       isAiOverloadedError(
-        new Error('HTTP 429: {"error":{"message":"Your Genspark credits have been exhausted"}}'),
+        new Error('HTTP 429: {"error":{"message":"Your credits have been exhausted"}}'),
       ),
     ).toBe(false)
     expect(

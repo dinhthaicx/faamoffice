@@ -8,7 +8,6 @@ export const he = {
   aiStarterPolishAll: 'לטש את כל המסמך לטון מקצועי יותר',
   aiStarterContinue: 'המשך לכתוב מהנקודה שבה המסמך נעצר',
   aiStarterFillTemplate: 'מצא ומלא את מצייני המיקום במסמך',
-  aiGskLoginBtn: 'התחבר ל-Genspark',
   aiPanelTitle: 'Faam AI',
   aiOpenAssistant: 'פתיחת עוזר ה-AI',
   aiSummarizeBtn: 'סיכום AI',
@@ -110,7 +109,8 @@ export const he = {
   aiTimeoutError: 'תם הזמן לבקשת ה-AI: אין תגובה מהרשת וההרצה הופסקה. בדוק את החיבור ונסה שוב',
   aiOverloadedError: 'שירות ה-AI עמוס כרגע — נסו שוב בעוד רגע',
   aiNetworkError: 'בעיית רשת: לא ניתן להתחבר לשירות ה-AI. בדוק את החיבור ונסה שוב',
-  aiCreditsExhausted: 'קרדיטי Genspark שלך אזלו. טען מחדש ב-genspark.ai/pricing ונסה שוב',
+  aiCreditsExhausted:
+    'ספק ה-AI שלך מדווח שהקרדיטים או המכסה נוצלו עד תום. טען מחדש אצל הספק או בחר מודל אחר בהגדרות',
   aiSumReadAttachment: 'קריאת קובץ מצורף',
   aiSumImageAttachment: 'תמונה מצורפת {name}',
   aiSumRead: 'קריאת {name}',

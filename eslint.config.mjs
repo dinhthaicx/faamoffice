@@ -16,6 +16,8 @@ export default tseslint.config(
       '**/target/**',
       '**/coverage/**',
       'scripts/drivers/**',
+      // the website (web/) is a standalone project with its own lint setup
+      'web/**',
       'apps/*/build/**',
       'packages/*/src/vendor/**',
       // Browser-side extractor fragments are function-body slices (top-level

@@ -5,7 +5,6 @@ export const de = {
   aiEmptyBuildTitle: 'Lass die KI diese Arbeitsmappe für dich aufbauen',
   aiEmptyBuildBody:
     'Beschreibe die gewünschte Tabelle, Daten oder Diagramme — die KI erstellt sie direkt.',
-  aiGskLoginBtn: 'Bei Genspark anmelden',
   aiUndelivered: 'Nicht gesendet',
   aiRetry: 'Erneut versuchen',
   aiOpenAssistant: 'KI-Assistenten öffnen',
@@ -50,13 +49,6 @@ export const de = {
   aiFileTooltip:
     'SHA-256 {sha}\nBeim Speichern werden nur die bearbeiteten Einträge neu geschrieben; alles andere bleibt erhalten.',
   aiFileMeta: '{sheets} Blätter · {entries} Einträge',
-  aiGensparkAccount: 'Genspark-Konto',
-  aiAccountChecking: 'Wird überprüft…',
-  aiLoggedIn: 'Angemeldet',
-  aiLoggedInAs: 'Angemeldet: {email}',
-  aiNotLoggedIn: 'Nicht angemeldet (KI-Funktionen erfordern ein Genspark-Konto)',
-  aiWaitingBrowserLogin: 'Warten auf Anmeldung im Browser…',
-  aiLoginGenspark: 'Bei Genspark anmelden',
   aiModel: 'Modell',
   aiCancel: 'Abbrechen',
   aiSave: 'Speichern',
@@ -67,7 +59,7 @@ export const de = {
   aiNetworkError:
     'Netzwerkproblem: Der KI-Dienst ist nicht erreichbar. Prüfe deine Verbindung und versuche es erneut',
   aiCreditsExhausted:
-    'Deine Genspark-Credits sind aufgebraucht. Lade unter genspark.ai/pricing auf und versuche es erneut',
+    'Ihr KI-Anbieter meldet, dass Ihr Guthaben oder Kontingent aufgebraucht ist. Laden Sie beim Anbieter auf oder wählen Sie in den Einstellungen ein anderes Modell',
   aiToolWorkbookContext: 'Arbeitsmappeninformationen lesen',
   aiToolReadRange: 'Bereich lesen',
   aiToolReadRangeOf: 'Bereich {range} lesen',

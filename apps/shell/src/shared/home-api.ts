@@ -243,16 +243,28 @@ export interface HomeApi {
   getUpdateChannel(): Promise<UpdateChannel>
   /** switch + persist the update channel; triggers an immediate update check */
   setUpdateChannel(channel: UpdateChannel): Promise<void>
-  /** Genspark account status (gsk login state; to be upgraded to a signup/account system later) */
-  accountStatus(): Promise<AccountStatus>
-  /** start Genspark login (opens the browser; accountStatus flips to logged-in on completion); returns whether the launch succeeded */
-  accountLogin(): Promise<boolean>
-  /** progress events for the login started via accountLogin; returns an unsubscribe */
-  onAccountLogin(handler: (ev: AccountLoginEvent) => void): () => void
-  /** re-open the pending login auth URL in the default browser (rescue when auto-open failed) */
-  openLoginUrl(): Promise<void>
-  /** log out (clears the saved API key; the login state is shared globally with the gsk CLI) */
-  accountLogout(): Promise<void>
+  /** the local profile (display name used for the greeting and the sidebar avatar) */
+  getProfile(): Promise<UserProfile>
+  /** save the local profile; every shell window is notified */
+  setProfile(profile: UserProfile): Promise<void>
+  /** the profile was changed (Settings → Profile); returns an unsubscribe */
+  onProfileChanged(handler: (profile: UserProfile) => void): () => void
+  /** FaamOffice account (optional): who is signed in, with the live credit balance */
+  faamAccountStatus(): Promise<FaamAccountInfo>
+  /** start the browser sign-in (device code); progress arrives through onFaamAccountEvent */
+  faamAccountLogin(): Promise<void>
+  /** sign-in progress / result; returns an unsubscribe */
+  onFaamAccountEvent(handler: (event: FaamAccountEvent) => void): () => void
+  /** stop a sign-in that is waiting for the browser */
+  faamAccountCancelLogin(): Promise<void>
+  /** sign out (revokes this device's token on the server) */
+  faamAccountLogout(): Promise<void>
+  /** change the account server; returns the normalized address ('' = invalid, default kept) */
+  faamAccountSetServer(url: string): Promise<string>
+  /** open the account website (profile, usage, devices) in the browser */
+  faamAccountOpenWeb(page: 'account' | 'register'): Promise<void>
+  /** model ids Faam AI Cloud serves to this account ([] when signed out / offline) */
+  faamCloudModels(): Promise<string[]>
   /** app version (from package.json / electron app.getVersion) */
   getAppVersion(): Promise<string>
   /** live updater state (null until an update was first seen); Settings → About */
@@ -313,8 +325,8 @@ export interface HomeApi {
   onDocumentThemeChanged(handler: (theme: DocTheme) => void): () => void
   /** open the GenTeam community page in the default browser */
   openGenTeam(): Promise<void>
-  /** open the Genspark credit-usage page in the default browser */
-  openCreditUsage(): Promise<void>
+  /** open a provider's download (local AI servers) or API-key page; unknown ids are ignored */
+  openAiProviderPage(provider: string): Promise<void>
   /** open the public GitHub repository in the default browser */
   openGitHubRepo(): Promise<void>
   /** current stargazer count of the public repo (null while offline / rate-limited) */
@@ -324,13 +336,7 @@ export interface HomeApi {
   starPromptShouldShow(): Promise<StarPromptShow>
   /** user reacted to the star prompt; 'starred' resolves it permanently */
   starPromptAction(action: StarPromptAction): Promise<void>
-  /** locally stored full cloud project list (instant; null when no store or logged out) */
-  cloudProjectsCached(): Promise<CloudProjectsSnapshot | null>
-  /** sync the full list from Genspark and return it (1 request when nothing changed); null when the sync failed */
-  cloudProjectsSync(): Promise<CloudProjectsSnapshot | null>
-  /** open a cloud project (relative '/agents?id=...' URL) in the default browser */
-  openCloudProject(projectUrl: string): Promise<void>
-  /** AI settings (userData/ai-settings.json, shared by every editor); the genspark key never appears here */
+  /** AI settings (userData/ai-settings.json, shared by every editor) */
   getAiSettings(): Promise<AiSettings>
   /** persist AI settings; open editors pick the change up on their next settings read */
   setAiSettings(settings: AiSettings): Promise<void>
@@ -374,46 +380,29 @@ export interface StarPromptShow {
   docOpens: number
 }
 
-export type CloudProjectKind = 'docs' | 'sheets' | 'slides'
-
-/** a Genspark web project shown in the home cloud section */
-export interface CloudProjectEntry {
-  projectId: string
-  title: string
-  /** module kind derived from the API project type ('docs_agent' → 'docs') */
-  kind: CloudProjectKind | 'other'
-  /** creation time, ms since epoch (0 when unparsable) */
-  ctimeMs: number
-  /** relative genspark.ai URL ('/agents?id=...') */
-  projectUrl: string
+/** the local profile; FaamOffice has no account, everything stays on this machine */
+export interface UserProfile {
+  /** display name; '' when the user has not set one */
+  name: string
 }
 
-/** full local copy of the cloud project list; filtering/paging are client-side */
-export interface CloudProjectsSnapshot {
-  /** false when gsk is unavailable (CLI missing or not logged in) */
-  available: boolean
-  /** all projects, newest first */
-  projects: CloudProjectEntry[]
-  /** ms epoch of the last successful sync (0 when never synced) */
-  syncedAt: number
-}
-
-export interface AccountStatus {
-  /** gsk is installed and logged in */
-  loggedIn: boolean
+/** FaamOffice account state shown in Settings → Profile */
+export interface FaamAccountInfo {
+  signedIn: boolean
+  /** account server address */
+  server: string
   email?: string
-  /** remaining Genspark credits (absent when the balance query failed) */
-  creditBalance?: number
+  name?: string
+  credits?: number
+  /** signed in, but the server could not be reached just now */
+  offline?: boolean
 }
 
-/** login flow progress pushed from main (gsk login CLI output) */
-export interface AccountLoginEvent {
-  phase: 'launched' | 'url' | 'success' | 'error'
-  url?: string
-  expiresInSec?: number
-  /** 'network' | 'expired' | raw CLI error text */
-  error?: string
-}
+/** device-code sign-in progress pushed from the main process */
+export type FaamAccountEvent =
+  | { phase: 'code'; userCode: string; url: string }
+  | { phase: 'success' }
+  | { phase: 'error'; error: 'network' | 'expired' | 'denied' | 'failed' }
 
 export interface RenameResult {
   ok: boolean
@@ -521,11 +510,17 @@ export const HOME_CHANNELS = {
   setLanguage: 'home:set-language',
   getUpdateChannel: 'home:get-update-channel',
   setUpdateChannel: 'home:set-update-channel',
-  accountStatus: 'home:account-status',
-  accountLogin: 'home:account-login',
-  accountLoginEvent: 'home:account-login-event',
-  accountLoginOpenUrl: 'home:account-login-open-url',
-  accountLogout: 'home:account-logout',
+  getProfile: 'home:get-profile',
+  setProfile: 'home:set-profile',
+  profileChanged: 'home:profile-changed',
+  faamAccountStatus: 'home:faam-account-status',
+  faamAccountLogin: 'home:faam-account-login',
+  faamAccountEvent: 'home:faam-account-event',
+  faamAccountCancelLogin: 'home:faam-account-cancel-login',
+  faamAccountLogout: 'home:faam-account-logout',
+  faamAccountSetServer: 'home:faam-account-set-server',
+  faamAccountOpenWeb: 'home:faam-account-open-web',
+  faamCloudModels: 'home:faam-cloud-models',
   getAppVersion: 'home:get-app-version',
   onboardingSeen: 'home:onboarding-seen',
   setOnboardingSeen: 'home:set-onboarding-seen',
@@ -549,12 +544,9 @@ export const HOME_CHANNELS = {
   setDefaultApp: 'home:set-default-app',
   pickDefaultSaveDir: 'home:pick-default-save-dir',
   openGenTeam: 'home:open-genteam',
-  openCreditUsage: 'home:open-credit-usage',
+  openAiProviderPage: 'home:open-ai-provider-page',
   openGitHubRepo: 'home:open-github-repo',
   githubStars: 'home:github-stars',
   starPromptShouldShow: 'home:star-prompt-should-show',
   starPromptAction: 'home:star-prompt-action',
-  cloudProjects: 'home:cloud-projects',
-  cloudProjectsCached: 'home:cloud-projects-cached',
-  openCloudProject: 'home:open-cloud-project',
 } as const

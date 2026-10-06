@@ -1729,7 +1729,7 @@ function IconClock(): ReactElement {
   )
 }
 
-/** Genspark brand mark, inline for crisp device-resolution rendering */
+/** Faam AI mark, inline for crisp device-resolution rendering */
 export function FaamAiMark({ size = 18 }: { size?: number }): React.JSX.Element {
   return (
     <svg

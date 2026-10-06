@@ -11,9 +11,9 @@ import { installDropOpenBridge } from '@genoffice/electron-utils/drop-open'
 import type { UpdateUiState } from '../shared/update-api'
 import { normalizeAiPanelPrefs } from '@genoffice/ui/ai-panel-prefs'
 import type {
-  AccountLoginEvent,
-  AccountStatus,
-  CloudProjectsSnapshot,
+  UserProfile,
+  FaamAccountEvent,
+  FaamAccountInfo,
   DefaultAppStatus,
   FolderListing,
   FolderRoot,
@@ -248,24 +248,45 @@ const homeApi: HomeApi = {
     if (channel !== 'stable' && channel !== 'beta') throw new Error('Invalid update channel.')
     await ipcRenderer.invoke(HOME_CHANNELS.setUpdateChannel, channel)
   },
-  async accountStatus() {
-    const result: unknown = await ipcRenderer.invoke(HOME_CHANNELS.accountStatus)
-    return (result ?? { loggedIn: false }) as AccountStatus
+  async getProfile() {
+    const result: unknown = await ipcRenderer.invoke(HOME_CHANNELS.getProfile)
+    const name = result && typeof result === 'object' ? (result as UserProfile).name : ''
+    return { name: typeof name === 'string' ? name : '' }
   },
-  async accountLogin() {
-    const result: unknown = await ipcRenderer.invoke(HOME_CHANNELS.accountLogin)
-    return result === true
+  async setProfile(profile) {
+    await ipcRenderer.invoke(HOME_CHANNELS.setProfile, { name: String(profile?.name ?? '') })
   },
-  onAccountLogin(handler) {
-    const listener = (_event: IpcRendererEvent, ev: AccountLoginEvent) => handler(ev)
-    ipcRenderer.on(HOME_CHANNELS.accountLoginEvent, listener)
-    return () => ipcRenderer.removeListener(HOME_CHANNELS.accountLoginEvent, listener)
+  onProfileChanged(handler) {
+    const listener = (_event: IpcRendererEvent, profile: UserProfile) => handler(profile)
+    ipcRenderer.on(HOME_CHANNELS.profileChanged, listener)
+    return () => ipcRenderer.removeListener(HOME_CHANNELS.profileChanged, listener)
   },
-  async openLoginUrl() {
-    await ipcRenderer.invoke(HOME_CHANNELS.accountLoginOpenUrl)
+  async faamAccountStatus() {
+    return (await ipcRenderer.invoke(HOME_CHANNELS.faamAccountStatus)) as FaamAccountInfo
   },
-  async accountLogout() {
-    await ipcRenderer.invoke(HOME_CHANNELS.accountLogout)
+  async faamAccountLogin() {
+    await ipcRenderer.invoke(HOME_CHANNELS.faamAccountLogin)
+  },
+  onFaamAccountEvent(handler) {
+    const listener = (_event: IpcRendererEvent, ev: FaamAccountEvent) => handler(ev)
+    ipcRenderer.on(HOME_CHANNELS.faamAccountEvent, listener)
+    return () => ipcRenderer.removeListener(HOME_CHANNELS.faamAccountEvent, listener)
+  },
+  async faamAccountCancelLogin() {
+    await ipcRenderer.invoke(HOME_CHANNELS.faamAccountCancelLogin)
+  },
+  async faamAccountLogout() {
+    await ipcRenderer.invoke(HOME_CHANNELS.faamAccountLogout)
+  },
+  async faamAccountSetServer(url) {
+    return (await ipcRenderer.invoke(HOME_CHANNELS.faamAccountSetServer, String(url))) as string
+  },
+  async faamAccountOpenWeb(page) {
+    await ipcRenderer.invoke(HOME_CHANNELS.faamAccountOpenWeb, page)
+  },
+  async faamCloudModels() {
+    const result: unknown = await ipcRenderer.invoke(HOME_CHANNELS.faamCloudModels)
+    return Array.isArray(result) ? result.filter((m): m is string => typeof m === 'string') : []
   },
   async getAppVersion() {
     const result: unknown = await ipcRenderer.invoke(HOME_CHANNELS.getAppVersion)
@@ -433,8 +454,8 @@ const homeApi: HomeApi = {
   async openGenTeam() {
     await ipcRenderer.invoke(HOME_CHANNELS.openGenTeam)
   },
-  async openCreditUsage() {
-    await ipcRenderer.invoke(HOME_CHANNELS.openCreditUsage)
+  async openAiProviderPage(provider) {
+    await ipcRenderer.invoke(HOME_CHANNELS.openAiProviderPage, String(provider))
   },
   async openGitHubRepo() {
     await ipcRenderer.invoke(HOME_CHANNELS.openGitHubRepo)
@@ -456,23 +477,6 @@ const homeApi: HomeApi = {
     if (action !== 'starred' && action !== 'later') throw new Error('Invalid star prompt action.')
     await ipcRenderer.invoke(HOME_CHANNELS.starPromptAction, action)
   },
-  async cloudProjectsCached() {
-    const result: unknown = await ipcRenderer.invoke(HOME_CHANNELS.cloudProjectsCached)
-    return asCloudProjectsSnapshot(result)
-  },
-  async cloudProjectsSync() {
-    // failures (network / CLI) resolve to null so the renderer keeps whatever it has
-    try {
-      const result: unknown = await ipcRenderer.invoke(HOME_CHANNELS.cloudProjects)
-      return asCloudProjectsSnapshot(result)
-    } catch {
-      return null
-    }
-  },
-  async openCloudProject(projectUrl) {
-    if (typeof projectUrl !== 'string' || !projectUrl) throw new Error('Invalid project URL.')
-    await ipcRenderer.invoke(HOME_CHANNELS.openCloudProject, projectUrl)
-  },
   // AI settings channels are registered once by the shell's aggregated docs handlers
   async getAiSettings() {
     return (await ipcRenderer.invoke('ai:get-settings')) as AiSettings
@@ -483,8 +487,8 @@ const homeApi: HomeApi = {
   getAiProviders() {
     return AI_PROVIDERS.map((meta) => {
       let defaultBaseUrl = ''
-      // genspark routes by model and custom has no default — both stay ''
-      if (meta.id !== 'genspark' && !meta.needsBaseUrl && !meta.needsCliPath) {
+      // custom has no default address and Faam AI Cloud's comes from the account — both stay ''
+      if (!meta.needsBaseUrl && !meta.needsCliPath && !meta.account) {
         defaultBaseUrl = getProviderAdapter(meta.id).resolveEndpoint({
           apiKey: '',
           model: meta.defaultModel,
@@ -536,17 +540,6 @@ const homeApi: HomeApi = {
   },
 }
 
-function asCloudProjectsSnapshot(result: unknown): CloudProjectsSnapshot | null {
-  if (
-    result &&
-    typeof result === 'object' &&
-    Array.isArray((result as CloudProjectsSnapshot).projects)
-  ) {
-    return result as CloudProjectsSnapshot
-  }
-  return null
-}
-
 contextBridge.exposeInMainWorld('aiOffice', homeApi)
 
 const integrationsApi: IntegrationsApi = {
@@ -592,6 +585,9 @@ const tabsApi: TabsApi = {
   },
   async showMenu(x, y) {
     await ipcRenderer.invoke(TABS_CHANNELS.showMenu, x, y)
+  },
+  async showLanguageMenu(x, y) {
+    return (await ipcRenderer.invoke(TABS_CHANNELS.showLanguageMenu, x, y)) as string | null
   },
   async showNewMenu(x, y) {
     await ipcRenderer.invoke(TABS_CHANNELS.showNewMenu, x, y)

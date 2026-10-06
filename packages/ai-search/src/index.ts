@@ -1,11 +1,10 @@
 /**
- * Search utilities (main process) — gsk (Genspark CLI) first, then Serper Google API,
- * then Serply, Tavily, Parallel (whose free Search MCP answers keyless), Exa and Firecrawl,
+ * Search utilities (main process) — the preferred keyed backend first, then Serper Google
+ * API, Serply, Tavily, Parallel (whose free Search MCP answers keyless), Exa and Firecrawl,
  * before the DuckDuckGo last resort. Runs in the main process
  * (Node fetch / child process) to avoid renderer CORS; the Serper key reuses SERPER_API_KEY,
  * the Serply key reuses SERPLY_API_KEY, the Tavily key reuses TAVILY_API_KEY, Parallel uses
  * PARALLEL_API_KEY, Exa uses EXA_API_KEY and Firecrawl uses FIRECRAWL_API_KEY.
- * For gsk auth see ./gsk.ts (`gsk login` or GSK_API_KEY).
  */
 
 import {
@@ -15,12 +14,10 @@ import {
   type ImageSearchResult,
   type WebSearchResult,
 } from './shared'
-import { gskImageSearch, gskWebSearch, hasGskAuth } from './gsk'
 import { parallelMcpSearch } from './parallel-mcp'
 
 export type { ImageSearchResult, WebSearchResult } from './shared'
-export * from './gsk'
-export * from './genoffice-auth'
+export * from './faam-account'
 export * from './media-tools'
 export * from './search-tools'
 
@@ -34,11 +31,9 @@ const FIRECRAWL_KEY = () => process.env.FIRECRAWL_API_KEY ?? ''
 /**
  * Backend selection for one search. Keys default to the SERPER_API_KEY /
  * SERPLY_API_KEY / TAVILY_API_KEY / PARALLEL_API_KEY env vars; settings-driven callers (search-tools.ts) pass the
- * user's key and turn gsk off so the chosen backend runs first.
+ * user's key so the chosen backend runs first.
  */
 export interface SearchOptions {
-  /** false = skip the Genspark backend (cloud tools off, or a BYOK search provider is active) */
-  useGsk?: boolean
   serperKey?: string
   serplyKey?: string
   tavilyKey?: string
@@ -59,10 +54,9 @@ const SEARCH_BACKENDS = new Set([
   'firecrawl',
 ] as const)
 
-function normalizeOptions(opts: boolean | SearchOptions | undefined): Required<SearchOptions> {
-  const o = typeof opts === 'boolean' ? { useGsk: opts } : (opts ?? {})
+function normalizeOptions(opts: SearchOptions | undefined): Required<SearchOptions> {
+  const o = opts ?? {}
   return {
-    useGsk: o.useGsk ?? true,
     serperKey: o.serperKey ?? SERPER_KEY(),
     serplyKey: o.serplyKey ?? SERPLY_KEY(),
     tavilyKey: o.tavilyKey ?? TAVILY_KEY(),
@@ -388,20 +382,10 @@ function normalizeSearchArgs(
 export async function webSearch(
   query: string,
   maxResults = 6,
-  options: boolean | SearchOptions = true,
+  options: SearchOptions = {},
 ): Promise<WebSearchResponse> {
   const o = normalizeOptions(options)
   const { query: q, max } = normalizeSearchArgs(query, maxResults, 6)
-  // useGsk=false: the user turned Genspark cloud tools off or picked their own
-  // search key — skip straight to the keyed/free backends
-  if (o.useGsk && hasGskAuth()) {
-    try {
-      const r = await gskWebSearch(q, max)
-      if (r.results.length) return { ...r, method: 'gsk' }
-    } catch {
-      /* fall back to Serper/Serply/Tavily/Parallel/DuckDuckGo */
-    }
-  }
   const keyed = {
     serper: () => serperWebSearch(o.serperKey, q, max),
     serply: () => serplyWebSearch(o.serplyKey, q, max),
@@ -433,7 +417,7 @@ export async function webSearch(
 export async function imageSearch(
   query: string,
   maxResults = 8,
-  options: boolean | SearchOptions = true,
+  options: SearchOptions = {},
 ): Promise<{
   images: ImageSearchResult[]
   method: string
@@ -441,14 +425,6 @@ export async function imageSearch(
 }> {
   const o = normalizeOptions(options)
   const { query: q, max } = normalizeSearchArgs(query, maxResults, 8)
-  if (o.useGsk && hasGskAuth()) {
-    try {
-      const images = filterUsableImages(await gskImageSearch(q, max))
-      if (images.length) return { images, method: 'gsk' }
-    } catch {
-      /* fall back to Serper/Serply/DuckDuckGo */
-    }
-  }
   // Tavily and Parallel have no image endpoint; Serper and Serply are the keyed image backends
   const keyed = [
     () => serperImageSearch(o.serperKey, q, max),

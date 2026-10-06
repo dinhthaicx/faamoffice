@@ -4,7 +4,8 @@ export const cs = {
   aiCollapsePanel: 'Sbalit panel',
   aiComposerPlaceholder: 'Požádejte AI o napsání nebo úpravu dokumentu…',
   aiCopyReplyTitle: 'Kopírovat odpověď',
-  aiCreditsExhausted: 'Došly kredity — dobijte na genspark.ai',
+  aiCreditsExhausted:
+    'Váš poskytovatel AI hlásí, že kredity nebo kvóta jsou vyčerpány. Dobijte kredit u poskytovatele nebo zvolte jiný model v Nastavení',
   aiEmptyTitle: 'Navrhněte stránku s AI',
   aiEmptyBody:
     'Vstupní stránka, report, plakát — řekněte, k čemu a pro koho má být; AI nejprve navrhne zadání a poté stránku sestaví',

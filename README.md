@@ -33,12 +33,12 @@ của trình soạn thảo.
 
 Vào **Cài đặt → Mô hình AI** và chọn nhà cung cấp:
 
-| Loại          | Nhà cung cấp                                                                                                      | Cần gì                        |
-| ------------- | ----------------------------------------------------------------------------------------------------------------- | ----------------------------- |
-| **AI cục bộ** | Ollama, LM Studio, llama.cpp server                                                                               | Không cần API key             |
-| **Đám mây**   | OpenAI, Anthropic Claude, Google Gemini, DeepSeek, xAI Grok, Mistral, Groq, OpenRouter, Kimi, Qwen, GLM, MiniMax… | API key của bạn               |
-| **Tuỳ chỉnh** | Bất kỳ máy chủ nào tương thích OpenAI (vLLM, LocalAI, Jan…)                                                       | Base URL, key nếu máy chủ cần |
-| **Genspark**  | Dùng tài khoản Genspark                                                                                           | Đăng nhập Genspark            |
+| Loại              | Nhà cung cấp                                                                                                      | Cần gì                         |
+| ----------------- | ----------------------------------------------------------------------------------------------------------------- | ------------------------------ |
+| **AI cục bộ**     | Ollama, LM Studio, llama.cpp server                                                                               | Không cần API key              |
+| **Đám mây**       | OpenAI, Anthropic Claude, Google Gemini, DeepSeek, xAI Grok, Mistral, Groq, OpenRouter, Kimi, Qwen, GLM, MiniMax… | API key của bạn                |
+| **Faam AI Cloud** | AI trên máy chủ FaamOffice, trả bằng credit                                                                       | Đăng nhập tài khoản FaamOffice |
+| **Tuỳ chỉnh**     | Bất kỳ máy chủ nào tương thích OpenAI (vLLM, LocalAI, Jan…)                                                       | Base URL, key nếu máy chủ cần  |
 
 ### Dùng AI chạy trên máy (không gửi dữ liệu ra ngoài)
 
@@ -55,6 +55,16 @@ Máy chủ chạy ở máy khác trong mạng LAN thì điền địa chỉ đó
 > Faam AI sửa tài liệu bằng cách gọi công cụ, nên hãy chọn mô hình hỗ trợ **tool calling**
 > (Qwen 3, Llama 3.1+, Mistral, GPT-OSS…). Mô hình không hỗ trợ vẫn trò chuyện được nhưng
 > không sửa được tài liệu.
+
+## Tài khoản FaamOffice (không bắt buộc)
+
+App dùng được hoàn toàn mà không cần tài khoản. Đăng nhập (Cài đặt → Hồ sơ → Đăng nhập) chỉ để dùng
+**Faam AI Cloud**: app mở trình duyệt, bạn xác nhận mã, rồi app nhận token và hiện số credit còn lại.
+
+Máy chủ tài khoản và website giới thiệu nằm trong thư mục [`web/`](web/) (Next.js + Prisma).
+Xem [web/README.md](web/README.md) để chạy thử trên máy, cấu hình AI phía máy chủ và quản trị credit.
+Địa chỉ máy chủ mặc định của bản build lấy từ biến `FAAMOFFICE_ACCOUNT_URL` lúc build; người dùng có
+thể đổi trong Cài đặt → Hồ sơ.
 
 ## Tải về
 

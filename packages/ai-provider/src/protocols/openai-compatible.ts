@@ -1,7 +1,7 @@
 import type { AgentMessage, AgentToolCall, AgentToolDef } from '@genoffice/agent-core'
 import { aiFetch } from '../fetch'
 import { httpBodyDetail } from '../http-error'
-import { gensparkAttributionHeaders, opencodeSessionHeaders } from '../providers'
+import { opencodeSessionHeaders } from '../providers'
 import { modelEchoesReasoning } from '../registry'
 import type { AiChatResponse, AiProviderConfig } from '../types'
 import { createStreamWatchdog, type StreamWatchdog } from '../watchdog'
@@ -177,7 +177,6 @@ async function openAiCompatibleTurn(
     headers: {
       'Content-Type': 'application/json',
       ...(config.apiKey ? { Authorization: `Bearer ${config.apiKey}` } : {}),
-      ...gensparkAttributionHeaders(baseUrl),
       ...opencodeSessionHeaders(baseUrl, cb.sessionId),
     },
     body: JSON.stringify({
@@ -358,7 +357,6 @@ export async function chatOpenAiCompatible(
     headers: {
       'Content-Type': 'application/json',
       ...(config.apiKey ? { Authorization: `Bearer ${config.apiKey}` } : {}),
-      ...gensparkAttributionHeaders(baseUrl),
       ...opencodeSessionHeaders(baseUrl),
     },
     body: JSON.stringify({

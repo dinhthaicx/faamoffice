@@ -3,7 +3,7 @@
 ## Reporting a Vulnerability
 
 Please report suspected vulnerabilities privately via GitHub's
-[private vulnerability reporting](https://github.com/genspark-ai/genoffice/security/advisories/new)
+[private vulnerability reporting](https://github.com/faamoffice/faamoffice/security/advisories/new)
 on this repository. Do not open public issues for security reports. We aim to
 acknowledge reports within 72 hours.
 
@@ -89,6 +89,6 @@ the main process.
   service provider's channels.
 - Vulnerabilities that require an already-compromised machine or a modified
   binary. This includes the deliberate environment-variable override points
-  for local development (`GSK_CLI_PATH`, `XLSX_SIDECAR_PATH`): setting them
+  for local development (`XLSX_SIDECAR_PATH`): setting them
   requires control of the process environment, which is equivalent to code
   execution on the machine.

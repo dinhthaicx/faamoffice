@@ -2149,7 +2149,7 @@ export function IconAiImage(props: IconProps) {
 export function FaamAiMark({ size = 30 }: { size?: number }) {
   return (
     <svg
-      className="genspark-mark"
+      className="ai-mark"
       width={size}
       height={size}
       viewBox="0 0 130 130.025"

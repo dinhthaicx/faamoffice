@@ -8,7 +8,6 @@ export const en = {
   aiStarterPolishAll: 'Polish the whole document for a more professional tone',
   aiStarterContinue: 'Continue writing from where the document leaves off',
   aiStarterFillTemplate: 'Find and fill in the placeholders in this document',
-  aiGskLoginBtn: 'Sign in to Genspark',
   aiPanelTitle: 'Faam AI',
   aiOpenAssistant: 'Open AI assistant',
   aiSummarizeBtn: 'AI Summarize',
@@ -114,7 +113,7 @@ export const en = {
   aiNetworkError:
     'Network problem: could not reach the AI service. Check your connection and try again',
   aiCreditsExhausted:
-    'Your Genspark credits have run out. Visit genspark.ai/pricing to top up, then try again',
+    'Your AI provider says your credits or quota are used up. Top up with the provider or choose another model in Settings',
   aiSumReadAttachment: 'Read attachment',
   aiSumImageAttachment: 'Image attachment {name}',
   aiSumRead: 'Read {name}',

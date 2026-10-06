@@ -11,6 +11,7 @@ import {
   writeFileSync,
 } from 'node:fs'
 import { randomUUID } from 'node:crypto'
+import { hostname } from 'node:os'
 import { basename, dirname, extname, join, resolve } from 'node:path'
 import {
   BrowserWindow,
@@ -99,22 +100,18 @@ import {
   withResolved,
   withShown,
 } from './star-prompt'
-import {
-  clearCloudProjectsStore,
-  cloudProjectExternalUrl,
-  readCloudProjectsStore,
-  syncCloudProjects,
-} from './cloud-projects'
 import { handleDroppedFiles } from './dropped-files'
-import { collectLaunchPaths } from './launch-paths'
 import {
-  genofficeLogout,
-  gskLoginInfo,
-  loadGenofficeAuth,
-  setGskProxyUrl,
-  startGenofficeLogin,
-  watchGskApiKey,
+  cancelFaamLogin,
+  faamAccountServer,
+  faamAccountStatus,
+  faamCloudModels,
+  faamLogout,
+  setFaamAccountServer,
+  setFaamBuildDefaultServer,
+  startFaamLogin,
 } from '@genoffice/ai-search'
+import { collectLaunchPaths } from './launch-paths'
 
 import {
   buildDocsMenu,
@@ -252,7 +249,6 @@ import {
   setHtmlProvisionalTitleHook,
 } from '../../../html/src/main/html-main'
 import type {
-  AccountLoginEvent,
   AutoSaveDefault,
   FolderListing,
   FolderRoot,
@@ -269,6 +265,9 @@ import type {
   FileSearchQuery,
   FileSearchRerank,
   FileSearchSettings,
+  UserProfile,
+  FaamAccountEvent,
+  FaamAccountInfo,
 } from '../shared/home-api'
 import { HOME_CHANNELS } from '../shared/home-api'
 import {
@@ -278,6 +277,7 @@ import {
 } from '@genoffice/ui/ai-panel-prefs'
 import type { TabKind } from '../shared/tabs-api'
 import { TABS_CHANNELS } from '../shared/tabs-api'
+import { LANG_OPTIONS } from '../shared/languages'
 import { showErrorDialog } from './error-dialog'
 import { startRendererWatchdog } from './renderer-watchdog'
 import {
@@ -476,7 +476,6 @@ const APP_SETTINGS_PATH = () => join(app.getPath('userData'), 'app-settings.json
 const OPEN_DOCUMENTS_PATH = () => join(app.getPath('userData'), OPEN_DOCUMENTS_FILE)
 /** only the instance holding the single-instance lock may write or remove the registry */
 let ownsOpenDocumentsRegistry = false
-let stopAuthWatch: (() => void) | null = null
 const publishOpenDocumentsIfOwner = (paths: readonly string[]) => {
   if (ownsOpenDocumentsRegistry) publishOpenDocuments(OPEN_DOCUMENTS_PATH(), paths)
 }
@@ -528,6 +527,21 @@ function currentTheme(): UiTheme {
   const saved = readAppSettings(APP_SETTINGS_PATH()).theme
   cachedTheme = saved === 'light' || saved === 'dark' ? saved : 'system'
   return cachedTheme
+}
+
+/** true when `url` is an http(s) address on the same origin as `base` */
+function sameOrigin(url: string, base: string): boolean {
+  try {
+    const a = new URL(url)
+    return (a.protocol === 'https:' || a.protocol === 'http:') && a.origin === new URL(base).origin
+  } catch {
+    return false
+  }
+}
+
+function readProfile(): UserProfile {
+  const name = readAppSettings(APP_SETTINGS_PATH()).profileName
+  return { name: typeof name === 'string' ? name : '' }
 }
 
 let cachedDocTheme: DocTheme | null = null
@@ -608,6 +622,24 @@ function resolveAnalyticsKeys(): AnalyticsKeys | null {
   }
 }
 
+/**
+ * Release builds can bake in the FaamOffice account server (electron-builder
+ * extraMetadata.faamofficeAccount.baseUrl, from FAAMOFFICE_ACCOUNT_URL at
+ * build time); the user's choice in Settings still wins.
+ */
+function applyFaamAccountBuildDefault(): void {
+  if (!app.isPackaged) return
+  try {
+    const pkg = JSON.parse(readFileSync(join(app.getAppPath(), 'package.json'), 'utf8')) as {
+      faamofficeAccount?: { baseUrl?: unknown }
+    }
+    const baseUrl = pkg.faamofficeAccount?.baseUrl
+    if (typeof baseUrl === 'string') setFaamBuildDefaultServer(baseUrl)
+  } catch {
+    /* no metadata: the module default applies */
+  }
+}
+
 function persistAnalyticsPreference(enabled: boolean): boolean {
   const previous = cachedAnalyticsEnabled
   // Change the in-memory gate before touching disk. The synchronous atomic
@@ -649,14 +681,25 @@ function initAnalytics(): void {
 }
 
 // ---- first-run onboarding ----
-// The GenTeam community page opened from the onboarding's second slide.
-// Stable short link served by the genoffice.ai site; it 302s to the tokened
-// invite link, which stays out of this repo and rotates server-side.
+// The feedback page opened from the onboarding's second slide (the fork's
+// GitHub issues).
 const GENTEAM_URL = 'https://github.com/faamoffice/faamoffice/issues'
 
-// Genspark credit-usage page opened from the account menu's credits row.
-// Kept main-side so the renderer never supplies the URL.
-const CREDIT_USAGE_URL = 'https://www.genspark.ai/credit-usage'
+// Download pages of the local AI servers and API-key pages of hosted vendors,
+// opened from Settings → AI Model. Main-side so the renderer never supplies a URL.
+const AI_PROVIDER_PAGES: Record<string, string> = {
+  ollama: 'https://ollama.com/download',
+  lmstudio: 'https://lmstudio.ai/download',
+  llamacpp: 'https://github.com/ggml-org/llama.cpp#quick-start',
+  openai: 'https://platform.openai.com/api-keys',
+  anthropic: 'https://console.anthropic.com/settings/keys',
+  gemini: 'https://aistudio.google.com/apikey',
+  deepseek: 'https://platform.deepseek.com/api_keys',
+  xai: 'https://console.x.ai/',
+  mistral: 'https://console.mistral.ai/api-keys',
+  groq: 'https://console.groq.com/keys',
+  openrouter: 'https://openrouter.ai/keys',
+}
 
 // ---- "star us on GitHub" prompt (see star-prompt.ts for the rules) ----
 
@@ -3727,53 +3770,71 @@ function statEntries(paths: string[]): RecentEntry[] {
 }
 
 function registerHomeIpc(): void {
-  // signed-in means FaamOffice's own device-code login; the shared gsk CLI key
-  // is only a silent fallback, deliberately not shown here to nudge users onto our key
-  ipcMain.handle(HOME_CHANNELS.accountStatus, async () => {
-    if (!loadGenofficeAuth()) return { loggedIn: false }
-    await proxyBootstrap
-    const info = await gskLoginInfo()
-    return info
-      ? { loggedIn: true, email: info.email, creditBalance: info.creditBalance }
-      : { loggedIn: true }
-  })
-
-  // login progress is streamed to the requesting renderer; the auth URL is
-  // kept main-side so the "open manually" rescue never opens a renderer-supplied URL
-  let pendingLoginUrl = ''
-  ipcMain.handle(HOME_CHANNELS.accountLogin, async (event) => {
-    analytics.track('login_click')
-    const sender = event.sender
-    pendingLoginUrl = ''
-    await proxyBootstrap
-    const send = (payload: AccountLoginEvent) => {
-      if (!sender.isDestroyed()) sender.send(HOME_CHANNELS.accountLoginEvent, payload)
+  applyFaamAccountBuildDefault()
+  // local profile: FaamOffice has no account; the name lives in app-settings.json
+  ipcMain.handle(HOME_CHANNELS.getProfile, (): UserProfile => readProfile())
+  ipcMain.handle(HOME_CHANNELS.setProfile, (_event, input: unknown) => {
+    const raw = input && typeof input === 'object' ? (input as { name?: unknown }).name : ''
+    const name = typeof raw === 'string' ? raw.trim().slice(0, 80) : ''
+    writeAppSetting(APP_SETTINGS_PATH(), 'profileName', name)
+    for (const w of BrowserWindow.getAllWindows()) {
+      w.webContents.send(HOME_CHANNELS.profileChanged, { name } satisfies UserProfile)
     }
-    // open the browser on the first url event only; later events refresh the rescue URL
-    let opened = false
-    const launched = startGenofficeLogin((progress) => {
-      if (progress.url) {
-        pendingLoginUrl = progress.url
-        if (!opened) {
-          opened = true
-          void shell.openExternal(progress.url)
+  })
+
+  // FaamOffice account (optional): device-code sign-in to the account server;
+  // its token unlocks the Faam AI Cloud provider
+  ipcMain.handle(HOME_CHANNELS.faamAccountStatus, async (): Promise<FaamAccountInfo> => {
+    await proxyBootstrap
+    const status = await faamAccountStatus()
+    return {
+      signedIn: status.signedIn,
+      server: status.server,
+      ...(status.user?.email ? { email: status.user.email } : {}),
+      ...(status.user?.name ? { name: status.user.name } : {}),
+      ...(typeof status.user?.credits === 'number' ? { credits: status.user.credits } : {}),
+      ...(status.offline ? { offline: true } : {}),
+    }
+  })
+  ipcMain.handle(HOME_CHANNELS.faamAccountLogin, async (event) => {
+    await proxyBootstrap
+    const sender = event.sender
+    const server = faamAccountServer()
+    const send = (payload: FaamAccountEvent) => {
+      if (!sender.isDestroyed()) sender.send(HOME_CHANNELS.faamAccountEvent, payload)
+    }
+    void startFaamLogin(`${hostname()} (FaamOffice)`, (progress) => {
+      if (progress.phase === 'code') {
+        // only ever open a page on the account server itself
+        if (sameOrigin(progress.url, server)) {
+          void shell.openExternal(progress.url).catch(() => undefined)
         }
+        send({ phase: 'code', userCode: progress.userCode, url: progress.url })
+      } else if (progress.phase === 'success') {
+        for (const w of BrowserWindow.getAllWindows()) {
+          w.webContents.send(HOME_CHANNELS.faamAccountEvent, { phase: 'success' })
+        }
+      } else {
+        send({ phase: 'error', error: progress.error })
       }
-      if (progress.phase === 'success') analytics.track('login_success')
-      send(progress)
     })
-    if (launched) send({ phase: 'launched' })
-    return launched
   })
-
-  ipcMain.handle(HOME_CHANNELS.accountLoginOpenUrl, () => {
-    if (pendingLoginUrl) void shell.openExternal(pendingLoginUrl)
+  ipcMain.handle(HOME_CHANNELS.faamAccountCancelLogin, () => cancelFaamLogin())
+  ipcMain.handle(HOME_CHANNELS.faamAccountLogout, async () => {
+    await proxyBootstrap
+    await faamLogout()
   })
-
-  ipcMain.handle(HOME_CHANNELS.accountLogout, async () => {
-    await genofficeLogout()
-    // the cloud projects cache belongs to the account that just signed out
-    clearCloudProjectsStore(cloudProjectsStorePath())
+  ipcMain.handle(HOME_CHANNELS.faamAccountSetServer, (_event, url: unknown) =>
+    typeof url === 'string' ? setFaamAccountServer(url) : '',
+  )
+  ipcMain.handle(HOME_CHANNELS.faamAccountOpenWeb, (_event, page: unknown) => {
+    const locale = currentLang() === 'vi' ? 'vi' : 'en'
+    const path = page === 'register' ? 'register' : 'account'
+    void shell.openExternal(`${faamAccountServer()}/${locale}/${path}`).catch(() => undefined)
+  })
+  ipcMain.handle(HOME_CHANNELS.faamCloudModels, async () => {
+    await proxyBootstrap
+    return faamCloudModels()
   })
 
   ipcMain.handle(HOME_CHANNELS.getAppVersion, (): string => app.getVersion())
@@ -4026,8 +4087,10 @@ function registerHomeIpc(): void {
   ipcMain.handle(HOME_CHANNELS.setLanguage, (_event, lang: unknown) => {
     if (!isLang(lang) || lang === currentLang()) return
     persistLang(lang)
-    // the switcher lives on the home page, so the home menu is the active one
-    buildHomeMenu()
+    // the switch can come from Settings or the tab bar while any tab is
+    // active: rebuild the menu that tab owns, not always the home one
+    if (tabManager) tabManager.refreshActiveTargets()
+    else buildHomeMenu()
     installDockMenu()
     installBackToHomeItems()
     for (const wc of webContents.getAllWebContents()) wc.send('app:language-changed', lang)
@@ -4383,10 +4446,9 @@ function registerHomeIpc(): void {
     })
   })
 
-  ipcMain.handle(HOME_CHANNELS.openCreditUsage, () => {
-    shell.openExternal(CREDIT_USAGE_URL).catch(() => {
-      // no browser handler available; nothing actionable for the user here
-    })
+  ipcMain.handle(HOME_CHANNELS.openAiProviderPage, (_event, provider: unknown) => {
+    const url = typeof provider === 'string' ? AI_PROVIDER_PAGES[provider] : undefined
+    if (url) void shell.openExternal(url).catch(() => undefined)
   })
 
   ipcMain.handle(HOME_CHANNELS.openGitHubRepo, () => {
@@ -4429,19 +4491,6 @@ function registerHomeIpc(): void {
     starPromptSessionGrant = null
     // 'later' needs no write: the display was already counted by the query
     if (action === 'starred') writeStarPrompt(withResolved(readStarPrompt()))
-  })
-
-  const cloudProjectsStorePath = () => join(app.getPath('userData'), 'cloud-projects.json')
-
-  ipcMain.handle(HOME_CHANNELS.cloudProjectsCached, () =>
-    readCloudProjectsStore(cloudProjectsStorePath()),
-  )
-
-  ipcMain.handle(HOME_CHANNELS.cloudProjects, () => syncCloudProjects(cloudProjectsStorePath()))
-
-  ipcMain.handle(HOME_CHANNELS.openCloudProject, (_event, projectUrl: unknown) => {
-    const url = cloudProjectExternalUrl(projectUrl)
-    if (url) void shell.openExternal(url)
   })
 }
 
@@ -4614,6 +4663,30 @@ function registerTabsIpc(): void {
         : {}),
     })
   })
+  ipcMain.handle(
+    TABS_CHANNELS.showLanguageMenu,
+    (_event, x: unknown, y: unknown) =>
+      new Promise<Lang | null>((resolve) => {
+        if (!shellWindow) return resolve(null)
+        const current = currentLang()
+        const menu = Menu.buildFromTemplate(
+          LANG_OPTIONS.map((option) => ({
+            label: option.label,
+            type: 'radio' as const,
+            checked: option.value === current,
+            click: () => resolve(option.value),
+          })),
+        )
+        menu.popup({
+          window: shellWindow,
+          ...(typeof x === 'number' && typeof y === 'number'
+            ? { x: Math.round(x), y: Math.round(y) }
+            : {}),
+          // the close callback can run before the item's click: give it a beat
+          callback: () => setTimeout(() => resolve(null), 50),
+        })
+      }),
+  )
   ipcMain.handle(TABS_CHANNELS.detach, (_event, id: unknown) => {
     if (typeof id !== 'string' || !tabManager?.canDetachTab(id)) return
     detachTabToWindow(id)
@@ -5523,9 +5596,8 @@ async function installMainProcessProxy(): Promise<void> {
   ].find((v) => v && /^https?:\/\//.test(v))
   if (!proxyUrl) {
     try {
-      // PAC/rule proxies answer per-host: probe the host the login flow, the
-      // Genspark LLM proxy and the gsk CLI actually target
-      const resolved = await session.defaultSession.resolveProxy('https://www.genspark.ai/')
+      // PAC/rule proxies answer per-host: probe a typical AI vendor endpoint
+      const resolved = await session.defaultSession.resolveProxy('https://api.openai.com/')
       const m = /PROXY\s+([^;\s]+)/.exec(resolved)
       if (m) proxyUrl = `http://${m[1]}`
     } catch {
@@ -5533,9 +5605,6 @@ async function installMainProcessProxy(): Promise<void> {
     }
   }
   if (!proxyUrl) return
-  // spawned gsk CLI children (login/search/…) do their own fetch and never see
-  // the dispatcher below — forward the proxy to them via env
-  setGskProxyUrl(proxyUrl)
   try {
     const { EnvHttpProxyAgent, setGlobalDispatcher } = await import('undici')
     // loopback and .local hosts stay direct so local AI servers (Ollama,
@@ -5710,14 +5779,6 @@ app.whenReady().then(async () => {
     app.quit()
     return
   }
-  // another FaamOffice-family app re-logging in rotates the shared key; the
-  // home page re-reads its account status. A logout that leaves only the
-  // gsk CLI fallback key is not a login
-  stopAuthWatch = watchGskApiKey(() => {
-    if (!loadGenofficeAuth()) return
-    for (const w of BrowserWindow.getAllWindows())
-      w.webContents.send(HOME_CHANNELS.accountLoginEvent, { phase: 'success' })
-  })
   // a registry left by a crashed instance must not block faamoffice writes
   ownsOpenDocumentsRegistry = true
   publishOpenDocuments(OPEN_DOCUMENTS_PATH(), [])
@@ -5926,7 +5987,6 @@ app.on('before-quit', () => {
 app.on('will-quit', () => {
   fileIndexer?.stop()
   fileIndexStore?.close()
-  stopAuthWatch?.()
   for (const watcher of folderWatchers.values()) watcher.close()
   controlServer?.close()
   // a second instance that lost the lock quits too; it must not delete the running editor's list

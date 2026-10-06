@@ -74,13 +74,13 @@ describe('generate_image', () => {
     expect(called).toBe(false)
   })
 
-  it('surfaces the channel error (not logged in / cloud tools off / generation failure)', async () => {
+  it('surfaces the channel error (no image provider / generation failure)', async () => {
     const { exec, editor } = await runWithDesktop(
-      { aiGenerateImage: () => Promise.resolve({ error: 'Genspark account is not logged in' }) },
+      { aiGenerateImage: () => Promise.resolve({ error: 'No image provider is configured' }) },
       { prompt: 'a watercolor fox' },
     )
     expect(exec.isError).toBe(true)
-    expect(exec.output).toContain('not logged in')
+    expect(exec.output).toContain('No image provider')
     expect(editor.state.doc.childCount).toBe(1) // nothing inserted
   })
 

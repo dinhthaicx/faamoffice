@@ -17,7 +17,6 @@ export const hi = {
   aiQcPageSkipped: 'पेज {n}: स्वचालित लेआउट जाँच छोड़ दी गई',
   aiQcStopped: 'लेआउट जाँच रोक दी गई',
   aiQcCapped: 'शेष {count} पेज नहीं जाँचे गए (प्रति रन सीमा)',
-  aiGskLoginBtn: 'Genspark में साइन इन करें',
   aiPanelTitle: 'Faam AI',
   aiOpenAssistant: 'AI सहायक खोलें',
   aiFactCheckBtn: 'AI तथ्य जाँच',
@@ -114,7 +113,7 @@ export const hi = {
   aiErrNetwork:
     'नेटवर्क समस्या: AI सेवा से कनेक्ट नहीं हो सका। कनेक्शन जांचें और फिर से प्रयास करें',
   aiCreditsExhausted:
-    'आपके Genspark क्रेडिट समाप्त हो गए हैं। genspark.ai/pricing पर रिचार्ज करें और फिर से प्रयास करें',
+    'आपके AI प्रदाता के अनुसार आपके क्रेडिट या कोटा समाप्त हो गए हैं। प्रदाता के पास टॉप अप करें या सेटिंग्स में कोई दूसरा मॉडल चुनें',
   aiErrRequestFailed: 'अनुरोध भेजने में विफल: {msg}',
   aiErrGenerateFailed: 'जनरेशन विफल',
   aiErrRegenFailed: 'स्लाइड फिर से बनाने में विफल',
@@ -223,5 +222,4 @@ export const hi = {
   aiSumSaveTemplate: 'स्टाइल टेम्पलेट "{name}" सहेजा गया',
   aiSumTemplatesEmpty: 'स्टाइल टेम्पलेट (खाली)',
   aiSumListTemplates: '{count} स्टाइल टेम्पलेट सूचीबद्ध किए गए',
-  aiPageCloudToLocal: 'क्लाउड अनुपलब्ध — स्थानीय रूप से जनरेट',
 } satisfies Record<keyof typeof zh, string>

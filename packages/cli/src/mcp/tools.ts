@@ -488,7 +488,7 @@ export const TOOLS: ToolSpec[] = [
     description:
       'Generate an image from a prompt with the provider configured in FaamOffice and save it; the result names the real format. ref images steer edits (background removal, upscale).',
     positionals: [{ key: 'prompt', description: 'what to draw' }],
-    options: ['out', 'aspect', 'size', 'ref', 'model', 'force'],
+    options: ['out', 'aspect', 'ref', 'force'],
   },
   {
     name: 'media',

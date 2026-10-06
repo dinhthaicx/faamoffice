@@ -10,7 +10,6 @@ const fallback = () =>
   new Response('<a class="result__a" href="https://fallback.example.com">Fallback</a>')
 
 beforeEach(() => {
-  vi.stubEnv('AI_SEARCH_DISABLE_GSK', '1')
   for (const key of ['SERPER_API_KEY', 'SERPLY_API_KEY', 'TAVILY_API_KEY', 'PARALLEL_API_KEY'])
     vi.stubEnv(key, '')
 })
@@ -63,7 +62,6 @@ describe('Parallel free Search MCP', () => {
   it.each([false, true])('searches anonymously and maps results (SSE: %s)', async (sse) => {
     const { requests } = mockServer({ content: [], structuredContent: payload }, sse)
     const r = await webSearch('office tools', 1, {
-      useGsk: false,
       prefer: 'parallel',
       parallelKey: '',
     })
@@ -97,7 +95,6 @@ describe('Parallel free Search MCP', () => {
     settings.search!.provider = 'parallel'
     const { requests } = mockServer({ content: [], structuredContent: payload })
     expect(searchOptionsFromSettings(settings)).toMatchObject({
-      useGsk: false,
       prefer: 'parallel',
       parallelKey: '',
     })

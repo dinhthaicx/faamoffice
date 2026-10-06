@@ -158,7 +158,7 @@ fn create_cache_directory(
     session_id: &str,
     cancelled: &AtomicBool,
 ) -> Result<CacheDirectory, SidecarError> {
-    let path = std::env::temp_dir().join(format!("genspark-ai-excel-{session_id}"));
+    let path = std::env::temp_dir().join(format!("faamoffice-excel-{session_id}"));
     let directory = CacheDirectory::create(path)?;
     if cancelled.load(Ordering::Acquire) {
         return Err(SidecarError::cancelled());

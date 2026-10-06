@@ -8,7 +8,6 @@ export const de = {
   aiStarterPolishAll: 'Das ganze Dokument für einen professionelleren Ton überarbeiten',
   aiStarterContinue: 'Dort weiterschreiben, wo das Dokument aufhört',
   aiStarterFillTemplate: 'Platzhalter im Dokument finden und ausfüllen',
-  aiGskLoginBtn: 'Bei Genspark anmelden',
   aiPanelTitle: 'Faam AI',
   aiOpenAssistant: 'KI-Assistenten öffnen',
   aiSummarizeBtn: 'KI-Zusammenfassung',
@@ -119,7 +118,7 @@ export const de = {
   aiNetworkError:
     'Netzwerkproblem: Der KI-Dienst ist nicht erreichbar. Prüfe deine Verbindung und versuche es erneut',
   aiCreditsExhausted:
-    'Deine Genspark-Credits sind aufgebraucht. Lade unter genspark.ai/pricing auf und versuche es erneut',
+    'Ihr KI-Anbieter meldet, dass Ihr Guthaben oder Kontingent aufgebraucht ist. Laden Sie beim Anbieter auf oder wählen Sie in den Einstellungen ein anderes Modell',
   aiSumReadAttachment: 'Anlage lesen',
   aiSumImageAttachment: 'Bildanlage {name}',
   aiSumRead: '{name} lesen',

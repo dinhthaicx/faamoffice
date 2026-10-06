@@ -297,7 +297,9 @@ body.overlay-title-bar .tab-bar-drag-spacer {
 
 .tab-new-btn,
 .tab-overflow-btn,
-.tab-app-menu-btn {
+.tab-app-menu-btn,
+.tab-lang-btn,
+.tab-theme-btn {
   -webkit-app-region: no-drag;
   position: relative;
   flex-shrink: 0;
@@ -316,8 +318,20 @@ body.overlay-title-bar .tab-bar-drag-spacer {
 
 .tab-new-btn:hover,
 .tab-overflow-btn:hover,
-.tab-app-menu-btn:hover {
+.tab-app-menu-btn:hover,
+.tab-lang-btn:hover,
+.tab-theme-btn:hover {
   background: rgba(0, 0, 0, 0.08);
+}
+
+/* language + theme pair at the right end of the strip, before the window
+   controls (Windows/Linux) or the window edge (macOS) */
+.tab-lang-btn {
+  margin-left: 2px;
+}
+
+.tab-theme-btn {
+  margin-right: 8px;
 }
 
 .app-frame-content {
@@ -347,7 +361,9 @@ body.overlay-title-bar .tab-bar-drag-spacer {
 
 [data-theme='dark'] .tab-new-btn:hover,
 [data-theme='dark'] .tab-overflow-btn:hover,
-[data-theme='dark'] .tab-app-menu-btn:hover {
+[data-theme='dark'] .tab-app-menu-btn:hover,
+[data-theme='dark'] .tab-lang-btn:hover,
+[data-theme='dark'] .tab-theme-btn:hover {
   background: rgba(255, 255, 255, 0.1);
 }
 
@@ -370,7 +386,9 @@ body.overlay-title-bar .tab-bar-drag-spacer {
   }
   :root:not([data-theme='light']):not([data-theme='dark']) .tab-new-btn:hover,
   :root:not([data-theme='light']):not([data-theme='dark']) .tab-overflow-btn:hover,
-  :root:not([data-theme='light']):not([data-theme='dark']) .tab-app-menu-btn:hover {
+  :root:not([data-theme='light']):not([data-theme='dark']) .tab-app-menu-btn:hover,
+  :root:not([data-theme='light']):not([data-theme='dark']) .tab-lang-btn:hover,
+  :root:not([data-theme='light']):not([data-theme='dark']) .tab-theme-btn:hover {
     background: rgba(255, 255, 255, 0.1);
   }
 }

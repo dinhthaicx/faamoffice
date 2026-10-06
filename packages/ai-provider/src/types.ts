@@ -1,7 +1,7 @@
 import type { AgentMessage, AgentToolCall, AgentToolDef } from '@genoffice/agent-core'
 
 export type AiProviderId =
-  | 'genspark'
+  | 'faamcloud'
   | 'codex'
   | 'anthropic'
   | 'gemini'
@@ -30,12 +30,6 @@ export type AiProviderId =
   | 'lmstudio'
   | 'llamacpp'
   | 'custom'
-
-/** Genspark account status (gsk login state; the sole auth source for AI features) */
-export interface GenSparkAccountStatus {
-  loggedIn: boolean
-  email?: string
-}
 
 export interface AiProviderConfig {
   apiKey: string
@@ -68,20 +62,16 @@ export interface AiProviderMeta {
   local?: boolean
   /** the model list is read live from GET /models instead of the static `models` */
   liveModels?: boolean
+  /**
+   * Faam AI Cloud: the key and base URL come from the signed-in FaamOffice
+   * account (the main process injects them per request), never from Settings
+   */
+  account?: boolean
 }
 
 /** Image generation / media analysis backends (separate from the chat provider) */
 export type AiMediaProviderId =
-  | 'genspark'
-  | 'openai'
-  | 'gemini'
-  | 'doubao'
-  | 'glm'
-  | 'xai'
-  | 'qwen'
-  | 'minimax'
-  | 'deepseek'
-  | 'custom'
+  'openai' | 'gemini' | 'doubao' | 'glm' | 'xai' | 'qwen' | 'minimax' | 'deepseek' | 'custom'
 
 /** wire shape of the image endpoint */
 export type AiImageProtocol = 'openai-images' | 'gemini' | 'dashscope' | 'minimax'
@@ -105,7 +95,7 @@ export interface AiMediaProviderMeta {
   description: string
   keyPlaceholder: string
   needsBaseUrl?: boolean
-  /** '' for genspark (gsk login) and custom (user-supplied) */
+  /** '' for custom (user-supplied) */
   defaultBaseUrl: string
   /** absent = the provider does not generate images */
   imageProtocol?: AiImageProtocol
@@ -131,9 +121,12 @@ export interface AiMediaSettings {
   provider?: AiMediaProviderId | undefined
 }
 
-/** web/image search backends; Parallel supports both a user key and free keyless search */
+/**
+ * web/image search backends; 'auto' is the free chain (Parallel's keyless
+ * Search MCP, then DuckDuckGo) and needs no key; Parallel also takes a user key
+ */
 export type AiSearchProviderId =
-  'genspark' | 'serper' | 'serply' | 'tavily' | 'parallel' | 'exa' | 'firecrawl'
+  'auto' | 'serper' | 'serply' | 'tavily' | 'parallel' | 'exa' | 'firecrawl'
 
 export interface AiSearchProviderMeta {
   id: AiSearchProviderId
@@ -145,7 +138,7 @@ export interface AiSearchProviderMeta {
 
 export interface AiSearchSettings {
   provider: AiSearchProviderId
-  providers: Record<Exclude<AiSearchProviderId, 'genspark'>, { apiKey: string }>
+  providers: Record<Exclude<AiSearchProviderId, 'auto'>, { apiKey: string }>
 }
 
 export interface AiSettings {
@@ -153,19 +146,11 @@ export interface AiSettings {
   providers: Record<AiProviderId, AiProviderConfig>
   /**
    * Provider for generate_image / analyze_media. Absent (pre-media settings
-   * files) means Genspark, i.e. the gsk login + gskToolsEnabled gate.
+   * files) means no media provider: the media tools stay unavailable.
    */
   media?: AiMediaSettings | undefined
-  /** web/image search backend; absent means Genspark (gsk when signed in, then the free chain) */
+  /** web/image search backend; absent means 'auto' (the free chain) */
   search?: AiSearchSettings | undefined
-  /**
-   * Genspark cloud tools (web/image search via gsk, image generation, media
-   * analysis). Default true; false makes tools skip the gsk backend entirely
-   * (search falls back to free sources, gsk-only tools are unavailable).
-   * Only meaningful while signed in — signed out, the gsk backend is
-   * unavailable regardless.
-   */
-  gskToolsEnabled?: boolean
   /**
    * Output-token cap for ONE model turn of agent runs (default
    * DEFAULT_MAX_OUTPUT_TOKENS). Reasoning models bill their thinking against

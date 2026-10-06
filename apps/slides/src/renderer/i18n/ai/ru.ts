@@ -17,7 +17,6 @@ export const ru = {
   aiQcPageSkipped: 'Страница {n}: автоматическая проверка макета пропущена',
   aiQcStopped: 'Проверка макета остановлена',
   aiQcCapped: 'Ещё {count} стр. не проверено (лимит за один запуск)',
-  aiGskLoginBtn: 'Войти в Genspark',
   aiPanelTitle: 'Faam AI',
   aiOpenAssistant: 'Открыть ИИ-помощника',
   aiFactCheckBtn: 'ИИ-фактчекинг',
@@ -115,7 +114,7 @@ export const ru = {
   aiErrNetwork:
     'Проблема с сетью: не удалось подключиться к сервису ИИ. Проверьте подключение и повторите попытку',
   aiCreditsExhausted:
-    'Кредиты Genspark исчерпаны. Пополните баланс на genspark.ai/pricing и повторите попытку',
+    'Ваш поставщик ИИ сообщает, что кредиты или квота исчерпаны. Пополните баланс у поставщика или выберите другую модель в настройках',
   aiErrRequestFailed: 'Не удалось отправить запрос: {msg}',
   aiErrGenerateFailed: 'Сбой генерации',
   aiErrRegenFailed: 'Не удалось переделать слайд',
@@ -224,5 +223,4 @@ export const ru = {
   aiSumSaveTemplate: 'Сохранён шаблон стиля «{name}»',
   aiSumTemplatesEmpty: 'Шаблоны стиля (пусто)',
   aiSumListTemplates: 'Показано шаблонов стиля: {count}',
-  aiPageCloudToLocal: 'Облако недоступно — создано локально',
 } satisfies Record<keyof typeof zh, string>

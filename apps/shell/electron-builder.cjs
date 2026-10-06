@@ -79,9 +79,6 @@ const WIN_SIDECAR = `../sheets/native/xlsx-engine/target/${winSidecarTarget}/rel
 
 function assertExtraResourceSources() {
   for (const rel of [
-    '../../node_modules/@genspark/cli',
-    '../../node_modules/@genspark/cli/node_modules/commander',
-    '../../node_modules/ws',
     '../../node_modules/electron/dist/LICENSES.chromium.html',
     '../../node_modules/@embedpdf/pdfium/dist/pdfium.wasm',
     '../pdf/node_modules/harfbuzzjs/hb-subset.wasm',
@@ -360,12 +357,8 @@ const config = {
       from: '../../packages/pdf2docx/ocr-helper/win-ocr.exe',
       to: 'ocr/win-ocr.exe',
     },
-    {
-      from: '../../node_modules/@genspark/cli',
-      to: 'gsk/node_modules/@genspark/cli',
-    },
-    // faamoffice command line: runs on the app binary with ELECTRON_RUN_AS_NODE (as
-    // the gsk CLI above already does), so the RunAsNode fuse must stay enabled.
+    // faamoffice command line: runs on the app binary with ELECTRON_RUN_AS_NODE,
+    // so the RunAsNode fuse must stay enabled.
     // Layout (Resources/cli next to wasm/, native/, ocr/) is what
     // packages/cli/src/resources.ts expects.
     {
@@ -395,14 +388,6 @@ const config = {
     {
       from: '../../packages/cli/dist/node_modules',
       to: 'cli/node_modules',
-    },
-    {
-      from: '../../node_modules/@genspark/cli/node_modules/commander',
-      to: 'gsk/node_modules/commander',
-    },
-    {
-      from: '../../node_modules/ws',
-      to: 'gsk/node_modules/ws',
     },
   ],
   // `mimeType` is read only by the Linux target, where it becomes the
@@ -735,6 +720,13 @@ if (ga4MeasurementId && ga4ApiSecret) {
   }
 }
 if (fontCdnUrl) extraMetadata.genofficeFontCdn = { baseUrl: fontCdnUrl }
+// FAAMOFFICE_ACCOUNT_URL — the FaamOffice account server (web/) this build signs
+// in to by default; users can still point Settings → Profile at another one.
+const faamAccountUrl = normalizeHttpsBaseUrl(
+  'FAAMOFFICE_ACCOUNT_URL',
+  process.env.FAAMOFFICE_ACCOUNT_URL,
+)
+if (faamAccountUrl) extraMetadata.faamofficeAccount = { baseUrl: faamAccountUrl }
 if (Object.keys(extraMetadata).length) config.extraMetadata = extraMetadata
 
 module.exports = config

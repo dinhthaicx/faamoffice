@@ -1,5 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import type { CSSProperties, PointerEvent as ReactPointerEvent, ReactElement } from 'react'
+import { isLang } from '@genoffice/i18n'
+import type { UiTheme } from '../../shared/home-api'
 import type { TabsApi, TabSummary } from '../../shared/tabs-api'
 import { TEAR_OFF_SLACK, insertionIndexForX, isBeyondBand } from '../../shared/tab-drag-geometry'
 import { notifyFilesChanged } from './file-events'
@@ -634,7 +636,98 @@ export function TabBar() {
           />
         </svg>
       </button>
+      <LanguageButton />
+      <ThemeButton />
       <div className="tab-bar-caption-spacer" />
     </div>
+  )
+}
+
+/** globe button: opens the native language picker under itself */
+export function LanguageButton(): ReactElement {
+  const { t, setLang } = useI18n()
+  return (
+    <button
+      className="tab-lang-btn"
+      title={t('language')}
+      aria-label={t('language')}
+      onClick={(event) => {
+        const rect = event.currentTarget.getBoundingClientRect()
+        void window.aiOfficeTabs
+          .showLanguageMenu(Math.round(rect.left), Math.round(rect.bottom))
+          .then((picked) => {
+            if (picked && isLang(picked)) setLang(picked)
+          })
+      }}
+    >
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+        <circle cx="12" cy="12" r="9" stroke="currentColor" strokeWidth="1.5" />
+        <path
+          d="M3 12h18M12 3c2.5 2.6 3.8 5.6 3.8 9s-1.3 6.4-3.8 9c-2.5-2.6-3.8-5.6-3.8-9S9.5 5.6 12 3Z"
+          stroke="currentColor"
+          strokeWidth="1.5"
+          strokeLinejoin="round"
+        />
+      </svg>
+    </button>
+  )
+}
+
+const DARK_QUERY = '(prefers-color-scheme: dark)'
+
+/**
+ * sun / moon button: flips between light and dark. A 'system' preference is
+ * resolved against the OS first, so one click always visibly changes the theme;
+ * the main process broadcasts the change to every tab and window.
+ */
+export function ThemeButton(): ReactElement {
+  const { t } = useI18n()
+  const [theme, setTheme] = useState<UiTheme>('system')
+  const [systemDark, setSystemDark] = useState(() => window.matchMedia(DARK_QUERY).matches)
+  useEffect(() => {
+    void window.aiOffice.getTheme().then(setTheme)
+    const off = window.aiOffice.onThemeChanged(setTheme)
+    const query = window.matchMedia(DARK_QUERY)
+    const onSystem = (event: MediaQueryListEvent) => setSystemDark(event.matches)
+    query.addEventListener('change', onSystem)
+    return () => {
+      off()
+      query.removeEventListener('change', onSystem)
+    }
+  }, [])
+  const dark = theme === 'dark' || (theme === 'system' && systemDark)
+  const label = dark ? t('switchToLight') : t('switchToDark')
+  return (
+    <button
+      className="tab-theme-btn"
+      title={label}
+      aria-label={label}
+      onClick={() => {
+        const next: UiTheme = dark ? 'light' : 'dark'
+        setTheme(next)
+        void window.aiOffice.setTheme(next)
+      }}
+    >
+      {dark ? (
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+          <circle cx="12" cy="12" r="4" stroke="currentColor" strokeWidth="1.5" />
+          <path
+            d="M12 2.5v2M12 19.5v2M2.5 12h2M19.5 12h2M5.3 5.3l1.4 1.4M17.3 17.3l1.4 1.4M5.3 18.7l1.4-1.4M17.3 6.7l1.4-1.4"
+            stroke="currentColor"
+            strokeWidth="1.5"
+            strokeLinecap="round"
+          />
+        </svg>
+      ) : (
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+          <path
+            d="M20 14.5A8 8 0 0 1 9.5 4a8 8 0 1 0 10.5 10.5Z"
+            stroke="currentColor"
+            strokeWidth="1.5"
+            strokeLinejoin="round"
+          />
+        </svg>
+      )}
+    </button>
   )
 }

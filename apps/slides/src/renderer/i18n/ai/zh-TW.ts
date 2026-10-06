@@ -17,7 +17,6 @@ export const zhTW = {
   aiQcPageSkipped: '第 {n} 頁:已略過自動版式檢查',
   aiQcStopped: '版式檢查已停止',
   aiQcCapped: '其餘 {count} 頁未檢查(單次上限)',
-  aiGskLoginBtn: '登入 Genspark',
   aiPanelTitle: 'Faam AI',
   aiOpenAssistant: '開啟 AI 助手',
   aiFactCheckBtn: 'AI 事實核查',
@@ -107,7 +106,7 @@ export const zhTW = {
   aiErrStreamTimeout: 'AI 請求逾時：網路長時間無回應，已停止。請檢查網路後重試',
   aiErrOverloaded: 'AI 服務目前繁忙，請稍後重試',
   aiErrNetwork: '網路有問題，無法連接 AI 服務。請檢查網路後重試',
-  aiCreditsExhausted: 'Genspark 點數已用完，請前往 genspark.ai/pricing 儲值後重試',
+  aiCreditsExhausted: 'AI 服務商提示點數或額度已用完。請向服務商儲值，或在設定中選擇其他模型',
   aiErrRequestFailed: '要求傳送失敗: {msg}',
   aiErrGenerateFailed: '產生失敗',
   aiErrRegenFailed: '重做頁面失敗',
@@ -216,5 +215,4 @@ export const zhTW = {
   aiSumSaveTemplate: '儲存風格範本"{name}"',
   aiSumTemplatesEmpty: '風格範本清單（空）',
   aiSumListTemplates: '列出 {count} 個風格範本',
-  aiPageCloudToLocal: '雲端不可用,已本地生成',
 } satisfies Record<keyof typeof zh, string>

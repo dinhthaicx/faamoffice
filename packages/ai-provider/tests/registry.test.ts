@@ -7,7 +7,7 @@ import {
   modelLacksVision,
 } from '../src/registry'
 import { endpointUrl } from '../src/protocols/shared'
-import { AI_PROVIDERS, GENSPARK_LLM_BASE_URLS } from '../src/providers'
+import { AI_PROVIDERS, providerRequiresApiKey } from '../src/providers'
 import type { AiProviderConfig, AiProviderId } from '../src/types'
 
 function config(model: string, baseUrl?: string): AiProviderConfig {
@@ -20,20 +20,6 @@ describe('provider registry', () => {
       expect(AI_PROVIDER_ADAPTERS[meta.id].meta).toBe(meta)
     }
     expect(Object.keys(AI_PROVIDER_ADAPTERS).sort()).toEqual(AI_PROVIDERS.map((m) => m.id).sort())
-  })
-
-  it('routes genspark by model id prefix onto the two proxy endpoints', () => {
-    const resolve = (model: string) => AI_PROVIDER_ADAPTERS.genspark.resolveEndpoint(config(model))
-    expect(resolve('claude-opus-4-7')).toEqual({
-      protocol: 'anthropic',
-      baseUrl: GENSPARK_LLM_BASE_URLS.anthropic,
-    })
-    // gpt-5.x fixes sampling, so the proxy's OpenAI route also drops temperature
-    expect(resolve('gpt-5.2')).toEqual({
-      protocol: 'openai-compatible',
-      baseUrl: GENSPARK_LLM_BASE_URLS.openai,
-      omitTemperature: true,
-    })
   })
 
   it('resolves direct providers to their official endpoints', () => {
@@ -331,12 +317,24 @@ describe('provider registry', () => {
     ).toBe('https://mirror/v1')
   })
 
-  it('only genspark authenticates through the gsk login', () => {
+  it('codex reuses its CLI login, Faam AI Cloud the account; every other provider takes an API key', () => {
     for (const [id, adapter] of Object.entries(AI_PROVIDER_ADAPTERS)) {
-      expect(adapter.capabilities.auth).toBe(
-        id === 'genspark' ? 'gsk-login' : id === 'codex' ? 'codex-chatgpt' : 'api-key',
-      )
+      const expected = id === 'codex' ? 'codex-chatgpt' : id === 'faamcloud' ? 'account' : 'api-key'
+      expect(adapter.capabilities.auth).toBe(expected)
     }
+  })
+
+  it('routes Faam AI Cloud to the account server the main process injects', () => {
+    const adapter = AI_PROVIDER_ADAPTERS.faamcloud
+    expect(() => adapter.resolveEndpoint({ apiKey: '', model: 'faam-fast' })).toThrow(/Sign in/)
+    expect(
+      adapter.resolveEndpoint({
+        apiKey: 'fo_t',
+        model: 'faam-fast',
+        baseUrl: 'https://faam.example.com/api/v1/ai',
+      }),
+    ).toEqual({ protocol: 'openai-compatible', baseUrl: 'https://faam.example.com/api/v1/ai' })
+    expect(providerRequiresApiKey('faamcloud')).toBe(true)
   })
 
   it('routes Codex to the auto-discovered local process bridge', () => {

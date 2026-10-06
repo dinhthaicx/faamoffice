@@ -7,7 +7,7 @@ import { CliError, EXIT } from '../result'
 export const searchCommand: CommandDef = {
   name: 'search',
   summary:
-    'Web or image search through the provider configured in FaamOffice (Genspark, Serper, Serply, Tavily, Parallel).',
+    'Web or image search through the provider configured in FaamOffice (Serper, Serply, Tavily, Parallel, Exa, Firecrawl), or the free chain when none is.',
   usage: 'search <query> [--images] [--max <n>]',
   options: [
     { name: 'images', description: 'search images instead of web pages' },

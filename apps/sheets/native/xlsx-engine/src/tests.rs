@@ -4095,7 +4095,7 @@ fn cancelled_open_registers_no_session() {
 #[test]
 fn cancel_after_the_cache_directory_is_created_reclaims_it() {
     let session_id = Uuid::new_v4().to_string();
-    let path = std::env::temp_dir().join(format!("genspark-ai-excel-{session_id}"));
+    let path = std::env::temp_dir().join(format!("faamoffice-excel-{session_id}"));
 
     let error = create_cache_directory(&session_id, &AtomicBool::new(true)).unwrap_err();
     assert!(matches!(error, SidecarError::Cancelled), "{error:?}");
@@ -4111,7 +4111,7 @@ fn cancel_after_the_cache_directory_is_created_reclaims_it() {
 #[test]
 fn cache_directory_outlives_the_open_only_once_committed() {
     let committed_id = Uuid::new_v4().to_string();
-    let committed = std::env::temp_dir().join(format!("genspark-ai-excel-{committed_id}"));
+    let committed = std::env::temp_dir().join(format!("faamoffice-excel-{committed_id}"));
     let mut directory = create_cache_directory(&committed_id, &AtomicBool::new(false)).unwrap();
     assert!(committed.exists());
     directory.commit();
@@ -4124,7 +4124,7 @@ fn cache_directory_outlives_the_open_only_once_committed() {
 
     // Uncommitted, the guard reclaims it on drop.
     let abandoned_id = Uuid::new_v4().to_string();
-    let abandoned = std::env::temp_dir().join(format!("genspark-ai-excel-{abandoned_id}"));
+    let abandoned = std::env::temp_dir().join(format!("faamoffice-excel-{abandoned_id}"));
     drop(create_cache_directory(&abandoned_id, &AtomicBool::new(false)).unwrap());
     assert!(!abandoned.exists());
 }
@@ -4151,7 +4151,7 @@ fn an_uncancelled_open_completes_and_keeps_its_cache_directory() {
     let metadata = sessions
         .open_with_locale(&path, "zh", None, &AtomicBool::new(false))
         .unwrap();
-    let cache = std::env::temp_dir().join(format!("genspark-ai-excel-{}", metadata.session_id));
+    let cache = std::env::temp_dir().join(format!("faamoffice-excel-{}", metadata.session_id));
     assert!(cache.exists(), "a completed open lost its cache directory");
     assert_eq!(sessions.session_count(), 1);
     // Close still reclaims it.

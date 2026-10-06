@@ -27,40 +27,21 @@ import type {
 } from '@genoffice/ai-provider'
 import { useI18n } from './locale'
 import type { StringKey, TFunc } from './locale'
-import type { AccountStatus, AiCatalogEntry, DocTheme, UiTheme } from '../../shared/home-api'
+import type {
+  AiCatalogEntry,
+  DocTheme,
+  FaamAccountEvent,
+  FaamAccountInfo,
+  UiTheme,
+} from '../../shared/home-api'
+import { LANG_OPTIONS } from '../../shared/languages'
 import { ProviderLogo } from './provider-logos'
 import { IntegrationsPane, skillUpdateDue } from './IntegrationsPane'
 import './settings.css'
 
 // ── Settings modal (opened from the account menu) ─────────
-// Genspark-style two-pane dialog: section nav on the left, fields on the right.
+// Two-pane dialog: section nav on the left, fields on the right.
 // All values go through the existing home IPC; nothing is stored locally.
-
-// sorted by ISO 639 language code — native-script labels have no natural
-// shared alphabet, so the code is the ordering key
-const LANG_OPTIONS = [
-  { value: 'ar', label: 'العربية' },
-  { value: 'cs', label: 'Čeština' },
-  { value: 'de', label: 'Deutsch' },
-  { value: 'en', label: 'English' },
-  { value: 'es', label: 'Español' },
-  { value: 'fr', label: 'Français' },
-  { value: 'he', label: 'עברית' },
-  { value: 'hi', label: 'हिन्दी' },
-  { value: 'id', label: 'Bahasa Indonesia' },
-  { value: 'it', label: 'Italiano' },
-  { value: 'ja', label: '日本語' },
-  { value: 'ko', label: '한국어' },
-  { value: 'ms', label: 'Bahasa Melayu' },
-  { value: 'nl', label: 'Nederlands' },
-  { value: 'pl', label: 'Polski' },
-  { value: 'pt', label: 'Português' },
-  { value: 'ru', label: 'Русский' },
-  { value: 'th', label: 'ไทย' },
-  { value: 'vi', label: 'Tiếng Việt' },
-  { value: 'zh', label: '简体中文' },
-  { value: 'zh-TW', label: '繁體中文' },
-] as const
 
 // GenMail's option order: follow-system first, then the manual picks
 const THEME_OPTIONS = [
@@ -149,10 +130,10 @@ function CustomFontSizeInput({
   )
 }
 
-export type SectionId = 'account' | 'aiModel' | 'aiMedia' | 'general' | 'integrations' | 'about'
+export type SectionId = 'profile' | 'aiModel' | 'aiMedia' | 'general' | 'integrations' | 'about'
 
 const SECTIONS: readonly { id: SectionId; labelKey: StringKey }[] = [
-  { id: 'account', labelKey: 'setSecAccount' },
+  { id: 'profile', labelKey: 'setSecProfile' },
   { id: 'aiModel', labelKey: 'setSecAiModel' },
   { id: 'aiMedia', labelKey: 'setSecAiMedia' },
   { id: 'general', labelKey: 'setSecGeneral' },
@@ -194,7 +175,7 @@ function SectionIcon({ id }: { id: SectionId }) {
       </svg>
     )
   }
-  if (id === 'account') {
+  if (id === 'profile') {
     return (
       <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
         <circle cx="8" cy="5.2" r="2.9" stroke="currentColor" strokeWidth="1.3" />
@@ -314,14 +295,6 @@ function AiModelPane({ t }: { t: TFunc }) {
     let alive = true
     void window.aiOffice.getAiSettings?.().then((s) => {
       if (!alive || !s) return
-      // The switch is disabled with genspark, so never present it stranded
-      // off. Display-only: s.provider may be the activeProvider fallback for
-      // a half-configured BYOK selection, so writing anything back here would
-      // clobber the stored choice — the main process heals a genuine legacy
-      // genspark+off file itself, judged on the raw stored provider.
-      if (s.provider === 'genspark' && s.gskToolsEnabled === false) {
-        s = { ...s, gskToolsEnabled: true }
-      }
       setSettings(s)
       const codex = s.providers.codex
       if (codex) {
@@ -337,7 +310,7 @@ function AiModelPane({ t }: { t: TFunc }) {
   // endpoint itself. Keyed on the catalog's `needsBaseUrl` flag rather than on
   // the literal 'custom' id, so it follows the slot rather than the name, and
   // stays a no-op while any other provider is selected — a local server saved
-  // months ago is never contacted while Genspark is in use.
+  // months ago is never contacted while another provider is in use.
   // Local presets and live-catalog vendors ride the same path, falling back to
   // their default address while the Base URL field is left empty.
   const endpointEntry = catalog.find(
@@ -366,11 +339,18 @@ function AiModelPane({ t }: { t: TFunc }) {
       listedForRef.current = ''
       setCatalog(foldModels(endpointProvider, []))
     }
-    if (!endpointBaseUrl || !window.aiOffice.getCustomModels) return
+    const fromAccount = !!endpointEntry?.account
+    if (!fromAccount && (!endpointBaseUrl || !window.aiOffice.getCustomModels)) return
     let cancelled = false
     const timer = setTimeout(() => {
-      void window.aiOffice
-        .getCustomModels(endpointBaseUrl, endpointApiKey)
+      // Faam AI Cloud lists models for the signed-in account (main holds the token)
+      const probe = fromAccount
+        ? (window.aiOffice.faamCloudModels?.() ?? Promise.resolve([])).then((models) => ({
+            models,
+            defaultModel: '',
+          }))
+        : window.aiOffice.getCustomModels!(endpointBaseUrl, endpointApiKey)
+      void probe
         .then((live) => {
           // A server that will not answer leaves the current list alone: a blip
           // must not wipe a picker mid-use.
@@ -393,7 +373,7 @@ function AiModelPane({ t }: { t: TFunc }) {
       cancelled = true
       clearTimeout(timer)
     }
-  }, [endpointProvider, endpointBaseUrl, endpointApiKey])
+  }, [endpointProvider, endpointBaseUrl, endpointApiKey, endpointEntry?.account])
 
   if (!settings) return null
   const provider = settings.provider
@@ -404,7 +384,6 @@ function AiModelPane({ t }: { t: TFunc }) {
     baseUrl: undefined,
     cliPath: undefined,
   }
-  const isGenspark = provider === 'genspark'
   const isCodex = provider === 'codex'
 
   const touch = () => {
@@ -429,12 +408,7 @@ function AiModelPane({ t }: { t: TFunc }) {
     touch()
   }
   const selectProvider = (id: AiSettings['provider']) => {
-    // cloud tools cannot be off with genspark (chat runs through gsk anyway)
-    setSettings({
-      ...settings,
-      provider: id,
-      ...(id === 'genspark' ? { gskToolsEnabled: true } : {}),
-    })
+    setSettings({ ...settings, provider: id })
     touch()
   }
   const save = () => {
@@ -499,7 +473,7 @@ function AiModelPane({ t }: { t: TFunc }) {
           className="set-dd"
           value={provider}
           ariaLabel={t('setAiProvider')}
-          options={catalog.map((c) => ({
+          options={orderedProviders(catalog).map((c) => ({
             value: c.id,
             label: c.label,
             render: (
@@ -513,8 +487,15 @@ function AiModelPane({ t }: { t: TFunc }) {
         />
       </div>
       <div className="set-field-desc set-ai-note">
-        {isGenspark ? t('setAiGensparkHint') : isCodex ? t('setAiCodexHint') : t('setAiByokNote')}
+        {isCodex
+          ? t('setAiCodexHint')
+          : meta?.account
+            ? t('setAiFaamCloudNote')
+            : meta?.local
+              ? t('setAiLocalNote')
+              : t('setAiByokNote')}
       </div>
+      {meta?.local && <LocalAiGuide t={t} provider={provider} url={endpointBaseUrl} />}
       <div className="set-field">
         <div className="set-field-text">
           <label className="set-field-label">{t('setAiModelId')}</label>
@@ -564,7 +545,7 @@ function AiModelPane({ t }: { t: TFunc }) {
             }}
           />
         </div>
-      ) : !isGenspark ? (
+      ) : meta?.account ? null : (
         <>
           <div className="set-field">
             <div className="set-field-text">
@@ -575,6 +556,14 @@ function AiModelPane({ t }: { t: TFunc }) {
                 <div className="set-field-desc">{t('setAiKeyHint')}</div>
               </div>
             </div>
+            {PROVIDER_KEY_PAGES.has(provider) && (
+              <button
+                className="set-btn"
+                onClick={() => void window.aiOffice.openAiProviderPage(provider)}
+              >
+                {t('setAiGetKey')}
+              </button>
+            )}
             <input
               id="set-ai-key"
               className="set-input"
@@ -608,7 +597,7 @@ function AiModelPane({ t }: { t: TFunc }) {
             />
           </div>
         </>
-      ) : null}
+      )}
       <div className="set-field">
         <div className="set-field-text">
           <div className="set-field-stack">
@@ -630,27 +619,100 @@ function AiModelPane({ t }: { t: TFunc }) {
           onBlur={commitMaxTokens}
         />
       </div>
-      <div className="set-field">
-        <div className="set-field-text">
-          <div className="set-field-stack">
-            <div className="set-field-label">{t('setAiGskTools')}</div>
-            <div className="set-field-desc">{t('setAiGskToolsDesc')}</div>
-          </div>
-        </div>
-        {/* locked on with the genspark provider — chat runs through gsk anyway */}
-        <button
-          className="set-switch"
-          role="switch"
-          aria-checked={settings.gskToolsEnabled !== false}
-          aria-label={t('setAiGskTools')}
-          disabled={isGenspark}
-          onClick={() => {
-            setSettings({ ...settings, gskToolsEnabled: settings.gskToolsEnabled === false })
-            touch()
-          }}
-        />
-      </div>
     </>
+  )
+}
+
+/** popular hosted vendors first, then local servers, then the rest in catalog order */
+const PROVIDER_ORDER: readonly string[] = [
+  'faamcloud',
+  'openai',
+  'anthropic',
+  'gemini',
+  'deepseek',
+  'xai',
+  'mistral',
+  'groq',
+  'openrouter',
+  'qwen',
+  'kimi',
+  'glm',
+  'minimax',
+  'ollama',
+  'lmstudio',
+  'llamacpp',
+  'custom',
+  'codex',
+]
+
+function orderedProviders<T extends { id: string }>(catalog: T[]): T[] {
+  const rank = (id: string) => {
+    const i = PROVIDER_ORDER.indexOf(id)
+    return i === -1 ? PROVIDER_ORDER.length : i
+  }
+  return [...catalog].sort((a, b) => rank(a.id) - rank(b.id))
+}
+
+/** vendors whose API-key page the main process can open (its own allowlist decides the URL) */
+const PROVIDER_KEY_PAGES: ReadonlySet<string> = new Set([
+  'openai',
+  'anthropic',
+  'gemini',
+  'deepseek',
+  'xai',
+  'mistral',
+  'groq',
+  'openrouter',
+])
+
+/** per-server setup: download, fetch a tool-calling model, start the server */
+const LOCAL_AI_STEPS: Record<string, { step: StringKey; code?: string }[]> = {
+  ollama: [
+    { step: 'setAiLocalStepInstall' },
+    { step: 'setAiLocalStepModel', code: 'ollama pull qwen3' },
+    { step: 'setAiLocalStepPick' },
+  ],
+  lmstudio: [
+    { step: 'setAiLocalStepInstall' },
+    { step: 'setAiLocalStepModel', code: 'lms get qwen3' },
+    { step: 'setAiLocalStepServe', code: 'lms server start' },
+    { step: 'setAiLocalStepPick' },
+  ],
+  llamacpp: [
+    { step: 'setAiLocalStepInstall', code: 'brew install llama.cpp' },
+    {
+      step: 'setAiLocalStepServe',
+      code: 'llama-server -hf ggml-org/Qwen3-8B-GGUF --jinja --port 8080',
+    },
+    { step: 'setAiLocalStepPick' },
+  ],
+}
+
+/** Setup guide shown while a local AI server (Ollama, LM Studio, llama.cpp) is selected */
+function LocalAiGuide({ t, provider, url }: { t: TFunc; provider: string; url: string }) {
+  const steps = LOCAL_AI_STEPS[provider]
+  if (!steps) return null
+  return (
+    <div className="set-local-guide">
+      <div className="set-local-guide-head">
+        <span className="set-field-label">{t('setAiLocalGuideTitle')}</span>
+        <button
+          className="set-btn"
+          onClick={() => void window.aiOffice.openAiProviderPage(provider)}
+        >
+          {t('setAiLocalDownload')}
+        </button>
+      </div>
+      <ol className="set-local-steps">
+        {steps.map(({ step, code }, i) => (
+          <li key={i}>
+            <span>{t(step, { url })}</span>
+            {code && <code className="set-local-code">{code}</code>}
+          </li>
+        ))}
+      </ol>
+      <div className="set-field-desc">{t('setAiLocalToolsTip')}</div>
+    </div>
   )
 }
 
@@ -797,9 +859,7 @@ function AiMediaPane({
           window.aiOffice.testAiSearchSettings?.({
             provider: search.provider,
             apiKey:
-              search.provider === 'genspark'
-                ? ''
-                : (search.providers[search.provider]?.apiKey ?? ''),
+              search.provider === 'auto' ? '' : (search.providers[search.provider]?.apiKey ?? ''),
           }) ?? Promise.resolve(fallback),
       ],
       ['image', () => vendorCheck(media.imageProvider)],
@@ -1043,33 +1103,29 @@ function AiMediaPane({
       <section key={cap}>
         {subhead(cap, title)}
         {providerRow(title, id, options, pick)}
-        <div className="set-field-desc set-ai-note">
-          {id === 'genspark' ? t('setAiMediaGensparkHint') : meta.description}
-        </div>
-        {id !== 'genspark' && (
-          <>
-            {modelRow(
-              `set-ai-${cap}-model`,
-              cap === 'image' ? meta.imageModels : meta.analysisModels,
-              cap === 'image' ? meta.defaultImageModel : meta.defaultAnalysisModel,
-              config[modelField],
-              (m) => updateMediaConfig(id, { [modelField]: m }),
-            )}
-            {keyRow(`set-ai-${cap}-key`, config.apiKey, meta.keyPlaceholder, (v) =>
-              updateMediaConfig(id, { apiKey: v }),
-            )}
-            {baseUrlRow(`set-ai-${cap}-base-url`, meta, config.baseUrl ?? '', (v) =>
-              updateMediaConfig(id, { baseUrl: v }),
-            )}
-          </>
-        )}
+        <div className="set-field-desc set-ai-note">{meta.description}</div>
+        <>
+          {modelRow(
+            `set-ai-${cap}-model`,
+            cap === 'image' ? meta.imageModels : meta.analysisModels,
+            cap === 'image' ? meta.defaultImageModel : meta.defaultAnalysisModel,
+            config[modelField],
+            (m) => updateMediaConfig(id, { [modelField]: m }),
+          )}
+          {keyRow(`set-ai-${cap}-key`, config.apiKey, meta.keyPlaceholder, (v) =>
+            updateMediaConfig(id, { apiKey: v }),
+          )}
+          {baseUrlRow(`set-ai-${cap}-base-url`, meta, config.baseUrl ?? '', (v) =>
+            updateMediaConfig(id, { baseUrl: v }),
+          )}
+        </>
       </section>
     )
   }
 
   const searchMeta = searchCatalog.find((m) => m.id === search.provider)
   const searchKey =
-    search.provider === 'genspark' ? '' : (search.providers[search.provider]?.apiKey ?? '')
+    search.provider === 'auto' ? '' : (search.providers[search.provider]?.apiKey ?? '')
 
   return (
     <>
@@ -1092,8 +1148,8 @@ function AiMediaPane({
           setSearch({ ...search, provider: v as AiSearchSettings['provider'] }),
         )}
         <div className="set-field-desc set-ai-note">
-          {search.provider === 'genspark'
-            ? t('setAiSearchGensparkHint')
+          {search.provider === 'auto'
+            ? t('setAiSearchAutoHint')
             : search.provider === 'parallel'
               ? t('setAiSearchParallelHint')
               : search.provider === 'serply'
@@ -1102,7 +1158,7 @@ function AiMediaPane({
                   ? t('setAiSearchSerperHint')
                   : t('setAiSearchTavilyHint')}
         </div>
-        {search.provider !== 'genspark' &&
+        {search.provider !== 'auto' &&
           keyRow('set-ai-search-key', searchKey, searchMeta?.keyPlaceholder ?? 'API Key', (v) =>
             setSearch({
               ...search,
@@ -1221,47 +1277,242 @@ function AiStatusPill({ status }: { status: AiStatus | null }) {
   )
 }
 
+/**
+ * Local profile: FaamOffice has no account, so the only identity is a display
+ * name kept in app-settings.json (greeting + sidebar avatar). Saved on blur.
+ */
+function ProfilePane({ t }: { t: TFunc }) {
+  const [name, setName] = useState('')
+  const stored = useRef('')
+  useEffect(() => {
+    let alive = true
+    void window.aiOffice.getProfile?.().then((p) => {
+      if (!alive) return
+      stored.current = p.name
+      setName(p.name)
+    })
+    return () => {
+      alive = false
+    }
+  }, [])
+  const commit = () => {
+    const next = name.trim()
+    if (next === stored.current) return
+    stored.current = next
+    void window.aiOffice.setProfile?.({ name: next })
+  }
+  return (
+    <>
+      <h3 className="set-pane-title">{t('setSecProfile')}</h3>
+      <div className="set-field">
+        <div className="set-field-text">
+          <div className="set-field-stack">
+            <label className="set-field-label" htmlFor="set-profile-name">
+              {t('setProfileName')}
+            </label>
+            <div className="set-field-desc">{t('setProfileNameHint')}</div>
+          </div>
+        </div>
+        <input
+          id="set-profile-name"
+          className="set-input"
+          type="text"
+          value={name}
+          maxLength={80}
+          spellCheck={false}
+          onChange={(e) => setName(e.target.value)}
+          onBlur={commit}
+          onKeyDown={(e) => {
+            if (e.key === 'Enter') commit()
+          }}
+        />
+      </div>
+      <div className="set-field-desc set-ai-note">{t('setProfileLocalNote')}</div>
+      <FaamAccountBlock t={t} />
+    </>
+  )
+}
+
+const FAAM_ERROR_KEYS = {
+  network: 'setFaamErrNetwork',
+  expired: 'setFaamErrExpired',
+  denied: 'setFaamErrDenied',
+  failed: 'setFaamErrFailed',
+} as const satisfies Record<Extract<FaamAccountEvent, { phase: 'error' }>['error'], StringKey>
+
+/**
+ * Optional FaamOffice account: browser sign-in with a device code, the live
+ * credit balance, sign-out, and the account server address. Signing in unlocks
+ * the Faam AI Cloud provider; nothing else in the app needs an account.
+ */
+function FaamAccountBlock({ t }: { t: TFunc }) {
+  const [info, setInfo] = useState<FaamAccountInfo | null>(null)
+  const [waitingCode, setWaitingCode] = useState<string | null>(null)
+  const [error, setError] = useState<keyof typeof FAAM_ERROR_KEYS | null>(null)
+  const [serverDraft, setServerDraft] = useState<string | null>(null)
+  const [serverInvalid, setServerInvalid] = useState(false)
+  const [busy, setBusy] = useState(false)
+
+  const refresh = useCallback(() => {
+    void window.aiOffice.faamAccountStatus?.().then(setInfo)
+  }, [])
+
+  useEffect(() => {
+    refresh()
+    const off = window.aiOffice.onFaamAccountEvent?.((ev) => {
+      if (ev.phase === 'code') {
+        setWaitingCode(ev.userCode)
+        setError(null)
+      } else if (ev.phase === 'success') {
+        setWaitingCode(null)
+        refresh()
+      } else {
+        setWaitingCode(null)
+        setError(ev.error)
+      }
+    })
+    return () => off?.()
+  }, [refresh])
+
+  const signIn = () => {
+    setError(null)
+    void window.aiOffice.faamAccountLogin?.()
+  }
+  const cancel = () => {
+    setWaitingCode(null)
+    void window.aiOffice.faamAccountCancelLogin?.()
+  }
+  const signOut = () => {
+    setBusy(true)
+    void window.aiOffice
+      .faamAccountLogout?.()
+      .then(refresh)
+      .finally(() => setBusy(false))
+  }
+  const commitServer = () => {
+    if (serverDraft === null) return
+    const draft = serverDraft.trim()
+    setServerDraft(null)
+    if (!draft || draft === info?.server) return
+    void window.aiOffice.faamAccountSetServer?.(draft).then((normalized) => {
+      setServerInvalid(!normalized)
+      refresh()
+    })
+  }
+
+  const signedIn = info?.signedIn ?? false
+  return (
+    <section className="set-account" aria-label={t('setFaamAccount')}>
+      <div className="set-field">
+        <div className="set-field-text">
+          <div className="set-field-stack">
+            <div className="set-field-label">{t('setFaamAccount')}</div>
+            <div className="set-field-desc">
+              {signedIn
+                ? [
+                    info?.email || info?.name,
+                    typeof info?.credits === 'number'
+                      ? t('setFaamCredits', { n: info.credits.toLocaleString() })
+                      : null,
+                    info?.offline ? t('setFaamOffline') : null,
+                  ]
+                    .filter(Boolean)
+                    .join(' · ')
+                : t('setFaamAccountDesc')}
+            </div>
+          </div>
+        </div>
+        <div className="set-account-actions">
+          {signedIn ? (
+            <>
+              <button
+                className="set-btn"
+                onClick={() => void window.aiOffice.faamAccountOpenWeb?.('account')}
+              >
+                {t('setFaamManage')}
+              </button>
+              <button className="set-btn" disabled={busy} onClick={signOut}>
+                {t('setFaamSignOut')}
+              </button>
+            </>
+          ) : waitingCode ? (
+            <button className="set-btn" onClick={cancel}>
+              {t('cancel')}
+            </button>
+          ) : (
+            <>
+              <button
+                className="set-btn"
+                onClick={() => void window.aiOffice.faamAccountOpenWeb?.('register')}
+              >
+                {t('setFaamRegister')}
+              </button>
+              <button className="set-btn primary" onClick={signIn}>
+                {t('setFaamSignIn')}
+              </button>
+            </>
+          )}
+        </div>
+      </div>
+      {waitingCode && (
+        <div className="set-field-desc set-ai-note" role="status">
+          {t('setFaamWaiting', { code: waitingCode })}
+        </div>
+      )}
+      {error && (
+        <div className="set-field-desc set-ai-note set-account-error" role="alert">
+          {t(FAAM_ERROR_KEYS[error])}
+        </div>
+      )}
+      <div className="set-field">
+        <div className="set-field-text">
+          <div className="set-field-stack">
+            <label className="set-field-label" htmlFor="set-faam-server">
+              {t('setFaamServer')}
+            </label>
+            <div className="set-field-desc">
+              {serverInvalid ? t('setFaamServerInvalid') : t('setFaamServerHint')}
+            </div>
+          </div>
+        </div>
+        <input
+          id="set-faam-server"
+          className="set-input"
+          type="url"
+          value={serverDraft ?? info?.server ?? ''}
+          spellCheck={false}
+          autoComplete="off"
+          onChange={(e) => setServerDraft(e.target.value)}
+          onBlur={commitServer}
+          onKeyDown={(e) => {
+            if (e.key === 'Enter') commitServer()
+          }}
+        />
+      </div>
+    </section>
+  )
+}
+
 export interface SettingsModalProps {
-  status: AccountStatus | null
-  loggingOut: boolean
-  /** browser sign-in in progress (spinner shows on the account entry) */
-  loginWaiting: boolean
-  /** device auth URL while waiting — rescue actions when the browser did not auto-open */
-  loginUrl: string | null
-  urlCopied: boolean
-  onOpenLoginUrl: () => void
-  onCopyLoginUrl: () => void
   onClose: () => void
   /** the Jev search settings were saved; the home search re-judges or drops its current order */
   onFileSearchChange?: () => void
-  /** closes the modal and launches the Genspark login flow (progress shows on the account entry) */
-  onLogin: () => void
-  onLogout: () => void
   /** an installed skill is older than the bundled one: dot on the Integrations entry */
   skillUpdateDue?: boolean
   onSkillUpdateDue?: (due: boolean) => void
-  /** open on this section / block instead of the account page */
+  /** open on this section / block instead of the profile page */
   target?: SettingsTarget | null
 }
 
 export function SettingsModal({
-  status,
-  loggingOut,
-  loginWaiting,
-  loginUrl,
-  urlCopied,
-  onOpenLoginUrl,
-  onCopyLoginUrl,
   onClose,
   onFileSearchChange,
-  onLogin,
-  onLogout,
   skillUpdateDue: updateDue = false,
   onSkillUpdateDue,
   target,
 }: SettingsModalProps) {
   const { lang, setLang, t } = useI18n()
-  const [section, setSection] = useState<SectionId>(target?.section ?? 'account')
+  const [section, setSection] = useState<SectionId>(target?.section ?? 'profile')
   const [theme, setTheme] = useState<UiTheme>('system')
   const [docTheme, setDocTheme] = useState<DocTheme>('follow')
   const [saveDir, setSaveDir] = useState('')
@@ -1392,9 +1643,6 @@ export function SettingsModal({
     return t('setDefaultAppDesc')
   })()
 
-  const loggedIn = status?.loggedIn ?? false
-  const email = status?.email ?? ''
-
   return (
     <div
       className="set-overlay"
@@ -1434,54 +1682,7 @@ export function SettingsModal({
             ))}
           </nav>
           <div className="set-pane">
-            {section === 'account' && (
-              <>
-                <h3 className="set-pane-title">{t('setSecAccount')}</h3>
-                <Field label={t('setEmail')} value={loggedIn ? email : t('setNotLoggedIn')} />
-                {loggedIn && (
-                  <Field
-                    label={t('credits')}
-                    value={
-                      status?.creditBalance === undefined
-                        ? '—'
-                        : Math.floor(status.creditBalance).toLocaleString('en-US')
-                    }
-                    action={
-                      <button
-                        className="set-btn"
-                        data-tip={t('creditsTip')}
-                        onClick={() => void window.aiOffice.openCreditUsage?.()}
-                      >
-                        {t('setViewUsage')}
-                      </button>
-                    }
-                  />
-                )}
-                <div className="set-pane-footer">
-                  {loggedIn ? (
-                    <button className="set-btn danger" disabled={loggingOut} onClick={onLogout}>
-                      {loggingOut ? t('loggingOut') : t('logout')}
-                    </button>
-                  ) : (
-                    <>
-                      {loginWaiting && loginUrl && (
-                        <>
-                          <button className="set-btn" onClick={onOpenLoginUrl}>
-                            {t('loginOpenManually')}
-                          </button>
-                          <button className="set-btn" onClick={onCopyLoginUrl}>
-                            {urlCopied ? t('loginCopied') : t('loginCopyUrl')}
-                          </button>
-                        </>
-                      )}
-                      <button className="set-btn primary" onClick={onLogin}>
-                        {loginWaiting ? t('waitingShort') : t('loginGenspark')}
-                      </button>
-                    </>
-                  )}
-                </div>
-              </>
-            )}
+            {section === 'profile' && <ProfilePane t={t} />}
             {section === 'aiModel' && <AiModelPane t={t} />}
             {section === 'aiMedia' && (
               <AiMediaPane

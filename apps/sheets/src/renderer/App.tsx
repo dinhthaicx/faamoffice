@@ -958,25 +958,6 @@ export function App({
   const aiSettingsRef = useRef<AiSettings | null>(null)
   aiSettingsRef.current = aiSettings
 
-  /** gsk login state for the cloud-tools gate (refreshed on mount and window focus) */
-  const gskLoggedInRef = useRef(false)
-  useEffect(() => {
-    let alive = true
-    const refresh = () => {
-      void window.desktopApi
-        ?.aiGskStatus()
-        .then((s) => {
-          if (alive) gskLoggedInRef.current = !!s?.loggedIn
-        })
-        .catch(() => {})
-    }
-    refresh()
-    window.addEventListener('focus', refresh)
-    return () => {
-      alive = false
-      window.removeEventListener('focus', refresh)
-    }
-  }, [])
   const [aiBusy, setAiBusy] = useState(false)
   // Display history survives restarts via localStorage; the AgentLoop's model
   // context does not, so restored turns are read-only transcript.
@@ -1279,9 +1260,7 @@ export function App({
           },
         }),
         createSearchSkill(),
-        createImageSkill(() =>
-          imageGenerationAvailable(aiSettingsRef.current, gskLoggedInRef.current),
-        ),
+        createImageSkill(() => imageGenerationAvailable(aiSettingsRef.current)),
       ]),
       events: {
         onText: (text) => {
@@ -1417,23 +1396,6 @@ export function App({
             }
             return next
           })
-          // Signed-out failures get an inline sign-in button; detected via
-          // gsk status rather than matching the localized error text
-          void window.desktopApi
-            .aiGskStatus()
-            .then((status) => {
-              // only a Genspark selection can be fixed by signing in
-              if (status.loggedIn || aiSettingsRef.current?.provider !== 'genspark') return
-              setChat((previous) => {
-                const next = [...previous]
-                const last = next.at(-1)
-                if (last?.role === 'assistant' && last.isError) {
-                  next[next.length - 1] = { ...last, loginRequired: true }
-                }
-                return next
-              })
-            })
-            .catch(() => {})
           setAiRunScope(undefined)
           void autoSaveCompletedAiRun().finally(() => setAiBusy(false))
         },
@@ -1446,15 +1408,8 @@ export function App({
     if (!settings) return false
     const config = settings.providers[settings.provider]
     if (!config?.model) return false
-    // Genspark's key never lands in the settings file; the main process injects
-    // it from the gsk login state. When logged out, requests return an error
-    // guiding sign-in — not intercepted here. Codex, custom and local servers
-    // run without a key.
-    return (
-      settings.provider === 'genspark' ||
-      !providerRequiresApiKey(settings.provider) ||
-      !!config.apiKey
-    )
+    // Codex, custom and local servers run without a key.
+    return !providerRequiresApiKey(settings.provider) || !!config.apiKey
   }
 
   /** Image attachments read as base64 and sent multimodal with this user message

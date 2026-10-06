@@ -221,11 +221,10 @@ Independently of the PATH, every launch of the packaged app writes the launcher 
 ## Cloud commands
 
 `search`, `image` and `media` reuse the editors' provider routing. Search uses
-the selected Serper / Serply / Tavily / Parallel provider when its key is configured;
-otherwise Genspark is the default when signed in (`~/.faamoffice/auth.json`)
-and cloud tools are on, then Parallel's free, rate-limited Search MCP, then
-DuckDuckGo. Parallel
-and Tavily provide web search only. Image generation and media analysis use
+the selected Serper / Serply / Tavily / Parallel / Exa / Firecrawl provider when
+its key is configured; otherwise (the default "Free (no key)" choice) it runs
+Parallel's free, rate-limited Search MCP, then DuckDuckGo. Tavily, Parallel, Exa
+and Firecrawl provide web search only. Image generation and media analysis use
 the corresponding provider chosen in the app's AI settings
 (`FaamOffice/ai-settings.json` in the platform config directory, override with
 `GENOFFICE_AI_SETTINGS`). `HTTPS_PROXY` / `HTTP_PROXY` / `ALL_PROXY` are honoured.

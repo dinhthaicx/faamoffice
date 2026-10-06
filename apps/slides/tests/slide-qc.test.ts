@@ -14,7 +14,7 @@ import {
   qcSlidePage,
   settingsSupportVision,
 } from '../src/renderer/ai/slide-qc'
-import { defaultAiSettings, type AiProviderId } from '@genoffice/ai-provider'
+import { defaultAiSettings, type AiProviderId, type AiSettings } from '@genoffice/ai-provider'
 import type { DeckAccess } from '../src/renderer/ai/slides-skill'
 
 const access: DeckAccess = {
@@ -123,10 +123,10 @@ describe('vision capability fallback', () => {
   })
 
   it('does not send screenshots to text-only models under a vision-capable provider', () => {
-    const settings = defaultAiSettings()
-    settings.providers.genspark.model = 'deep-seek-v4-flash'
+    const settings: AiSettings = { ...defaultAiSettings(), provider: 'openrouter' }
+    settings.providers.openrouter.model = 'deepseek/deepseek-v4-flash'
     expect(settingsSupportVision(settings)).toBe(false)
-    settings.providers.genspark.model = 'claude-opus-4-7'
+    settings.providers.openrouter.model = 'anthropic/claude-opus-4.7'
     expect(settingsSupportVision(settings)).toBe(true)
   })
 

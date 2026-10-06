@@ -40,6 +40,12 @@ export interface TabsApi {
    */
   showMenu(x: number, y: number): Promise<void>
   /**
+   * Native language picker under the tab bar's language button, at (x, y) in
+   * window CSS coordinates; resolves with the picked language code, or null
+   * when dismissed. Native so the editor view below the strip cannot cover it.
+   */
+  showLanguageMenu(x: number, y: number): Promise<string | null>
+  /**
    * pop up the native "+" new-file menu (new doc/sheet/slides, open local
    * file) at (x, y) in window CSS coordinates. Native for the same reason
    * as showMenu.
@@ -104,6 +110,7 @@ export const TABS_CHANNELS = {
   activate: 'tabs:activate',
   close: 'tabs:close',
   showMenu: 'tabs:show-menu',
+  showLanguageMenu: 'tabs:show-language-menu',
   showNewMenu: 'tabs:show-new-menu',
   showTabMenu: 'tabs:show-tab-menu',
   detach: 'tabs:detach',

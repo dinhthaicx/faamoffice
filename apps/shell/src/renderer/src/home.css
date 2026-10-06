@@ -1,7 +1,7 @@
 /* Shared chrome/AI-panel tokens come from @genoffice/ui/tokens.css (imported
  * before this file in main.tsx); only shell-specific tokens live here. */
 :root {
-  /* Genspark DS v4.1: guide/onboarding accent is the brand blue */
+  /* guide/onboarding accent is the brand blue */
   --accent: #0f7fff;
   --accent-hover: #0e72e5;
   /* selected-option tint for the shared dropdown (gs-dd) */
@@ -173,7 +173,7 @@ body.vib .home {
   font-variant-numeric: tabular-nums;
 }
 
-/* ---- bottom-left account entry (today = Genspark login, later = signup/account system) ---- */
+/* ---- bottom-left profile entry (opens Settings) ---- */
 /* clicking it opens the settings modal (settings.css) directly, which hosts
    login/logout plus preferences (language / theme / save location / update channel) */
 
@@ -279,69 +279,6 @@ body.vib .home {
 
 .account-sub.error {
   color: #b3261e;
-}
-
-/* one-line rescue hint while waiting for the browser sign-in (auto-open may have failed) */
-.login-hint {
-  position: absolute;
-  left: -8px;
-  bottom: calc(100% + 4px);
-  width: calc(100% + 16px);
-  display: flex;
-  align-items: center;
-  gap: 2px;
-  padding: 4px;
-  border: 1px solid var(--border-subtle);
-  border-radius: 10px;
-  background: var(--surface);
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
-  z-index: 30;
-}
-
-/* class selectors so the per-button font-size below is not out-specified by a descendant rule */
-.login-hint-open,
-.login-hint-copy {
-  border: none;
-  background: none;
-  font: inherit;
-  cursor: pointer;
-}
-
-.login-hint-open:hover,
-.login-hint-copy:hover {
-  background: var(--bg-hover);
-}
-
-.login-hint-open {
-  flex: 1;
-  min-width: 0;
-  border-radius: 7px;
-  font-size: 12.5px;
-  line-height: 17px;
-  padding: 4px 6px;
-  color: var(--accent);
-  text-align: start;
-}
-
-.login-hint-copy {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
-  align-self: center;
-  width: 25px;
-  height: 25px;
-  padding: 0;
-  border-radius: 7px;
-  color: var(--text-muted);
-}
-
-.login-hint-copy:hover {
-  color: var(--text-primary);
-}
-
-.login-hint-copy.copied {
-  color: var(--accent);
 }
 
 /* ---- main content ---- */
@@ -539,12 +476,9 @@ body.vib .home {
   color: var(--text-tertiary);
 }
 
-/* segmented control: gray track, active segment = white card */
-/* segmented filter control: gray track, active segment = white card.
-   One shared 40px rail for the recents page and the Genspark Projects
-   toolbar (where it lines up with the 40px refresh button and search box). */
-.filter-pills,
-.cloud-seg {
+/* segmented filter control: gray track, active segment = white card, on the
+   recents page's 40px toolbar rail */
+.filter-pills {
   display: flex;
   align-items: center;
   height: 40px;
@@ -554,8 +488,7 @@ body.vib .home {
   flex-shrink: 0;
 }
 
-.filter-pill,
-.cloud-seg button {
+.filter-pill {
   padding: 7px 15px;
   border: none;
   border-radius: 8px;
@@ -569,13 +502,11 @@ body.vib .home {
   white-space: nowrap;
 }
 
-.filter-pill:hover,
-.cloud-seg button:hover {
+.filter-pill:hover {
   color: var(--text);
 }
 
-.filter-pill.active,
-.cloud-seg button.active {
+.filter-pill.active {
   background: var(--surface);
   color: var(--text);
   font-weight: 600;
@@ -1581,410 +1512,6 @@ body.vib .home {
   white-space: nowrap;
   font-variant-numeric: tabular-nums;
   padding-top: 1px;
-}
-
-/* ── Cloud (Genspark web) projects ── */
-
-/* fixed header: the content column never scrolls; only .cloud-scroll does */
-/* whole page scrolls (same as the recents page) so the wheel works anywhere;
-   no bottom padding: the list runs flush to the window edge */
-.content:has(.cloud-projects) {
-  padding: 40px 36px 0;
-}
-
-.cloud-projects .proj-empty {
-  flex: 1;
-}
-
-/* pinned while the page scrolls (wheel still works anywhere); the ::before
-   covers the seam left by the content's 40px top padding */
-.cloud-hero {
-  position: sticky;
-  top: 0;
-  z-index: 3;
-  background: var(--bg-content);
-  padding-bottom: 12px;
-}
-
-.cloud-hero::before {
-  content: '';
-  position: absolute;
-  top: -40px;
-  left: -36px;
-  right: -36px;
-  height: 40px;
-  background: var(--bg-content);
-}
-
-.cloud-hero-top {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 16px;
-}
-
-.cloud-title {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  margin: 0;
-  font-size: 20px;
-  font-weight: 700;
-  letter-spacing: -0.01em;
-  color: var(--text);
-}
-
-.cloud-subtitle {
-  margin: 8px 0 0;
-  font-size: 14px;
-  color: var(--text-muted);
-}
-
-.cloud-sort-menu {
-  position: absolute;
-  right: 0;
-  top: calc(100% + 6px);
-  min-width: 150px;
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: 10px;
-  box-shadow: 0 8px 24px rgb(0 0 0 / 10%);
-  padding: 4px;
-  z-index: 5;
-}
-
-.cloud-sort-menu button {
-  display: flex;
-  align-items: center;
-  gap: 7px;
-  width: 100%;
-  text-align: left;
-  border: none;
-  background: none;
-  padding: 8px 11px;
-  font-size: 13px;
-  border-radius: 7px;
-  cursor: pointer;
-  color: var(--text);
-}
-
-.cloud-sort-check {
-  flex-shrink: 0;
-}
-
-.cloud-sort-menu button:hover {
-  background: var(--surface-subtle);
-}
-
-.cloud-sort-menu button.active {
-  font-weight: 600;
-}
-
-.cloud-controls {
-  display: flex;
-  align-items: center;
-  gap: 14px;
-  margin-top: 26px;
-}
-
-.cloud-search {
-  /* sits at the toolbar's right edge, flush with the table below */
-  flex: 1;
-  max-width: 520px;
-  margin-left: auto;
-  display: flex;
-  align-items: center;
-  gap: 9px;
-  height: 40px;
-  padding: 0 13px;
-  border: 1px solid var(--border);
-  border-radius: 10px;
-  background: var(--surface);
-  color: var(--text-muted);
-}
-
-.cloud-search:focus-within {
-  border-color: var(--accent);
-}
-
-.cloud-search input {
-  flex: 1;
-  min-width: 0;
-  border: none;
-  outline: none;
-  background: transparent;
-  font-size: 14px;
-  color: var(--text);
-}
-
-/* placeholder color follows the suite convention (AI input boxes):
-   tertiary text, not the browser's UA default */
-.cloud-search input::placeholder,
-.folder-rename-input::placeholder {
-  color: var(--text-tertiary);
-}
-
-/* .cloud-seg styles live with .filter-pills (shared segmented control). */
-
-/* the toolbar → table gap lives in the sticky hero's padding-bottom so the
-   pinned header paints over rows scrolling underneath */
-.cloud-scroll {
-  margin-top: 0;
-}
-
-/* Genspark Projects list styled like the recent-files table: bordered
-   rounded container, column header, grid rows with hairline dividers */
-.cloud-table {
-  border: 1px solid var(--border);
-  border-radius: 12px;
-  background: var(--surface);
-}
-
-.cloud-columns,
-.cloud-row {
-  display: grid;
-  grid-template-columns: 24px minmax(0, 1fr) 110px;
-  align-items: center;
-  gap: 12px;
-  padding: 0 16px;
-}
-
-.cloud-columns {
-  padding-top: 11px;
-  padding-bottom: 11px;
-  border-bottom: 1px solid var(--border-subtle);
-  font-size: 12px;
-  font-weight: 600;
-  letter-spacing: 0.06em;
-  color: var(--text-secondary);
-}
-
-/* header label starts at the icon column so it lines up with the file badges */
-.cloud-columns .col-name {
-  grid-column: 1 / 3;
-}
-
-/* WPS-style sortable column header: label + direction arrow, click opens
-   the sort popover (menu styles shared with .cloud-sort-menu) */
-.cloud-col-sort {
-  position: relative;
-  justify-self: start;
-}
-
-.cloud-col-sort-btn {
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-  padding: 2px 4px;
-  margin: -2px -4px;
-  border: none;
-  border-radius: 6px;
-  background: none;
-  font: inherit;
-  letter-spacing: inherit;
-  color: inherit;
-  cursor: pointer;
-}
-
-.cloud-col-sort-btn:hover {
-  color: var(--text-primary);
-  background: var(--bg-hover);
-}
-
-.cloud-list {
-  list-style: none;
-  margin: 0;
-  padding: 0;
-}
-
-.cloud-list li + li {
-  border-top: 1px solid var(--border-subtle);
-}
-
-.cloud-row {
-  width: 100%;
-  /* matches the recent-file rows: 14px paddings + a 26px control column */
-  min-height: 54px;
-  padding-top: 14px;
-  padding-bottom: 14px;
-  border: none;
-  background: none;
-  cursor: pointer;
-  text-align: left;
-  font: inherit;
-  color: var(--text);
-}
-
-.cloud-list li:last-child .cloud-row {
-  border-radius: 0 0 12px 12px;
-}
-
-.cloud-row:hover {
-  background: var(--surface-subtle);
-}
-
-.cloud-row:focus-visible {
-  outline: 2px solid var(--accent);
-  outline-offset: -2px;
-}
-
-/* title + trailing external icon; the icon hugs the text and survives truncation */
-.cloud-row-main {
-  flex: 1;
-  min-width: 0;
-  display: flex;
-  align-items: center;
-  gap: 11px;
-}
-
-.cloud-row-title {
-  flex: 0 1 auto;
-  min-width: 0;
-  font-size: 14px;
-  font-weight: 500;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-.cloud-row-time {
-  font-size: 12px;
-  color: var(--text-tertiary);
-  white-space: nowrap;
-  font-variant-numeric: tabular-nums;
-}
-
-/* always visible so rows read as external links; darkens on hover */
-.cloud-row-external {
-  flex-shrink: 0;
-  color: #c9ced4;
-}
-
-.cloud-row:hover .cloud-row-external,
-.cloud-row:focus-visible .cloud-row-external {
-  color: var(--text-secondary);
-}
-
-/* right-aligned to match the sidebar count column (22px, centered digits) */
-.nav-external {
-  flex-shrink: 0;
-  margin-left: auto;
-  margin-right: 4px;
-  color: var(--text-muted);
-}
-
-.cloud-refresh-btn {
-  flex-shrink: 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  /* sits in the toolbar next to the 40px filter tabs / search box */
-  width: 40px;
-  height: 40px;
-  border: 1px solid var(--border);
-  background: var(--surface);
-  border-radius: 10px;
-  color: var(--text);
-  cursor: pointer;
-}
-
-.cloud-refresh-btn:hover:not(:disabled) {
-  background: var(--surface-subtle);
-}
-
-.cloud-refresh-btn.syncing svg {
-  animation: cloud-refresh-spin 0.9s linear infinite;
-  color: var(--text-muted);
-}
-
-@keyframes cloud-refresh-spin {
-  to {
-    transform: rotate(360deg);
-  }
-}
-
-/* Drag-over affordance while OS files hover anywhere over the window (the
-   open itself is handled by the preload drop bridge, not this overlay) */
-.home-drop-overlay {
-  position: fixed;
-  inset: 0;
-  z-index: 300; /* above modals (100): a drag in progress always leads */
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: var(--color-bg-overlay);
-  /* never intercepts events — the drop must land on the page underneath */
-  pointer-events: none;
-}
-
-.home-drop-card {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 10px;
-  padding: 36px 56px;
-  background: var(--surface);
-  border: 2px dashed var(--accent);
-  border-radius: var(--radius-16);
-  box-shadow: var(--shadow-modal-strong);
-  color: var(--accent);
-  animation: menu-in 0.12s ease;
-}
-
-.home-drop-card h2 {
-  margin: 0;
-  color: var(--text);
-  font-size: 17px;
-  font-weight: 600;
-}
-
-.home-drop-card p {
-  margin: 0;
-  color: var(--text-muted);
-  font-size: 12px;
-  max-width: 360px;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-/* Motion accessibility: suppress all animation for users who opt out */
-/* PowerPoint-sized minimum window (720px): the fixed 232px sidebar and the
-   eight-column file grid no longer fit side by side */
-@media (max-width: 900px) {
-  .sidebar {
-    width: 200px;
-  }
-
-  .content {
-    padding: 28px 20px 40px;
-  }
-
-  .recents-toolbar {
-    gap: 8px 12px;
-  }
-
-  .recent-columns,
-  .recent-item {
-    grid-template-columns: 18px 24px minmax(0, 1fr) 110px 24px 28px;
-  }
-
-  .recent-columns .col-path,
-  .recent-columns .col-size,
-  .recent-path,
-  .recent-size {
-    display: none;
-  }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  *,
-  *::before,
-  *::after {
-    animation-duration: 0.01ms !important;
-    animation-iteration-count: 1 !important;
-    transition-duration: 0.01ms !important;
-  }
 }
 
 /* ── File search (home toolbar) ── */

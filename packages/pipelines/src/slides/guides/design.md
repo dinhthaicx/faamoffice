@@ -16,7 +16,7 @@ Never put more than one page in a file, and never write a page before its outlin
 
 ## 0. Check what the machine can do
 
-Run `faamoffice capabilities --json` once. It reads FaamOffice's own settings and reports, without a network call, whether web search, image search, image generation and media analysis are configured (a Genspark login with cloud tools on, or a key the user entered in Settings). Only when a feature is configured may the deck use it; when nothing is configured, work from the material you have and use typography, color blocks and shapes instead of photos. Never ask the user to configure a key just for a deck.
+Run `faamoffice capabilities --json` once. It reads FaamOffice's own settings and reports, without a network call, whether web search, image search, image generation and media analysis are configured (a key the user entered in Settings). Only when a feature is configured may the deck use it; when nothing is configured, work from the material you have and use typography, color blocks and shapes instead of photos. Never ask the user to configure a key just for a deck.
 
 ## 1. Style sheet first (one per deck)
 

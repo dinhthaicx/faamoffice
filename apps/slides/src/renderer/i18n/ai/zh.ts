@@ -16,7 +16,6 @@ export const zh = {
   aiQcPageSkipped: '第 {n} 页:已跳过自动版式检查',
   aiQcStopped: '版式检查已停止',
   aiQcCapped: '其余 {count} 页未检查(单次上限)',
-  aiGskLoginBtn: '登录 Genspark',
   aiPanelTitle: 'Faam AI',
   aiOpenAssistant: '打开 AI 助手',
   aiFactCheckBtn: 'AI 事实核查',
@@ -106,7 +105,7 @@ export const zh = {
   aiErrStreamTimeout: 'AI 请求超时：网络长时间无响应，已停止。请检查网络后重试',
   aiErrOverloaded: 'AI 服务当前繁忙，请稍后重试',
   aiErrNetwork: '网络有问题，无法连接 AI 服务。请检查网络后重试',
-  aiCreditsExhausted: 'Genspark 积分已用完，请前往 genspark.ai/pricing 充值后重试',
+  aiCreditsExhausted: 'AI 服务商提示积分或额度已用完。请向服务商充值，或在设置中选择其他模型',
   aiErrRequestFailed: '请求发送失败: {msg}',
   aiErrGenerateFailed: '生成失败',
   aiErrRegenFailed: '重做页面失败',
@@ -215,5 +214,4 @@ export const zh = {
   aiSumSaveTemplate: '保存风格模板"{name}"',
   aiSumTemplatesEmpty: '风格模板列表（空）',
   aiSumListTemplates: '列出 {count} 个风格模板',
-  aiPageCloudToLocal: '云端不可用,已本地生成',
 }

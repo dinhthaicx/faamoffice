@@ -1,22 +1,50 @@
-# GenOffice Privacy
+# FaamOffice Privacy
 
-Last updated: August 26, 2026
+Last updated: October 6, 2026
 
-GenOffice opens, edits, and saves documents locally. Document editing does not
-upload files to GenOffice. AI features require a network connection and send
-requests only when you use them.
+FaamOffice opens, edits and saves documents on your computer. Editing a
+document never uploads it anywhere. The app only talks to the network for the
+features listed below, and only when you use them.
 
-## Usage analytics
+## AI (Faam AI)
 
-Usage analytics is enabled by default in packaged official builds, including
-the initial app launch before the onboarding notice is shown. Onboarding
-explains what is collected and where to turn it off.
+- **Your own API key** (OpenAI, Anthropic, Google Gemini, DeepSeek, Groq and
+  others): the text, document excerpts and images that a Faam AI request needs
+  are sent directly from your computer to the provider you chose, under that
+  provider's privacy policy. The key is stored only on this computer.
+- **Local AI** (Ollama, LM Studio, llama.cpp or another server you run): requests
+  go to the address you entered; with a server on your own machine nothing
+  leaves it.
+- **Web and image search** used by Faam AI go to the search provider selected
+  under Settings → AI Media, or to the free sources (Parallel, DuckDuckGo).
 
-You can disable reporting at any time under **Settings → General → Send
-anonymous usage statistics**. An explicit opt-out is remembered and stops all
-subsequent analytics events.
+## FaamOffice account (optional)
 
-### Events and parameters
+FaamOffice works without an account. If you sign in to a FaamOffice account to
+use Faam AI Cloud, the account server stores your email, name, a hash of your
+password, the devices you signed in from, and a usage record (time, model,
+token counts, credits) for each cloud AI request. The requests themselves are
+forwarded to the AI provider the server operator configured. See the privacy
+policy published on that server's website.
+
+## Other network access
+
+- The About page and the GitHub prompt read the public star count of the
+  FaamOffice repository from api.github.com.
+- Links you click (downloads, API-key pages, GitHub) open in your browser.
+- Builds from this repository send no usage analytics, check no update feed and
+  download no fonts unless whoever built them injected the corresponding
+  endpoints (`GENOFFICE_GA4_*`, `GENOFFICE_UPDATE_URL`, `GENOFFICE_FONT_CDN_URL`
+  in `apps/shell/electron-builder.cjs`). The release workflow in this repository
+  injects none of them.
+
+## Usage analytics (only when enabled at build time)
+
+Builds from this repository contain a no-op tracker and send nothing. A
+distributor can enable anonymous usage analytics by injecting Google Analytics 4
+credentials at build time (`GENOFFICE_GA4_MEASUREMENT_ID` /
+`GENOFFICE_GA4_API_SECRET`). In such a build, onboarding explains it and you can
+turn it off under **Settings → General → Send anonymous usage statistics**.
 
 When enabled, the app sends these events:
 
@@ -25,46 +53,14 @@ When enabled, the app sends these events:
 - `app_launch` — no event-specific parameter
 - `file_open` — `ext`, the file extension such as `docx` or `xlsx`
 - `file_new` — `kind`, one of `docx`, `xlsx`, `pptx`, `md`, or `pdf`
-- `login_click` — no event-specific parameter
-- `login_success` — no event-specific parameter
 
-Every event includes:
+Every event includes `app_version`, `platform`, `os_version`, `ui_lang`, a
+per-process `session_id`, `engagement_time_msec` (fixed `100`) and, when the
+operating system's regional locale provides one, the two-letter `country_id`.
+The `client_id` is a random install UUID. Analytics never sends document
+content, file names, file paths, account identity or email addresses.
 
-- `app_version`
-- `platform`
-- `os_version`
-- `ui_lang`
-- a per-process `session_id` derived from the process start time
-- `engagement_time_msec` with the fixed value `100`
+## Contact
 
-When available, the payload also includes `country_id`, the two-letter country
-code from the operating system's regional locale. This can differ from the
-user's physical location.
-
-The Google Analytics 4 payload also uses a random install UUID as `client_id`.
-The country code is sent through GA4's country-only `user_location` field; the
-app does not send a city or region. Neither identifier is a Genspark account or
-email address.
-
-## Network information
-
-Events are sent to Google Analytics 4 using the Measurement Protocol over
-HTTPS. As the HTTPS recipient, Google necessarily sees the connection's public
-IP address and transport metadata, and may use them for coarse geolocation and
-security or spam-abuse processing. GenOffice does not add an IP address to the
-event payload.
-
-## Data not collected by analytics
-
-GenOffice analytics never sends:
-
-- document content
-- file names
-- file paths
-- Genspark account identity
-- email addresses
-
-The analytics metadata is injected only into packaged official builds and is
-not part of this repository. Source builds and forks without that packaged
-metadata install a no-op tracker and send no usage analytics; all features work
-the same.
+Questions or concerns: open an issue at
+https://github.com/faamoffice/faamoffice/issues.

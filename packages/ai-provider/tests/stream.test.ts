@@ -220,7 +220,7 @@ describe('streamForProvider: temperature policy', () => {
     expect(bodies[1].temperature).toBe(0.3)
   })
 
-  // issue genspark-ai/genoffice#147: every model in the OpenAI BYOK dropdown is GPT-5.x,
+  // upstream issue #147: every model in the OpenAI BYOK dropdown is GPT-5.x,
   // and api.openai.com 400s `max_tokens` for that family
   it('caps OpenAI via max_completion_tokens and other vendors via max_tokens', async () => {
     const fetchMock = vi.fn().mockImplementation(() => Promise.resolve(okTurn()))
@@ -686,7 +686,7 @@ describe('streamForProvider: anthropic', () => {
 
   it('replaces an HTML error body (e.g. a gateway block page) with a readable note', async () => {
     const html =
-      '<!doctype html>\n<html>\n<head><title>Genspark</title></head><body>app shell</body></html>'
+      '<!doctype html>\n<html>\n<head><title>Web App</title></head><body>app shell</body></html>'
     vi.stubGlobal('fetch', vi.fn().mockResolvedValue(new Response(html, { status: 403 })))
     const { cb } = collector()
     await expect(
@@ -1341,79 +1341,7 @@ describe('streamForProvider: openai-compatible', () => {
   })
 })
 
-describe('streamForProvider: genspark', () => {
-  it('routes claude models to the Anthropic-compatible proxy endpoint', async () => {
-    const fetchMock = vi.fn().mockResolvedValue(okResponse(sseStream([])))
-    vi.stubGlobal('fetch', fetchMock)
-    const { cb } = collector()
-    await streamForProvider(
-      'genspark',
-      { apiKey: 'gsk-k', model: 'claude-opus-4-7' },
-      'sys',
-      [],
-      [],
-      100,
-      cb,
-    ).catch(() => {})
-    expect(fetchMock).toHaveBeenCalledWith(
-      'https://www.genspark.ai/api/anthropic/v1/messages',
-      expect.objectContaining({ headers: expect.objectContaining({ 'x-api-key': 'gsk-k' }) }),
-    )
-  })
-
-  it('routes other models to the OpenAI-compatible proxy', async () => {
-    const fetchMock = vi.fn().mockResolvedValue(okResponse(sseStream(['data: [DONE]'])))
-    vi.stubGlobal('fetch', fetchMock)
-    const { cb } = collector()
-    await streamForProvider(
-      'genspark',
-      { apiKey: 'gsk-k', model: 'gpt-5.2' },
-      'sys',
-      [],
-      [],
-      100,
-      cb,
-    ).catch(() => {})
-    expect(fetchMock).toHaveBeenCalledWith(
-      'https://www.genspark.ai/api/llm_proxy/v1/chat/completions',
-      expect.anything(),
-    )
-  })
-
-  it('stamps X-Agent-Type on both proxy routes for billing attribution', async () => {
-    for (const model of ['claude-opus-4-7', 'gpt-5.2']) {
-      const fetchMock = vi.fn().mockResolvedValue(okResponse(sseStream([])))
-      vi.stubGlobal('fetch', fetchMock)
-      const { cb } = collector()
-      await streamForProvider('genspark', { apiKey: 'gsk-k', model }, 'sys', [], [], 100, cb).catch(
-        () => {},
-      )
-      expect(fetchMock).toHaveBeenCalledWith(
-        expect.anything(),
-        expect.objectContaining({
-          headers: expect.objectContaining({ 'X-Agent-Type': 'genoffice' }),
-        }),
-      )
-    }
-  })
-
-  it('never sends X-Agent-Type to direct vendor APIs', async () => {
-    for (const [provider, model] of [
-      ['anthropic', 'claude-opus-4-7'],
-      ['gemini', 'gemini-2.5-flash'],
-      ['openai', 'gpt-4.1-mini'],
-    ] as const) {
-      const fetchMock = vi.fn().mockResolvedValue(okResponse(sseStream([])))
-      vi.stubGlobal('fetch', fetchMock)
-      const { cb } = collector()
-      await streamForProvider(provider, { apiKey: 'k', model }, 'sys', [], [], 100, cb).catch(
-        () => {},
-      )
-      const headers = fetchMock.mock.calls[0]![1].headers as Record<string, string>
-      expect(headers['X-Agent-Type']).toBeUndefined()
-    }
-  })
-
+describe('streamForProvider: gateway session headers', () => {
   it('opencode: sends the renderer session id as x-opencode-session on every route', async () => {
     for (const [provider, model] of [
       ['opencode-go', 'kimi-k2.7-code'],
@@ -1463,7 +1391,7 @@ describe('streamForProvider: genspark', () => {
 
 describe('streamForProvider: 200 + non-stream JSON instead of SSE', () => {
   const creditsNotice =
-    'Your Genspark credits have been exhausted. Please visit https://www.genspark.ai/pricing to purchase more credits.'
+    'Your credits have been exhausted. Please visit https://gateway.example.com/pricing to purchase more credits.'
   const json = (value: unknown) =>
     new Response(JSON.stringify(value), {
       status: 200,
@@ -1490,7 +1418,7 @@ describe('streamForProvider: 200 + non-stream JSON instead of SSE', () => {
     expect(deltas).toEqual([])
   })
 
-  it('gemini route: zero usage + a pricing link counts as a credits notice', async () => {
+  it('gemini route: a credits-exhausted notice becomes AiCreditsError', async () => {
     vi.stubGlobal(
       'fetch',
       vi.fn().mockResolvedValue(
@@ -1498,7 +1426,9 @@ describe('streamForProvider: 200 + non-stream JSON instead of SSE', () => {
           candidates: [
             {
               content: {
-                parts: [{ text: 'Out of quota, visit https://www.genspark.ai/pricing to top up.' }],
+                parts: [
+                  { text: 'Credits exhausted, visit https://example.com/pricing to top up.' },
+                ],
               },
             },
           ],
@@ -1682,8 +1612,8 @@ describe('streamForProvider: interleaved-thinking reasoning', () => {
     const reasoning: string[] = []
     const { deltas, cb } = collector()
     await streamForProvider(
-      'genspark',
-      { apiKey: 'k', model: 'deep-seek-v4-flash' },
+      'custom',
+      { apiKey: 'k', model: 'deep-seek-v4-flash', baseUrl: 'https://gateway.example.com/v1' },
       'sys',
       toolLoopMessages,
       [],
@@ -1701,8 +1631,8 @@ describe('streamForProvider: interleaved-thinking reasoning', () => {
     const fetchMock = vi.fn().mockImplementation(() => Promise.resolve(reasoningTurn()))
     vi.stubGlobal('fetch', fetchMock)
     await streamForProvider(
-      'genspark',
-      { apiKey: 'k', model: 'gpt-5.6-luna' },
+      'custom',
+      { apiKey: 'k', model: 'gpt-5.6-luna', baseUrl: 'https://gateway.example.com/v1' },
       'sys',
       toolLoopMessages,
       [],
@@ -1716,7 +1646,7 @@ describe('streamForProvider: interleaved-thinking reasoning', () => {
 })
 
 describe('streamForProvider: a connection dropped mid tool arguments is not an empty stream', () => {
-  // Tool arguments are buffered upstream; the Genspark gateway closes the SSE
+  // Tool arguments are buffered upstream; a metered gateway closes the SSE
   // after ~125s of that silence. The turn was billed and in progress, so it
   // must not match the "(empty stream)" contract that agent-core replays.
   it('anthropic: open tool_use block with no stop_reason rejects as a dropped connection', async () => {

@@ -64,7 +64,8 @@ export async function readBodyCapped(resp: Response, maxBytes: number): Promise<
   return out
 }
 
-export function remoteImageHeaders(rawUrl: string): Record<string, string> {
+/** The URL is unused today; the parameter keeps per-host headers possible without touching callers. */
+export function remoteImageHeaders(_rawUrl: string): Record<string, string> {
   const headers: Record<string, string> = {
     'User-Agent': 'Mozilla/5.0',
     // Only advertise formats the insert pipelines can label correctly: callers
@@ -72,20 +73,12 @@ export function remoteImageHeaders(rawUrl: string): Record<string, string> {
     // content-negotiating CDNs to send bytes that end up mislabeled.
     Accept: 'image/png,image/jpeg,image/gif,image/*;q=0.8,*/*;q=0.5',
   }
-  try {
-    const host = new URL(rawUrl).hostname.toLowerCase()
-    if (host === 'genspark.ai' || host.endsWith('.genspark.ai')) {
-      headers.Referer = 'https://www.genspark.ai/'
-    }
-  } catch {
-    /* fetchWithSsrfGuard rejects unparseable URLs on its own */
-  }
   return headers
 }
 
 /**
  * fetchWithSsrfGuard specialized for image downloads: browser-like headers
- * (with a Referer for the Genspark CDN) and retries on transient failures
+ * and retries on transient failures
  * (network errors, 403/408/429, 5xx). An SSRF-blocked URL still returns null
  * immediately — that outcome never changes on retry.
  */

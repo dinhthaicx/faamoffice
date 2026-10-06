@@ -17,7 +17,6 @@ export const nl = {
   aiQcPageSkipped: 'Pagina {n}: automatische lay-outcontrole overgeslagen',
   aiQcStopped: 'Lay-outcontrole gestopt',
   aiQcCapped: 'Nog {count} pagina(’s) niet gecontroleerd (limiet per run)',
-  aiGskLoginBtn: 'Aanmelden bij Genspark',
   aiPanelTitle: 'Faam AI',
   aiOpenAssistant: 'AI-assistent openen',
   aiFactCheckBtn: 'AI-factcheck',
@@ -116,7 +115,7 @@ export const nl = {
   aiErrNetwork:
     'Netwerkprobleem: kan de AI-service niet bereiken. Controleer je verbinding en probeer het opnieuw',
   aiCreditsExhausted:
-    'Je Genspark-credits zijn op. Waardeer op via genspark.ai/pricing en probeer het opnieuw',
+    'Je AI-provider meldt dat je tegoed of quotum op is. Waardeer op bij de provider of kies een ander model in Instellingen',
   aiErrRequestFailed: 'Verzenden van verzoek mislukt: {msg}',
   aiErrGenerateFailed: 'Genereren mislukt',
   aiErrRegenFailed: 'Dia opnieuw genereren mislukt',
@@ -225,5 +224,4 @@ export const nl = {
   aiSumSaveTemplate: 'Stijlsjabloon "{name}" opgeslagen',
   aiSumTemplatesEmpty: 'Stijlsjablonen (leeg)',
   aiSumListTemplates: '{count} stijlsjablonen weergegeven',
-  aiPageCloudToLocal: 'Cloud niet beschikbaar — lokaal gegenereerd',
 } satisfies Record<keyof typeof zh, string>

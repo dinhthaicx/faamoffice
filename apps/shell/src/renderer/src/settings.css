@@ -546,6 +546,67 @@
   line-height: 1.5;
 }
 
+/* optional FaamOffice account block in Settings → Profile */
+.set-account {
+  margin-top: 18px;
+  padding-top: 14px;
+  border-top: 1px solid var(--border-subtle);
+}
+
+.set-account-actions {
+  display: flex;
+  flex-shrink: 0;
+  gap: 8px;
+}
+
+.set-account-error {
+  color: var(--danger, var(--text-secondary));
+}
+
+/* setup guide shown while a local AI server (Ollama, LM Studio, llama.cpp) is selected */
+.set-local-guide {
+  margin: 10px 0 4px;
+  padding: 12px 14px;
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-8);
+  background: var(--surface-subtle);
+}
+
+.set-local-guide-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 8px;
+}
+
+.set-local-steps {
+  margin: 0 0 8px;
+  padding-left: 20px;
+  line-height: 1.55;
+  color: var(--text-secondary);
+}
+
+.set-local-steps li + li {
+  margin-top: 6px;
+}
+
+.set-local-code {
+  display: block;
+  width: fit-content;
+  max-width: 100%;
+  margin-top: 4px;
+  padding: 3px 8px;
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-6);
+  background: var(--surface);
+  color: var(--text);
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 12px;
+  overflow-wrap: anywhere;
+  user-select: text;
+}
+
 /* feedback pill: spinner while testing, green on success/saved, red on failure */
 .set-ai-status {
   display: inline-flex;

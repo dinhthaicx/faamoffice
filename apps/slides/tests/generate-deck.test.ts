@@ -16,8 +16,6 @@ import type { AgentToolCall } from '../src/shared/ipc'
 function makeAccess(opts?: {
   failPages?: number[]
   failAttempts?: Record<number, number>
-  cloudEnabled?: boolean
-  cloudDown?: boolean
   localImageFails?: Record<number, string[]>
   landFailOnce?: number[]
   searchImagesFail?: boolean
@@ -29,12 +27,11 @@ function makeAccess(opts?: {
   const failAttempts = { ...(opts?.failAttempts ?? {}) } // pageIndex -> how many more times to fail
   const landFailOnce = new Set(opts?.landFailOnce ?? []) // these pages fail their first "landing" once (simulated conversion failure)
   let pages = 0
-  const genPageCalls: number[] = [] // records each generatePageCloud call's pageIndex
-  const localPageCalls: number[] = [] // records each generatePageLocal call's pageIndex
+  const genPageCalls: number[] = [] // records each generatePageLocal call's pageIndex
   const stylesSeen: string[] = [] // records the style each page received (verifies styleSkill reached single pages)
   const landOrder: string[] = [] // records the landing order
   const imageSearchCalls: string[] = [] // records the queries searchImages was called with
-  const imagesSeen: string[][] = [] // records the images each generatePageCloud call received
+  const imagesSeen: string[][] = [] // records the images each generatePageLocal call received
   const sidecarSaves: Array<{ topic: string; styleSkill: string; createdAt: string }> = []
   const savedTemplates: Record<
     string,
@@ -80,37 +77,16 @@ function makeAccess(opts?: {
       landOrder.push('replace:' + markers[0])
       return { ok: true, pages }
     },
-    isCloudPageGenEnabled: async () => opts?.cloudEnabled !== false,
-    generatePageCloud: async (args) => {
+    generatePageLocal: async (args) => {
       genPageCalls.push(args.pageIndex)
       stylesSeen.push(args.style)
       imagesSeen.push([...args.images])
-      if (opts?.cloudDown)
-        return {
-          ok: false,
-          error: 'tool_cli /slide_generate failed: the Genspark CLI requires a paid plan',
-        }
       if (failPages.has(args.pageIndex)) return { ok: false, error: 'mock fail' }
       if (failAttempts[args.pageIndex] && failAttempts[args.pageIndex] > 0) {
         failAttempts[args.pageIndex] -= 1
         return { ok: false, error: 'transient' }
       }
-      // Return an identifiable marker (with page order); the mock landing treats it like the real cloudpptx: marker
-      return {
-        ok: true,
-        marker: `<!doctype html><html><body>PAGE${args.pageIndex}:${args.title}</body></html>`,
-      }
-    },
-    generatePageLocal: async (args) => {
-      localPageCalls.push(args.pageIndex)
-      stylesSeen.push(args.style)
-      imagesSeen.push([...args.images])
-      if (failPages.has(args.pageIndex)) return { ok: false, error: 'mock fail' }
-      if (failAttempts[args.pageIndex] && failAttempts[args.pageIndex] > 0) {
-        failAttempts[args.pageIndex] -= 1
-        return { ok: false, error: 'transient' }
-      }
-      // Same marker contract as the cloud path, distinguishable in landOrder assertions
+      // Identifiable marker (with page order) for landOrder assertions
       const fails = opts?.localImageFails?.[args.pageIndex]
       return {
         ok: true,
@@ -165,7 +141,6 @@ function makeAccess(opts?: {
   return {
     access,
     genPageCalls,
-    localPageCalls,
     stylesSeen,
     landOrder,
     imageSearchCalls,
@@ -199,7 +174,7 @@ describe('generate_deck self-driven page-by-page generation', () => {
 
     const res = (await skill.executeTool(deckCall(5))) as { output: string; summary: string }
 
-    // The tool internally calls generatePageCloud once per each of the 5 pages (the AI never touches per-page work)
+    // The tool internally calls generatePageLocal once per each of the 5 pages (the AI never touches per-page work)
     expect(genPageCalls.sort((a, b) => a - b)).toEqual([1, 2, 3, 4, 5])
     // All 5 pages landed
     expect(getPages()).toBe(5)
@@ -217,7 +192,7 @@ describe('generate_deck self-driven page-by-page generation', () => {
     const skill = createSlidesSkill(access)
     await skill.executeTool(deckCall(3))
     // First page replace, next two append, and content is in PAGE1/2/3 order
-    expect(landOrder[0]).toBe('replace:<!doctype html><html><body>PAGE1:Page 1 Title</body></html>')
+    expect(landOrder[0]).toBe('replace:localpptx:PAGE1:Page 1 Title')
     expect(landOrder[1]).toContain('append:')
     expect(landOrder[1]).toContain('PAGE2')
     expect(landOrder[2]).toContain('PAGE3')
@@ -247,25 +222,19 @@ describe('generate_deck self-driven page-by-page generation', () => {
   })
 })
 
-describe('generate_deck local page generation (cloud/gsk unavailable)', () => {
-  it('cloud disabled → the local spec builder generates every page through the same marker landing', async () => {
-    const { access, genPageCalls, localPageCalls, landOrder, getPages } = makeAccess({
-      cloudEnabled: false,
-    })
+describe('generate_deck local page generation', () => {
+  it('the local spec builder generates every page through the marker landing', async () => {
+    const { access, genPageCalls, landOrder, getPages } = makeAccess()
     const skill = createSlidesSkill(access)
     const res = (await skill.executeTool(deckCall(3))) as { output: string }
-    expect(genPageCalls).toEqual([]) // cloud never touched
-    expect(localPageCalls.sort((a, b) => a - b)).toEqual([1, 2, 3])
+    expect(genPageCalls.sort((a, b) => a - b)).toEqual([1, 2, 3])
     expect(getPages()).toBe(3)
     expect(landOrder[0]).toBe('replace:localpptx:PAGE1:Page 1 Title')
     expect(res.output).toContain('3/3')
   })
 
   it('page failing both inline attempts gets another generation in the retry round and lands at its original position', async () => {
-    const { access, landOrder, getPages } = makeAccess({
-      cloudEnabled: false,
-      failAttempts: { 2: 2 },
-    })
+    const { access, landOrder, getPages } = makeAccess({ failAttempts: { 2: 2 } })
     const skill = createSlidesSkill(access)
     const res = (await skill.executeTool(deckCall(3))) as { output: string }
     expect(getPages()).toBe(3)
@@ -276,7 +245,6 @@ describe('generate_deck local page generation (cloud/gsk unavailable)', () => {
 
   it("local image download failures surface in the tool output with the page's number", async () => {
     const { access, getPages } = makeAccess({
-      cloudEnabled: false,
       localImageFails: { 2: ['https://img.example/broken.jpg'] },
     })
     const skill = createSlidesSkill(access)
@@ -287,34 +255,8 @@ describe('generate_deck local page generation (cloud/gsk unavailable)', () => {
     expect(res.output).toContain('https://img.example/broken.jpg')
   })
 
-  it('cloud fails (e.g. Genspark free plan) → falls back to the local pipeline and still produces the deck', async () => {
-    const { access, localPageCalls, getPages } = makeAccess({ cloudDown: true })
-    const skill = createSlidesSkill(access)
-    const res = (await skill.executeTool(deckCall(3))) as { output: string }
-    expect(getPages()).toBe(3)
-    expect(localPageCalls.sort((a, b) => a - b)).toEqual([1, 2, 3])
-    expect(res.output).toContain('3/3')
-    expect(res.output).toContain('locally')
-  })
-
-  it('pages that fail both pipelines during a cloud→local switch still get the retry round', async () => {
-    // Cloud is down for every page; page 2 also exhausts its two local attempts inside
-    // genOne. The retry round must give it two more local attempts (the run ended on the
-    // local pipeline), where the old !useCloud guard skipped it entirely.
-    const { access, localPageCalls, getPages } = makeAccess({
-      cloudDown: true,
-      failAttempts: { 2: 2 },
-    })
-    const skill = createSlidesSkill(access)
-    const res = (await skill.executeTool(deckCall(3))) as { output: string }
-    expect(getPages()).toBe(3)
-    // page 2: two local attempts inside genOne (both fail) + the retry round's third
-    expect(localPageCalls.filter((p) => p === 2)).toHaveLength(3)
-    expect(res.output).toContain('3/3')
-  })
-
-  it('neither cloud nor local pipeline available → fails fast', async () => {
-    const { access } = makeAccess({ cloudEnabled: false })
+  it('no page generation pipeline available → fails fast', async () => {
+    const { access } = makeAccess()
     delete (access as { generatePageLocal?: unknown }).generatePageLocal
     const skill = createSlidesSkill(access)
     const r = (await skill.executeTool(deckCall(2))) as { isError?: boolean }
@@ -418,13 +360,13 @@ describe('generate_deck lands pages while generating + retries', () => {
     expect(ctx).toContain('page 2 "T2"')
   })
 
-  it('a page failing beyond one retry → only 2 calls then skipped (no final-round regeneration)', async () => {
+  it('a page that keeps failing → two inline attempts + one retry round (two more), then skipped', async () => {
     const { access, getPages, genPageCalls } = makeAccess({ failPages: [2] })
     const skill = createSlidesSkill(access)
     await skill.executeTool(deckCall(3))
     expect(getPages()).toBe(2)
-    // One initial attempt + one retry, nothing more
-    expect(genPageCalls.filter((n) => n === 2).length).toBe(2)
+    // Two attempts inside genOne, then the retry round's genOne makes two more, nothing else
+    expect(genPageCalls.filter((n) => n === 2).length).toBe(4)
   })
 
   it('all pages fail to land initially (zero landed) → retry round still inserts: first page via insertMode, rest via insert_at', async () => {
@@ -452,7 +394,7 @@ describe('generate_deck lands pages while generating + retries', () => {
 })
 
 describe('generate_deck in-tool image search', () => {
-  it('image_queries are keywords → tool searches images → real URLs passed to generatePageCloud', async () => {
+  it('image_queries are keywords → tool searches images → real URLs passed to generatePageLocal', async () => {
     const { access, imageSearchCalls, imagesSeen } = makeAccess()
     const skill = createSlidesSkill(access)
     const call: AgentToolCall = {
@@ -497,7 +439,7 @@ describe('generate_deck in-tool image search', () => {
     await skill.executeTool(call)
     // Already a URL; searchImages should not be called
     expect(imageSearchCalls).toEqual([])
-    // generatePageCloud should receive the original URL
+    // generatePageLocal should receive the original URL
     expect(imagesSeen[0]).toEqual([existingUrl])
   })
 

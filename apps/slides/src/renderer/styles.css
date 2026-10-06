@@ -633,15 +633,15 @@ button {
   box-shadow: var(--slides-shadow-badge-soft);
 }
 
-/* Genspark brand logo (Ribbon AI button / AI panel title / collapsed entry) */
-.genspark-badge {
+/* AI badge logo (Ribbon AI button / AI panel title / collapsed entry) */
+.ai-badge {
   display: block;
   width: 22px;
   height: 22px;
   border-radius: 50%;
 }
 
-.ai-panel-title .genspark-badge {
+.ai-panel-title .ai-badge {
   width: 18px;
   height: 18px;
 }
@@ -671,7 +671,7 @@ button {
   overflow-x: scroll;
   overflow-y: hidden;
   /* Slim visible scrollbar so mouse users can reach overflowed groups
-     (genspark-ai/genoffice#55). Its 5px lane is carved out of the bottom
+     (upstream genoffice#55). Its 5px lane is carved out of the bottom
      padding, keeping the 80px band and the content area unchanged; Chromium
      paints a thumb only while the row actually overflows. */
   padding-bottom: 1px;
@@ -820,7 +820,7 @@ button {
 }
 
 .rb-big.ai-entry.active {
-  /* neutral gray, shared with the docs/sheets Genspark entries */
+  /* neutral gray, shared with the docs/sheets AI entries */
   background: var(--active-bg);
 }
 
@@ -2547,7 +2547,7 @@ body.vib .slide-list {
 .ai-attachments {
   display: flex;
   gap: 8px;
-  /* single row inside the prompt box, above the textarea (Genspark composer style):
+  /* single row inside the prompt box, above the textarea (reference composer style):
      extra images run past the box edge and scroll horizontally.
      scroll (not auto) + zero bottom padding: the always-present 4px scrollbar lane
      doubles as the bottom padding, so overflowing never grows the strip and
@@ -2655,7 +2655,7 @@ body.vib .slide-list {
   background: var(--slides-att-bg);
 }
 
-/* the type icon sits in its own bordered white tile, like the Genspark card */
+/* the type icon sits in its own bordered white tile, like the reference attachment card */
 .ai-attachment-card-icon {
   display: flex;
   flex-shrink: 0;
@@ -3240,7 +3240,7 @@ body.vib .slide-list {
   margin-top: 18px;
 }
 
-/* Genspark DS modal footer buttons: secondary = bg-subtle, primary = black (#232425) */
+/* Design-system modal footer buttons: secondary = bg-subtle, primary = black (#232425) */
 .modal-actions button {
   display: inline-flex;
   align-items: center;
@@ -3372,7 +3372,7 @@ body.vib .slide-list {
   margin-top: 5.6px;
 }
 
-/* 形状选项 / 文本选项 primary tabs under the pane header (Genspark style:
+/* 形状选项 / 文本选项 primary tabs under the pane header (reference style:
    left-aligned text tabs, active = bold + text-colored underline) */
 .fp-tabs {
   display: flex;
@@ -3406,7 +3406,7 @@ body.vib .slide-list {
   border-bottom-color: var(--accent);
 }
 
-/* Second-level tabs (填充与线条 / 效果 / 大小与属性 …): Genspark segmented pill track —
+/* Second-level tabs (填充与线条 / 效果 / 大小与属性 …): segmented pill track —
    pills sit in one rounded gray track; active = accent-filled pill. Long locales
    (fr/de/es labels exceed the 260px pane) wrap onto a second row instead of
    clipping at the pane edge; 16px ≈ the stadium radius at single-row height. */
@@ -5590,7 +5590,7 @@ body.vib .slide-list {
    Faam AI group); absolute so it doesn't distort the zoom-box extent.
    z-index lifts it over the Konva stage's transparent 160px bleed, which
    otherwise swallows the clicks */
-/* Genspark SAS floating toolbar, matched to the reference stage-toolbar:
+/* SAS floating toolbar, matched to the reference stage-toolbar:
    white bar (padding 3px 5px, ~35px tall); 24px borderless tool buttons
    with 12px #374151 labels; thin span dividers separate the groups; the
    assistant toggle shows a gray selected state while the panel is open */
@@ -5662,7 +5662,7 @@ body.vib .slide-list {
 }
 
 /* the brand mark uses currentColor and keeps the button's ink, not the blue */
-.stage-ai-btn svg.genspark-mark {
+.stage-ai-btn svg.ai-mark {
   color: var(--slides-stagebar-ink);
 }
 
@@ -9041,21 +9041,6 @@ body.show-curtain::after {
   .slideshow [class*='ss-anim-'] {
     animation-duration: 0.01ms !important;
   }
-}
-
-.ai-login-btn {
-  margin-top: 8px;
-  border: 1px solid var(--accent);
-  border-radius: 6px;
-  background: var(--accent);
-  padding: 4px 14px;
-  font-size: 13px;
-  color: var(--slides-on-accent);
-  cursor: pointer;
-}
-
-.ai-login-btn:hover {
-  opacity: 0.88;
 }
 
 /* ================= transient toast (save feedback) ================= */

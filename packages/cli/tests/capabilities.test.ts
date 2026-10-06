@@ -1,23 +1,7 @@
 import { mkdirSync, writeFileSync } from 'node:fs'
 import { join } from 'node:path'
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
-import * as aiSearch from '@genoffice/ai-search'
+import { describe, expect, it } from 'vitest'
 import { run, tempDir } from './helpers'
-
-// hasGskAuth reads process.env, not the command context: isolate the login state per test
-const saved: Record<string, string | undefined> = {}
-beforeEach(() => {
-  for (const k of ['GENOFFICE_AUTH_DIR', 'AI_SEARCH_DISABLE_GSK']) saved[k] = process.env[k]
-  process.env.GENOFFICE_AUTH_DIR = join(tempDir(), 'no-auth')
-  process.env.AI_SEARCH_DISABLE_GSK = '1'
-})
-afterEach(() => {
-  vi.restoreAllMocks()
-  for (const [k, v] of Object.entries(saved)) {
-    if (v === undefined) delete process.env[k]
-    else process.env[k] = v
-  }
-})
 
 // a real settings file always carries the chat provider block; without it every section resets to defaults
 function settingsFile(dir: string, settings: Record<string, unknown>): string {
@@ -27,7 +11,7 @@ function settingsFile(dir: string, settings: Record<string, unknown>): string {
 }
 
 describe('faamoffice capabilities', () => {
-  it('reports nothing configured when signed out with default settings', async () => {
+  it('reports nothing configured with default settings', async () => {
     const dir = tempDir()
     const r = await run(['capabilities', '--json'], {
       env: {
@@ -69,7 +53,8 @@ describe('faamoffice capabilities', () => {
     expect(d.search).toEqual({ available: true, via: 'serper' })
     expect(d.image_search).toEqual({ available: true, via: 'serper' })
     expect(d.image_generation).toEqual({ available: true, via: 'openai' })
-    expect(d.media_analysis.available).toBe(false)
+    // OpenAI is also the default analysis choice, so the same key covers image analysis
+    expect(d.media_analysis).toEqual({ available: true, via: 'openai' })
     expect(d.app.available).toBe(true)
     expect(r.json().summary).toContain('image_generation')
   })
@@ -102,24 +87,6 @@ describe('faamoffice capabilities', () => {
     expect(d.image_search.available).toBe(false)
   })
 
-  it.each(['tavily', 'parallel'])(
-    '%s does not advertise Genspark image search when signed in',
-    async (provider) => {
-      vi.spyOn(aiSearch, 'hasGskAuth').mockReturnValue(true)
-      const settings = settingsFile(tempDir(), {
-        search: { provider, providers: { [provider]: { apiKey: 'test-key' } } },
-      })
-      const r = await run(['capabilities', '--json'], {
-        env: { ...process.env, GENOFFICE_AI_SETTINGS: settings },
-      })
-      const d = r.json().detail
-      expect(d.search).toEqual({ available: true, via: provider })
-      expect(d.image_search).toEqual({ available: false, via: null })
-      expect(d.image_generation).toEqual({ available: true, via: 'genspark' })
-      expect(d.media_analysis).toEqual({ available: true, via: 'genspark' })
-    },
-  )
-
   it('reports selected keyless Parallel as web search without requiring a login', async () => {
     const settings = settingsFile(tempDir(), {
       search: { provider: 'parallel', providers: { parallel: { apiKey: '' } } },
@@ -129,5 +96,50 @@ describe('faamoffice capabilities', () => {
     })
     expect(r.json().detail.search).toEqual({ available: true, via: 'parallel' })
     expect(r.json().detail.image_search).toEqual({ available: false, via: null })
+  })
+
+  it('does not count the free search chain as configured search', async () => {
+    const settings = settingsFile(tempDir(), { search: { provider: 'auto', providers: {} } })
+    const r = await run(['capabilities', '--json'], {
+      env: { ...process.env, GENOFFICE_AI_SETTINGS: settings },
+    })
+    const d = r.json().detail
+    expect(d.search).toEqual({ available: false, via: null })
+    expect(d.image_search).toEqual({ available: false, via: null })
+  })
+
+  it('reports nothing for a settings file left on the removed Genspark choices', async () => {
+    const settings = settingsFile(tempDir(), {
+      provider: 'genspark',
+      providers: { genspark: { apiKey: '', model: 'claude-opus-4-7' } },
+      gskToolsEnabled: true,
+      search: { provider: 'genspark', providers: {} },
+      media: { imageProvider: 'genspark', analysisProvider: 'genspark', providers: {} },
+    })
+    const r = await run(['capabilities', '--json'], {
+      env: { ...process.env, GENOFFICE_AI_SETTINGS: settings },
+    })
+    expect(r.code).toBe(0)
+    const d = r.json().detail
+    expect(d.search).toEqual({ available: false, via: null })
+    expect(d.image_generation).toEqual({ available: false, via: null })
+    expect(d.media_analysis).toEqual({ available: false, via: null })
+  })
+
+  it('names the video provider when only video analysis is set up', async () => {
+    const settings = settingsFile(tempDir(), {
+      media: {
+        imageProvider: 'openai',
+        analysisProvider: 'openai',
+        videoAnalysisProvider: 'gemini',
+        providers: { gemini: { apiKey: 'g' } },
+      },
+    })
+    const r = await run(['capabilities', '--json'], {
+      env: { ...process.env, GENOFFICE_AI_SETTINGS: settings },
+    })
+    const d = r.json().detail
+    expect(d.image_generation).toEqual({ available: false, via: null })
+    expect(d.media_analysis).toEqual({ available: true, via: 'gemini' })
   })
 })

@@ -1,7 +1,6 @@
 import { join } from 'node:path'
 import { describe, expect, it } from 'vitest'
 import { aiSettingsPath, proxyUrlFromEnv } from '../src/cloud'
-import { analysisText } from '../src/commands/media'
 import { resultCount } from '../src/commands/search'
 import { run } from './helpers'
 
@@ -98,19 +97,6 @@ describe('cloud command plumbing', () => {
     expect(missingUrl.json().message).toContain('/nonexistent/photo.jpg')
   })
 
-  it('unwraps the Genspark per-file analysis map and leaves prose alone', () => {
-    expect(analysisText('A red square.')).toBe('A red square.')
-    expect(
-      analysisText(
-        JSON.stringify({
-          'https://x/a': { status: 'completed', analysis: ' HELLO ' },
-          'https://x/b': { status: 'completed', analysis: 'WORLD' },
-        }),
-      ),
-    ).toBe('HELLO\n\nWORLD')
-    expect(analysisText('{not json')).toBe('{not json')
-  })
-
   it('lists the cloud commands in help', async () => {
     const r = await run(['help'])
     expect(r.stdout).toMatch(/\bsearch\b/)
@@ -137,24 +123,27 @@ describe('cloud guard rails', () => {
     expect(siblingExtensions('bmp')).toEqual(['png', 'jpg', 'webp', 'gif'])
   })
 
-  it('validates --aspect and --size before any network call', async () => {
-    expect((await run(['image', 'a cat', '--aspect', '5:7', '--json'])).code).toBe(1)
-    expect((await run(['image', 'a cat', '--size', '9k', '--json'])).code).toBe(1)
+  it('reports a missing image or analysis provider without contacting any service', async () => {
+    const { writeFileSync } = await import('node:fs')
+    const { tempDir } = await import('./helpers')
+    const dir = tempDir()
+    const env = {
+      ...process.env,
+      GENOFFICE_AUDIT_LOG: 'off',
+      GENOFFICE_AI_SETTINGS: join(dir, 'missing.json'),
+    }
+    const image = await run(['image', 'a cat', '--out', join(dir, 'x.png'), '--json'], { env })
+    expect(image.code).toBe(4)
+    expect(image.json().message).toContain('No image generation provider')
+    writeFileSync(join(dir, 'photo.png'), 'x')
+    const media = await run(['media', join(dir, 'photo.png'), '--json'], { env })
+    expect(media.code).toBe(4)
+    expect(media.json().message).toContain('No media analysis provider')
   })
 
-  it('recognises a per-file provider failure', async () => {
-    const { providerFailure } = await import('../src/commands/media')
-    expect(providerFailure('plain prose')).toBeNull()
-    expect(
-      providerFailure(JSON.stringify({ 'https://x/a': { status: 'completed', analysis: 'ok' } })),
-    ).toBeNull()
-    expect(
-      providerFailure(
-        JSON.stringify({ 'https://x/a': { status: 'error', error: 'Not Found (404)' } }),
-      ),
-    ).toBe('Not Found (404)')
-    expect(
-      providerFailure(JSON.stringify({ result: { text: 'other shape' }, meta: {} })),
-    ).toBeNull()
+  it('validates --aspect and rejects the removed --size / --model flags before any network call', async () => {
+    expect((await run(['image', 'a cat', '--aspect', '5:7', '--json'])).code).toBe(1)
+    expect((await run(['image', 'a cat', '--size', '1k', '--json'])).code).toBe(1)
+    expect((await run(['image', 'a cat', '--model', 'x', '--json'])).code).toBe(1)
   })
 })

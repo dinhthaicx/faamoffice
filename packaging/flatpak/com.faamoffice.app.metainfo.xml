@@ -21,12 +21,12 @@
       <li>A local-first design: files stay on disk, working offline</li>
     </ul>
   </description>
-  <developer id="ai.genspark">
-    <name>Mainfunc, Inc.</name>
+  <developer id="io.github.faamoffice">
+    <name>FaamOffice</name>
   </developer>
   <launchable type="desktop-id">com.faamoffice.app.desktop</launchable>
   <url type="homepage">https://github.com/faamoffice/faamoffice</url>
-  <url type="bugtracker">https://github.com/genspark-ai/genoffice/issues</url>
+  <url type="bugtracker">https://github.com/faamoffice/faamoffice/issues</url>
   <content_rating type="oars-1.1" />
   <provides>
     <mediatype type="application/vnd.openxmlformats-officedocument.wordprocessingml.document" />

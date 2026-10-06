@@ -7,6 +7,7 @@ import {
   imageGenerationAvailable,
   mediaAnalysisAvailable,
   resolveAiMediaSettings,
+  videoAnalysisAvailable,
 } from '../src/media'
 import {
   analyzeMediaWithProvider,
@@ -38,11 +39,15 @@ function openaiSettings(apiKey = 'sk-test', imageModel = 'gpt-image-2'): AiSetti
 }
 
 describe('media settings', () => {
-  it('defaults every provider to its default models and genspark as the active one', () => {
+  it('defaults every provider to its default models, with nothing active until a key is set', () => {
     const media = defaultAiMediaSettings()
-    expect(media.imageProvider).toBe('genspark')
-    expect(media.analysisProvider).toBe('genspark')
-    expect(media.videoAnalysisProvider).toBe('genspark')
+    expect(media.imageProvider).toBe('openai')
+    expect(media.analysisProvider).toBe('openai')
+    expect(media.videoAnalysisProvider).toBe('gemini')
+    for (const capability of ['image', 'analysis', 'video'] as const) {
+      expect(activeMediaProvider({ media }, capability)).toBeNull()
+      expect(activeMediaConfig({ media }, capability)).toBeNull()
+    }
     for (const meta of AI_MEDIA_PROVIDERS) {
       expect(media.providers[meta.id].imageModel).toBe(meta.defaultImageModel)
       expect(media.providers[meta.id].apiKey).toBe('')
@@ -53,9 +58,9 @@ describe('media settings', () => {
 
   it('is carried by defaultAiSettings and healed in from a pre-media settings file', () => {
     const defaults = defaultAiSettings()
-    expect(defaults.media?.imageProvider).toBe('genspark')
+    expect(defaults.media?.imageProvider).toBe('openai')
     const resolved = resolveAiSettings(
-      { provider: 'genspark', providers: defaults.providers },
+      { provider: 'openai', providers: defaults.providers },
       defaultAiSettings(),
     )
     expect(resolved.media).toEqual(defaultAiMediaSettings())
@@ -92,6 +97,40 @@ describe('media settings', () => {
     expect(media.providers.openai.imageModel).toBe('gpt-image-2')
   })
 
+  it('maps stored Genspark choices (removed) and unknown ids to the defaults, keeping keys', () => {
+    const media = resolveAiMediaSettings({
+      imageProvider: 'genspark',
+      analysisProvider: 'genspark',
+      videoAnalysisProvider: 'genspark',
+      providers: {
+        genspark: { apiKey: '' },
+        nope: { apiKey: 'x' },
+        gemini: { apiKey: ' AIza ' },
+      },
+    } as never)
+    expect(media.imageProvider).toBe('openai')
+    expect(media.analysisProvider).toBe('openai')
+    expect(media.videoAnalysisProvider).toBe('gemini')
+    expect(Object.keys(media.providers)).not.toContain('genspark')
+    expect(Object.keys(media.providers)).not.toContain('nope')
+    expect(media.providers.gemini.apiKey).toBe('AIza')
+    // the pre-catalog single `provider` field is checked the same way
+    expect(resolveAiMediaSettings({ provider: 'genspark' } as never).imageProvider).toBe('openai')
+    expect(resolveAiMediaSettings({ imageProvider: 'nope' } as never).imageProvider).toBe('openai')
+    // a whole settings file from before the removal: no media tool is active
+    const settings = resolveAiSettings(
+      {
+        provider: 'openai',
+        providers: {},
+        media: { imageProvider: 'genspark', analysisProvider: 'genspark', providers: {} },
+      },
+      defaultAiSettings(),
+    )
+    expect(activeMediaProvider(settings, 'image')).toBeNull()
+    expect(imageGenerationAvailable(settings)).toBe(false)
+    expect(mediaAnalysisAvailable(settings)).toBe(false)
+  })
+
   it('tolerates non-string values in a hand-edited settings file', () => {
     const media = resolveAiMediaSettings({
       providers: {
@@ -106,14 +145,14 @@ describe('media settings', () => {
   it('activates a BYOK media provider per capability, only when usable and capable', () => {
     expect(activeMediaProvider(openaiSettings(), 'image')).toBe('openai')
     expect(activeMediaProvider(openaiSettings(), 'analysis')).toBe('openai')
-    expect(activeMediaProvider(openaiSettings(''), 'image')).toBe('genspark')
-    expect(activeMediaProvider(openaiSettings('   '), 'image')).toBe('genspark')
+    expect(activeMediaProvider(openaiSettings(''), 'image')).toBeNull()
+    expect(activeMediaProvider(openaiSettings('   '), 'image')).toBeNull()
     const custom = defaultAiMediaSettings()
     custom.imageProvider = 'custom'
-    expect(activeMediaProvider(withMedia(custom), 'image')).toBe('genspark')
+    expect(activeMediaProvider(withMedia(custom), 'image')).toBeNull()
     custom.providers.custom.baseUrl = 'http://localhost:1234/v1'
     expect(activeMediaProvider(withMedia(custom), 'image')).toBe('custom')
-    expect(activeMediaProvider(withMedia(custom), 'analysis')).toBe('genspark')
+    expect(activeMediaProvider(withMedia(custom), 'analysis')).toBeNull()
     expect(activeMediaConfig(withMedia(custom), 'image')?.provider).toBe('custom')
     // MiniMax-M3 supports both image and video analysis
     const mm = defaultAiMediaSettings()
@@ -128,36 +167,40 @@ describe('media settings', () => {
     ds.providers.deepseek.apiKey = 'sk-ds'
     expect(activeMediaProvider(withMedia(ds), 'analysis')).toBe('deepseek')
     ds.videoAnalysisProvider = 'deepseek'
-    expect(activeMediaProvider(withMedia(ds), 'video')).toBe('genspark')
-    // OpenAI reads images but not video: as the video provider it falls back
+    expect(activeMediaProvider(withMedia(ds), 'video')).toBeNull()
+    // OpenAI reads images but not video: as the video provider nothing is active
     const oa = openaiSettings()
     oa.media!.videoAnalysisProvider = 'openai'
-    expect(activeMediaProvider(oa, 'video')).toBe('genspark')
+    expect(activeMediaProvider(oa, 'video')).toBeNull()
     oa.media!.videoAnalysisProvider = 'gemini'
     oa.media!.providers.gemini.apiKey = 'AIza'
     expect(activeMediaProvider(oa, 'video')).toBe('gemini')
-    expect(activeMediaProvider({ media: undefined }, 'image')).toBe('genspark')
+    expect(activeMediaProvider({ media: undefined }, 'image')).toBeNull()
     expect(
       activeMediaProvider({ media: { imageProvider: 'nope', providers: {} } as never }, 'image'),
-    ).toBe('genspark')
+    ).toBeNull()
   })
 
-  it('gates the tools on gsk login + toggle without BYOK, and on the BYOK model with it', () => {
-    const genspark = defaultAiSettings()
-    expect(imageGenerationAvailable(genspark, true)).toBe(true)
-    expect(imageGenerationAvailable(genspark, false)).toBe(false)
-    expect(imageGenerationAvailable({ ...genspark, gskToolsEnabled: false }, true)).toBe(false)
-    expect(mediaAnalysisAvailable({ ...genspark, gskToolsEnabled: false }, true)).toBe(false)
+  it('gates the tools on a configured provider and model', () => {
+    const fresh = defaultAiSettings()
+    expect(imageGenerationAvailable(fresh)).toBe(false)
+    expect(mediaAnalysisAvailable(fresh)).toBe(false)
+    expect(videoAnalysisAvailable(fresh)).toBe(false)
+    expect(imageGenerationAvailable(null)).toBe(false)
+    expect(mediaAnalysisAvailable(undefined)).toBe(false)
 
     const byok = openaiSettings()
-    expect(imageGenerationAvailable(byok, false)).toBe(true)
-    expect(imageGenerationAvailable({ ...byok, gskToolsEnabled: false }, false)).toBe(true)
-    expect(mediaAnalysisAvailable(byok, false)).toBe(true)
+    expect(imageGenerationAvailable(byok)).toBe(true)
+    expect(mediaAnalysisAvailable(byok)).toBe(true)
+    // the default video choice (Gemini) has no key yet
+    expect(videoAnalysisAvailable(byok)).toBe(false)
+    byok.media!.providers.gemini.apiKey = 'AIza'
+    expect(videoAnalysisAvailable(byok)).toBe(true)
     // built-in vendors fall back to their default model; a custom endpoint
     // without a model for one capability disables that tool alone
     const noAnalysis = openaiSettings()
     noAnalysis.media!.providers.openai.analysisModel = ''
-    expect(mediaAnalysisAvailable(noAnalysis, false)).toBe(true)
+    expect(mediaAnalysisAvailable(noAnalysis)).toBe(true)
     const custom = defaultAiMediaSettings()
     custom.imageProvider = 'custom'
     custom.analysisProvider = 'custom'
@@ -167,9 +210,8 @@ describe('media settings', () => {
       imageModel: 'flux',
       analysisModel: '',
     }
-    expect(mediaAnalysisAvailable(withMedia(custom), false)).toBe(false)
-    expect(imageGenerationAvailable(withMedia(custom), false)).toBe(true)
-    expect(imageGenerationAvailable(null, true)).toBe(true)
+    expect(mediaAnalysisAvailable(withMedia(custom))).toBe(false)
+    expect(imageGenerationAvailable(withMedia(custom))).toBe(true)
   })
 })
 

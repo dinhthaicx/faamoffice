@@ -9,7 +9,6 @@ export const it = {
   aiStarterPolishAll: "Rifinisci l'intero documento con un tono più professionale",
   aiStarterContinue: 'Continua a scrivere da dove il documento si interrompe',
   aiStarterFillTemplate: 'Trova e compila i segnaposto nel documento',
-  aiGskLoginBtn: 'Accedi a Genspark',
   aiPanelTitle: 'Faam AI',
   aiOpenAssistant: "Apri l'assistente IA",
   aiSummarizeBtn: 'Riassunto IA',
@@ -119,7 +118,7 @@ export const it = {
   aiNetworkError:
     'Problema di rete: impossibile raggiungere il servizio IA. Controlla la connessione e riprova',
   aiCreditsExhausted:
-    'I tuoi crediti Genspark sono esauriti. Ricarica su genspark.ai/pricing e riprova',
+    'Il tuo provider di IA segnala che i crediti o la quota sono esauriti. Ricarica presso il provider o scegli un altro modello nelle Impostazioni',
   aiSumReadAttachment: 'Lettura allegato',
   aiSumImageAttachment: 'Immagine allegata {name}',
   aiSumRead: 'Lettura di {name}',

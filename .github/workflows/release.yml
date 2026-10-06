@@ -37,6 +37,9 @@ jobs:
       # GitHub-hosted mac runners carry no Developer ID; keep electron-builder
       # from searching the keychain for one
       CSC_IDENTITY_AUTO_DISCOVERY: 'false'
+      # default FaamOffice account server baked into the app (repository
+      # variable; empty = users enter their server in Settings → Profile)
+      FAAMOFFICE_ACCOUNT_URL: ${{ vars.FAAMOFFICE_ACCOUNT_URL }}
     steps:
       - name: Checkout
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1

@@ -8,9 +8,9 @@ import {
 } from '../src/search-settings'
 
 describe('search settings', () => {
-  it('defaults to genspark with empty keys and rides along in defaultAiSettings', () => {
+  it('defaults to the free chain with empty keys and rides along in defaultAiSettings', () => {
     expect(defaultAiSearchSettings()).toEqual({
-      provider: 'genspark',
+      provider: 'auto',
       providers: {
         serper: { apiKey: '' },
         serply: { apiKey: '' },
@@ -20,12 +20,37 @@ describe('search settings', () => {
         firecrawl: { apiKey: '' },
       },
     })
-    expect(defaultAiSettings().search?.provider).toBe('genspark')
+    expect(defaultAiSettings().search?.provider).toBe('auto')
     const resolved = resolveAiSettings(
-      { provider: 'genspark', providers: {} as never },
+      { provider: 'openai', providers: {} as never },
       defaultAiSettings(),
     )
     expect(resolved.search).toEqual(defaultAiSearchSettings())
+  })
+
+  it('maps a stored Genspark choice (removed) or an unknown id to the free chain, keeping keys', () => {
+    const fromGenspark = resolveAiSearchSettings({
+      provider: 'genspark',
+      providers: { serper: { apiKey: ' k ' } },
+    } as never)
+    expect(fromGenspark.provider).toBe('auto')
+    expect(fromGenspark.providers.serper.apiKey).toBe('k')
+    expect(activeSearchProvider({ search: fromGenspark })).toBe('auto')
+    expect(resolveAiSearchSettings({ provider: 'bing', providers: {} } as never).provider).toBe(
+      'auto',
+    )
+    // a whole settings file from before the removal lands on the free chain too
+    const resolved = resolveAiSettings(
+      { provider: 'openai', providers: {}, search: { provider: 'genspark', providers: {} } },
+      defaultAiSettings(),
+    )
+    expect(resolved.search?.provider).toBe('auto')
+  })
+
+  it("lists 'auto' as a keyless choice with image search", () => {
+    const auto = AI_SEARCH_PROVIDERS.find((m) => m.id === 'auto')
+    expect(auto?.imageSearch).toBe(true)
+    expect(AI_SEARCH_PROVIDERS.some((m) => (m.id as string) === 'genspark')).toBe(false)
   })
 
   it('merges and trims stored keys', () => {
@@ -39,7 +64,7 @@ describe('search settings', () => {
   })
 
   it('activates a BYOK search provider only with a key', () => {
-    expect(activeSearchProvider({ search: undefined })).toBe('genspark')
+    expect(activeSearchProvider({ search: undefined })).toBe('auto')
     expect(
       activeSearchProvider({
         search: {
@@ -54,7 +79,7 @@ describe('search settings', () => {
           },
         },
       }),
-    ).toBe('genspark')
+    ).toBe('auto')
     expect(
       activeSearchProvider({
         search: {
@@ -84,9 +109,9 @@ describe('search settings', () => {
           },
         },
       }),
-    ).toBe('genspark')
+    ).toBe('auto')
     expect(activeSearchProvider({ search: { provider: 'bing', providers: {} } as never })).toBe(
-      'genspark',
+      'auto',
     )
   })
 })
@@ -104,7 +129,7 @@ describe('Serply search settings', () => {
       activeSearchProvider({
         search: { ...settings, providers: { ...settings.providers, serply: { apiKey: '  ' } } },
       }),
-    ).toBe('genspark')
+    ).toBe('auto')
   })
 })
 
@@ -160,7 +185,7 @@ describe('exa and firecrawl providers', () => {
     expect(s.providers.firecrawl.apiKey).toBe('')
   })
 
-  it('activate with a key and fall back to genspark without one', () => {
+  it('activate with a key and fall back to the free chain without one', () => {
     const mk = (id: 'exa' | 'firecrawl', apiKey: string) => ({
       search: {
         provider: id,
@@ -174,9 +199,9 @@ describe('exa and firecrawl providers', () => {
         },
       },
     })
-    expect(activeSearchProvider(mk('exa', ''))).toBe('genspark')
+    expect(activeSearchProvider(mk('exa', ''))).toBe('auto')
     expect(activeSearchProvider(mk('exa', 'exa-1'))).toBe('exa')
-    expect(activeSearchProvider(mk('firecrawl', ' '))).toBe('genspark')
+    expect(activeSearchProvider(mk('firecrawl', ' '))).toBe('auto')
     expect(activeSearchProvider(mk('firecrawl', 'fc-1'))).toBe('firecrawl')
   })
 

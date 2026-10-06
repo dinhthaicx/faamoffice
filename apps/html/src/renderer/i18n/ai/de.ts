@@ -4,7 +4,8 @@ export const de = {
   aiCollapsePanel: 'Panel einklappen',
   aiComposerPlaceholder: 'KI schreiben oder bearbeiten lassen…',
   aiCopyReplyTitle: 'Antwort kopieren',
-  aiCreditsExhausted: 'Guthaben aufgebraucht — bei genspark.ai aufladen',
+  aiCreditsExhausted:
+    'Ihr KI-Anbieter meldet, dass Ihr Guthaben oder Kontingent aufgebraucht ist. Laden Sie beim Anbieter auf oder wählen Sie in den Einstellungen ein anderes Modell',
   aiEmptyTitle: 'Eine Seite mit KI gestalten',
   aiEmptyBody:
     'Landingpage, Bericht, Poster – nennen Sie Zweck und Zielgruppe; die KI schlägt zuerst ein Briefing vor und baut dann die Seite',

@@ -17,7 +17,6 @@ export const en = {
   aiQcPageSkipped: 'Page {n}: automatic layout check skipped',
   aiQcStopped: 'Layout check stopped',
   aiQcCapped: '{count} more page(s) not checked (per-run cap)',
-  aiGskLoginBtn: 'Sign in to Genspark',
   aiPanelTitle: 'Faam AI',
   aiOpenAssistant: 'Open AI assistant',
   aiFactCheckBtn: 'AI Fact Check',
@@ -114,7 +113,7 @@ export const en = {
   aiErrNetwork:
     'Network problem: could not reach the AI service. Check your connection and try again',
   aiCreditsExhausted:
-    'Your Genspark credits have run out. Visit genspark.ai/pricing to top up, then try again',
+    'Your AI provider says your credits or quota are used up. Top up with the provider or choose another model in Settings',
   aiErrRequestFailed: 'Failed to send request: {msg}',
   aiErrGenerateFailed: 'Generation failed',
   aiErrRegenFailed: 'Slide redo failed',
@@ -223,5 +222,4 @@ export const en = {
   aiSumSaveTemplate: 'Saved style template "{name}"',
   aiSumTemplatesEmpty: 'Style templates (empty)',
   aiSumListTemplates: 'Listed {count} style templates',
-  aiPageCloudToLocal: 'cloud unavailable — generated locally',
 } satisfies Record<keyof typeof zh, string>
