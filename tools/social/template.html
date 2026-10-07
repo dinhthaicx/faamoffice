@@ -1,0 +1,1154 @@
+<!doctype html>
+<!--
+  FaamOffice social share image. One layout system, four canvases:
+    #square    1080x1080  feed post
+    #portrait  1080x1350  4:5 feed post (Facebook / Instagram)
+    #story     1080x1920  Story / Reels / TikTok (key content kept out of the
+                          top 250 px and bottom 340 px UI zones)
+    #landscape 1200x630   link preview / Open Graph (Facebook, Zalo)
+  Rendered by tools/gen-social-images.mjs, which opens this file as
+  template.html#<format> and fills every [data-logo] slot with the FaamOffice
+  mark from tools/brand-logo.mjs. Fonts: Be Vietnam Pro (SIL OFL 1.1, fonts/).
+  The file-type cards are generic glyphs labelled by extension only; they do
+  not reproduce any vendor's product icons.
+-->
+<html lang="vi" data-format="square">
+  <head>
+    <meta charset="utf-8" />
+    <title>FaamOffice social image</title>
+    <script>
+      const format = location.hash.slice(1)
+      if (format) document.documentElement.dataset.format = format
+    </script>
+    <style>
+      @font-face {
+        font-family: 'BVP';
+        src: url('fonts/BeVietnamPro-Regular.ttf') format('truetype');
+        font-weight: 400;
+      }
+      @font-face {
+        font-family: 'BVP';
+        src: url('fonts/BeVietnamPro-SemiBold.ttf') format('truetype');
+        font-weight: 600;
+      }
+      @font-face {
+        font-family: 'BVP';
+        src: url('fonts/BeVietnamPro-Bold.ttf') format('truetype');
+        font-weight: 700;
+      }
+      @font-face {
+        font-family: 'BVP';
+        src: url('fonts/BeVietnamPro-ExtraBold.ttf') format('truetype');
+        font-weight: 800;
+      }
+      @font-face {
+        font-family: 'BVP';
+        src: url('fonts/BeVietnamPro-Black.ttf') format('truetype');
+        font-weight: 900;
+      }
+
+      :root {
+        --bg: #050816;
+        --ink: #ffffff;
+        --ink-2: rgba(232, 238, 255, 0.88);
+        --muted: #a8b3cc;
+        --faint: #7d88a3;
+        --navy: #07112b;
+        --mint: #1dfacd;
+        --leaf: #8cd96b;
+        --hl-green: #6bf0a0;
+        --hl-teal: #2ee6c9;
+        --hl-blue: #5aa8ff;
+        --paper: #f7f9fc;
+        --paper-line: #d5deeb;
+        --docx: #1f5bd8;
+        --xlsx: #15803d;
+        --pptx: #d9560f;
+        --pdf: #c81e1e;
+      }
+
+      /* ---------- per-format metrics ---------- */
+      html[data-format='square'] {
+        --W: 1080px;
+        --H: 1080px;
+        --px: 64px;
+        --pt: 48px;
+        --pb: 48px;
+        --logo-h: 54px;
+        --brand-size: 38px;
+        --os-size: 28px;
+        --os-h: 52px;
+        --eyebrow-size: 64px;
+        --eyebrow-gap: 30px;
+        --eyebrow-lh: 1.1;
+        --free-size: 158px;
+        --free-gap: 0px;
+        --sticker: 172px;
+        --sticker-big: 48px;
+        --sticker-small: 30px;
+        --license-size: 42px;
+        --license-gap: 0px;
+        --sub-size: 34px;
+        --sub-gap: 12px;
+        --ai-gap: 0px;
+        --chip-size: 28px;
+        --chip-h: 54px;
+        --chips-gap: 8px;
+        --cta-h: 84px;
+        --cta-size: 36px;
+        --cta-gap: 18px;
+        --cw: 190px;
+        --ch: 236px;
+        --ext-size: 42px;
+        --stage-w: 952px;
+        --stage-h: 314px;
+      }
+      html[data-format='portrait'] {
+        --W: 1080px;
+        --H: 1350px;
+        --px: 64px;
+        --pt: 60px;
+        --pb: 48px;
+        --logo-h: 58px;
+        --brand-size: 40px;
+        --os-size: 29px;
+        --os-h: 56px;
+        --eyebrow-size: 66px;
+        --eyebrow-gap: 18px;
+        --free-size: 164px;
+        --free-gap: 0px;
+        --sticker: 184px;
+        --sticker-big: 52px;
+        --sticker-small: 32px;
+        --license-size: 44px;
+        --license-gap: 4px;
+        --sub-size: 35px;
+        --sub-gap: 20px;
+        --ai-gap: 8px;
+        --chip-size: 29px;
+        --chip-h: 60px;
+        --chips-gap: 26px;
+        --cta-h: 96px;
+        --cta-size: 38px;
+        --cta-gap: 22px;
+        --foot-gap: 18px;
+        --cw: 198px;
+        --ch: 244px;
+        --ext-size: 44px;
+        --stage-w: 952px;
+        --stage-h: 398px;
+      }
+      html[data-format='story'] {
+        --W: 1080px;
+        --H: 1920px;
+        --px: 64px;
+        --pt: 252px;
+        --pb: 340px;
+        --logo-h: 62px;
+        --brand-size: 44px;
+        --os-size: 30px;
+        --os-h: 58px;
+        --eyebrow-size: 78px;
+        --eyebrow-gap: 36px;
+        --free-size: 190px;
+        --free-gap: 0px;
+        --sticker: 180px;
+        --sticker-big: 56px;
+        --sticker-small: 34px;
+        --license-size: 48px;
+        --license-gap: 6px;
+        --sub-size: 36px;
+        --sub-gap: 28px;
+        --ai-gap: 10px;
+        --chip-size: 29px;
+        --chip-h: 58px;
+        --chips-gap: 22px;
+        --cta-h: 104px;
+        --cta-size: 40px;
+        --cta-gap: 28px;
+        --cw: 200px;
+        --ch: 248px;
+        --ext-size: 44px;
+        --stage-w: 952px;
+        --stage-h: 452px;
+      }
+      html[data-format='landscape'] {
+        --W: 1200px;
+        --H: 630px;
+        --px: 56px;
+        --pt: 44px;
+        --pb: 48px;
+        --logo-h: 48px;
+        --brand-size: 34px;
+        --os-size: 26px;
+        --os-h: 48px;
+        --eyebrow-size: 46px;
+        --eyebrow-gap: 14px;
+        --free-size: 112px;
+        --free-gap: 0px;
+        --sticker: 132px;
+        --sticker-big: 38px;
+        --sticker-small: 26px;
+        --license-size: 32px;
+        --license-gap: 0px;
+        --sub-size: 28px;
+        --sub-gap: 10px;
+        --ai-gap: 4px;
+        --chip-size: 26px;
+        --chip-h: 50px;
+        --chips-gap: 10px;
+        --cta-h: 72px;
+        --cta-size: 30px;
+        --cta-gap: 22px;
+        --cw: 152px;
+        --ch: 188px;
+        --ext-size: 32px;
+        --stage-w: 470px;
+        --stage-h: 490px;
+      }
+
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+      html,
+      body {
+        width: var(--W);
+        height: var(--H);
+        background: var(--bg);
+        overflow: hidden;
+      }
+      body {
+        font-family: 'BVP', sans-serif;
+        color: var(--ink);
+        -webkit-font-smoothing: antialiased;
+      }
+
+      .canvas {
+        position: relative;
+        width: var(--W);
+        height: var(--H);
+        overflow: hidden;
+        background: var(--bg);
+      }
+
+      /* ---------- light & texture ---------- */
+      .bg {
+        position: absolute;
+        inset: 0;
+        width: 100%;
+        height: 100%;
+        pointer-events: none;
+      }
+      .bg-glow {
+        background:
+          radial-gradient(60% 46% at 100% 0%, rgba(29, 116, 250, 0.36), transparent 72%),
+          radial-gradient(56% 44% at 0% 100%, rgba(58, 172, 113, 0.26), transparent 72%),
+          radial-gradient(40% 30% at 10% 22%, rgba(50, 166, 165, 0.14), transparent 72%);
+      }
+      .bg-grid {
+        background-image:
+          linear-gradient(rgba(255, 255, 255, 0.04) 1px, transparent 1px),
+          linear-gradient(90deg, rgba(255, 255, 255, 0.04) 1px, transparent 1px);
+        background-size: 54px 54px;
+        background-position: -1px -1px;
+        -webkit-mask-image: radial-gradient(70% 50% at 50% 62%, #000 0%, transparent 78%);
+        mask-image: radial-gradient(70% 50% at 50% 62%, #000 0%, transparent 78%);
+      }
+      html[data-format='landscape'] .bg-grid {
+        -webkit-mask-image: radial-gradient(46% 70% at 78% 56%, #000 0%, transparent 78%);
+        mask-image: radial-gradient(46% 70% at 78% 56%, #000 0%, transparent 78%);
+      }
+      /* fine grain so the glows survive JPEG re-encoding without banding */
+      .grain {
+        opacity: 0.03;
+        mix-blend-mode: screen;
+      }
+
+      /* ---------- frame ---------- */
+      .frame {
+        position: absolute;
+        inset: var(--pt) var(--px) var(--pb) var(--px);
+        display: grid;
+        grid-template-columns: minmax(0, 1fr);
+        grid-template-rows: auto auto minmax(0, 1fr) auto auto auto;
+        grid-template-areas: 'top' 'head' 'hero' 'chips' 'cta' 'foot';
+      }
+      html[data-format='landscape'] .frame {
+        grid-template-columns: minmax(0, 1fr) var(--stage-w);
+        grid-template-rows: auto minmax(0, 1fr) auto;
+        grid-template-areas: 'top top' 'head hero' 'cta hero';
+        column-gap: 16px;
+      }
+
+      /* ---------- header ---------- */
+      .top {
+        grid-area: top;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+      }
+      .brand {
+        display: flex;
+        align-items: center;
+        gap: calc(var(--logo-h) * 0.27);
+      }
+      .brand .mark {
+        height: var(--logo-h);
+        width: auto;
+        display: block;
+      }
+      .brand .name {
+        font-size: var(--brand-size);
+        font-weight: 800;
+        letter-spacing: -0.01em;
+        line-height: 1;
+      }
+      .os {
+        height: var(--os-h);
+        padding: 0 calc(var(--os-h) * 0.42) 0 calc(var(--os-h) * 0.32);
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        border-radius: 999px;
+        border: 1.5px solid rgba(255, 255, 255, 0.16);
+        background: rgba(255, 255, 255, 0.06);
+        font-size: var(--os-size);
+        font-weight: 600;
+        color: var(--ink-2);
+        line-height: 1;
+        white-space: nowrap;
+      }
+      .os svg {
+        width: calc(var(--os-size) * 1.1);
+        height: calc(var(--os-size) * 1.1);
+        flex: none;
+      }
+      html[data-format='landscape'] .top {
+        padding-right: 0;
+      }
+
+      /* ---------- headline ---------- */
+      .head {
+        grid-area: head;
+        position: relative;
+      }
+      .eyebrow {
+        margin-top: var(--eyebrow-gap);
+        font-size: var(--eyebrow-size);
+        font-weight: 700;
+        line-height: var(--eyebrow-lh, 1.16);
+        letter-spacing: -0.015em;
+      }
+      .free-row {
+        display: flex;
+        align-items: center;
+        margin-top: var(--free-gap);
+      }
+      .free {
+        /* Ễ's stacked marks rise 0.29em above the line box; the padding keeps
+       them inside the clipped background and 12px+ clear of the line above */
+        padding: calc(0.29em + 14px) 0.06em 0.02em 0;
+        margin-left: -0.05em;
+        font-size: var(--free-size);
+        font-weight: 900;
+        line-height: 1;
+        letter-spacing: -0.035em;
+        white-space: nowrap;
+        background: linear-gradient(
+          92deg,
+          var(--hl-green) 0%,
+          var(--hl-teal) 46%,
+          var(--hl-blue) 100%
+        );
+        -webkit-background-clip: text;
+        background-clip: text;
+        color: transparent;
+        filter: drop-shadow(0 0 26px rgba(46, 230, 201, 0.22));
+      }
+
+      .sticker {
+        position: relative;
+        width: var(--sticker);
+        height: var(--sticker);
+        flex: none;
+      }
+      .sticker .burst {
+        position: absolute;
+        inset: 0;
+        transform: rotate(12deg);
+      }
+      .sticker svg {
+        position: absolute;
+        inset: 0;
+        width: 100%;
+        height: 100%;
+        filter: drop-shadow(0 10px 22px rgba(29, 250, 205, 0.24));
+      }
+      .sticker .txt {
+        position: absolute;
+        inset: 0;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        color: var(--navy);
+      }
+      .sticker .big {
+        font-size: var(--sticker-big);
+        font-weight: 900;
+        line-height: 1;
+        letter-spacing: -0.03em;
+      }
+      .sticker .small {
+        font-size: var(--sticker-small);
+        font-weight: 900;
+        line-height: 1;
+        letter-spacing: 0.12em;
+        margin-top: 4px;
+        padding-left: 0.12em;
+      }
+      .free-row .sticker {
+        margin-left: auto;
+        margin-top: calc(var(--free-size) * 0.1);
+      }
+      .stage .sticker {
+        position: absolute;
+        z-index: 2;
+      }
+      html[data-format='square'] .stage .sticker,
+      html[data-format='portrait'] .stage .sticker {
+        display: none;
+      }
+      html[data-format='story'] .free-row .sticker,
+      html[data-format='landscape'] .free-row .sticker {
+        display: none;
+      }
+
+      .license {
+        margin-top: var(--license-gap);
+        display: flex;
+        align-items: center;
+        gap: calc(var(--license-size) * 0.3);
+        font-size: var(--license-size);
+        font-weight: 700;
+        line-height: 1.2;
+        letter-spacing: -0.01em;
+        color: var(--ink);
+      }
+      .license svg {
+        width: calc(var(--license-size) * 1.02);
+        height: calc(var(--license-size) * 1.02);
+        flex: none;
+      }
+
+      .sub {
+        margin-top: var(--sub-gap);
+        font-size: var(--sub-size);
+        line-height: 1.3;
+        letter-spacing: -0.005em;
+        white-space: nowrap;
+      }
+      .sub .lead {
+        color: var(--muted);
+        font-weight: 600;
+      }
+      .sub b {
+        color: var(--ink);
+        font-weight: 800;
+      }
+      html[data-format='landscape'] .sub .lead {
+        display: block;
+      }
+      html[data-format='landscape'] .sub b {
+        font-size: calc(var(--sub-size) * 1.08);
+      }
+
+      .ai {
+        margin-top: var(--ai-gap);
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        font-size: var(--sub-size);
+        font-weight: 700;
+        line-height: 1.3;
+        color: var(--mint);
+      }
+      .ai svg {
+        width: calc(var(--sub-size) * 0.95);
+        height: calc(var(--sub-size) * 0.95);
+        flex: none;
+      }
+
+      /* ---------- hero: brand ring + generic file-type cards ---------- */
+      .hero {
+        grid-area: hero;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 0;
+      }
+      .stage {
+        position: relative;
+        width: var(--stage-w);
+        height: var(--stage-h);
+        flex: none;
+      }
+      .ring-glow {
+        position: absolute;
+        border-radius: 50%;
+        background: radial-gradient(
+          circle,
+          rgba(46, 230, 201, 0.26) 0%,
+          rgba(29, 116, 250, 0.12) 42%,
+          transparent 70%
+        );
+      }
+      .stage .halo {
+        position: absolute;
+        filter: blur(22px);
+        opacity: 0.7;
+      }
+      .stage .ring {
+        position: absolute;
+      }
+
+      .card-wrap {
+        position: absolute;
+        width: var(--cw);
+        height: var(--ch);
+        transform: rotate(var(--rot, 0deg));
+        filter: drop-shadow(0 18px 28px rgba(0, 0, 0, 0.45))
+          drop-shadow(0 2px 4px rgba(0, 0, 0, 0.25));
+      }
+      .card {
+        --fold: calc(var(--cw) * 0.2);
+        position: relative;
+        width: 100%;
+        height: 100%;
+        border-radius: calc(var(--cw) * 0.1);
+        overflow: hidden;
+        background: var(--paper);
+        clip-path: polygon(0 0, calc(100% - var(--fold)) 0, 100% var(--fold), 100% 100%, 0 100%);
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+      }
+      .card::before {
+        content: '';
+        position: absolute;
+        left: 0;
+        right: 0;
+        top: 0;
+        height: calc(var(--ch) * 0.03);
+        background: var(--c);
+      }
+      .card::after {
+        content: '';
+        position: absolute;
+        top: 0;
+        right: 0;
+        width: var(--fold);
+        height: var(--fold);
+        background: linear-gradient(225deg, transparent 50%, #cfd8e6 50%);
+        border-bottom-left-radius: calc(var(--fold) * 0.24);
+      }
+      .card .glyph {
+        flex: 1;
+        width: 66%;
+        display: block;
+        margin: 0 auto;
+      }
+      .card .ext {
+        flex: none;
+        width: 100%;
+        height: calc(var(--ch) * 0.3);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: var(--c);
+        color: #fff;
+        font-size: var(--ext-size);
+        font-weight: 800;
+        line-height: 1;
+        letter-spacing: 0.01em;
+      }
+      .c-docx {
+        --c: var(--docx);
+      }
+      .c-xlsx {
+        --c: var(--xlsx);
+      }
+      .c-pptx {
+        --c: var(--pptx);
+      }
+      .c-pdf {
+        --c: var(--pdf);
+      }
+
+      /* square: two cards either side of the ring, the inner ones tucked over its edge */
+      html[data-format='square'] .ring-glow {
+        left: 316px;
+        top: -30px;
+        width: 320px;
+        height: 320px;
+      }
+      html[data-format='square'] .ring,
+      html[data-format='square'] .halo {
+        left: 366px;
+        top: 10px;
+        width: 228px;
+      }
+      html[data-format='square'] .c-docx {
+        left: 4px;
+        top: 70px;
+        --rot: -7deg;
+      }
+      html[data-format='square'] .c-xlsx {
+        left: 202px;
+        top: 82px;
+        --rot: -2deg;
+      }
+      html[data-format='square'] .c-pptx {
+        left: 562px;
+        top: 82px;
+        --rot: 2deg;
+      }
+      html[data-format='square'] .c-pdf {
+        left: 758px;
+        top: 70px;
+        --rot: 7deg;
+      }
+
+      /* portrait and story: the ring rises behind a row of cards */
+      html[data-format='portrait'] .ring-glow {
+        left: 266px;
+        top: -70px;
+        width: 420px;
+        height: 420px;
+      }
+      html[data-format='portrait'] .ring,
+      html[data-format='portrait'] .halo {
+        left: 346px;
+        top: 3px;
+        width: 276px;
+      }
+      html[data-format='portrait'] .c-docx {
+        left: 2px;
+        top: 148px;
+        --rot: -7deg;
+      }
+      html[data-format='portrait'] .c-xlsx {
+        left: 252px;
+        top: 136px;
+        --rot: -2deg;
+      }
+      html[data-format='portrait'] .c-pptx {
+        left: 502px;
+        top: 136px;
+        --rot: 2deg;
+      }
+      html[data-format='portrait'] .c-pdf {
+        left: 752px;
+        top: 148px;
+        --rot: 7deg;
+      }
+
+      html[data-format='story'] .ring-glow {
+        left: 216px;
+        top: -90px;
+        width: 520px;
+        height: 520px;
+      }
+      html[data-format='story'] .ring,
+      html[data-format='story'] .halo {
+        left: 316px;
+        top: 1px;
+        width: 340px;
+      }
+      html[data-format='story'] .c-docx {
+        left: 2px;
+        top: 192px;
+        --rot: -7deg;
+      }
+      html[data-format='story'] .c-xlsx {
+        left: 251px;
+        top: 180px;
+        --rot: -2deg;
+      }
+      html[data-format='story'] .c-pptx {
+        left: 501px;
+        top: 180px;
+        --rot: 2deg;
+      }
+      html[data-format='story'] .c-pdf {
+        left: 750px;
+        top: 192px;
+        --rot: 7deg;
+      }
+      html[data-format='story'] .stage .sticker {
+        left: 34px;
+        top: 16px;
+      }
+
+      /* landscape: a 2x2 spread framed by the ring, sticker top left */
+      html[data-format='landscape'] .ring-glow {
+        left: 20px;
+        top: 10px;
+        width: 460px;
+        height: 460px;
+      }
+      html[data-format='landscape'] .ring,
+      html[data-format='landscape'] .halo {
+        left: 52px;
+        top: 36px;
+        width: 420px;
+      }
+      html[data-format='landscape'] .c-docx {
+        left: 66px;
+        top: 64px;
+        --rot: -5deg;
+      }
+      html[data-format='landscape'] .c-xlsx {
+        left: 236px;
+        top: 92px;
+        --rot: 4deg;
+      }
+      html[data-format='landscape'] .c-pptx {
+        left: 56px;
+        top: 268px;
+        --rot: -3deg;
+      }
+      html[data-format='landscape'] .c-pdf {
+        left: 230px;
+        top: 296px;
+        --rot: 5deg;
+      }
+      html[data-format='landscape'] .stage .sticker {
+        left: -14px;
+        top: 24px;
+      }
+
+      /* ---------- chips ---------- */
+      .chips {
+        grid-area: chips;
+        display: flex;
+        justify-content: center;
+        flex-wrap: wrap;
+        gap: 10px;
+        margin-top: var(--chips-gap);
+      }
+      .chip {
+        height: var(--chip-h);
+        padding: 0 calc(var(--chip-h) * 0.36) 0 calc(var(--chip-h) * 0.18);
+        display: flex;
+        align-items: center;
+        gap: calc(var(--chip-h) * 0.18);
+        border-radius: 999px;
+        border: 1.5px solid rgba(255, 255, 255, 0.16);
+        background: rgba(255, 255, 255, 0.07);
+        font-size: var(--chip-size);
+        font-weight: 600;
+        line-height: 1;
+        white-space: nowrap;
+      }
+      .chip svg {
+        width: calc(var(--chip-h) * 0.6);
+        height: calc(var(--chip-h) * 0.6);
+        flex: none;
+      }
+      html[data-format='landscape'] .chips {
+        display: none;
+      }
+      /* the square has no room for the AI line: it becomes the third chip */
+      html[data-format='square'] .ai,
+      html[data-format='square'] .chip-vi {
+        display: none;
+      }
+      html:not([data-format='square']) .chip-ai {
+        display: none;
+      }
+
+      /* ---------- CTA ---------- */
+      .cta {
+        grid-area: cta;
+        margin-top: var(--cta-gap);
+        height: var(--cta-h);
+        border-radius: 999px;
+        background: linear-gradient(90deg, #1dfacd 0%, #45e7b0 48%, var(--leaf) 100%);
+        box-shadow:
+          0 0 0 5px rgba(29, 250, 205, 0.1),
+          0 14px 36px rgba(29, 250, 205, 0.2);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: calc(var(--cta-size) * 0.45);
+        color: var(--navy);
+      }
+      .cta svg {
+        width: calc(var(--cta-size) * 1.15);
+        height: calc(var(--cta-size) * 1.15);
+        flex: none;
+      }
+      .cta .label {
+        font-size: var(--cta-size);
+        font-weight: 700;
+        line-height: 1;
+        letter-spacing: -0.005em;
+        white-space: nowrap;
+      }
+      .cta .label b {
+        font-weight: 900;
+      }
+      html[data-format='landscape'] .cta {
+        align-self: end;
+        justify-content: flex-start;
+        padding: 0 34px 0 18px;
+        justify-self: start;
+      }
+
+      /* ---------- footnote ---------- */
+      .foot {
+        grid-area: foot;
+        margin-top: var(--foot-gap, 22px);
+        font-size: 26px;
+        font-weight: 400;
+        line-height: 1.3;
+        color: var(--faint);
+        text-align: center;
+      }
+      html[data-format='square'] .foot,
+      html[data-format='story'] .foot,
+      html[data-format='landscape'] .foot {
+        display: none;
+      }
+    </style>
+  </head>
+  <body>
+    <svg width="0" height="0" style="position: absolute" aria-hidden="true">
+      <defs>
+        <linearGradient id="g-brand" x1="0" y1="0" x2="1" y2="1">
+          <stop offset="0" stop-color="#3AAC71" />
+          <stop offset="0.5" stop-color="#32A6A5" />
+          <stop offset="1" stop-color="#1D74FA" />
+        </linearGradient>
+        <linearGradient id="g-sticker" x1="0" y1="0" x2="1" y2="1">
+          <stop offset="0" stop-color="#8CD96B" />
+          <stop offset="0.55" stop-color="#4BE8A6" />
+          <stop offset="1" stop-color="#1DFACD" />
+        </linearGradient>
+        <filter id="f-grain">
+          <feTurbulence
+            type="fractalNoise"
+            baseFrequency="0.4"
+            numOctaves="2"
+            stitchTiles="stitch"
+          />
+          <feColorMatrix values="0 0 0 0 1  0 0 0 0 1  0 0 0 0 1  0 0 0 1 0" />
+        </filter>
+      </defs>
+    </svg>
+
+    <template id="sticker">
+      <svg viewBox="0 0 200 200" aria-hidden="true">
+        <path
+          fill="url(#g-sticker)"
+          d="M100.00 1.00L113.77 13.08L130.59 5.85L139.95 21.59L158.19 19.91L162.23 37.77L180.09 41.81L178.41 60.05L194.15 69.41L186.92 86.23L199.00 100.00L186.92 113.77L194.15 130.59L178.41 139.95L180.09 158.19L162.23 162.23L158.19 180.09L139.95 178.41L130.59 194.15L113.77 186.92L100.00 199.00L86.23 186.92L69.41 194.15L60.05 178.41L41.81 180.09L37.77 162.23L19.91 158.19L21.59 139.95L5.85 130.59L13.08 113.77L1.00 100.00L13.08 86.23L5.85 69.41L21.59 60.05L19.91 41.81L37.77 37.77L41.81 19.91L60.05 21.59L69.41 5.85L86.23 13.08Z"
+        />
+        <circle
+          cx="100"
+          cy="100"
+          r="76"
+          fill="none"
+          stroke="#07112B"
+          stroke-opacity="0.3"
+          stroke-width="2"
+          stroke-dasharray="4 6"
+        />
+      </svg>
+      <div class="txt"><span class="big">100%</span><span class="small">FREE</span></div>
+    </template>
+
+    <div class="canvas">
+      <div class="bg bg-glow"></div>
+      <div class="bg bg-grid"></div>
+      <svg class="bg grain" aria-hidden="true">
+        <rect width="100%" height="100%" filter="url(#f-grain)" />
+      </svg>
+
+      <div class="frame">
+        <header class="top" data-check="top">
+          <div class="brand">
+            <span data-logo="brand" class="mark"></span><span class="name">FaamOffice</span>
+          </div>
+          <div class="os">
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <rect
+                x="3"
+                y="4.5"
+                width="18"
+                height="12"
+                rx="2.2"
+                fill="none"
+                stroke="#1DFACD"
+                stroke-width="2"
+              />
+              <path d="M1.5 19.5h21" stroke="#1DFACD" stroke-width="2" stroke-linecap="round" />
+            </svg>
+            Windows · macOS · Linux
+          </div>
+        </header>
+
+        <section class="head">
+          <div class="eyebrow" data-check="eyebrow">Bộ văn phòng</div>
+          <div class="free-row">
+            <div class="free" data-check="free">MIỄN PHÍ</div>
+            <div class="sticker" data-check="sticker" data-sticker></div>
+          </div>
+          <div class="license" data-check="license">
+            <svg viewBox="0 0 48 48" aria-hidden="true">
+              <path
+                d="M24 4l16 6v12c0 10.5-6.8 18.6-16 22-9.2-3.4-16-11.5-16-22V10z"
+                fill="rgba(29,250,205,0.14)"
+                stroke="#1DFACD"
+                stroke-width="3.4"
+                stroke-linejoin="round"
+              />
+              <path
+                d="M16.5 24.5l5.2 5.2 10-10.4"
+                fill="none"
+                stroke="#1DFACD"
+                stroke-width="3.8"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              />
+            </svg>
+            Không cần mua bản quyền
+          </div>
+          <p class="sub" data-check="sub">
+            <span class="lead">Mở, sửa và lưu file</span> <b>Word · Excel · PowerPoint · PDF</b>
+          </p>
+          <p class="ai" data-check="ai">
+            <svg viewBox="0 0 32 32" aria-hidden="true">
+              <path
+                fill="currentColor"
+                d="M16 2c1.1 6.9 4.1 9.9 11 11-6.9 1.1-9.9 4.1-11 11-1.1-6.9-4.1-9.9-11-11 6.9-1.1 9.9-4.1 11-11z"
+              />
+              <path
+                fill="currentColor"
+                opacity=".75"
+                d="M26 20c.5 2.9 1.6 4 4.5 4.5-2.9.5-4 1.6-4.5 4.5-.5-2.9-1.6-4-4.5-4.5 2.9-.5 4-1.6 4.5-4.5z"
+              />
+            </svg>
+            Có trợ lý AI
+          </p>
+        </section>
+
+        <section class="hero">
+          <div class="stage">
+            <div class="ring-glow"></div>
+            <span data-logo="halo" class="halo"></span>
+            <span data-logo="ring" class="ring"></span>
+            <div class="sticker" data-check="sticker-hero" data-art data-sticker></div>
+
+            <!-- generic file-type cards: own glyphs, extension labels only -->
+            <div class="card-wrap c-docx" data-check="card-docx" data-art>
+              <div class="card">
+                <svg class="glyph" viewBox="-10 -26 132 132" aria-hidden="true">
+                  <rect x="0" y="0" width="112" height="11" rx="5.5" fill="#1F5BD8" />
+                  <rect x="0" y="25" width="112" height="8" rx="4" fill="#D5DEEB" />
+                  <rect x="0" y="42" width="96" height="8" rx="4" fill="#D5DEEB" />
+                  <rect x="0" y="59" width="112" height="8" rx="4" fill="#D5DEEB" />
+                  <rect x="0" y="76" width="70" height="8" rx="4" fill="#D5DEEB" />
+                </svg>
+                <div class="ext">.DOCX</div>
+              </div>
+            </div>
+
+            <div class="card-wrap c-xlsx" data-check="card-xlsx" data-art>
+              <div class="card">
+                <svg class="glyph" viewBox="-10 -26 132 132" aria-hidden="true">
+                  <rect
+                    x="1"
+                    y="1"
+                    width="110"
+                    height="86"
+                    rx="8"
+                    fill="#fff"
+                    stroke="#D5DEEB"
+                    stroke-width="2.4"
+                  />
+                  <path
+                    d="M2 9a7 7 0 0 1 7-7h94a7 7 0 0 1 7 7v13H2z"
+                    fill="#15803D"
+                    opacity=".18"
+                  />
+                  <path
+                    d="M38 2v84M75 2v84M2 22h108M2 44h108M2 66h108"
+                    stroke="#D5DEEB"
+                    stroke-width="2.4"
+                  />
+                  <rect x="43" y="49" width="27" height="12" rx="2.5" fill="#15803D" />
+                  <rect
+                    x="80"
+                    y="27"
+                    width="26"
+                    height="12"
+                    rx="2.5"
+                    fill="#15803D"
+                    opacity=".55"
+                  />
+                  <rect x="7" y="71" width="26" height="11" rx="2.5" fill="#15803D" opacity=".35" />
+                </svg>
+                <div class="ext">.XLSX</div>
+              </div>
+            </div>
+
+            <div class="card-wrap c-pptx" data-check="card-pptx" data-art>
+              <div class="card">
+                <svg class="glyph" viewBox="-10 -26 132 132" aria-hidden="true">
+                  <rect
+                    x="1"
+                    y="1"
+                    width="110"
+                    height="74"
+                    rx="8"
+                    fill="#fff"
+                    stroke="#D5DEEB"
+                    stroke-width="2.4"
+                  />
+                  <rect x="12" y="12" width="52" height="9" rx="4.5" fill="#D9560F" />
+                  <rect x="16" y="46" width="14" height="20" rx="2" fill="#D9560F" opacity=".45" />
+                  <rect x="36" y="36" width="14" height="30" rx="2" fill="#D9560F" opacity=".7" />
+                  <rect x="56" y="28" width="14" height="38" rx="2" fill="#D9560F" />
+                  <circle
+                    cx="90"
+                    cy="46"
+                    r="13"
+                    fill="none"
+                    stroke="#D9560F"
+                    stroke-width="7"
+                    stroke-dasharray="54 82"
+                    transform="rotate(-90 90 46)"
+                  />
+                  <rect x="44" y="81" width="24" height="7" rx="3" fill="#D5DEEB" />
+                </svg>
+                <div class="ext">.PPTX</div>
+              </div>
+            </div>
+
+            <div class="card-wrap c-pdf" data-check="card-pdf" data-art>
+              <div class="card">
+                <svg class="glyph" viewBox="-10 -26 132 132" aria-hidden="true">
+                  <rect x="0" y="0" width="80" height="11" rx="5.5" fill="#8A97AD" />
+                  <rect x="0" y="25" width="112" height="8" rx="4" fill="#D5DEEB" />
+                  <rect x="0" y="41" width="104" height="8" rx="4" fill="#D5DEEB" />
+                  <rect x="-3" y="54" width="64" height="13" rx="3" fill="#C81E1E" opacity=".3" />
+                  <rect x="0" y="57" width="58" height="8" rx="4" fill="#C81E1E" opacity=".55" />
+                  <rect x="66" y="57" width="46" height="8" rx="4" fill="#D5DEEB" />
+                  <path
+                    d="M4 90c9-15 16-15 20-4s10 8 18-7 14-6 19 3"
+                    fill="none"
+                    stroke="#B91C1C"
+                    stroke-width="5"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                  />
+                  <path d="M70 92h40" stroke="#8A97AD" stroke-width="3" stroke-linecap="round" />
+                </svg>
+                <div class="ext">.PDF</div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <div class="chips" data-check="chips">
+          <span class="chip"
+            ><svg viewBox="0 0 34 34" aria-hidden="true">
+              <circle cx="17" cy="17" r="17" fill="url(#g-brand)" />
+              <path
+                d="M10 17.5l4.6 4.6L24 12.6"
+                fill="none"
+                stroke="#fff"
+                stroke-width="3.4"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              /></svg
+            >Mã nguồn mở</span
+          >
+          <span class="chip"
+            ><svg viewBox="0 0 34 34" aria-hidden="true">
+              <circle cx="17" cy="17" r="17" fill="url(#g-brand)" />
+              <path
+                d="M10 17.5l4.6 4.6L24 12.6"
+                fill="none"
+                stroke="#fff"
+                stroke-width="3.4"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              /></svg
+            >Giữ đúng định dạng gốc</span
+          >
+          <span class="chip chip-ai"
+            ><svg viewBox="0 0 34 34" aria-hidden="true">
+              <circle cx="17" cy="17" r="17" fill="url(#g-brand)" />
+              <path
+                fill="#fff"
+                d="M15.5 7.5c.7 4.4 2.6 6.3 7 7-4.4.7-6.3 2.6-7 7-.7-4.4-2.6-6.3-7-7 4.4-.7 6.3-2.6 7-7z"
+              />
+              <path
+                fill="#fff"
+                opacity=".8"
+                d="M23 19.5c.3 1.8 1 2.5 2.8 2.8-1.8.3-2.5 1-2.8 2.8-.3-1.8-1-2.5-2.8-2.8 1.8-.3 2.5-1 2.8-2.8z"
+              /></svg
+            >Có trợ lý AI</span
+          >
+          <span class="chip chip-vi"
+            ><svg viewBox="0 0 34 34" aria-hidden="true">
+              <circle cx="17" cy="17" r="17" fill="url(#g-brand)" />
+              <path
+                d="M10 17.5l4.6 4.6L24 12.6"
+                fill="none"
+                stroke="#fff"
+                stroke-width="3.4"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              /></svg
+            >Tiếng Việt</span
+          >
+        </div>
+
+        <div class="cta" data-check="cta">
+          <svg viewBox="0 0 40 40" aria-hidden="true">
+            <circle cx="20" cy="20" r="20" fill="#07112B" />
+            <path
+              d="M20 9.5v14M14 18l6 6 6-6M12 28.5h16"
+              fill="none"
+              stroke="#1DFACD"
+              stroke-width="3.2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            />
+          </svg>
+          <span class="label">Tải miễn phí tại <b>faamoffice.net</b></span>
+        </div>
+
+        <p class="foot" data-check="foot">
+          Word, Excel, PowerPoint là thương hiệu của Microsoft.<br />FaamOffice không liên kết với
+          Microsoft.
+        </p>
+      </div>
+    </div>
+    <script>
+      // both sticker slots share one definition
+      const sticker = document.getElementById('sticker')
+      for (const slot of document.querySelectorAll('[data-sticker]')) {
+        const burst = document.createElement('div')
+        burst.className = 'burst'
+        burst.append(sticker.content.cloneNode(true))
+        slot.append(burst)
+      }
+    </script>
+  </body>
+</html>
