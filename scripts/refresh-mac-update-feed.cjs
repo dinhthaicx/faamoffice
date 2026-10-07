@@ -40,7 +40,7 @@ async function refreshMacUpdateFeed(dir) {
     metadata.set(path.basename(file), info)
   }
   feed.sha512 = metadata.get(primaryName).sha512
-  writeFileSync(`${feedPath}.tmp`, dump(feed))
+  writeFileSync(`${feedPath}.tmp`, dump(feed, { lineWidth: -1 }))
   renameSync(`${feedPath}.tmp`, feedPath)
   return paths
 }

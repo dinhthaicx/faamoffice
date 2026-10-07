@@ -11,6 +11,7 @@ const { refreshMacUpdateFeed } = require('../../../scripts/refresh-mac-update-fe
   refreshMacUpdateFeed: (dir: string) => Promise<string[]>
 }
 const { load, dump } = require('js-yaml')
+const { rewriteFeed } = require('../../../scripts/release-feed.cjs')
 const sha512 = (bytes: Buffer) => createHash('sha512').update(bytes).digest('base64')
 let dir: string
 
@@ -42,6 +43,14 @@ describe('macOS update metadata after notarization', () => {
 
     await refreshMacUpdateFeed(dir)
 
+    const validated = rewriteFeed(readFileSync(join(dir, 'latest-mac.yml'), 'utf8'), {
+      feed: 'latest-mac.yml',
+      tag: 'v0.11.2',
+      repo: 'dinhthaicx/faamoffice',
+      assets: new Set(names),
+      dir,
+    })
+    expect(validated.files).toEqual(names)
     const actual = load(readFileSync(join(dir, 'latest-mac.yml'), 'utf8'))
     expect(actual.version).toBe(feed.version)
     expect(actual.releaseDate).toBe(feed.releaseDate)
