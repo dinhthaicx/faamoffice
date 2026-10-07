@@ -307,7 +307,7 @@ export function AnnouncementPreview({
       <div className={cx("h-1.5", style.bar)} aria-hidden="true" />
       {values.kind === "rich" && imageSrc ? (
         // eslint-disable-next-line @next/next/no-img-element -- admin-provided image (upload or external https URL)
-        <img src={imageSrc} alt="" className="max-h-60 w-full bg-bg-muted object-cover" referrerPolicy="no-referrer" />
+        <img src={imageSrc} alt="" className="max-h-60 w-full bg-bg-muted object-contain" referrerPolicy="no-referrer" />
       ) : null}
       <div className="p-5">
         <span className={cx("inline-block rounded-full px-2 py-0.5 text-xs font-medium", style.badge)}>{t.level[values.level]}</span>

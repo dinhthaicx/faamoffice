@@ -104,7 +104,9 @@
   flex: none;
   width: 100%;
   max-height: 240px;
-  object-fit: cover;
+  /* the whole image, as the admin preview shows it: a banner fills the width,
+     a square or portrait one is letterboxed instead of cropped */
+  object-fit: contain;
   background: var(--surface-subtle);
 }
 
