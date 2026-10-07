@@ -362,6 +362,19 @@ export interface HomeApi {
   /** user reacted to the default-app prompt; 'set' claims the types (or opens the Windows
    * Default apps page) and resolves to the refreshed status */
   defaultAppPromptAction(action: DefaultAppPromptAction): Promise<DefaultAppStatus>
+  /** announcements from the FaamOffice account server still to show this session (fetched
+   * once per app session, already filtered by the local display rules, at most 3) */
+  announcementsPending(): Promise<AnnouncementView[]>
+  /** the user saw / dismissed / closed an announcement; main persists it per its display mode */
+  announcementAction(id: string, action: AnnouncementAction): Promise<void>
+  /** open the link of this announcement in the browser (the URL never leaves the main process) */
+  openAnnouncementLink(id: string): Promise<void>
+  /** Escape was pressed in the shell window, possibly inside an html announcement's frame
+   * (whose key events never reach the shell document); returns the unsubscribe */
+  onAnnouncementEscape(handler: () => void): () => void
+  /** the page of this html announcement failed to load (network error, blocked frame or
+   * HTTP error — the iframe's load event fires for those too); returns the unsubscribe */
+  onAnnouncementFrameFailed(handler: (id: string) => void): () => void
   /** AI settings (userData/ai-settings.json, shared by every editor) */
   getAiSettings(): Promise<AiSettings>
   /** persist AI settings; open editors pick the change up on their next settings read */
@@ -417,6 +430,34 @@ export interface DefaultAppPromptShow {
   /** live default-app ownership (meaningful when show is true) */
   status: DefaultAppStatus
 }
+
+export type AnnouncementKind = 'rich' | 'html'
+export type AnnouncementLevel = 'info' | 'warning' | 'critical'
+export type AnnouncementDisplayMode = 'once' | 'every_launch' | 'until_dismissed'
+
+/**
+ * An announcement published by the super admin on the FaamOffice account
+ * server, prepared by the main process for the startup dialog.
+ */
+export interface AnnouncementView {
+  id: string
+  kind: AnnouncementKind
+  level: AnnouncementLevel
+  displayMode: AnnouncementDisplayMode
+  title: string
+  /** plain text with line breaks (kind=rich); never HTML */
+  body?: string
+  /** data: URL of the image the main process downloaded and verified (kind=rich) */
+  image?: string
+  /** sandboxed page on the account server (kind=html) */
+  htmlUrl?: string
+  /** a link button; opened through openAnnouncementLink(id), so only the label crosses IPC */
+  link?: { label: string }
+}
+
+/** 'shown' = displayed (marks a `once` announcement seen); 'dismiss' = closed with
+ * "Don't show this again" checked; 'close' = closed for this session */
+export type AnnouncementAction = 'shown' | 'dismiss' | 'close'
 
 /** the local profile; FaamOffice has no account, everything stays on this machine */
 export interface UserProfile {
@@ -592,4 +633,9 @@ export const HOME_CHANNELS = {
   starPromptAction: 'home:star-prompt-action',
   defaultAppPromptShouldShow: 'home:default-app-prompt-should-show',
   defaultAppPromptAction: 'home:default-app-prompt-action',
+  announcementsPending: 'home:announcements-pending',
+  announcementAction: 'home:announcement-action',
+  openAnnouncementLink: 'home:announcement-open-link',
+  announcementEscape: 'home:announcement-escape',
+  announcementFrameFailed: 'home:announcement-frame-failed',
 } as const

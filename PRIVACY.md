@@ -1,10 +1,11 @@
 # FaamOffice Privacy
 
-Last updated: October 6, 2026
+Last updated: October 7, 2026
 
 FaamOffice opens, edits and saves documents on your computer. Editing a
 document never uploads it anywhere. The app only talks to the network for the
-features listed below, and only when you use them.
+features listed below. Apart from the announcement check at startup, it does so
+only when you use them.
 
 ## AI (Faam AI)
 
@@ -26,6 +27,18 @@ password, the devices you signed in from, and a usage record (time, model,
 token counts, credits) for each cloud AI request. The requests themselves are
 forwarded to the AI provider the server operator configured. See the privacy
 policy published on that server's website.
+
+## Announcements
+
+Once per app start, the app asks the FaamOffice account server
+(https://faamoffice.net, or the account server set under Settings → Profile) for
+announcements. The request carries your operating system (mac, win or linux),
+the app version and the interface language, and no account token or other
+identifier. Images in an announcement are downloaded from the address its
+author used, and an HTML announcement may load images and fonts from other
+https sites, so those servers see your IP address. Which announcements you have
+seen or dismissed is stored only on this computer. To turn the check off, start
+the app with the environment variable `FAAMOFFICE_ANNOUNCEMENTS=0`.
 
 ## Other network access
 

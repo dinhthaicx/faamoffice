@@ -395,6 +395,15 @@ export const strings = {
     setFaamServerHint: '你注册账号的 FaamOffice 网站地址。更换服务器会退出登录。',
     setFaamServerInvalid: '地址无效：应以 http:// 或 https:// 开头。',
     setAiFaamCloudNote: '使用你的 FaamOffice 账号，每次请求扣除积分。请在“设置 → 个人资料”中登录。',
+    // Startup announcements from the account server
+    announcementClose: '关闭',
+    announcementDontShowAgain: '不再显示',
+    announcementLevelInfo: '公告',
+    announcementLevelWarning: '注意',
+    announcementLevelCritical: '重要',
+    announcementLinkFallback: '了解更多',
+    announcementLoading: '正在加载…',
+    announcementLoadFailed: '无法加载此公告。',
   },
   en: {
     addFolderRoot: 'Add folder…',
@@ -808,6 +817,15 @@ export const strings = {
     setFaamServerInvalid: 'Invalid address: it must start with http:// or https://.',
     setAiFaamCloudNote:
       'Uses your FaamOffice account; each request spends credits. Sign in under Settings → Profile.',
+    // Startup announcements from the account server
+    announcementClose: 'Close',
+    announcementDontShowAgain: "Don't show this again",
+    announcementLevelInfo: 'Announcement',
+    announcementLevelWarning: 'Note',
+    announcementLevelCritical: 'Important',
+    announcementLinkFallback: 'Learn more',
+    announcementLoading: 'Loading…',
+    announcementLoadFailed: "Couldn't load this announcement.",
   },
   vi: {
     addFolderRoot: 'Thêm thư mục…',
@@ -1219,6 +1237,15 @@ export const strings = {
     setFaamServerInvalid: 'Địa chỉ không hợp lệ: cần bắt đầu bằng http:// hoặc https://.',
     setAiFaamCloudNote:
       'Dùng tài khoản FaamOffice của bạn; mỗi yêu cầu trừ credit. Đăng nhập trong Cài đặt → Hồ sơ.',
+    // Startup announcements from the account server
+    announcementClose: 'Đóng',
+    announcementDontShowAgain: 'Không hiển thị lại',
+    announcementLevelInfo: 'Thông báo',
+    announcementLevelWarning: 'Lưu ý',
+    announcementLevelCritical: 'Quan trọng',
+    announcementLinkFallback: 'Xem chi tiết',
+    announcementLoading: 'Đang tải…',
+    announcementLoadFailed: 'Không tải được thông báo này.',
   },
   ja: {
     addFolderRoot: 'フォルダーを追加…',
@@ -1644,6 +1671,15 @@ export const strings = {
     setFaamServerInvalid: '無効なアドレスです。http:// または https:// で始めてください。',
     setAiFaamCloudNote:
       'FaamOffice アカウントを使い、リクエストごとにクレジットを消費します。「設定 → プロフィール」でサインインしてください。',
+    // Startup announcements from the account server
+    announcementClose: '閉じる',
+    announcementDontShowAgain: '今後表示しない',
+    announcementLevelInfo: 'お知らせ',
+    announcementLevelWarning: 'ご注意',
+    announcementLevelCritical: '重要',
+    announcementLinkFallback: '詳しく見る',
+    announcementLoading: '読み込み中…',
+    announcementLoadFailed: 'このお知らせを読み込めませんでした。',
   },
   ko: {
     addFolderRoot: '폴더 추가…',
@@ -2059,6 +2095,15 @@ export const strings = {
     setFaamServerInvalid: '잘못된 주소입니다. http:// 또는 https://로 시작해야 합니다.',
     setAiFaamCloudNote:
       'FaamOffice 계정을 사용하며 요청마다 크레딧이 차감됩니다. 설정 → 프로필에서 로그인하세요.',
+    // Startup announcements from the account server
+    announcementClose: '닫기',
+    announcementDontShowAgain: '다시 표시하지 않기',
+    announcementLevelInfo: '공지',
+    announcementLevelWarning: '참고',
+    announcementLevelCritical: '중요',
+    announcementLinkFallback: '자세히 보기',
+    announcementLoading: '불러오는 중…',
+    announcementLoadFailed: '이 공지를 불러오지 못했습니다.',
   },
   fr: {
     addFolderRoot: 'Ajouter un dossier…',
@@ -2490,6 +2535,15 @@ export const strings = {
     setFaamServerInvalid: 'Adresse invalide : elle doit commencer par http:// ou https://.',
     setAiFaamCloudNote:
       'Utilise votre compte FaamOffice ; chaque requête consomme des crédits. Connectez-vous dans Réglages → Profil.',
+    // Startup announcements from the account server
+    announcementClose: 'Fermer',
+    announcementDontShowAgain: 'Ne plus afficher',
+    announcementLevelInfo: 'Annonce',
+    announcementLevelWarning: 'À noter',
+    announcementLevelCritical: 'Important',
+    announcementLinkFallback: 'En savoir plus',
+    announcementLoading: 'Chargement…',
+    announcementLoadFailed: 'Impossible de charger cette annonce.',
   },
   de: {
     addFolderRoot: 'Ordner hinzufügen…',
@@ -2926,6 +2980,15 @@ export const strings = {
     setFaamServerInvalid: 'Ungültige Adresse: Sie muss mit http:// oder https:// beginnen.',
     setAiFaamCloudNote:
       'Nutzt Ihr FaamOffice-Konto; jede Anfrage verbraucht Credits. Anmelden unter Einstellungen → Profil.',
+    // Startup announcements from the account server
+    announcementClose: 'Schließen',
+    announcementDontShowAgain: 'Nicht mehr anzeigen',
+    announcementLevelInfo: 'Ankündigung',
+    announcementLevelWarning: 'Hinweis',
+    announcementLevelCritical: 'Wichtig',
+    announcementLinkFallback: 'Mehr erfahren',
+    announcementLoading: 'Wird geladen…',
+    announcementLoadFailed: 'Diese Ankündigung konnte nicht geladen werden.',
   },
   es: {
     addFolderRoot: 'Añadir carpeta…',
@@ -3358,6 +3421,15 @@ export const strings = {
     setFaamServerInvalid: 'Dirección no válida: debe empezar por http:// o https://.',
     setAiFaamCloudNote:
       'Usa tu cuenta de FaamOffice; cada solicitud gasta créditos. Inicia sesión en Ajustes → Perfil.',
+    // Startup announcements from the account server
+    announcementClose: 'Cerrar',
+    announcementDontShowAgain: 'No volver a mostrar',
+    announcementLevelInfo: 'Anuncio',
+    announcementLevelWarning: 'Aviso',
+    announcementLevelCritical: 'Importante',
+    announcementLinkFallback: 'Más información',
+    announcementLoading: 'Cargando…',
+    announcementLoadFailed: 'No se pudo cargar este anuncio.',
   },
   th: {
     addFolderRoot: 'เพิ่มโฟลเดอร์…',
@@ -3768,6 +3840,15 @@ export const strings = {
     setFaamServerInvalid: 'ที่อยู่ไม่ถูกต้อง ต้องขึ้นต้นด้วย http:// หรือ https://',
     setAiFaamCloudNote:
       'ใช้บัญชี FaamOffice ของคุณ แต่ละคำขอจะหักเครดิต ลงชื่อเข้าใช้ที่การตั้งค่า → โปรไฟล์',
+    // Startup announcements from the account server
+    announcementClose: 'ปิด',
+    announcementDontShowAgain: 'ไม่ต้องแสดงอีก',
+    announcementLevelInfo: 'ประกาศ',
+    announcementLevelWarning: 'โปรดทราบ',
+    announcementLevelCritical: 'สำคัญ',
+    announcementLinkFallback: 'ดูรายละเอียด',
+    announcementLoading: 'กำลังโหลด…',
+    announcementLoadFailed: 'โหลดประกาศนี้ไม่ได้',
   },
   id: {
     addFolderRoot: 'Tambah folder…',
@@ -4192,6 +4273,15 @@ export const strings = {
     setFaamServerInvalid: 'Alamat tidak valid: harus diawali http:// atau https://.',
     setAiFaamCloudNote:
       'Memakai akun FaamOffice Anda; setiap permintaan memotong kredit. Masuk di Pengaturan → Profil.',
+    // Startup announcements from the account server
+    announcementClose: 'Tutup',
+    announcementDontShowAgain: 'Jangan tampilkan lagi',
+    announcementLevelInfo: 'Pengumuman',
+    announcementLevelWarning: 'Catatan',
+    announcementLevelCritical: 'Penting',
+    announcementLinkFallback: 'Selengkapnya',
+    announcementLoading: 'Memuat…',
+    announcementLoadFailed: 'Pengumuman ini tidak dapat dimuat.',
   },
   ru: {
     addFolderRoot: 'Добавить папку…',
@@ -4619,6 +4709,15 @@ export const strings = {
     setFaamServerInvalid: 'Неверный адрес: он должен начинаться с http:// или https://.',
     setAiFaamCloudNote:
       'Использует ваш аккаунт FaamOffice; каждый запрос расходует кредиты. Войдите в «Настройки → Профиль».',
+    // Startup announcements from the account server
+    announcementClose: 'Закрыть',
+    announcementDontShowAgain: 'Больше не показывать',
+    announcementLevelInfo: 'Объявление',
+    announcementLevelWarning: 'Обратите внимание',
+    announcementLevelCritical: 'Важно',
+    announcementLinkFallback: 'Подробнее',
+    announcementLoading: 'Загрузка…',
+    announcementLoadFailed: 'Не удалось загрузить объявление.',
   },
   ar: {
     addFolderRoot: 'إضافة مجلد…',
@@ -5030,6 +5129,15 @@ export const strings = {
     setFaamServerInvalid: 'عنوان غير صالح: يجب أن يبدأ بـ http:// أو https://.',
     setAiFaamCloudNote:
       'يستخدم حساب FaamOffice الخاص بك؛ وكل طلب يستهلك رصيدًا. سجّل الدخول من الإعدادات ← الملف الشخصي.',
+    // Startup announcements from the account server
+    announcementClose: 'إغلاق',
+    announcementDontShowAgain: 'عدم الإظهار مرة أخرى',
+    announcementLevelInfo: 'إعلان',
+    announcementLevelWarning: 'ملاحظة',
+    announcementLevelCritical: 'مهم',
+    announcementLinkFallback: 'اعرف المزيد',
+    announcementLoading: 'جارٍ التحميل…',
+    announcementLoadFailed: 'تعذّر تحميل هذا الإعلان.',
   },
   pt: {
     addFolderRoot: 'Adicionar pasta…',
@@ -5451,6 +5559,15 @@ export const strings = {
     setFaamServerInvalid: 'Endereço inválido: deve começar com http:// ou https://.',
     setAiFaamCloudNote:
       'Usa sua conta FaamOffice; cada solicitação gasta créditos. Entre em Configurações → Perfil.',
+    // Startup announcements from the account server
+    announcementClose: 'Fechar',
+    announcementDontShowAgain: 'Não mostrar novamente',
+    announcementLevelInfo: 'Comunicado',
+    announcementLevelWarning: 'Atenção',
+    announcementLevelCritical: 'Importante',
+    announcementLinkFallback: 'Saiba mais',
+    announcementLoading: 'Carregando…',
+    announcementLoadFailed: 'Não foi possível carregar este comunicado.',
   },
   it: {
     addFolderRoot: 'Aggiungi cartella…',
@@ -5869,6 +5986,15 @@ export const strings = {
     setFaamServerInvalid: 'Indirizzo non valido: deve iniziare con http:// o https://.',
     setAiFaamCloudNote:
       'Usa il tuo account FaamOffice; ogni richiesta consuma crediti. Accedi da Impostazioni → Profilo.',
+    // Startup announcements from the account server
+    announcementClose: 'Chiudi',
+    announcementDontShowAgain: 'Non mostrare più',
+    announcementLevelInfo: 'Annuncio',
+    announcementLevelWarning: 'Nota',
+    announcementLevelCritical: 'Importante',
+    announcementLinkFallback: 'Scopri di più',
+    announcementLoading: 'Caricamento…',
+    announcementLoadFailed: 'Impossibile caricare questo annuncio.',
   },
   pl: {
     addFolderRoot: 'Dodaj folder…',
@@ -6286,6 +6412,15 @@ export const strings = {
     setFaamServerInvalid: 'Nieprawidłowy adres: musi zaczynać się od http:// lub https://.',
     setAiFaamCloudNote:
       'Korzysta z Twojego konta FaamOffice; każde żądanie zużywa kredyty. Zaloguj się w Ustawienia → Profil.',
+    // Startup announcements from the account server
+    announcementClose: 'Zamknij',
+    announcementDontShowAgain: 'Nie pokazuj ponownie',
+    announcementLevelInfo: 'Ogłoszenie',
+    announcementLevelWarning: 'Uwaga',
+    announcementLevelCritical: 'Ważne',
+    announcementLinkFallback: 'Dowiedz się więcej',
+    announcementLoading: 'Ładowanie…',
+    announcementLoadFailed: 'Nie udało się wczytać tego ogłoszenia.',
   },
   cs: {
     addFolderRoot: 'Přidat složku…',
@@ -6697,6 +6832,15 @@ export const strings = {
     setFaamServerInvalid: 'Neplatná adresa: musí začínat http:// nebo https://.',
     setAiFaamCloudNote:
       'Používá váš účet FaamOffice; každý požadavek spotřebuje kredity. Přihlaste se v Nastavení → Profil.',
+    // Startup announcements from the account server
+    announcementClose: 'Zavřít',
+    announcementDontShowAgain: 'Znovu nezobrazovat',
+    announcementLevelInfo: 'Oznámení',
+    announcementLevelWarning: 'Upozornění',
+    announcementLevelCritical: 'Důležité',
+    announcementLinkFallback: 'Další informace',
+    announcementLoading: 'Načítání…',
+    announcementLoadFailed: 'Toto oznámení se nepodařilo načíst.',
   },
   nl: {
     addFolderRoot: 'Map toevoegen…',
@@ -7115,6 +7259,15 @@ export const strings = {
     setFaamServerInvalid: 'Ongeldig adres: het moet beginnen met http:// of https://.',
     setAiFaamCloudNote:
       'Gebruikt je FaamOffice-account; elk verzoek kost credits. Meld je aan via Instellingen → Profiel.',
+    // Startup announcements from the account server
+    announcementClose: 'Sluiten',
+    announcementDontShowAgain: 'Niet meer tonen',
+    announcementLevelInfo: 'Aankondiging',
+    announcementLevelWarning: 'Let op',
+    announcementLevelCritical: 'Belangrijk',
+    announcementLinkFallback: 'Meer informatie',
+    announcementLoading: 'Laden…',
+    announcementLoadFailed: 'Deze aankondiging kan niet worden geladen.',
   },
   ms: {
     addFolderRoot: 'Tambah folder…',
@@ -7537,6 +7690,15 @@ export const strings = {
     setFaamServerInvalid: 'Alamat tidak sah: mesti bermula dengan http:// atau https://.',
     setAiFaamCloudNote:
       'Menggunakan akaun FaamOffice anda; setiap permintaan menggunakan kredit. Log masuk di Tetapan → Profil.',
+    // Startup announcements from the account server
+    announcementClose: 'Tutup',
+    announcementDontShowAgain: 'Jangan tunjukkan lagi',
+    announcementLevelInfo: 'Pengumuman',
+    announcementLevelWarning: 'Makluman',
+    announcementLevelCritical: 'Penting',
+    announcementLinkFallback: 'Ketahui lebih lanjut',
+    announcementLoading: 'Memuatkan…',
+    announcementLoadFailed: 'Pengumuman ini tidak dapat dimuatkan.',
   },
   he: {
     addFolderRoot: 'הוספת תיקייה…',
@@ -7933,6 +8095,15 @@ export const strings = {
     setFaamServerInvalid: 'כתובת לא תקינה: עליה להתחיל ב-http:// או https://.',
     setAiFaamCloudNote:
       'משתמש בחשבון FaamOffice שלך; כל בקשה מנכה קרדיטים. התחברו בהגדרות ← פרופיל.',
+    // Startup announcements from the account server
+    announcementClose: 'סגירה',
+    announcementDontShowAgain: 'לא להציג שוב',
+    announcementLevelInfo: 'הודעה',
+    announcementLevelWarning: 'לתשומת לבך',
+    announcementLevelCritical: 'חשוב',
+    announcementLinkFallback: 'מידע נוסף',
+    announcementLoading: 'טוען…',
+    announcementLoadFailed: 'לא ניתן לטעון את ההודעה.',
   },
   hi: {
     addFolderRoot: 'फ़ोल्डर जोड़ें…',
@@ -8345,6 +8516,15 @@ export const strings = {
     setFaamServerInvalid: 'अमान्य पता: यह http:// या https:// से शुरू होना चाहिए।',
     setAiFaamCloudNote:
       'आपके FaamOffice खाते का उपयोग करता है; हर अनुरोध में क्रेडिट खर्च होते हैं। सेटिंग्स → प्रोफ़ाइल में साइन इन करें।',
+    // Startup announcements from the account server
+    announcementClose: 'बंद करें',
+    announcementDontShowAgain: 'फिर से न दिखाएँ',
+    announcementLevelInfo: 'घोषणा',
+    announcementLevelWarning: 'ध्यान दें',
+    announcementLevelCritical: 'महत्वपूर्ण',
+    announcementLinkFallback: 'और जानें',
+    announcementLoading: 'लोड हो रहा है…',
+    announcementLoadFailed: 'यह घोषणा लोड नहीं हो सकी।',
   },
   'zh-TW': {
     addFolderRoot: '加入資料夾…',
@@ -8734,5 +8914,14 @@ export const strings = {
     setFaamServerInvalid: '位址無效：應以 http:// 或 https:// 開頭。',
     setAiFaamCloudNote:
       '使用你的 FaamOffice 帳號，每次請求扣除點數。請在「設定 → 個人檔案」中登入。',
+    // Startup announcements from the account server
+    announcementClose: '關閉',
+    announcementDontShowAgain: '不再顯示',
+    announcementLevelInfo: '公告',
+    announcementLevelWarning: '注意',
+    announcementLevelCritical: '重要',
+    announcementLinkFallback: '了解更多',
+    announcementLoading: '載入中…',
+    announcementLoadFailed: '無法載入此公告。',
   },
 } as const

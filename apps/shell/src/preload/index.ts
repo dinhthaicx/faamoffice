@@ -11,6 +11,7 @@ import { installDropOpenBridge } from '@genoffice/electron-utils/drop-open'
 import type { UpdateUiState } from '../shared/update-api'
 import { normalizeAiPanelPrefs } from '@genoffice/ui/ai-panel-prefs'
 import type {
+  AnnouncementView,
   UserProfile,
   FaamAccountEvent,
   FaamAccountInfo,
@@ -104,6 +105,59 @@ function normalizeLoginItemStatus(result: unknown): LoginItemStatus {
   return r.needsApproval === true
     ? { supported: true, enabled: r.enabled === true, needsApproval: true }
     : { supported: true, enabled: r.enabled === true }
+}
+
+/** mirrors the main-side id check (announcements.ts); validated inline, see setUpdateChannel */
+function isAnnouncementId(value: unknown): value is string {
+  return typeof value === 'string' && /^[A-Za-z0-9_-]{1,128}$/.test(value)
+}
+
+function isHttpUrl(value: unknown): value is string {
+  if (typeof value !== 'string') return false
+  try {
+    const url = new URL(value)
+    return url.protocol === 'https:' || url.protocol === 'http:'
+  } catch {
+    return false
+  }
+}
+
+const IMAGE_DATA_URL = /^data:image\/(?:png|jpeg|webp|gif);base64,[A-Za-z0-9+/]+=*$/
+
+/** re-check the prepared list: anything off-shape is dropped, never rendered */
+function normalizeAnnouncements(result: unknown): AnnouncementView[] {
+  if (!Array.isArray(result)) return []
+  const out: AnnouncementView[] = []
+  for (const item of result as unknown[]) {
+    if (!item || typeof item !== 'object') continue
+    const r = item as Record<string, unknown>
+    const kind = r.kind
+    const level = r.level
+    const displayMode = r.displayMode
+    if (!isAnnouncementId(r.id) || typeof r.title !== 'string' || !r.title) continue
+    if (kind !== 'rich' && kind !== 'html') continue
+    if (level !== 'info' && level !== 'warning' && level !== 'critical') continue
+    if (
+      displayMode !== 'once' &&
+      displayMode !== 'every_launch' &&
+      displayMode !== 'until_dismissed'
+    )
+      continue
+    const view: AnnouncementView = { id: r.id, kind, level, displayMode, title: r.title }
+    if (kind === 'html') {
+      if (!isHttpUrl(r.htmlUrl)) continue
+      view.htmlUrl = r.htmlUrl
+    } else {
+      if (typeof r.body === 'string' && r.body) view.body = r.body
+      if (typeof r.image === 'string' && IMAGE_DATA_URL.test(r.image)) view.image = r.image
+    }
+    const link = r.link as { label?: unknown } | null | undefined
+    if (link && typeof link === 'object') {
+      view.link = { label: typeof link.label === 'string' ? link.label : '' }
+    }
+    out.push(view)
+  }
+  return out
 }
 
 const homeApi: HomeApi = {
@@ -508,6 +562,32 @@ const homeApi: HomeApi = {
     return normalizeDefaultAppStatus(
       await ipcRenderer.invoke(HOME_CHANNELS.defaultAppPromptAction, action),
     )
+  },
+  async announcementsPending() {
+    return normalizeAnnouncements(await ipcRenderer.invoke(HOME_CHANNELS.announcementsPending))
+  },
+  async announcementAction(id, action) {
+    if (!isAnnouncementId(id)) throw new Error('Invalid announcement id.')
+    if (action !== 'shown' && action !== 'dismiss' && action !== 'close') {
+      throw new Error('Invalid announcement action.')
+    }
+    await ipcRenderer.invoke(HOME_CHANNELS.announcementAction, id, action)
+  },
+  async openAnnouncementLink(id) {
+    if (!isAnnouncementId(id)) throw new Error('Invalid announcement id.')
+    await ipcRenderer.invoke(HOME_CHANNELS.openAnnouncementLink, id)
+  },
+  onAnnouncementEscape(handler) {
+    const listener = () => handler()
+    ipcRenderer.on(HOME_CHANNELS.announcementEscape, listener)
+    return () => ipcRenderer.removeListener(HOME_CHANNELS.announcementEscape, listener)
+  },
+  onAnnouncementFrameFailed(handler) {
+    const listener = (_event: IpcRendererEvent, id: unknown) => {
+      if (isAnnouncementId(id)) handler(id)
+    }
+    ipcRenderer.on(HOME_CHANNELS.announcementFrameFailed, listener)
+    return () => ipcRenderer.removeListener(HOME_CHANNELS.announcementFrameFailed, listener)
   },
   // AI settings channels are registered once by the shell's aggregated docs handlers
   async getAiSettings() {

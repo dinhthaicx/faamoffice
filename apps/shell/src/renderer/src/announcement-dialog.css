@@ -1,0 +1,257 @@
+/* Startup announcement dialog: a centered modal over the home screen.
+ * Chrome-colored via semantic tokens (light/dark follow the UI theme); only
+ * the three level accents are defined here, tuned per theme for contrast. */
+
+.announcement-overlay {
+  --announcement-info: #0b63ce;
+  --announcement-warning: #a95300;
+  --announcement-critical: #c42b2f;
+
+  position: fixed;
+  inset: 0;
+  /* above Settings (60) and the home prompt cards (50), below onboarding (1000) */
+  z-index: 900;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  background: var(--color-bg-overlay);
+  backdrop-filter: blur(4px);
+}
+
+[data-theme='dark'] .announcement-overlay {
+  --announcement-info: #5ba5ff;
+  --announcement-warning: #f0a83c;
+  --announcement-critical: #f1707a;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme='light']):not([data-theme='dark']) .announcement-overlay {
+    --announcement-info: #5ba5ff;
+    --announcement-warning: #f0a83c;
+    --announcement-critical: #f1707a;
+  }
+}
+
+.announcement-dialog {
+  --announcement-tone: var(--announcement-info);
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  width: 480px;
+  max-width: 100%;
+  max-height: calc(100vh - 48px);
+  overflow: hidden;
+  outline: none; /* receives initial focus as the dialog container */
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-top: 4px solid var(--announcement-tone);
+  border-radius: 14px;
+  box-shadow: var(--shadow-modal-strong);
+  animation: announcement-in 0.2s ease-out;
+  /* a tall dialog reaches into the tab strip's drag region, which hit-tests by
+     rectangle regardless of z-order and would swallow presses (the × button) */
+  -webkit-app-region: no-drag;
+}
+
+.announcement-dialog.is-html {
+  width: 640px;
+}
+
+.announcement-dialog[data-level='warning'] {
+  --announcement-tone: var(--announcement-warning);
+}
+
+.announcement-dialog[data-level='critical'] {
+  --announcement-tone: var(--announcement-critical);
+}
+
+@keyframes announcement-in {
+  from {
+    opacity: 0;
+    transform: translateY(8px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+.announcement-close {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  z-index: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border: 1px solid var(--border);
+  border-radius: 50%;
+  background: var(--surface);
+  color: var(--text-secondary);
+  cursor: pointer;
+}
+
+.announcement-close:hover {
+  background: var(--hover);
+  color: var(--text);
+}
+
+.announcement-image {
+  display: block;
+  flex: none;
+  width: 100%;
+  max-height: 240px;
+  object-fit: cover;
+  background: var(--surface-subtle);
+}
+
+.announcement-content {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  padding: 18px 22px 20px;
+  overflow-y: auto;
+}
+
+.announcement-badge {
+  display: inline-flex;
+  align-self: flex-start;
+  align-items: center;
+  gap: 5px;
+  margin-bottom: 10px;
+  padding: 3px 9px;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--announcement-tone) 12%, transparent);
+  color: var(--announcement-tone);
+  font-size: 11.5px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+}
+
+.announcement-title {
+  margin: 0 0 8px;
+  /* keep the title clear of the close button */
+  padding-right: 28px;
+  font-size: 17px;
+  font-weight: 600;
+  line-height: 1.35;
+  color: var(--text);
+  overflow-wrap: anywhere;
+}
+
+.announcement-body {
+  margin: 0;
+  font-size: 13.5px;
+  line-height: 1.6;
+  color: var(--text-secondary);
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+.announcement-frame {
+  position: relative;
+  height: min(56vh, 480px);
+  min-height: 160px;
+  margin-top: 4px;
+  border: 1px solid var(--border-subtle);
+  border-radius: 8px;
+  overflow: hidden;
+  background: var(--surface-subtle);
+}
+
+.announcement-frame iframe {
+  display: block;
+  width: 100%;
+  height: 100%;
+  border: 0;
+}
+
+/* the page appears only once it has loaded; a page that failed (net error,
+   blocked frame, HTTP error — reported by the main process even after its load
+   event) is hidden again behind the localized failed state */
+.announcement-frame:not([data-state='ready']) iframe {
+  visibility: hidden;
+}
+
+.announcement-frame-status {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0;
+  padding: 16px;
+  font-size: 13px;
+  text-align: center;
+  /* --text-muted misses 4.5:1 on --surface-subtle in both themes */
+  color: var(--text-secondary);
+}
+
+.announcement-frame-status.is-error {
+  color: var(--announcement-critical);
+}
+
+/* invisible tab stops that wrap focus leaving the html page back into the dialog */
+.announcement-focus-guard {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  opacity: 0;
+  outline: none;
+  pointer-events: none;
+}
+
+.announcement-footer {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px 16px;
+  padding: 12px 22px 16px;
+  border-top: 1px solid var(--border-subtle);
+}
+
+.announcement-dont-show {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  font-size: 12.5px;
+  color: var(--text-secondary);
+  cursor: pointer;
+}
+
+.announcement-dont-show input {
+  margin: 0;
+  accent-color: var(--accent);
+}
+
+.announcement-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-left: auto;
+  padding: 7px 14px;
+  border: none;
+  border-radius: 8px;
+  background: var(--accent);
+  color: var(--color-btn-primary-text);
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.announcement-link:hover {
+  background: var(--accent-hover);
+}
+
+.announcement-close:focus-visible,
+.announcement-link:focus-visible,
+.announcement-dont-show input:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}

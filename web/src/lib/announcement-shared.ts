@@ -367,6 +367,9 @@ export const FRAME_SANDBOX = "allow-popups allow-popups-to-escape-sandbox";
 /**
  * Policy of /announcement-frame/{id}: an opaque origin (sandbox without
  * allow-scripts / allow-same-origin), no script-src at all, https media only.
+ * No frame-ancestors: the packaged app's window is a file:// page (http://localhost
+ * in dev), which "*" never matches, and a page without scripts or state has
+ * nothing to clickjack.
  */
 export const FRAME_CSP = [
   `sandbox ${FRAME_SANDBOX}`,
@@ -377,8 +380,6 @@ export const FRAME_CSP = [
   "media-src https:",
   "base-uri 'none'",
   "form-action 'none'",
-  // "*" only matches network schemes; the desktop app renders from genoffice-app://
-  "frame-ancestors * genoffice-app:",
 ].join("; ");
 
 /** Response headers of the frame route (and of next.config.ts for that path). No X-Frame-Options: apps embed it. */
@@ -390,9 +391,9 @@ export const FRAME_RESPONSE_HEADERS = {
   "X-Robots-Tag": "noindex, nofollow",
 } as const;
 
-/** The same policy as a <meta> tag can carry it (no sandbox / frame-ancestors), for the editor's srcdoc preview. */
+/** The same policy as a <meta> tag can carry it (no sandbox), for the editor's srcdoc preview. */
 export const FRAME_META_CSP = FRAME_CSP.split("; ")
-  .filter((d) => !d.startsWith("sandbox") && !d.startsWith("frame-ancestors"))
+  .filter((d) => !d.startsWith("sandbox"))
   .join("; ");
 
 export function escapeHtml(value: string): string {

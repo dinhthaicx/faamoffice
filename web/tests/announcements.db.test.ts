@@ -277,7 +277,7 @@ describe("GET /announcement-frame/{id}", () => {
     const csp = res.headers.get("content-security-policy") ?? "";
     expect(csp.startsWith("sandbox allow-popups allow-popups-to-escape-sandbox;")).toBe(true);
     expect(csp).toContain("default-src 'none'");
-    expect(csp).toContain("frame-ancestors *");
+    expect(csp).not.toContain("frame-ancestors");
     expect(csp).not.toMatch(/script-src|allow-scripts|allow-same-origin/);
     expect(res.headers.get("x-frame-options")).toBeNull();
     expect(res.headers.get("x-content-type-options")).toBe("nosniff");

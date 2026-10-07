@@ -288,7 +288,8 @@ describe("sandboxed frame", () => {
   it("uses a sandbox without scripts or same-origin and no script-src", () => {
     expect(FRAME_CSP).toContain("sandbox allow-popups allow-popups-to-escape-sandbox;");
     expect(FRAME_CSP).toContain("default-src 'none'");
-    expect(FRAME_CSP).toContain("frame-ancestors * genoffice-app:");
+    // embeddable from the packaged app's file:// window, which "frame-ancestors *" would refuse
+    expect(FRAME_CSP).not.toContain("frame-ancestors");
     expect(FRAME_CSP).not.toMatch(/script-src|allow-scripts|allow-same-origin/);
     expect(FRAME_META_CSP).not.toMatch(/sandbox|frame-ancestors/);
     expect(FRAME_RESPONSE_HEADERS).not.toHaveProperty("X-Frame-Options");

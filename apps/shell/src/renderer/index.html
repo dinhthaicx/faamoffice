@@ -2,9 +2,11 @@
 <html lang="zh-CN">
   <head>
     <meta charset="UTF-8" />
+    <!-- frame-src: the sandboxed page of an html announcement from the FaamOffice
+         account server (https, or a local http dev server); scripts stay 'self' only -->
     <meta
       http-equiv="Content-Security-Policy"
-      content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self' data: blob:; worker-src 'self' blob:; connect-src 'self' ws://localhost:*"
+      content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self' data: blob:; worker-src 'self' blob:; connect-src 'self' ws://localhost:*; frame-src https: http://localhost:* http://127.0.0.1:*"
     />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>FaamOffice</title>

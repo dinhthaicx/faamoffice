@@ -39,7 +39,7 @@ const frameHeaders = [
     value:
       "sandbox allow-popups allow-popups-to-escape-sandbox; default-src 'none'; img-src https: data:; " +
       "style-src 'unsafe-inline' https:; font-src https: data:; media-src https:; base-uri 'none'; " +
-      "form-action 'none'; frame-ancestors * genoffice-app:",
+      "form-action 'none'",
   },
   { key: "X-Content-Type-Options", value: "nosniff" },
   { key: "Referrer-Policy", value: "no-referrer" },

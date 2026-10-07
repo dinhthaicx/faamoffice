@@ -107,6 +107,12 @@ import {
 } from './star-prompt'
 import { handleDroppedFiles } from './dropped-files'
 import {
+  ANNOUNCEMENTS_KEY,
+  createAnnouncementsService,
+  guardAnnouncementFrames,
+  registerAnnouncementsIpc,
+} from './announcements'
+import {
   cancelFaamLogin,
   faamAccountServer,
   faamAccountStatus,
@@ -721,6 +727,20 @@ let upgradeStarPromptPending = false
 /** one home-screen prompt per session: the default-app prompt (asked first by
  * the renderer) or the star invitation, never both */
 const homePromptSlot = createHomePromptSlot()
+
+// ---- startup announcements from the account server (see announcements.ts) ----
+
+/** fetched once per app session, on the shell renderer's first request */
+const announcements = createAnnouncementsService({
+  fetch: (input, init) => fetch(input, init),
+  serverUrl: () => faamAccountServer(),
+  appVersion: app.getVersion(),
+  platform: process.platform,
+  uiLanguage: () => currentLang(),
+  readState: () => readAppSettings(APP_SETTINGS_PATH())[ANNOUNCEMENTS_KEY],
+  writeState: (state) => writeAppSetting(APP_SETTINGS_PATH(), ANNOUNCEMENTS_KEY, state),
+  now: () => Date.now(),
+})
 
 // ---- "open Office files with FaamOffice?" prompt (see default-app-prompt.ts) ----
 
@@ -3348,6 +3368,11 @@ function createShellWindow(): void {
   // all-clean close is left untouched, so ⌘Q keeps quitting the app.
   installShellCloseGuard(win, manager)
 
+  // the html announcement's sandboxed iframe: its links open in the system
+  // browser, it never spawns an Electron window or navigates (or redirects)
+  // off its origin; Escape inside it and load failures reach the dialog
+  guardAnnouncementFrames(win.webContents, announcements, (url) => shell.openExternal(url))
+
   win.on('closed', () => {
     if (shellWindow === win) shellWindow = null
     if (tabManager === manager) {
@@ -4475,7 +4500,8 @@ function registerHomeIpc(): void {
     slot: homePromptSlot,
     now: () => Date.now(),
   })
-  // returning show:true also counts as shown (the renderer displays it unconditionally)
+  // returning show:true also counts as shown: the renderer only asks once the card can
+  // display (after onboarding and any announcements, with Home in front)
   ipcMain.handle(
     HOME_CHANNELS.defaultAppPromptShouldShow,
     (): Promise<DefaultAppPromptShow> | DefaultAppPromptShow => {
@@ -4493,6 +4519,8 @@ function registerHomeIpc(): void {
   ipcMain.handle(HOME_CHANNELS.defaultAppPromptAction, (_event, action: unknown) =>
     defaultAppPrompt.action(action),
   )
+
+  registerAnnouncementsIpc(ipcMain, announcements, (url) => shell.openExternal(url))
 
   ipcMain.handle(HOME_CHANNELS.pickDefaultSaveDir, async (): Promise<string | null> => {
     const result = await showOpenDialogWithMemory(dialog, shellWindow, {
@@ -4544,8 +4572,8 @@ function registerHomeIpc(): void {
     // (same pattern as GENOFFICE_FAKE_UPDATE); nothing is recorded
     forcePreview: !app.isPackaged && !!process.env.GENOFFICE_FORCE_STAR_PROMPT,
   })
-  // returning true also counts as "shown": the renderer displays it
-  // unconditionally, so no separate mark-shown round-trip is needed
+  // returning true also counts as "shown": the renderer only asks once the
+  // card can display, so no separate mark-shown round-trip is needed
   ipcMain.handle(HOME_CHANNELS.starPromptShouldShow, (): StarPromptShow => starPrompt.shouldShow())
   ipcMain.handle(HOME_CHANNELS.starPromptAction, (_event, action: unknown) => {
     starPrompt.action(action)
