@@ -1,0 +1,52 @@
+name: Microsoft Store screenshots
+
+on:
+  workflow_dispatch:
+    inputs:
+      release_run_id:
+        description: Release run containing faamoffice-store-appx
+        required: true
+        default: '37609694928'
+
+permissions:
+  contents: read
+  actions: read
+
+jobs:
+  capture:
+    runs-on: windows-2022
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: 22
+      - uses: actions/download-artifact@v4
+        with:
+          name: faamoffice-store-appx
+          run-id: ${{ inputs.release_run_id }}
+          github-token: ${{ github.token }}
+          path: store-package
+      - name: Extract the actual release package and install capture driver
+        shell: pwsh
+        run: |
+          $package = Get-ChildItem store-package/*.appx | Select-Object -First 1
+          if (!$package) { throw 'Missing Store appx' }
+          $destination = Join-Path $env:RUNNER_TEMP 'faamoffice-store'
+          [System.IO.Compression.ZipFile]::ExtractToDirectory($package.FullName, $destination)
+          $tools = Join-Path $env:RUNNER_TEMP 'capture-tools'
+          npm install --prefix $tools --ignore-scripts --no-audit --no-fund playwright-core@1.61.1
+          if ($LASTEXITCODE -ne 0) { throw 'Capture driver install failed' }
+          "CAPTURE_TOOLS=$tools" >> $env:GITHUB_ENV
+          "FAAM_CAPTURE_EXE=$destination/app/FaamOffice.exe" >> $env:GITHUB_ENV
+          "FAAM_CAPTURE_APPX=$($package.FullName)" >> $env:GITHUB_ENV
+          "FAAM_CAPTURE_RELEASE_RUN=${{ inputs.release_run_id }}" >> $env:GITHUB_ENV
+      - name: Capture real Windows app windows in Vietnamese and English
+        run: node scripts/store-screenshots.cjs
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: faamoffice-store-screenshots
+          path: apps/shell/release/store-screenshots
+          if-no-files-found: error
+          retention-days: 30
