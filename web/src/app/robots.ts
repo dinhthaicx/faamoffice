@@ -11,7 +11,7 @@ export default function robots(): MetadataRoute.Robots {
       {
         userAgent: "*",
         allow: "/",
-        disallow: ["/api/", ...PRIVATE, ...locales.flatMap((l) => PRIVATE.map((p) => `/${l}${p}`))],
+        disallow: ["/api/", "/announcement-frame/", ...PRIVATE, ...locales.flatMap((l) => PRIVATE.map((p) => `/${l}${p}`))],
       },
     ],
     sitemap: `${site}/sitemap.xml`,

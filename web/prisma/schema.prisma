@@ -37,6 +37,33 @@ enum CreditReason {
   ai_usage
 }
 
+enum AnnouncementStatus {
+  draft
+  published
+}
+
+enum AnnouncementKind {
+  /// Image + title + plain-text body + link button, rendered by the desktop app.
+  rich
+  /// Admin-authored HTML served from /announcement-frame/{id} (sandboxed, no scripts).
+  html
+}
+
+enum AnnouncementLevel {
+  info
+  warning
+  critical
+}
+
+enum AnnouncementDisplayMode {
+  /// Shown one time per device.
+  once
+  /// Shown on every app start while active.
+  every_launch
+  /// Shown on every app start until the user ticks "don't show again".
+  until_dismissed
+}
+
 model User {
   id              String    @id @default(cuid())
   /// Always stored lowercase and trimmed.
@@ -51,13 +78,15 @@ model User {
   createdAt       DateTime  @default(now())
   updatedAt       DateTime  @updatedAt
 
-  sessions           Session[]
-  emailTokens        EmailToken[]
-  deviceCodes        DeviceCode[]
-  apiTokens          ApiToken[]
-  creditTransactions CreditTransaction[] @relation("CreditOwner")
-  actedTransactions  CreditTransaction[] @relation("CreditActor")
-  usageRecords       UsageRecord[]
+  sessions             Session[]
+  emailTokens          EmailToken[]
+  deviceCodes          DeviceCode[]
+  apiTokens            ApiToken[]
+  creditTransactions   CreditTransaction[] @relation("CreditOwner")
+  actedTransactions    CreditTransaction[] @relation("CreditActor")
+  usageRecords         UsageRecord[]
+  createdAnnouncements Announcement[]      @relation("AnnouncementCreator")
+  updatedAnnouncements Announcement[]      @relation("AnnouncementUpdater")
 
   @@index([createdAt])
   @@index([name])
@@ -65,14 +94,14 @@ model User {
 
 /// Web browser sessions (httpOnly cookie). Only the SHA-256 hash of the cookie value is stored.
 model Session {
-  id         String   @id @default(cuid())
-  tokenHash  String   @unique
-  userId     String
-  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  userAgent  String?
-  ip         String?
-  createdAt  DateTime @default(now())
-  expiresAt  DateTime
+  id        String   @id @default(cuid())
+  tokenHash String   @unique
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userAgent String?
+  ip        String?
+  createdAt DateTime @default(now())
+  expiresAt DateTime
 
   @@index([userId])
   @@index([expiresAt])
@@ -171,5 +200,67 @@ model UsageRecord {
   transaction CreditTransaction?
 
   @@index([userId, createdAt])
+  @@index([createdAt])
+}
+
+/// Dialog announcements published by admins and shown by the desktop app at startup.
+model Announcement {
+  id          String                  @id @default(cuid())
+  status      AnnouncementStatus      @default(draft)
+  kind        AnnouncementKind        @default(rich)
+  level       AnnouncementLevel       @default(info)
+  displayMode AnnouncementDisplayMode @default(once)
+  titleVi     String
+  titleEn     String?
+  /// Plain text with line breaks (kind = rich).
+  bodyVi      String?
+  bodyEn      String?
+  /// Untrusted-by-design HTML (kind = html), only ever served from the sandboxed frame route.
+  htmlVi      String?
+  htmlEn      String?
+  /// Uploaded image (served by /api/v1/announcements/{id}/image) ...
+  imageId     String?
+  image       AnnouncementImage?      @relation(fields: [imageId], references: [id], onDelete: SetNull)
+  /// ... or an external https image URL (never both).
+  imageUrl    String?
+  /// https only.
+  linkUrl     String?
+  linkLabelVi String?
+  linkLabelEn String?
+  /// Comma-separated subset of "mac,win,linux"; empty = every platform.
+  platforms   String                  @default("")
+  /// Inclusive app version range ("x.y.z"); null = unbounded.
+  minVersion  String?
+  maxVersion  String?
+  startsAt    DateTime                @default(now())
+  endsAt      DateTime?
+  /// Higher first.
+  priority    Int                     @default(0)
+  createdById String?
+  createdBy   User?                   @relation("AnnouncementCreator", fields: [createdById], references: [id], onDelete: SetNull)
+  updatedById String?
+  updatedBy   User?                   @relation("AnnouncementUpdater", fields: [updatedById], references: [id], onDelete: SetNull)
+  createdAt   DateTime                @default(now())
+  updatedAt   DateTime                @updatedAt
+
+  @@index([status, startsAt])
+  @@index([status, priority, startsAt])
+  @@index([imageId])
+  @@index([updatedAt])
+}
+
+/// Images uploaded for announcements (png/jpeg/webp/gif, at most 2 MB, verified by magic bytes).
+model AnnouncementImage {
+  id        String   @id @default(cuid())
+  mime      String
+  bytes     Bytes
+  width     Int?
+  height    Int?
+  /// Size in bytes.
+  size      Int
+  createdAt DateTime @default(now())
+
+  announcements Announcement[]
+
   @@index([createdAt])
 }

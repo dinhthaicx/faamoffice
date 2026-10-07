@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { AdminNav } from "@/components/admin-nav";
 import { LocalTime } from "@/components/local-time";
 import { buttonClass, Card, Container, cx } from "@/components/ui";
 import { requirePageAdmin } from "@/lib/auth";
@@ -79,6 +80,7 @@ export default async function AdminPage({ params, searchParams }: PageProps<"/[l
   return (
     <Container className="py-10">
       <h1 className="text-3xl font-bold tracking-tight">{t.title}</h1>
+      <AdminNav locale={locale} dict={dict} current="users" />
 
       <section aria-label={t.title} className="mt-6 grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-6">
         {stats.map((s) => (

@@ -33,3 +33,14 @@ export async function requireApiAdmin(req: Request) {
   if (session.user.role !== "ADMIN") throw new HttpError(403, "forbidden", "Administrator access required.");
   return session;
 }
+
+/**
+ * Admin guard for safe (GET) cookie-authenticated reads such as <img> loads,
+ * which carry no Origin header. Never use it for mutations.
+ */
+export async function requireApiAdminRead() {
+  const session = await getSession();
+  if (!session) throw new HttpError(401, "unauthorized", "Please sign in.");
+  if (session.user.role !== "ADMIN") throw new HttpError(403, "forbidden", "Administrator access required.");
+  return session;
+}

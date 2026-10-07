@@ -74,6 +74,10 @@ function buildLimiters() {
     deviceToken: createRateLimiter({ limit: 120, windowMs: minute }),
     deviceApprove: createRateLimiter({ limit: 30, windowMs: 10 * minute }),
     sensitiveAccount: createRateLimiter({ limit: 20, windowMs: 15 * minute }),
+    // Public announcement endpoints (list, single, image, frame), per IP.
+    announcements: createRateLimiter({ limit: 300, windowMs: minute }),
+    // Admin image uploads, per admin.
+    announcementUpload: createRateLimiter({ limit: 30, windowMs: 10 * minute }),
   };
 }
 

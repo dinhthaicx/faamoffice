@@ -71,6 +71,39 @@ Disabled users cannot sign in, their browser sessions are deleted and their
 desktop tokens are rejected until the account is enabled again. There is no
 payment gateway: admins add credits manually.
 
+### Announcements (in-app dialogs)
+
+`/vi/admin/announcements` (`/en/…`, tab "Thông báo" / "Announcements" in the
+admin navigation) manages the dialogs the desktop app shows when it starts:
+
+1. **New announcement** → choose the type: *Image and text* (`rich`: optional
+   image, title, plain-text body, link button — laid out by the app) or *HTML
+   page* (`html`: your own HTML, shown in a sandboxed frame).
+2. Pick the level (`info` / `warning` / `critical`) and the display mode:
+   `once` (one time per device), `every_launch` (every start while active) or
+   `until_dismissed` (every start until the user ticks "don't show again").
+3. Write the Vietnamese title (required) and optionally English; empty English
+   fields fall back to Vietnamese. For images either upload one (PNG/JPEG/WebP/GIF,
+   ≤ 2 MB, type checked by magic bytes) or paste an `https://` URL. Links must be https.
+   Image fields only apply to *Image and text*: an *HTML page* ignores them and
+   drops them (and deletes the upload) when saved. The button label defaults to
+   "Xem chi tiết" / "Learn more" only when both labels are empty.
+4. Target platforms (none = all), an inclusive version range (`x.y.z`), the
+   display window (start defaults to now, no end = forever) and a priority
+   (−1000…1000, higher first). The live preview shows the dialog in vi/en.
+5. Save as draft or published; the list offers publish/unpublish, edit and
+   delete (with confirmation). Apps receive changes within about a minute
+   (public responses are cacheable for 60 s).
+
+HTML announcements never run scripts: they are served from
+`/announcement-frame/{id}` with `Content-Security-Policy: sandbox allow-popups
+allow-popups-to-escape-sandbox; default-src 'none'; …` (no `script-src`, no
+`allow-same-origin`), so the page lives in an opaque origin and cannot read
+faamoffice.net cookies. Images, stylesheets, fonts and media must use https;
+forms cannot submit; links open outside the frame (`<base target="_blank">`).
+Unused uploads are deleted when an announcement drops its image, when it is
+deleted, and (for abandoned uploads) after 24 hours.
+
 ## Faam AI Cloud upstream
 
 The proxy forwards `/api/v1/ai/chat/completions` to
@@ -211,6 +244,75 @@ The app uses base URL `${SITE_URL}/api/v1/ai` and appends `/chat/completions`.
 - When the client disconnects, the upstream request is aborted and the partial
   output is billed by estimate.
 
+### 4. Announcements (no auth)
+
+Public, cookie-free and CORS-readable: every response, errors included, carries
+`Access-Control-Allow-Origin: *` and `Access-Control-Expose-Headers: Retry-After`.
+Drafts are never exposed. Rate limit: 300 requests per minute per IP (429
+`rate_limited` with `Retry-After`).
+
+`GET /api/v1/announcements?platform=mac|win|linux&version=0.11.1&locale=vi`
+
+```json
+{
+  "announcements": [
+    {
+      "id": "cm…",
+      "kind": "rich",
+      "level": "info",
+      "displayMode": "once",
+      "title": "…",
+      "body": "…",
+      "imageUrl": "https://faamoffice.net/api/v1/announcements/cm…/image?v=cm…",
+      "htmlUrl": "https://faamoffice.net/announcement-frame/cm…?locale=vi",
+      "link": { "url": "https://…", "label": "…" },
+      "startsAt": "2026-10-07T00:00:00.000Z",
+      "endsAt": "2026-10-31T00:00:00.000Z",
+      "updatedAt": "2026-10-07T00:00:00.000Z"
+    }
+  ]
+}
+```
+
+- `kind`: `rich` | `html`; `level`: `info` | `warning` | `critical`;
+  `displayMode`: `once` | `every_launch` | `until_dismissed` (the app keeps
+  per-device "seen" / "dismissed" state keyed by `id`, and may use `updatedAt`
+  to show an edited announcement again).
+- Optional keys are **omitted** when empty: `body` (rich only), `imageUrl`
+  (rich only: the uploaded image or an external https URL), `htmlUrl` (html
+  only; load it in an `<iframe>`), `link` (label defaults to "Xem chi tiết" /
+  "Learn more"), `endsAt`.
+- Only `published` announcements with `startsAt ≤ now < endsAt` (or no
+  `endsAt`), matching the platform (or targeting all platforms) and the version
+  range (numeric `x.y.z` compare, inclusive; pre-release/build suffixes such as
+  `-beta.1` or `+build.7` are ignored, also when the `+` is sent unencoded and
+  arrives as a space). Sorted by `priority` desc, then `startsAt` desc; at most 5.
+- `platform` also accepts Node's `darwin` / `win32`; when omitted, platforms are
+  not filtered. A missing or unparsable `version` disables version filtering.
+- `locale`: `vi` (also `vi-VN`, and the default) → Vietnamese fields; any other
+  locale → English fields, each falling back to Vietnamese.
+- `Cache-Control: public, max-age=60`. An unknown `platform` or a malformed
+  `locale` → 400 `{ "error": "invalid_request", "message": …, "field": … }`.
+
+`GET /api/v1/announcements/{id}?locale=vi` — one published (and started)
+announcement, the same object as a list item (not wrapped); 404 `not_found` for
+drafts and unknown ids.
+
+`GET /api/v1/announcements/{id}/image` — the uploaded image bytes with the stored
+`Content-Type` (png/jpeg/webp/gif), `Content-Length`, `Cache-Control: public,
+max-age=86400` and `X-Content-Type-Options: nosniff`; 404 for drafts and missing
+images. The `v` query parameter in `imageUrl` changes when the image is replaced.
+
+`GET /announcement-frame/{id}?locale=vi` (outside `/vi`/`/en`, not in the
+sitemap, disallowed in robots.txt) — a complete HTML document around the
+announcement's HTML (`<base target="_blank">`, a small neutral stylesheet with
+light/dark via `prefers-color-scheme`). Headers: `Content-Security-Policy:
+sandbox allow-popups allow-popups-to-escape-sandbox; default-src 'none'; img-src
+https: data:; style-src 'unsafe-inline' https:; font-src https: data:; media-src
+https:; base-uri 'none'; form-action 'none'; frame-ancestors *`,
+`X-Content-Type-Options: nosniff`, `Referrer-Policy: no-referrer`, and **no**
+`X-Frame-Options`. Drafts and `rich` announcements → 404.
+
 ### Web (cookie) endpoints
 
 Used by the website; they require the session cookie (where relevant) and a
@@ -218,7 +320,13 @@ same-site `Origin` header (CSRF), and are rate limited per process:
 `POST /api/auth/{register,login,logout,forgot-password,reset-password}`,
 `POST /api/auth/device/approve` (`{ user_code, action: "approve" | "deny" }`),
 `POST /api/account/{profile,password,delete,resend-verification,tokens/revoke}`,
-`POST /api/admin/users/:id/{credits,status}`.
+`POST /api/admin/users/:id/{credits,status}`,
+`POST /api/admin/announcements` (create), `POST /api/admin/announcements/:id`
+(update; replies with the stored editor `values` and `image`),
+`POST /api/admin/announcements/:id/{status,delete}` and
+`POST /api/admin/announcements/images` (multipart `file`, ≤ 2 MB, else 413
+`image_too_large`). Admin-only
+reads: `GET /api/admin/announcements/images/:id` (editor preview, drafts included).
 
 ## Testing
 
@@ -226,11 +334,15 @@ same-site `Origin` header (CSRF), and are rate limited per process:
 npm test
 ```
 
-70 tests: scrypt hashing, user codes, the device-flow state machine, a SQLite
+117 tests: scrypt hashing, user codes, the device-flow state machine, a SQLite
 integration suite (device flow end to end, bearer auth, ledger), token hashing,
 billing math and estimation, model mapping/request rewriting, the rate limiter,
-the SSE usage parser, locale negotiation, dictionary parity, request guards and
-release asset mapping.
+the SSE usage parser, locale negotiation, dictionary parity, request guards,
+release asset mapping, and announcements (version/platform/locale matching,
+input validation, image magic bytes and size cap, the frame's sandbox headers
+and routing, CORS on public errors, a SQLite suite over the public and admin
+route handlers, and the editor's server-rendered markup: accessibility and
+error placement).
 
 Smoke test — start a server pointed at the mock upstream the script runs on port
 4555, then run the script (it starts nothing else):
@@ -255,13 +367,14 @@ handling. Admin checks (402, credit adjustment, disable/enable) run when
 - [x] Static generation for public pages (download page revalidates hourly from GitHub Releases)
 - [x] Per-page title/description, canonical, `hreflang` vi/en/x-default, Open Graph + Twitter card
 - [x] 1200×630 OG/Twitter images per locale (`next/og`, Inter with Vietnamese glyphs, built at build time)
-- [x] `metadataBase` from `SITE_URL`; `sitemap.xml` with both locales and alternates; `robots.txt` disallowing `/api`, `/account`, `/admin`, `/device` (+ localized)
+- [x] `metadataBase` from `SITE_URL`; `sitemap.xml` with both locales and alternates; `robots.txt` disallowing `/api`, `/announcement-frame`, `/account`, `/admin`, `/device` (+ localized)
 - [x] JSON-LD: SoftwareApplication, Organization, WebSite, FAQPage (home), BreadcrumbList (sub-pages)
 - [x] `noindex` on auth, account, admin and device pages
 - [x] `lang` per locale, one `h1` per page, landmarks, skip link, alt text / `aria-hidden` decorations, visible focus, AA contrast
 - [x] Light/dark via `prefers-color-scheme`; responsive down to 320 px; JS-free mobile menu and FAQ (`<details>`)
 - [x] Favicon (`.ico` + SVG), Apple touch icon, web manifest with 192/512 icons
 - [x] Security headers: CSP, `X-Frame-Options: DENY`, `Referrer-Policy`, `Permissions-Policy`, `nosniff`, HSTS on https
+  (except `/announcement-frame/*`, which has its own sandbox CSP and must be embeddable)
 
 ## Project layout
 
@@ -271,7 +384,8 @@ scripts/             smoke test, mock upstream, make-admin
 src/proxy.ts         locale redirects (Next 16 "proxy", formerly middleware)
 src/app/[locale]/    pages (home, download, faam-ai, privacy, terms, auth, device, account, admin)
 src/app/api/         route handlers (auth, device flow, account, admin, v1)
-src/lib/             auth/session, device flow, tokens, billing, AI proxy, mail, SEO
+src/app/announcement-frame/  sandboxed HTML of announcements (outside the locale routing)
+src/lib/             auth/session, device flow, tokens, billing, AI proxy, mail, SEO, announcements
 src/i18n/            locale config and vi/en dictionaries
 tests/               vitest suites
 ```
@@ -298,5 +412,9 @@ npm run dev                   # http://localhost:3000
 - Chạy bằng Docker: `docker compose up -d --build` (dữ liệu nằm trong volume `faam-data`).
 - Kiểm tra: `npm run lint && npm run typecheck && npm test && npm run build`, sau đó `npm run smoke`
   với máy chủ đang chạy (xem mục Testing ở trên).
+- Thông báo trong ứng dụng: vào `/vi/admin/announcements` (thẻ "Thông báo" trong trang quản trị) để
+  tạo hộp thoại hiện khi FaamOffice khởi động — loại "Ảnh và văn bản" hoặc "Trang HTML" (chạy trong
+  khung cách ly, không có script), chọn mức độ, cách hiển thị, nền tảng, khoảng phiên bản và thời gian,
+  xem trước rồi xuất bản. Ứng dụng đọc `GET /api/v1/announcements` (xem mục "4. Announcements").
 - Chính sách quyền riêng tư và điều khoản dịch vụ là văn bản mẫu: đơn vị vận hành cần xem lại
   và điền thông tin trước khi dùng.

@@ -37,13 +37,13 @@ export function rateLimited(retryAfter: number): HttpError {
   });
 }
 
-/** Read the request body as text, enforcing a byte limit (default 1 MB). */
-export async function readBodyText(req: Request, maxBytes = 1024 * 1024): Promise<string> {
+/** Read the raw request body, enforcing a byte limit (default 1 MB) while streaming. */
+export async function readBodyBytes(req: Request, maxBytes = 1024 * 1024): Promise<Uint8Array<ArrayBuffer>> {
   const declared = Number(req.headers.get("content-length") ?? "");
   if (Number.isFinite(declared) && declared > maxBytes) {
     throw new HttpError(413, "payload_too_large", `Request body exceeds ${maxBytes} bytes.`);
   }
-  if (!req.body) return "";
+  if (!req.body) return new Uint8Array(0);
   const reader = req.body.getReader();
   const chunks: Uint8Array[] = [];
   let total = 0;
@@ -57,7 +57,18 @@ export async function readBodyText(req: Request, maxBytes = 1024 * 1024): Promis
     }
     chunks.push(value);
   }
-  return Buffer.concat(chunks).toString("utf8");
+  const out = new Uint8Array(total);
+  let offset = 0;
+  for (const chunk of chunks) {
+    out.set(chunk, offset);
+    offset += chunk.byteLength;
+  }
+  return out;
+}
+
+/** Read the request body as text, enforcing a byte limit (default 1 MB). */
+export async function readBodyText(req: Request, maxBytes = 1024 * 1024): Promise<string> {
+  return new TextDecoder().decode(await readBodyBytes(req, maxBytes));
 }
 
 export async function readJson(req: Request, maxBytes?: number): Promise<unknown> {

@@ -4,7 +4,9 @@
 //    Accept-Language, defaulting to Vietnamese.
 //  - Locale-prefixed paths pass through untouched (no Set-Cookie, so static
 //    pages stay cacheable); the language switcher stores the fo_locale cookie.
-// API routes, Next internals and static files are excluded by the matcher.
+// API routes, the announcement frame (/announcement-frame/{id}, served to the
+// desktop app outside the locale routing), Next internals and static files are
+// excluded by the matcher.
 
 import { NextResponse, type NextRequest } from "next/server";
 import { isLocale, LOCALE_COOKIE, negotiateLocale } from "@/i18n/config";
@@ -26,7 +28,7 @@ export function proxy(request: NextRequest) {
 
 export const config = {
   matcher: [
-    // Everything except API routes, Next internals, metadata files and any path with a file extension.
-    "/((?!api/|_next/|favicon\\.ico|icon|apple-icon|manifest\\.webmanifest|robots\\.txt|sitemap\\.xml|.*\\.[A-Za-z0-9]+$).*)",
+    // Everything except API routes, the announcement frame, Next internals, metadata files and any path with a file extension.
+    "/((?!api/|announcement-frame/|_next/|favicon\\.ico|icon|apple-icon|manifest\\.webmanifest|robots\\.txt|sitemap\\.xml|.*\\.[A-Za-z0-9]+$).*)",
   ],
 };

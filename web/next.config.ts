@@ -21,6 +21,32 @@ const csp = [
   ...(isHttps ? ["upgrade-insecure-requests"] : []),
 ].join("; ");
 
+// Admin announcement editor: its live preview shows external https images,
+// stylesheets and fonts (the sandboxed srcdoc preview inherits this policy).
+const adminAnnouncementsCsp = csp
+  .replace("img-src 'self' data: blob:", "img-src 'self' data: blob: https:")
+  .replace("style-src 'self' 'unsafe-inline'", "style-src 'self' 'unsafe-inline' https:")
+  .replace("font-src 'self' data:", "font-src 'self' data: https:")
+  .concat("; media-src 'self' https:");
+
+// /announcement-frame/{id} serves admin HTML for the desktop app's iframe. It is
+// sandboxed into an opaque origin, never runs scripts and must be embeddable, so
+// it gets its own headers instead of the site-wide ones (no X-Frame-Options).
+// Keep in sync with FRAME_RESPONSE_HEADERS in src/lib/announcement-shared.ts (tested).
+const frameHeaders = [
+  {
+    key: "Content-Security-Policy",
+    value:
+      "sandbox allow-popups allow-popups-to-escape-sandbox; default-src 'none'; img-src https: data:; " +
+      "style-src 'unsafe-inline' https:; font-src https: data:; media-src https:; base-uri 'none'; " +
+      "form-action 'none'; frame-ancestors * genoffice-app:",
+  },
+  { key: "X-Content-Type-Options", value: "nosniff" },
+  { key: "Referrer-Policy", value: "no-referrer" },
+  { key: "X-Robots-Tag", value: "noindex, nofollow" },
+  ...(isHttps ? [{ key: "Strict-Transport-Security", value: "max-age=63072000; includeSubDomains" }] : []),
+];
+
 const securityHeaders = [
   { key: "Content-Security-Policy", value: csp },
   { key: "X-Frame-Options", value: "DENY" },
@@ -44,7 +70,16 @@ const nextConfig: NextConfig = {
     globalNotFound: true,
   },
   async headers() {
-    return [{ source: "/(.*)", headers: securityHeaders }];
+    // Headers set here win over the same headers set by route handlers.
+    return [
+      { source: "/((?!announcement-frame/).*)", headers: securityHeaders },
+      { source: "/announcement-frame/:path*", headers: frameHeaders },
+      // Later rules override earlier ones for the same key.
+      {
+        source: "/:locale(vi|en)/admin/announcements/:path*",
+        headers: [{ key: "Content-Security-Policy", value: adminAnnouncementsCsp }],
+      },
+    ];
   },
 };
 
