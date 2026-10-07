@@ -47,6 +47,7 @@ inlined into static pages at build time — rebuild after changing them.
 | Variable | Default | Purpose |
 | --- | --- | --- |
 | `SITE_URL` [build] | `http://localhost:3000` | Public base URL: canonical/hreflang/OG/sitemap, email links, `verification_uri` |
+| `FAAMOFFICE_WEB_BUILD_DIR` | `.next` | Optional staging directory for a production build while the website serves the existing build. Use the same value for `next start` to preview it. |
 | `NEXT_PUBLIC_GITHUB_REPO` [build] | `dinhthaicx/faamoffice` | Repo whose GitHub Releases provide installers |
 | `GITHUB_TOKEN` | – | Optional, avoids GitHub API rate limits for the download page |
 | `DATABASE_URL` | `file:./data/faamoffice.db` | SQLite file (or PostgreSQL URL after switching) |

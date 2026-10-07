@@ -1,5 +1,6 @@
 /**
  * Renders the FaamOffice social share images into marketing/social/:
+ * The landscape image also updates the website's shared Open Graph/Twitter PNG.
  *
  *   faamoffice-share-1200x630.png   link preview / Open Graph (Facebook, Zalo)
  *   faamoffice-post-1080x1080.png   square feed post
@@ -191,6 +192,9 @@ try {
       }
     }
     writeFileSync(join(outDir, format.file), png)
+    if (format.name === 'landscape') {
+      writeFileSync(join(root, 'web/src/assets', format.file), png)
+    }
     console.log(`${format.file}  ${(png.length / 1024).toFixed(0)} KB`)
   }
 } finally {

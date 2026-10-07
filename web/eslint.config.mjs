@@ -17,7 +17,7 @@ const eslintConfig = cwdInsideWeb
   ? defineConfig([
       ...nextVitals,
       ...nextTs,
-      globalIgnores([".next/**", "out/**", "build/**", "next-env.d.ts", "src/generated/**", "data/**"]),
+      globalIgnores([".next/**", ".next-*/**", "out/**", "build/**", "next-env.d.ts", "src/generated/**", "data/**"]),
     ])
   : defineConfig([globalIgnores(["**/*"])]);
 

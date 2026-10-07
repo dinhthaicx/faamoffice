@@ -1,10 +1,19 @@
 // Metadata and JSON-LD builders for public pages.
 
 import type { Metadata } from "next";
+import socialShareImage from "@/assets/faamoffice-share-1200x630.png";
 import { getSiteUrl } from "./env";
 import { GITHUB_URL, LATEST_RELEASE_URL, LICENSE_URL } from "./site";
 import { localeMeta, locales, type Locale } from "@/i18n/config";
 import type { Dictionary } from "@/i18n";
+
+export const SOCIAL_SHARE_IMAGE = {
+  url: socialShareImage.src,
+  width: socialShareImage.width,
+  height: socialShareImage.height,
+  type: "image/png",
+  alt: "FaamOffice — free office suite with AI",
+};
 
 export function absoluteUrl(path: string): string {
   return `${getSiteUrl()}${path}`;
@@ -41,8 +50,9 @@ export function pageMetadata(input: {
       description,
       locale: localeMeta[locale].ogLocale,
       alternateLocale: locales.filter((l) => l !== locale).map((l) => localeMeta[l].ogLocale),
+      images: [SOCIAL_SHARE_IMAGE],
     },
-    twitter: { card: "summary_large_image", title, description },
+    twitter: { card: "summary_large_image", title, description, images: [SOCIAL_SHARE_IMAGE] },
     ...(input.noindex ? { robots: { index: false, follow: false } } : {}),
   };
 }

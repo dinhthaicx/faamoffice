@@ -62,6 +62,8 @@ const securityHeaders = [
 
 const nextConfig: NextConfig = {
   poweredByHeader: false,
+  // Build separately from the directory served by the running website.
+  distDir: process.env.FAAMOFFICE_WEB_BUILD_DIR || ".next",
   // web/ is a standalone project inside the FaamOffice monorepo: never resolve
   // modules or trace files from the repository root.
   turbopack: { root: __dirname },

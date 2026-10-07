@@ -7,6 +7,7 @@ import { SiteHeader } from "@/components/site-header";
 import { FullPageNavigation } from "@/components/ads-client";
 import { adsActive } from "@/lib/ads";
 import { getSiteUrl } from "@/lib/env";
+import { SOCIAL_SHARE_IMAGE } from "@/lib/seo";
 import { getSiteSettings, publicSocialLinks } from "@/lib/site-settings";
 import { isLocale, localeMeta, locales, toLocale } from "@/i18n/config";
 import { getDictionary } from "@/i18n";
@@ -39,8 +40,8 @@ export async function generateMetadata({ params }: LayoutProps<"/[locale]">): Pr
     creator: "FaamOffice",
     publisher: "FaamOffice",
     formatDetection: { telephone: false, email: false, address: false },
-    openGraph: { siteName: "FaamOffice", type: "website", locale: localeMeta[locale].ogLocale },
-    twitter: { card: "summary_large_image" },
+    openGraph: { siteName: "FaamOffice", type: "website", locale: localeMeta[locale].ogLocale, images: [SOCIAL_SHARE_IMAGE] },
+    twitter: { card: "summary_large_image", images: [SOCIAL_SHARE_IMAGE] },
     // AdSense verification is available while ads are off; it loads no script.
     ...(ads.publisherId ? { other: { "google-adsense-account": ads.publisherId } } : {}),
   };
