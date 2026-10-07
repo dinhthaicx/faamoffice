@@ -37,6 +37,7 @@ export const vi = {
     github: "Mã nguồn trên GitHub",
     releases: "Các bản phát hành",
     privacy: "Chính sách quyền riêng tư",
+    codeSigning: "Chính sách ký mã (Code signing policy)",
     terms: "Điều khoản dịch vụ",
     license: "Phát hành theo giấy phép Apache-2.0.",
     follow: "Theo dõi FaamOffice",
@@ -127,11 +128,11 @@ export const vi = {
     },
     privacy: {
       eyebrow: "Riêng tư từ thiết kế",
-      title: "Tài liệu của bạn ở lại trên máy của bạn",
+      title: "Bạn kiểm soát nơi xử lý tài liệu",
       points: [
-        { title: "Mở và lưu ngay trên máy", description: "FaamOffice là ứng dụng desktop. Tệp được mở, sửa và lưu trên ổ đĩa của bạn, không tải lên máy chủ nào." },
+        { title: "Mở và lưu ngay trên máy", description: "FaamOffice mở, sửa và lưu tệp trên ổ đĩa của bạn. Các thao tác soạn thảo thông thường không tải tài liệu lên máy chủ." },
         { title: "Không bắt buộc tài khoản", description: "Mọi trình soạn thảo đều dùng được mà không cần đăng nhập. Tài khoản chỉ cần khi bạn muốn dùng Faam AI Cloud." },
-        { title: "Bạn quyết định AI chạy ở đâu", description: "Với AI cục bộ, nội dung không rời khỏi máy. Với API key riêng, dữ liệu đi thẳng tới nhà cung cấp bạn chọn." },
+        { title: "Bạn quyết định AI chạy ở đâu", description: "AI trên máy của bạn giữ nội dung tại máy; API key riêng gửi tới nhà cung cấp bạn chọn. Faam AI Cloud gửi nội dung cần xử lý qua máy chủ FaamOffice tới Ollama/Qwen 3.5 chạy trên máy chủ đó." },
         { title: "Mã nguồn mở để kiểm chứng", description: "Toàn bộ mã nguồn công khai theo Apache-2.0: ai cũng có thể đọc, kiểm tra và tự build." },
       ],
     },
@@ -152,7 +153,7 @@ export const vi = {
       eyebrow: "Mã nguồn mở",
       title: "Miễn phí thật sự, không giới hạn tính năng",
       description:
-        "FaamOffice phát hành theo giấy phép Apache-2.0 và là bản fork của GenOffice. Ứng dụng không có quảng cáo, không khóa tính năng, không thu thập tài liệu của bạn. Bạn có thể đọc mã, báo lỗi hoặc đóng góp trên GitHub.",
+        "FaamOffice phát hành theo giấy phép Apache-2.0 và là bản fork của GenOffice. Các trình soạn thảo dùng được miễn phí, không có quảng cáo trong ứng dụng. Khi dùng AI, nội dung được xử lý tại nơi bạn chọn, theo chính sách quyền riêng tư. Bạn có thể đọc mã, báo lỗi hoặc đóng góp trên GitHub.",
       cta: "Xem mã nguồn trên GitHub",
     },
     faq: {
@@ -161,7 +162,7 @@ export const vi = {
         { q: "FaamOffice có miễn phí không?", a: "Có. FaamOffice miễn phí và mã nguồn mở theo giấy phép Apache-2.0. Bạn chỉ trả tiền nếu dùng API key của một nhà cung cấp AI trả phí." },
         { q: "FaamOffice chạy trên hệ điều hành nào?", a: "macOS (Apple Silicon và Intel), Windows 64-bit và Linux (AppImage, .deb, .rpm)." },
         { q: "Có cần tạo tài khoản không?", a: "Không. Mọi trình soạn thảo, cùng Faam AI dùng API key riêng hoặc AI cục bộ, đều hoạt động mà không cần đăng nhập. Tài khoản FaamOffice chỉ cần cho Faam AI Cloud." },
-        { q: "Tài liệu của tôi có bị gửi lên máy chủ không?", a: "Tệp luôn nằm trên máy của bạn. Khi bạn nhờ Faam AI, phần nội dung cần thiết được gửi tới dịch vụ AI bạn chọn; với AI cục bộ (Ollama, LM Studio, llama.cpp) thì không có gì rời khỏi máy." },
+        { q: "Tài liệu của tôi có bị gửi lên máy chủ không?", a: "Soạn thảo thông thường không tải tài liệu lên máy chủ. Khi dùng Faam AI Cloud, lời nhắc và phần tài liệu gửi kèm đi qua máy chủ FaamOffice tới Ollama/Qwen 3.5 trên máy chủ đó. Với API key riêng, nội dung đi tới nhà cung cấp bạn chọn; AI chạy trên chính máy bạn giữ nội dung tại máy." },
         { q: "Faam AI dùng được những mô hình nào?", a: "Faam AI Cloud, hoặc API key của OpenAI, Anthropic Claude, Google Gemini, DeepSeek, xAI Grok, Mistral, Groq, OpenRouter, Qwen, Kimi, GLM, MiniMax và mọi máy chủ tương thích OpenAI. Để Faam AI sửa được tài liệu, hãy chọn mô hình hỗ trợ gọi công cụ (tool calling)." },
         { q: "Faam AI Cloud là gì?", a: "Faam AI Cloud cho phép bạn dùng các mô hình AI ngay trong ứng dụng chỉ bằng tài khoản FaamOffice, không cần API key: vào Cài đặt → Mô hình AI, chọn Faam AI Cloud rồi đăng nhập là xong. Để dịch vụ ổn định cho mọi người, số lượt dùng mỗi ngày có thể được giới hạn. Lịch sử sử dụng hiển thị trong trang Tài khoản." },
         {
@@ -280,20 +281,50 @@ export const vi = {
       "Đây là văn bản mẫu. Đơn vị vận hành trang web và Faam AI Cloud phải xem xét, điền thông tin còn thiếu (tên pháp lý, địa chỉ, email liên hệ, luật áp dụng) và điều chỉnh theo quy định pháp luật nơi mình hoạt động trước khi sử dụng.",
     updated: "Cập nhật lần cuối",
     updatedDate: "07/10/2026",
+    updatedDateTime: "2026-10-07",
     contact: "Liên hệ",
+  },
+  codeSigning: {
+    metaTitle: "Chính sách ký mã — Code signing policy",
+    metaDescription: "Trạng thái chuẩn bị đăng ký SignPath và trách nhiệm duy trì, rà soát mã nguồn, duyệt bản phát hành FaamOffice.",
+    title: "Chính sách ký mã (Code signing policy)",
+    intro: "FaamOffice đang chuẩn bị đăng ký chương trình ký mã miễn phí của SignPath Foundation. Chưa gửi đơn, chưa được chấp nhận và chưa có bản phát hành nào mang chữ ký SignPath.",
+    sections: [
+      {
+        heading: "1. Trạng thái đăng ký",
+        paragraphs: ["Trạng thái hiện tại: đang chuẩn bị đăng ký (preparing). Chỉ chuyển sang chờ xét duyệt (pending) sau khi đơn thực sự được gửi. Chỉ công bố SignPath cung cấp chữ ký sau khi dự án được chấp nhận; trạng thái chữ ký của từng bản phát hành được ghi riêng trong ghi chú phát hành."],
+      },
+      {
+        heading: "2. Người chịu trách nhiệm",
+        paragraphs: ["dinhthaicx chịu trách nhiệm duy trì dự án, rà soát mã nguồn và duyệt bản phát hành: https://github.com/dinhthaicx"],
+        list: ["Maintainer: dinhthaicx.", "Reviewer: dinhthaicx.", "Release approver: dinhthaicx."],
+      },
+      {
+        heading: "3. Mã nguồn và quy trình phát hành",
+        paragraphs: ["Mã nguồn công khai và quy trình build bằng GitHub Actions: https://github.com/dinhthaicx/faamoffice. FaamOffice là bản fork của GenOffice và phải được SignPath xét duyệt theo điều kiện dành cho mã nguồn upstream đã chỉnh sửa.", "Nếu được chấp nhận, mỗi yêu cầu ký phải được release approver duyệt trước khi phát hành. Những người tham gia quy trình ký phải bật xác thực nhiều yếu tố cho GitHub và SignPath. Hiện chưa có tích hợp ký SignPath trong quy trình phát hành."],
+      },
+      {
+        heading: "4. Chữ ký của các gói hiện có",
+        paragraphs: ["Bộ cài Windows trên GitHub hiện chưa có chữ ký Authenticode. Bộ cài macOS 0.11.2 đã được ký bằng Apple Developer ID và notarize; đó là chữ ký Apple, không phải SignPath. Gói AppX đang được chuẩn bị để nộp Microsoft Store; Store sẽ ký gói phân phối qua Store sau khi được duyệt."],
+      },
+      {
+        heading: "5. Quyền riêng tư và liên hệ",
+        paragraphs: ["Chính sách quyền riêng tư: https://faamoffice.net/vi/privacy. Tài liệu về các kết nối của ứng dụng: https://github.com/dinhthaicx/faamoffice/blob/faamoffice/PRIVACY.md.", "Câu hỏi về ký mã và bản phát hành: https://github.com/dinhthaicx/faamoffice/issues."],
+      },
+    ] as LegalSection[],
   },
   privacy: {
     metaTitle: "Chính sách quyền riêng tư",
     metaDescription: "FaamOffice thu thập những dữ liệu gì, dùng vào việc gì và bạn kiểm soát chúng ra sao — cho ứng dụng desktop, tài khoản web và Faam AI Cloud.",
     title: "Chính sách quyền riêng tư",
     intro:
-      "Chính sách này giải thích dữ liệu nào được xử lý khi bạn dùng ứng dụng FaamOffice, trang web này và dịch vụ Faam AI Cloud, cùng các quyền của bạn. “Chúng tôi” là đơn vị vận hành trang web này ([TÊN ĐƠN VỊ VẬN HÀNH]).",
+      "Chính sách này áp dụng cho ứng dụng FaamOffice, website faamoffice.net và Faam AI Cloud do dinhthaicx (https://github.com/dinhthaicx) vận hành tại Việt Nam. Liên hệ về quyền riêng tư: dinhthaicx@gmail.com.",
     sections: [
       {
         heading: "1. Ứng dụng desktop và tệp của bạn",
         paragraphs: [
-          "FaamOffice mở, sửa và lưu tệp ngay trên máy tính của bạn. Chúng tôi không nhận, không lưu trữ và không có quyền truy cập vào tài liệu của bạn.",
-          "Khi bạn dùng Faam AI với API key riêng, yêu cầu đi thẳng từ máy bạn tới nhà cung cấp AI đó và chịu chính sách của họ. Khi dùng AI cục bộ, dữ liệu không rời khỏi máy hoặc mạng nội bộ của bạn.",
+          "FaamOffice mở, sửa và lưu tệp ngay trên máy tính của bạn. Các thao tác soạn thảo thông thường không tải tài liệu lên máy chủ. Khi bạn yêu cầu AI xử lý, lời nhắc, lịch sử hội thoại, phần tài liệu hoặc hình ảnh cần thiết có thể được gửi theo chế độ AI bạn chọn.",
+          "Với API key riêng, yêu cầu đi thẳng từ máy bạn tới nhà cung cấp AI đã chọn và chịu chính sách của họ; key được lưu trên máy bạn. Với Ollama, LM Studio hoặc llama.cpp chạy trên chính máy bạn, nội dung không rời khỏi máy. Nếu bạn nhập địa chỉ máy chủ trong mạng LAN hoặc từ xa, yêu cầu được gửi tới địa chỉ đó. Faam AI Cloud có cách xử lý riêng ở mục 3.",
         ],
       },
       {
@@ -310,14 +341,33 @@ export const vi = {
       {
         heading: "3. Faam AI Cloud",
         paragraphs: [
-          "Khi bạn dùng Faam AI Cloud, nội dung yêu cầu (bao gồm phần tài liệu được gửi kèm) được chuyển qua máy chủ của chúng tôi tới nhà cung cấp mô hình AI phía sau để tạo câu trả lời. Chúng tôi không lưu nội dung yêu cầu hay câu trả lời.",
-          "Với mỗi yêu cầu, chúng tôi lưu thời gian, tên mô hình và số token đầu vào/đầu ra, để áp dụng hạn mức sử dụng và hiển thị lịch sử cho bạn.",
-          "Nhà cung cấp mô hình phía sau xử lý dữ liệu theo chính sách của họ: [LIỆT KÊ NHÀ CUNG CẤP VÀ LIÊN KẾT CHÍNH SÁCH].",
+          "Khi bạn chọn Faam AI Cloud và gửi yêu cầu, lời nhắc, lịch sử hội thoại, phần tài liệu hoặc hình ảnh được gửi kèm rời máy của bạn, đi qua máy chủ FaamOffice để tạo câu trả lời. Máy chủ xử lý được nội dung này; chế độ Cloud không có bảo đảm nội dung chỉ ở trên máy của bạn.",
+          "Cấu hình hiện tại dùng Ollama với mô hình Qwen 3.5 chạy trên chính máy chủ vận hành FaamOffice. Máy chủ chuyển yêu cầu tới Ollama qua địa chỉ loopback trên cùng máy, không chuyển tới API AI đám mây bên ngoài. Ollama và Qwen là phần mềm/mô hình chạy tại máy chủ, không phải dịch vụ AI bên ngoài nhận yêu cầu trong cấu hình này. Xem giải thích về xử lý cục bộ của Ollama: https://docs.ollama.com/faq",
+          "Nội dung yêu cầu và câu trả lời được xử lý trong khi thực hiện yêu cầu; backend tài khoản không ghi nội dung đó vào cơ sở dữ liệu lịch sử sử dụng. Với mỗi yêu cầu, cơ sở dữ liệu lưu tài khoản/thiết bị, thời gian, tên mô hình, số token đầu vào/đầu ra, trạng thái ước tính và số credit để áp dụng hạn mức, tính credit khi bật và hiển thị lịch sử cho bạn.",
+          "Bạn có thể không dùng Cloud, đăng xuất hoặc chọn AI trên máy của mình. Việc mở tài liệu không tự gửi tài liệu tới Cloud. Nếu cấu hình xử lý AI thay đổi, chính sách này sẽ được cập nhật trước khi áp dụng cấu hình mới.",
+        ],
+      },
+      {
+        heading: "4. Kết nối tự động khi khởi động",
+        paragraphs: ["Ứng dụng có các kết nối dưới đây dù bạn không đăng nhập. Máy chủ nhận yêu cầu có thể thấy địa chỉ IP và thông tin kết nối; các yêu cầu này không gửi nội dung tài liệu."],
+        list: [
+          "Thông báo: một lần mỗi lần mở ứng dụng, sau màn hình chào ở lần đầu, tới https://faamoffice.net hoặc máy chủ tài khoản bạn đặt trong Cài đặt → Hồ sơ. Yêu cầu /api/v1/announcements gửi hệ điều hành, phiên bản app và ngôn ngữ giao diện; không gửi token tài khoản hay định danh khác. Ảnh và font trong thông báo có thể tải từ các địa chỉ HTTPS do người đăng thông báo sử dụng; các máy chủ đó thấy IP của bạn. Trạng thái đã xem/bỏ qua chỉ lưu trên máy.",
+          "Kênh theo dõi: cùng lúc kiểm tra thông báo, /api/v1/app/config lấy danh sách các nút theo dõi từ cùng máy chủ; không gửi token, định danh hay tham số khác. Danh sách được lưu đệm trên máy, liên kết chỉ mở trong trình duyệt khi bạn bấm.",
+          "Cập nhật: các bản GitHub có địa chỉ cập nhật kiểm tra GitHub Releases khoảng 15 giây sau khởi động và sau đó mỗi vài giờ, tải tệp latest*.yml. Thư viện cập nhật gửi x-user-staging-id, một UUID ngẫu nhiên của bản cài lưu trong .updaterId; không gửi tài khoản hay tài liệu. GitHub thấy IP và phục vụ bộ cài khi tải cập nhật. Bản không có địa chỉ cập nhật không thực hiện kiểm tra này; gói Microsoft Store được Store quản lý cập nhật.",
+        ],
+        after: "Hiện có thể đặt biến môi trường FAAMOFFICE_ANNOUNCEMENTS=0 trước khi chạy app để tắt cả thông báo và lấy danh sách kênh, hoặc FAAMOFFICE_UPDATES=0 để tắt kiểm tra cập nhật. Các nút theo dõi đã lưu vẫn có thể hiện. Bộ cài hiện chưa có màn hình privacy và lựa chọn tắt các kết nối này ngay lúc cài đặt; đây là phần đang cần bổ sung để chuẩn bị đăng ký SignPath. Chi tiết: https://github.com/dinhthaicx/faamoffice/blob/faamoffice/PRIVACY.md",
+      },
+      {
+        heading: "5. Các dịch vụ và kết nối khác",
+        paragraphs: [
+          "Website và API faamoffice.net được chuyển qua Cloudflare Tunnel. Cloudflare xử lý lưu lượng và thông tin kết nối để cung cấp, bảo vệ dịch vụ theo https://www.cloudflare.com/privacypolicy/. Khi mở Cài đặt (bao gồm trang Giới thiệu), ứng dụng có thể đọc số sao công khai từ api.github.com; GitHub thấy IP theo https://docs.github.com/en/site-policy/privacy-policies/github-general-privacy-statement. Các liên kết ngoài chỉ mở khi bạn bấm.",
+          "Tìm kiếm web/ảnh trong Faam AI gửi yêu cầu tới nhà cung cấp bạn chọn trong Cài đặt → AI Media hoặc nguồn miễn phí Parallel/DuckDuckGo. Yêu cầu tới API AI bằng key riêng và các nguồn tìm kiếm chịu chính sách của dịch vụ tương ứng; hãy kiểm tra nhà cung cấp trước khi gửi nội dung nhạy cảm.",
+          "Các bản phát hành từ workflow của kho này không được cấu hình gửi thống kê sử dụng hoặc tải font từ CDN. Nếu bên tự build bật Google Analytics 4, màn hình chào thông báo và bạn có thể tắt trong Cài đặt → Chung → Gửi thống kê sử dụng ẩn danh. Khi bật, dữ liệu gồm UUID ngẫu nhiên của bản cài, phiên bản app/hệ điều hành, ngôn ngữ, mã quốc gia nếu có và sự kiện mở app, mở/tạo tệp với phần mở rộng hoặc loại tệp; không gồm tên, đường dẫn hay nội dung tệp, tài khoản hay email. Danh sách trường đầy đủ nằm trong PRIVACY.md.",
         ],
       },
       {
         id: "cookies",
-        heading: "4. Cookie",
+        heading: "6. Cookie",
         paragraphs: ["Trang web chỉ dùng cookie cần thiết:"],
         list: [
           "Cookie phiên đăng nhập (httpOnly) để giữ bạn đăng nhập trong 30 ngày.",
@@ -326,40 +376,40 @@ export const vi = {
         after: "Chúng tôi không dùng cookie quảng cáo hay công cụ theo dõi của bên thứ ba.",
       },
       {
-        heading: "5. Email",
+        heading: "7. Email",
         paragraphs: [
           "Chúng tôi chỉ gửi email giao dịch: xác nhận địa chỉ email và đặt lại mật khẩu. Chúng tôi không gửi email quảng cáo nếu không có sự đồng ý của bạn.",
         ],
       },
       {
-        heading: "6. Thời gian lưu trữ",
+        heading: "8. Thời gian lưu trữ",
         paragraphs: [
-          "Dữ liệu tài khoản được giữ cho đến khi bạn xóa tài khoản. Phiên đăng nhập hết hạn sau 30 ngày; liên kết xác nhận email hết hạn sau 24 giờ và liên kết đặt lại mật khẩu sau 1 giờ. Nhật ký máy chủ có thể được giữ ngắn hạn để vận hành và bảo mật.",
+          "Dữ liệu tài khoản được giữ cho đến khi bạn xóa tài khoản. Phiên đăng nhập hết hạn sau 30 ngày; liên kết xác nhận email hết hạn sau 24 giờ và liên kết đặt lại mật khẩu sau 1 giờ. Hết hạn có nghĩa là token không còn dùng được, không phải cam kết mọi bản ghi được xóa ngay. Nhật ký vận hành và lỗi được giữ để chẩn đoán và bảo vệ dịch vụ; hiện chưa thiết lập thời hạn tự động xóa cố định cho các nhật ký này. Backend AI không ghi nội dung lỗi trả về từ Ollama vào nhật ký.",
         ],
       },
       {
-        heading: "7. Quyền của bạn",
+        heading: "9. Quyền của bạn",
         paragraphs: [
           "Bạn có thể xem và sửa tên, đổi mật khẩu, đăng xuất thiết bị và xóa vĩnh viễn tài khoản ngay trong trang Tài khoản. Xóa tài khoản sẽ xóa hồ sơ, lịch sử sử dụng và mọi thiết bị đã đăng nhập. Với các yêu cầu khác về dữ liệu cá nhân, hãy liên hệ với chúng tôi.",
         ],
       },
       {
-        heading: "8. Bảo mật",
+        heading: "10. Bảo mật",
         paragraphs: [
           "Mật khẩu được băm bằng scrypt; token thiết bị, phiên đăng nhập và liên kết trong email chỉ được lưu dưới dạng băm SHA-256. Kết nối tới trang web được mã hóa bằng HTTPS.",
         ],
       },
       {
-        heading: "9. Trẻ em",
+        heading: "11. Trẻ em",
         paragraphs: ["Dịch vụ không dành cho người dưới 13 tuổi (hoặc độ tuổi tối thiểu theo luật nơi bạn sống)."],
       },
       {
-        heading: "10. Thay đổi chính sách",
+        heading: "12. Thay đổi chính sách",
         paragraphs: ["Khi chính sách thay đổi, chúng tôi cập nhật ngày ở đầu trang và thông báo trên trang web nếu thay đổi quan trọng."],
       },
       {
-        heading: "11. Liên hệ",
-        paragraphs: ["[TÊN ĐƠN VỊ VẬN HÀNH], [ĐỊA CHỈ], email: [EMAIL LIÊN HỆ]."],
+        heading: "13. Liên hệ",
+        paragraphs: ["Người vận hành: dinhthaicx tại Việt Nam. Email công khai: dinhthaicx@gmail.com. Bạn cũng có thể báo vấn đề tại https://github.com/dinhthaicx/faamoffice/issues; không đăng nội dung tài liệu, mật khẩu, API key hoặc dữ liệu riêng tư trong issue công khai."],
       },
     ] as LegalSection[],
     // Used only while Google ads are on (admin Settings): replaces the cookie

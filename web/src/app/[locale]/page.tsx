@@ -229,6 +229,10 @@ export default async function HomePage({ params }: PageProps<"/[locale]">) {
               </li>
             ))}
           </ul>
+          <div className="mt-8 flex flex-wrap gap-6 text-sm font-semibold text-link">
+            <Link href={`/${locale}/privacy`} className="hover:underline">{dict.footer.privacy}</Link>
+            <Link href={`/${locale}/code-signing`} className="hover:underline">{dict.footer.codeSigning}</Link>
+          </div>
         </Container>
       </section>
 

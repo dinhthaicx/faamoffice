@@ -71,6 +71,7 @@ export function SiteFooter({
     {
       title: f.legal,
       links: [
+        { href: `/${locale}/code-signing`, label: f.codeSigning, internal: true },
         { href: `/${locale}/privacy`, label: f.privacy, internal: true },
         { href: `/${locale}/terms`, label: f.terms, internal: true },
       ],

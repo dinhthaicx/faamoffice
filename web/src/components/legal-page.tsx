@@ -56,11 +56,13 @@ export function LegalPage({
   dict,
   path,
   content,
+  reviewPending = false,
 }: {
   locale: Locale;
   dict: Dictionary;
   path: string;
   content: LegalContent;
+  reviewPending?: boolean;
 }) {
   return (
     <Container className="max-w-3xl py-10">
@@ -74,13 +76,15 @@ export function LegalPage({
       <article className="mt-6">
         <h1 className="text-4xl font-extrabold tracking-tight">{content.title}</h1>
         <p className="mt-3 text-sm text-muted">
-          {dict.legal.updated}: <time dateTime="2026-10-06">{dict.legal.updatedDate}</time>
+          {dict.legal.updated}: <time dateTime={dict.legal.updatedDateTime}>{dict.legal.updatedDate}</time>
         </p>
-        <Alert tone="warn" className="mt-6">
-          <strong className="font-semibold">{dict.legal.reviewTitle}:</strong> {dict.legal.reviewNote}
-        </Alert>
+        {reviewPending ? (
+          <Alert tone="warn" className="mt-6">
+            <strong className="font-semibold">{dict.legal.reviewTitle}:</strong> {dict.legal.reviewNote}
+          </Alert>
+        ) : null}
         <div className="prose-legal mt-8">
-          <p>{content.intro}</p>
+          <p><Linked text={content.intro} /></p>
           {content.sections.map((section) => (
             <section key={section.heading}>
               <h2>{section.heading}</h2>

@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 import { Breadcrumbs } from "@/components/breadcrumbs";
 import { CodeBlock } from "@/components/code-block";
 import { DownloadRecommendation } from "@/components/download-recommendation";
@@ -146,6 +147,10 @@ export default async function DownloadPage({ params }: PageProps<"/[locale]/down
             }}
           />
           {!hasAssets ? <Alert className="mt-6">{d.fallbackNote}</Alert> : null}
+          <div className="mt-6 flex flex-wrap gap-6 text-sm font-semibold text-link">
+            <Link href={`/${locale}/code-signing`} className="hover:underline">{dict.footer.codeSigning}</Link>
+            <Link href={`/${locale}/privacy`} className="hover:underline">{dict.footer.privacy}</Link>
+          </div>
         </Container>
       </section>
 

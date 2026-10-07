@@ -31,6 +31,20 @@ how many requests each account can make per day. The requests themselves are
 forwarded to the AI provider the server operator configured. See the privacy
 policy published on that server's website.
 
+For **faamoffice.net**, the operator is **dinhthaicx**, in Vietnam, with public
+contact **dinhthaicx@gmail.com**. Faam AI Cloud requests (prompts, conversation
+history, document content and images included in the request) leave your
+computer and pass through the FaamOffice server. The current inference backend
+is **Ollama running Qwen 3.5 on that same server computer**, reached over a
+loopback address. This configuration does not forward requests to an external
+cloud AI API. Local inference on the server does not mean that Cloud requests
+stay on your own computer. The account backend stores usage metadata, not
+request or reply content, in its usage-history database. Its error logs exclude
+upstream response bodies, which could echo document content. Read the website
+policy in [Vietnamese](https://faamoffice.net/vi/privacy) or
+[English](https://faamoffice.net/en/privacy), and Ollama's local-processing
+explanation at https://docs.ollama.com/faq.
+
 ## Startup checks
 
 ### Announcements
@@ -67,6 +81,8 @@ app's data folder) and no account or document information; GitHub sees your IP
 address. Downloading an update fetches the installer from the same release.
 Builds without an update address (development runs, manual workflow runs, local
 packaging, 0.11.1 and older) make no update request.
+Microsoft Store packages have no app-managed update feed; the Store manages
+their updates.
 
 ### Turning the checks off
 
@@ -76,10 +92,21 @@ packaging, 0.11.1 and older) make no update request.
 - `FAAMOFFICE_UPDATES=0` turns off the update check. Help → Check for Updates
   then points to the download page instead.
 
+These are runtime environment controls. The current installer does not yet
+display this policy or offer installation options for these automatic
+connections. Adding those controls and rebuilding the app/installer is still
+required preparation for SignPath; this document does not claim that the
+installer already meets SignPath's requirements.
+
 ## Other network access
 
-- The About page and the GitHub prompt read the public star count of the
-  FaamOffice repository from api.github.com.
+- Opening Settings (including About) can read the public
+  star count of the FaamOffice repository from api.github.com, cached for the
+  session. This request sends no account or document information; GitHub sees
+  your IP. See https://docs.github.com/en/site-policy/privacy-policies/github-general-privacy-statement.
+- The faamoffice.net website and API use Cloudflare Tunnel. Cloudflare handles
+  traffic and connection information to provide and protect the service, under
+  https://www.cloudflare.com/privacypolicy/.
 - Links you click (downloads, API-key pages, GitHub) open in your browser.
 - Builds from this repository send no usage analytics and download no fonts
   unless whoever built them injected the corresponding endpoints
@@ -113,5 +140,7 @@ content, file names, file paths, account identity or email addresses.
 
 ## Contact
 
-Questions or concerns: open an issue at
-https://github.com/dinhthaicx/faamoffice/issues.
+Operator: **dinhthaicx**, Vietnam. Privacy contact: **dinhthaicx@gmail.com**.
+Questions or concerns can also be reported at
+https://github.com/dinhthaicx/faamoffice/issues. Do not include private document
+content, passwords or API keys in a public issue.

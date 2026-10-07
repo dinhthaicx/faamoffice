@@ -36,6 +36,7 @@ export const en: Dictionary = {
     github: "Source code on GitHub",
     releases: "Releases",
     privacy: "Privacy policy",
+    codeSigning: "Code signing policy",
     terms: "Terms of service",
     license: "Released under the Apache-2.0 license.",
     follow: "Follow FaamOffice",
@@ -126,11 +127,11 @@ export const en: Dictionary = {
     },
     privacy: {
       eyebrow: "Private by design",
-      title: "Your documents stay on your computer",
+      title: "You control where documents are processed",
       points: [
-        { title: "Open and save locally", description: "FaamOffice is a desktop app. Files are opened, edited and saved on your own disk, never uploaded to a server." },
+        { title: "Open and save locally", description: "FaamOffice opens, edits and saves files on your disk. Ordinary editing does not upload documents to a server." },
         { title: "No account required", description: "Every editor works without signing in. You only need an account to use Faam AI Cloud." },
-        { title: "You decide where AI runs", description: "With local AI, content never leaves your machine. With your own API key, data goes straight to the provider you chose." },
+        { title: "You decide where AI runs", description: "AI on your computer keeps content there; your own API key sends it to your chosen provider. Faam AI Cloud sends the content needed for a request through the FaamOffice server to Ollama/Qwen 3.5 on that server." },
         { title: "Open source, verifiable", description: "All source code is public under Apache-2.0: anyone can read it, audit it and build it themselves." },
       ],
     },
@@ -151,7 +152,7 @@ export const en: Dictionary = {
       eyebrow: "Open source",
       title: "Truly free, with no feature limits",
       description:
-        "FaamOffice is released under the Apache-2.0 license and is a fork of GenOffice. The desktop app has no ads, no locked features, and does not collect your documents. Read the code, report issues or contribute on GitHub.",
+        "FaamOffice is released under Apache-2.0 and is a fork of GenOffice. The editors are free to use, with no ads in the app. AI processes content at the destination you choose, as described in the privacy policy. You can read the code, report issues or contribute on GitHub.",
       cta: "View the source on GitHub",
     },
     faq: {
@@ -160,7 +161,7 @@ export const en: Dictionary = {
         { q: "Is FaamOffice free?", a: "Yes. FaamOffice is free and open source under the Apache-2.0 license. You only pay if you use an API key from a paid AI provider." },
         { q: "Which operating systems does FaamOffice support?", a: "macOS (Apple Silicon and Intel), 64-bit Windows, and Linux (AppImage, .deb, .rpm)." },
         { q: "Do I need an account?", a: "No. Every editor — and Faam AI with your own API key or local AI — works without signing in. A FaamOffice account is only needed for Faam AI Cloud." },
-        { q: "Are my documents uploaded to a server?", a: "Your files always stay on your computer. When you ask Faam AI for help, the relevant content is sent to the AI service you chose; with local AI (Ollama, LM Studio, llama.cpp) nothing leaves your machine." },
+        { q: "Are my documents uploaded to a server?", a: "Ordinary editing does not upload documents. With Faam AI Cloud, the prompt and accompanying document content pass through the FaamOffice server to Ollama/Qwen 3.5 on that server. With your own API key, content goes to your selected provider; AI running on your own computer keeps content there." },
         { q: "Which models can Faam AI use?", a: "Faam AI Cloud, or your API key for OpenAI, Anthropic Claude, Google Gemini, DeepSeek, xAI Grok, Mistral, Groq, OpenRouter, Qwen, Kimi, GLM, MiniMax, and any OpenAI-compatible server. To let Faam AI edit documents, choose a model that supports tool calling." },
         { q: "What is Faam AI Cloud?", a: "Faam AI Cloud lets you use AI models right inside the app with just your FaamOffice account, no API key: open Settings → AI models, choose Faam AI Cloud and sign in. To keep the service reliable for everyone, daily usage may be limited. Your usage history is on the Account page." },
         {
@@ -281,28 +282,76 @@ export const en: Dictionary = {
       "This is a template. The operator of this website and of Faam AI Cloud must review it, fill in the missing details (legal name, address, contact email, governing law) and adapt it to the laws where they operate before relying on it.",
     updated: "Last updated",
     updatedDate: "October 7, 2026",
+    updatedDateTime: "2026-10-07",
     contact: "Contact",
+  },
+  codeSigning: {
+    metaTitle: "Code signing policy",
+    metaDescription: "FaamOffice's SignPath application preparation and the responsibilities for maintenance, code review and release approval.",
+    title: "Code signing policy",
+    intro: "FaamOffice is preparing to apply to the SignPath Foundation free code signing program. No application has been submitted, the project has not been accepted, and no release has a SignPath signature.",
+    sections: [
+      {
+        heading: "1. Application status",
+        paragraphs: [
+          "Current status: preparing to apply. Change the status to pending only after an application has actually been submitted. Credit SignPath as a signing provider only after the project has been accepted; document each release's signature status separately in its release notes.",
+        ],
+      },
+      {
+        heading: "2. Responsible team members",
+        paragraphs: [
+          "dinhthaicx maintains the project, reviews code and approves releases: https://github.com/dinhthaicx",
+        ],
+        list: [
+          "Maintainer: dinhthaicx.",
+          "Reviewer: dinhthaicx.",
+          "Release approver: dinhthaicx.",
+        ],
+      },
+      {
+        heading: "3. Source code and release process",
+        paragraphs: [
+          "Public source code and GitHub Actions builds: https://github.com/dinhthaicx/faamoffice. FaamOffice is a fork of GenOffice and must be reviewed by SignPath under its conditions for modified upstream code.",
+          "If accepted, every signing request must be approved by the release approver before publication. Participants in signing must use multi-factor authentication for GitHub and SignPath. SignPath signing is not currently integrated into the release process.",
+        ],
+      },
+      {
+        heading: "4. Signatures on existing packages",
+        paragraphs: [
+          "The Windows installer on GitHub currently has no Authenticode signature. The macOS 0.11.2 installers are Apple Developer ID signed and notarized; that is Apple signing, not SignPath. The AppX package is being prepared for Microsoft Store submission; Microsoft signs Store-distributed packages after approval.",
+        ],
+      },
+      {
+        heading: "5. Privacy and contact",
+        paragraphs: [
+          "Privacy policy: https://faamoffice.net/en/privacy. Application network disclosure: https://github.com/dinhthaicx/faamoffice/blob/faamoffice/PRIVACY.md.",
+          "Questions about signing and releases: https://github.com/dinhthaicx/faamoffice/issues.",
+        ],
+      },
+    ] as LegalSection[],
   },
   privacy: {
     metaTitle: "Privacy policy",
     metaDescription: "What data FaamOffice processes, why, and how you control it — for the desktop app, web accounts and Faam AI Cloud.",
     title: "Privacy policy",
     intro:
-      "This policy explains which data is processed when you use the FaamOffice app, this website and the Faam AI Cloud service, and what your rights are. “We” means the operator of this website ([OPERATOR NAME]).",
+      "This policy covers the FaamOffice app, faamoffice.net and Faam AI Cloud, operated by dinhthaicx (https://github.com/dinhthaicx) in Vietnam. Privacy contact: dinhthaicx@gmail.com.",
     sections: [
       {
         heading: "1. The desktop app and your files",
         paragraphs: [
-          "FaamOffice opens, edits and saves files on your own computer. We do not receive, store or have access to your documents.",
-          "When you use Faam AI with your own API key, requests go directly from your computer to that AI provider and are governed by its policies. With local AI, data never leaves your computer or local network.",
+          "FaamOffice opens, edits and saves files on your computer. Ordinary editing does not upload documents to a server. When you ask AI to process content, the prompt, conversation history, relevant document content or images may be sent according to the AI mode you choose.",
+          "With your own API key, requests go directly from your computer to your chosen AI provider under its policies; the key is stored on your computer. With Ollama, LM Studio or llama.cpp on your own computer, content stays there. If you enter a LAN or remote server address, requests go to that address. Faam AI Cloud is described separately in section 3.",
         ],
       },
       {
         heading: "2. Account data",
-        paragraphs: ["When you create a FaamOffice account we store:"],
+        paragraphs: [
+          "When you create a FaamOffice account we store:",
+        ],
         list: [
           "Your name and email address, and whether the email is verified.",
-          "Your password as a one-way hash (scrypt) — we never know your password.",
+          "Your password as a one-way hash (scrypt).",
           "The devices signed in to your account (device name, sign-in time and last use).",
           "Your Faam AI Cloud usage history and the usage allowance attached to your account.",
           "Browser sessions, with the browser (user agent) and IP address at sign-in, to protect your account.",
@@ -311,56 +360,85 @@ export const en: Dictionary = {
       {
         heading: "3. Faam AI Cloud",
         paragraphs: [
-          "When you use Faam AI Cloud, the content of your request (including any document content sent with it) passes through our servers to the AI model provider behind the service so that a reply can be generated. We do not store request or response content.",
-          "For each request we store the time, model name and input/output token counts, to apply usage limits and to show you your history.",
-          "The model provider behind the service processes data under its own policy: [LIST PROVIDERS AND POLICY LINKS].",
+          "When you choose Faam AI Cloud and send a request, the prompt, conversation history and any accompanying document content or images leave your computer and pass through the FaamOffice server to generate a reply. The server can process this content; Cloud does not guarantee that content stays on your computer.",
+          "The current configuration uses Ollama with Qwen 3.5 running on the same computer that operates FaamOffice's server. Requests are forwarded to Ollama through a loopback address on that computer, without forwarding to an external cloud AI API. Ollama and Qwen are software/a model running on the server, rather than external AI services receiving requests in this configuration. Ollama's explanation of local processing: https://docs.ollama.com/faq",
+          "Request and response content is processed while fulfilling the request; the account backend does not write that content to the usage-history database. For each request the database stores the account/device, time, model name, input/output token counts, estimation status and credits, to apply limits, charge credits when enabled and show your usage history.",
+          "You can avoid Cloud, sign out or choose AI on your own computer. Opening a document does not automatically send it to Cloud. If the AI processing configuration changes, this policy will be updated before the new configuration takes effect.",
         ],
       },
       {
-        heading: "4. Cookies",
-        paragraphs: ["This website only uses necessary cookies:"],
+        heading: "4. Automatic startup connections",
+        paragraphs: [
+          "The app makes the following connections even when you are not signed in. Receiving servers can see your IP address and connection information; these requests do not send document content.",
+        ],
+        list: [
+          "Announcements: once per app start, after the welcome screens on first use, from https://faamoffice.net or the account server set in Settings → Profile. The /api/v1/announcements request sends the operating system, app version and interface language, without an account token or another identifier. Announcement images and fonts may load from HTTPS addresses used by the announcement author; those servers see your IP. Seen/dismissed status stays on your computer.",
+          "Channels to follow: alongside the announcement check, /api/v1/app/config retrieves follow buttons from the same server, without a token, identifier or other parameters. The list is cached on your computer; links only open in your browser when clicked.",
+          "Updates: GitHub builds with an update address check GitHub Releases about 15 seconds after startup and every few hours afterwards, downloading a latest*.yml file. The updater sends x-user-staging-id, a random install UUID stored in .updaterId, without account or document information. GitHub sees your IP and serves the installer when you download an update. Builds without an update address make no such check; Microsoft Store packages use Store-managed updates.",
+        ],
+        after: "Currently, setting FAAMOFFICE_ANNOUNCEMENTS=0 in the environment before starting the app disables both announcements and channel-list requests; FAAMOFFICE_UPDATES=0 disables update checks. Previously cached follow buttons may still appear. The current installer has no privacy screen or installation options to disable these connections; adding them is part of preparing the SignPath application. Details: https://github.com/dinhthaicx/faamoffice/blob/faamoffice/PRIVACY.md",
+      },
+      {
+        heading: "5. Other services and connections",
+        paragraphs: [
+          "The faamoffice.net website and API are routed through Cloudflare Tunnel. Cloudflare processes traffic and connection information to provide and protect the service under https://www.cloudflare.com/privacypolicy/. When opening Settings (including About), the app may retrieve the public star count from api.github.com; GitHub sees your IP under https://docs.github.com/en/site-policy/privacy-policies/github-general-privacy-statement. External links only open when clicked.",
+          "Web/image search in Faam AI sends requests to the provider selected in Settings → AI Media or the free Parallel/DuckDuckGo sources. AI requests using your own key and search requests are governed by the respective service's policies; review your selected provider before sending sensitive content.",
+          "Releases from this repository's workflow are not configured to send usage analytics or download CDN fonts. If a distributor enables Google Analytics 4 in a custom build, onboarding explains it and you can disable it under Settings → General → Send anonymous usage statistics. When enabled, data includes a random install UUID, app/OS versions, language, country code if available and app-launch/file-open/file-new events with the file extension or type; it excludes file names, paths, content, accounts and email addresses. PRIVACY.md lists all fields.",
+        ],
+      },
+      {
+        id: "cookies",
+        heading: "6. Cookies",
+        paragraphs: [
+          "This website only uses necessary cookies:",
+        ],
         list: [
           "A session cookie (httpOnly) that keeps you signed in for 30 days.",
           "A language cookie that remembers whether you chose Vietnamese or English.",
         ],
         after: "We do not use advertising cookies or third-party trackers.",
-        id: "cookies",
       },
       {
-        heading: "5. Email",
+        heading: "7. Email",
         paragraphs: [
           "We only send transactional email: email verification and password reset. We do not send marketing email without your consent.",
         ],
       },
       {
-        heading: "6. Retention",
+        heading: "8. Retention",
         paragraphs: [
-          "Account data is kept until you delete your account. Sessions expire after 30 days; email verification links expire after 24 hours and password reset links after 1 hour. Server logs may be kept for a short time for operations and security.",
+          "Account data is kept until you delete your account. Sessions expire after 30 days; email verification links expire after 24 hours and password reset links after 1 hour. Expiry makes a token unusable, rather than guaranteeing immediate deletion of every record. Operational and error logs are retained for diagnostics and security; no fixed automatic deletion period is currently configured for these logs. The AI backend does not log error response bodies from Ollama.",
         ],
       },
       {
-        heading: "7. Your rights",
+        heading: "9. Your rights",
         paragraphs: [
           "You can view and edit your name, change your password, sign devices out and permanently delete your account from the Account page. Deleting your account removes your profile, usage history and all signed-in devices. For any other request about your personal data, contact us.",
         ],
       },
       {
-        heading: "8. Security",
+        heading: "10. Security",
         paragraphs: [
           "Passwords are hashed with scrypt; device tokens, sessions and email links are only stored as SHA-256 hashes. Connections to the website are encrypted with HTTPS.",
         ],
       },
       {
-        heading: "9. Children",
-        paragraphs: ["The service is not intended for children under 13 (or the minimum age required where you live)."],
+        heading: "11. Children",
+        paragraphs: [
+          "The service is not intended for children under 13 (or the minimum age required where you live).",
+        ],
       },
       {
-        heading: "10. Changes to this policy",
-        paragraphs: ["When this policy changes we update the date at the top of the page and announce significant changes on the website."],
+        heading: "12. Changes to this policy",
+        paragraphs: [
+          "When this policy changes we update the date at the top of the page and announce significant changes on the website.",
+        ],
       },
       {
-        heading: "11. Contact",
-        paragraphs: ["[OPERATOR NAME], [ADDRESS], email: [CONTACT EMAIL]."],
+        heading: "13. Contact",
+        paragraphs: [
+          "Operator: dinhthaicx in Vietnam. Public email: dinhthaicx@gmail.com. You can also report issues at https://github.com/dinhthaicx/faamoffice/issues; do not post document content, passwords, API keys or private data in public issues.",
+        ],
       },
     ] as LegalSection[],
     ads: {

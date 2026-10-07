@@ -142,6 +142,26 @@ describe("credits on (default)", () => {
   });
 });
 
+describe("upstream error privacy", () => {
+  it.each([401, 403, 500, 503])("keeps an echoed document out of logs and the response for status %s", async (status) => {
+    const { user, token } = await makeUser(100);
+    const privateContent = "private-document-content-that-must-not-be-logged";
+    vi.stubGlobal("fetch", async () => new Response(JSON.stringify({ error: privateContent }), { status }));
+    const logger = vi.spyOn(console, "error").mockImplementation(() => {});
+    try {
+      const response = await chat(request(token, { messages: [{ role: "user", content: privateContent }] }));
+      expect(response.status).toBe(502);
+      expect(await response.text()).not.toContain(privateContent);
+      expect(logger).toHaveBeenCalledOnce();
+      expect(JSON.stringify(logger.mock.calls)).toContain(String(status));
+      expect(JSON.stringify(logger.mock.calls)).not.toContain(privateContent);
+      expect(await prisma.usageRecord.count({ where: { userId: user.id } })).toBe(0);
+    } finally {
+      logger.mockRestore();
+    }
+  });
+});
+
 describe("credits off", () => {
   beforeEach(async () => {
     await settings.updateSiteSettings({ creditsEnabled: false, aiDailyRequestLimit: 0 }, null);

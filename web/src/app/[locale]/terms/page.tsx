@@ -13,5 +13,5 @@ export async function generateMetadata({ params }: PageProps<"/[locale]/terms">)
 export default async function TermsPage({ params }: PageProps<"/[locale]/terms">) {
   const locale = toLocale((await params).locale);
   const dict = getDictionary(locale);
-  return <LegalPage locale={locale} dict={dict} path="/terms" content={dict.terms} />;
+  return <LegalPage locale={locale} dict={dict} path="/terms" content={dict.terms} reviewPending />;
 }

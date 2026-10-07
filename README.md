@@ -10,6 +10,7 @@ Soạn và sửa Word, Excel, PowerPoint, PDF, Markdown, HTML ngay trên máy; l
 <p align="center">
   <a href="LICENSE"><img src="https://img.shields.io/badge/license-Apache--2.0-blue" alt="License: Apache-2.0"></a>
   <a href="../../releases/latest"><b>Tải về</b></a>
+  <a href="#code-signing-policy"><b>Code signing policy</b></a>
 </p>
 
 ---
@@ -77,6 +78,8 @@ build, và người dùng có thể đổi trong Cài đặt → Hồ sơ (ví d
 
 Bộ cài cho macOS (Apple Silicon và Intel), Windows (x64) và Linux (AppImage, deb, rpm) nằm ở
 trang [Releases](../../releases/latest).
+Xem [Code signing policy](#code-signing-policy) và [chính sách quyền riêng tư](PRIVACY.md)
+trước khi tải và cài ứng dụng.
 
 Bộ cài **macOS 0.11.2** hiện được ký bằng Developer ID và được Apple xác minh (notarization),
 cho cả Apple Silicon và Intel.
@@ -105,6 +108,54 @@ bất cứ lúc nào bằng **Help → Check for Updates**.
 
 Đặt biến môi trường `FAAMOFFICE_UPDATES=0` khi mở app để tắt việc kiểm tra. Xem [PRIVACY.md](PRIVACY.md)
 về những gì app gửi đi khi khởi động.
+
+## Code signing policy
+
+**Trạng thái: đang chuẩn bị đăng ký SignPath (preparing).** Chưa gửi đơn, chưa được chấp nhận
+và chưa có bản phát hành nào mang chữ ký SignPath. Chỉ chuyển sang **pending** sau khi thực sự
+gửi đơn; chỉ ghi SignPath cung cấp chữ ký sau khi được chấp nhận. Chữ ký của từng bản phát hành
+phải được kiểm tra và ghi riêng trong release notes.
+
+**Status: preparing to apply to SignPath.** No application has been submitted, the project has
+not been accepted, and no release has a SignPath signature. Change to **pending** only after
+submission. Credit SignPath as providing code signing only after acceptance; verify and document
+the signature status of each release separately.
+
+| Responsibility / Trách nhiệm | Person / Người phụ trách |
+| --- | --- |
+| Maintainer | [dinhthaicx](https://github.com/dinhthaicx) |
+| Reviewer | [dinhthaicx](https://github.com/dinhthaicx) |
+| Release approver | [dinhthaicx](https://github.com/dinhthaicx) |
+
+If accepted, every signing request requires release approval. Everyone involved in signing must
+use multi-factor authentication for GitHub and SignPath. FaamOffice is a fork of GenOffice and
+requires SignPath's review under its conditions for modified upstream software. The current
+Windows installer is unsigned; the notarized Apple Developer ID signatures on macOS are separate
+from SignPath.
+
+Chính sách trên website: [Tiếng Việt](https://faamoffice.net/vi/code-signing) ·
+[English](https://faamoffice.net/en/code-signing). Privacy: [PRIVACY.md](PRIVACY.md) ·
+[Tiếng Việt](https://faamoffice.net/vi/privacy) · [English](https://faamoffice.net/en/privacy).
+Questions / Liên hệ: [GitHub Issues](https://github.com/dinhthaicx/faamoffice/issues).
+
+Chuẩn bị installer cho SignPath: bộ cài hiện chưa hiển thị privacy trong lúc cài và chưa có lựa
+chọn tắt các kết nối tự động. Các biến môi trường trong PRIVACY.md chỉ là công tắc lúc chạy.
+Cần bổ sung màn hình privacy, lưu lựa chọn của người cài, cho app đọc lựa chọn trước khi gửi
+yêu cầu mạng, rồi build lại shell và bộ cài Windows. Chưa tuyên bố bộ cài đáp ứng yêu cầu này.
+Xem [điều kiện SignPath](https://signpath.org/terms.html).
+
+Installer preparation: the current installer does not display privacy or offer installation
+options to disable automatic network connections. The runtime environment switches are not
+installation options. A privacy screen, persisted installer choices and application support
+before network requests require rebuilding the shell and Windows installer. Compliance with
+this requirement has not yet been claimed.
+
+Ảnh Microsoft Store: chạy workflow **Microsoft Store screenshots** với ID của run Release có
+artifact `faamoffice-store-appx`. Workflow mở chính executable Windows từ AppX, chụp cửa sổ
+thật bằng Electron desktopCapturer ở tiếng Việt/Anh và xuất PNG cùng manifest nguồn gốc trong
+artifact `faamoffice-store-screenshots`; không thay giao diện hay khung cửa sổ bằng ảnh dựng.
+Kiểm tra ảnh trước khi tải vào Partner Center. Theo [hướng dẫn Microsoft](https://learn.microsoft.com/en-us/windows/apps/publish/publish-your-app/msix/screenshots-and-images),
+ảnh desktop phải là PNG từ 1366 × 768, tối đa 50 MB; nên có ít nhất bốn ảnh mỗi ngôn ngữ.
 
 ## Build từ mã nguồn
 

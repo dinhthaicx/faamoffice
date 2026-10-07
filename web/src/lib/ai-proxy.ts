@@ -112,7 +112,7 @@ async function readLimitedText(res: Response, limit: number): Promise<string> {
 async function upstreamFailure(res: Response): Promise<Response> {
   const text = await readLimitedText(res, UPSTREAM_ERROR_BODY_LIMIT).catch(() => "");
   if (res.status === 401 || res.status === 403) {
-    console.error(`[faam-ai] upstream rejected the server credentials (${res.status}): ${text.slice(0, 500)}`);
+    console.error(`[faam-ai] upstream rejected the server credentials (${res.status})`);
     return openAiError(502, "The Faam AI upstream rejected this server's credentials.", "upstream_error");
   }
   if ([400, 404, 409, 413, 422, 429].includes(res.status)) {
@@ -131,7 +131,8 @@ async function upstreamFailure(res: Response): Promise<Response> {
     }
     return openAiError(res.status, text.slice(0, 1000) || `Upstream returned ${res.status}`, "upstream_error");
   }
-  console.error(`[faam-ai] upstream error ${res.status}: ${text.slice(0, 500)}`);
+  // Upstream errors can echo prompts or document content; never log their body.
+  console.error(`[faam-ai] upstream error ${res.status}`);
   return openAiError(502, "The Faam AI upstream service failed. Please try again.", "upstream_error");
 }
 

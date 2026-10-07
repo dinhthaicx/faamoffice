@@ -32,7 +32,7 @@ export const AI_PROVIDERS = [
 export const LOCAL_AI = ["Ollama", "LM Studio", "llama.cpp"] as const;
 
 /** Public marketing pages (path after the locale prefix), used by the sitemap. */
-export const PUBLIC_PAGES = ["", "/download", "/faam-ai", "/privacy", "/terms"] as const;
+export const PUBLIC_PAGES = ["", "/download", "/faam-ai", "/privacy", "/terms", "/code-signing"] as const;
 
 /** Microsoft Store listing; launch=true&mode=full opens the Store app on Windows (Microsoft's badge link format). */
 export function msStoreUrl(productId: string): string {

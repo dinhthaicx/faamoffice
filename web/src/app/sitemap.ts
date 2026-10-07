@@ -3,7 +3,7 @@ import { absoluteUrl } from "@/lib/seo";
 import { PUBLIC_PAGES } from "@/lib/site";
 import { locales } from "@/i18n/config";
 
-const priority: Record<string, number> = { "": 1, "/download": 0.9, "/faam-ai": 0.8, "/privacy": 0.3, "/terms": 0.3 };
+const priority: Record<string, number> = { "": 1, "/download": 0.9, "/faam-ai": 0.8, "/privacy": 0.3, "/terms": 0.3, "/code-signing": 0.3 };
 
 export default function sitemap(): MetadataRoute.Sitemap {
   const lastModified = new Date();

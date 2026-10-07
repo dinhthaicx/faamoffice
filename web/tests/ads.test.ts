@@ -150,8 +150,10 @@ describe("verification and public output", () => {
     const content = privacyWithAds(dict.privacy);
     const cookie = content.sections.findIndex((section) => section.id === "cookies");
     expect(content.sections[cookie].after).toBe(dict.privacy.ads.cookiesAfter);
-    expect(content.sections[cookie + 1].heading).toBe(`5. ${dict.privacy.ads.section.heading}`);
-    expect(content.sections.at(-1)?.heading).toMatch(/^12\./);
+    expect(content.sections[cookie + 1].heading).toBe(`${cookie + 2}. ${dict.privacy.ads.section.heading}`);
+    expect(content.sections.map((section) => Number.parseInt(section.heading))).toEqual(
+      Array.from({ length: dict.privacy.sections.length + 1 }, (_, i) => i + 1),
+    );
     expect(JSON.stringify(dict.privacy)).toBe(before);
   });
 
