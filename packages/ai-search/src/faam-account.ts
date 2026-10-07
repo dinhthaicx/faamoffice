@@ -16,8 +16,8 @@ import { homedir } from 'node:os'
 import { dirname, join } from 'node:path'
 
 export const FAAM_CLIENT_ID = 'faamoffice-desktop'
-/** server used when neither the environment nor the user picked one */
-export const FAAM_DEFAULT_SERVER = 'http://localhost:3000'
+/** the public FaamOffice account server, used unless the environment, the build or the user picks another */
+export const FAAM_DEFAULT_SERVER = 'https://faamoffice.net'
 
 export interface FaamAccountUser {
   id: string

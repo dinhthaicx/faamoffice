@@ -63,8 +63,8 @@ App dùng được hoàn toàn mà không cần tài khoản. Đăng nhập (Cà
 
 Máy chủ tài khoản và website giới thiệu nằm trong thư mục [`web/`](web/) (Next.js + Prisma).
 Xem [web/README.md](web/README.md) để chạy thử trên máy, cấu hình AI phía máy chủ và quản trị credit.
-Địa chỉ máy chủ mặc định của bản build lấy từ biến `FAAMOFFICE_ACCOUNT_URL` lúc build; người dùng có
-thể đổi trong Cài đặt → Hồ sơ.
+Máy chủ tài khoản mặc định là **https://faamoffice.net**. Có thể thay bằng biến `FAAMOFFICE_ACCOUNT_URL` lúc
+build, và người dùng có thể đổi trong Cài đặt → Hồ sơ (ví dụ trỏ về máy chủ tự dựng).
 
 ## Tải về
 
