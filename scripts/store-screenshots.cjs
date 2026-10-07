@@ -155,7 +155,13 @@ async function launch(locale, file) {
   const app = await _electron.launch({
     executablePath: exe,
     args: ['--force-device-scale-factor=1', ...(file ? [file] : [])],
-    env: { ...env, GENOFFICE_LANG: locale, FAAMOFFICE_ANNOUNCEMENTS: '0', FAAMOFFICE_UPDATES: '0' },
+    env: {
+      ...env,
+      GENOFFICE_LANG: locale,
+      GENOFFICE_NO_SPARE_VIEW: '1',
+      FAAMOFFICE_ANNOUNCEMENTS: '0',
+      FAAMOFFICE_UPDATES: '0',
+    },
     timeout: 90_000,
   })
   await app.firstWindow()
@@ -183,10 +189,25 @@ async function capture(locale, kind, file) {
       const deadline = Date.now() + 90_000
       let editor
       while (Date.now() < deadline && !editor) {
-        editor = app.windows().find((page) => page.url().includes(`/modules/${domain}/`))
+        for (const candidate of app.windows()) {
+          // Attach can race the packaged page's first navigation; Playwright's
+          // cached URL then stays empty even though the document is loaded.
+          const href =
+            candidate.url() ||
+            (await candidate.evaluate(() => window.location.href).catch(() => ''))
+          if (href.includes(`/modules/${domain}/`)) {
+            editor = candidate
+            break
+          }
+        }
         if (!editor) await pause(250)
       }
-      if (!editor) throw new Error(`Editor did not load: ${kind}`)
+      if (!editor) {
+        const urls = await app.evaluate(({ webContents }) =>
+          webContents.getAllWebContents().map((wc) => wc.getURL()),
+        )
+        throw new Error(`Editor did not load: ${kind}; contents: ${JSON.stringify(urls)}`)
+      }
       await editor.locator('body').waitFor()
       await pause(12_000)
     } else {
