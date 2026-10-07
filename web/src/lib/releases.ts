@@ -1,9 +1,10 @@
 // Latest desktop release from GitHub Releases, with installers classified by platform.
 
 import { GITHUB_REPO, LATEST_RELEASE_URL } from "./site";
+import snapshot from "./release-snapshot.json";
 
 export type AssetKey = "macArm" | "macIntel" | "winExe" | "appImage" | "deb" | "rpm";
-export type ReleaseAsset = { name: string; url: string; size: number };
+export type ReleaseAsset = { name: string; url: string; size: number; downloadCount?: number };
 export type ReleaseInfo = {
   version: string | null;
   publishedAt: string | null;
@@ -11,7 +12,7 @@ export type ReleaseInfo = {
   assets: Partial<Record<AssetKey, ReleaseAsset>>;
 };
 
-type GithubAsset = { name: string; browser_download_url: string; size?: number };
+type GithubAsset = { name: string; browser_download_url: string; size?: number; download_count?: number };
 
 const ARM = /(arm64|aarch64)/i;
 
@@ -27,7 +28,10 @@ const ARM = /(arm64|aarch64)/i;
 export function classifyAssets(assets: GithubAsset[]): Partial<Record<AssetKey, ReleaseAsset>> {
   const out: Partial<Record<AssetKey, ReleaseAsset>> = {};
   const set = (key: AssetKey, a: GithubAsset, preferred: boolean) => {
-    if (!out[key] || preferred) out[key] = { name: a.name, url: a.browser_download_url, size: a.size ?? 0 };
+    if (!out[key] || preferred) out[key] = {
+      name: a.name, url: a.browser_download_url, size: a.size ?? 0,
+      ...(typeof a.download_count === "number" && a.download_count >= 0 ? { downloadCount: a.download_count } : {}),
+    };
   };
   for (const a of assets) {
     const name = a.name;
@@ -54,9 +58,24 @@ export function classifyAssets(assets: GithubAsset[]): Partial<Record<AssetKey, 
   return out;
 }
 
-/** Fetch the latest release (cached for an hour). Falls back to the releases page on any error. */
+const releaseState = globalThis as unknown as { __faamLastRelease?: { repo: string; release: ReleaseInfo } };
+
+/** Last verified direct installer links remain usable during a GitHub API outage. */
+export function fallbackRelease(): ReleaseInfo {
+  if (releaseState.__faamLastRelease?.repo === GITHUB_REPO) {
+    const previous = releaseState.__faamLastRelease.release;
+    // A cached download count must not be presented as a fresh GitHub count.
+    return { ...previous, assets: Object.fromEntries(Object.entries(previous.assets).map(([key, asset]) =>
+      [key, { name: asset!.name, url: asset!.url, size: asset!.size }])) };
+  }
+  return snapshot.repository === GITHUB_REPO
+    ? { version: snapshot.version, publishedAt: snapshot.publishedAt, htmlUrl: snapshot.htmlUrl, assets: snapshot.assets }
+    : { version: null, publishedAt: null, htmlUrl: LATEST_RELEASE_URL, assets: {} };
+}
+
+/** Fetch the latest release (cached for an hour), retaining verified direct links on failure. */
 export async function getLatestRelease(): Promise<ReleaseInfo> {
-  const fallback: ReleaseInfo = { version: null, publishedAt: null, htmlUrl: LATEST_RELEASE_URL, assets: {} };
+  const fallback = fallbackRelease();
   try {
     const headers: Record<string, string> = {
       Accept: "application/vnd.github+json",
@@ -76,12 +95,21 @@ export async function getLatestRelease(): Promise<ReleaseInfo> {
       html_url?: string;
       assets?: GithubAsset[];
     };
-    return {
+    const assets = classifyAssets((Array.isArray(data.assets) ? data.assets : []).filter((asset) => {
+      try {
+        const url = new URL(asset.browser_download_url);
+        return url.protocol === "https:" && url.hostname === "github.com" && url.pathname.startsWith(`/${GITHUB_REPO}/releases/download/`);
+      } catch { return false; }
+    }));
+    if (!Object.keys(assets).length) return fallback;
+    const release: ReleaseInfo = {
       version: (data.tag_name ?? data.name ?? "").replace(/^v/, "") || null,
       publishedAt: data.published_at ?? null,
       htmlUrl: data.html_url ?? LATEST_RELEASE_URL,
-      assets: classifyAssets(Array.isArray(data.assets) ? data.assets : []),
+      assets,
     };
+    releaseState.__faamLastRelease = { repo: GITHUB_REPO, release };
+    return release;
   } catch {
     return fallback;
   }

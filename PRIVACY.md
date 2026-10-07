@@ -1,6 +1,6 @@
 # FaamOffice Privacy
 
-Last updated: October 7, 2026
+Last updated: October 8, 2026
 
 FaamOffice opens, edits and saves documents on your computer. Editing a
 document never uploads it anywhere. The app only talks to the network for the
@@ -137,6 +137,24 @@ per-process `session_id`, `engagement_time_msec` (fixed `100`) and, when the
 operating system's regional locale provides one, the two-letter `country_id`.
 The `client_id` is a random install UUID. Analytics never sends document
 content, file names, file paths, account identity or email addresses.
+
+## Website installer-download statistics
+
+Clicking an installer link on faamoffice.net sends the selected package, release
+version, website language and button location to the website's statistics
+endpoint. It stores aggregate counts by Vietnam calendar day (GMT+7), without
+IP addresses, user agents, cookies, account details or visitor identifiers.
+The IP is used only in a short-lived in-memory rate limiter. No tracking cookie
+is added. Statistics are restricted to administrators and do not confirm a
+completed download or installation. They begin when this feature is deployed;
+downloads from other sites or links shared outside the website are not counted.
+
+Installer links go straight to the GitHub release files even if tracking fails
+or JavaScript is disabled. GitHub processes those requests under its own policy.
+GitHub's separate public asset download counts may also be shown in the admin
+dashboard; they include sources outside faamoffice.net and are not combined
+with website click counts. Anonymous daily aggregate counts have no automatic
+deletion period.
 
 ## Contact
 

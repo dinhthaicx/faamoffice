@@ -82,6 +82,8 @@ function buildLimiters() {
     aiUser: createRateLimiter({ limit: 60, windowMs: minute }),
     // Public app configuration (GET /api/v1/app/config), per IP.
     appConfig: createRateLimiter({ limit: 300, windowMs: minute }),
+    // Anonymous installer-link clicks, per IP in memory only.
+    downloadClicks: createRateLimiter({ limit: 60, windowMs: minute }),
   };
 }
 

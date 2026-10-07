@@ -276,3 +276,16 @@ model AnnouncementImage {
 
   @@index([createdAt])
 }
+
+/// Anonymous installer-link clicks, aggregated by Vietnam calendar day.
+/// No visitor identifier, account, IP, referrer or user-agent is persisted.
+model DownloadDailyStat {
+  day      String
+  asset    String
+  version  String
+  locale   String
+  source   String
+  count    Int    @default(0)
+
+  @@id([day, asset, version, locale, source])
+}

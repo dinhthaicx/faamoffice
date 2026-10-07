@@ -5,9 +5,11 @@
 // full list below stays the source of truth (and works without JavaScript).
 
 import { useSyncExternalStore } from "react";
+import { DownloadLink } from "./download-link";
+import type { DownloadClick } from "@/lib/downloads-shared";
 
 type Os = "mac" | "windows" | "linux";
-type Option = { label: string; url: string; fileName?: string };
+type Option = { label: string; url: string | null; fileName?: string; tracking?: DownloadClick };
 
 export type RecommendationProps = {
   title: string;
@@ -33,6 +35,7 @@ export function DownloadRecommendation({ title, buttonLabel, options }: Recommen
   const os = useSyncExternalStore(subscribe, detectOs, () => null);
   if (!os) return null;
   const option = options[os];
+  if (!option.primary.url) return null;
   return (
     <div className="mt-10 rounded-2xl border border-border bg-card p-6 shadow-sm sm:p-8">
       <p className="text-sm font-semibold text-link">{title}</p>
@@ -43,22 +46,24 @@ export function DownloadRecommendation({ title, buttonLabel, options }: Recommen
           </p>
           {option.primary.fileName ? <p className="mt-1 font-mono text-xs text-muted">{option.primary.fileName}</p> : null}
         </div>
-        <a
+        <DownloadLink
           href={option.primary.url}
+          fileName={option.primary.fileName}
+          tracking={option.primary.tracking}
           className="inline-flex items-center justify-center gap-2 rounded-lg bg-accent px-5 py-3 text-base font-semibold text-accent-fg hover:bg-accent-hover"
         >
           <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.8" className="h-4 w-4" aria-hidden="true">
             <path d="M10 3v10m0 0-4-4m4 4 4-4M4 16h12" strokeLinecap="round" strokeLinejoin="round" />
           </svg>
           {buttonLabel.replace("{os}", option.name)}
-        </a>
+        </DownloadLink>
       </div>
       {option.secondary?.length ? (
         <p className="mt-4 flex flex-wrap gap-x-4 gap-y-1 text-sm">
-          {option.secondary.map((s) => (
-            <a key={s.url + s.label} href={s.url} className="text-link underline-offset-4 hover:underline">
+          {option.secondary.filter((s) => s.url).map((s) => (
+            <DownloadLink key={s.url + s.label} href={s.url!} fileName={s.fileName} tracking={s.tracking} className="text-link underline-offset-4 hover:underline">
               {s.label}
-            </a>
+            </DownloadLink>
           ))}
         </p>
       ) : null}

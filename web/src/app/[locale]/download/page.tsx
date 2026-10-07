@@ -3,6 +3,7 @@ import Link from "next/link";
 import { Breadcrumbs } from "@/components/breadcrumbs";
 import { CodeBlock } from "@/components/code-block";
 import { DownloadRecommendation } from "@/components/download-recommendation";
+import { DownloadLink } from "@/components/download-link";
 import { JsonLd } from "@/components/json-ld";
 import { Alert, buttonClass, Card, Container, DownloadIcon } from "@/components/ui";
 import { getLatestRelease, type AssetKey, type ReleaseInfo } from "@/lib/releases";
@@ -46,7 +47,7 @@ function StoreBadge({ url, locale, alt }: { url: string; locale: Locale; alt: st
 
 function assetLink(release: ReleaseInfo, key: AssetKey) {
   const asset = release.assets[key];
-  return { url: asset?.url ?? release.htmlUrl, fileName: asset?.name, size: asset ? formatSize(asset.size) : "" };
+  return { url: asset?.url ?? null, fileName: asset?.name, size: asset ? formatSize(asset.size) : "" };
 }
 
 export default async function DownloadPage({ params }: PageProps<"/[locale]/download">) {
@@ -90,7 +91,8 @@ export default async function DownloadPage({ params }: PageProps<"/[locale]/down
 
   const option = (key: AssetKey, label: string) => {
     const a = assetLink(release, key);
-    return { label, url: a.url, fileName: a.fileName };
+    return { label, url: a.url, fileName: a.fileName,
+      tracking: release.version ? { asset: key, version: release.version, locale, source: "recommended" as const } : undefined };
   };
 
   return (
@@ -177,13 +179,17 @@ export default async function DownloadPage({ params }: PageProps<"/[locale]/down
                       const link = assetLink(release, a.key);
                       return (
                         <li key={a.key}>
-                          <a href={link.url} className={`${buttonClass.secondary} w-full justify-between`}>
+                          {link.url ? <DownloadLink href={link.url} fileName={link.fileName}
+                            tracking={release.version ? { asset: a.key, version: release.version, locale, source: "platform" } : undefined}
+                            className={`${buttonClass.secondary} w-full justify-between`}>
                             <span className="flex items-center gap-2">
                               <DownloadIcon />
                               {a.label}
                             </span>
                             {link.size ? <span className="text-xs font-normal text-muted">{link.size}</span> : null}
-                          </a>
+                          </DownloadLink> : <span aria-disabled="true" className={`${buttonClass.secondary} w-full justify-between opacity-50`}>
+                            {a.label}<span className="text-xs">{d.unavailable}</span>
+                          </span>}
                           {link.fileName ? <p className="mt-1 truncate font-mono text-xs text-muted">{link.fileName}</p> : null}
                         </li>
                       );

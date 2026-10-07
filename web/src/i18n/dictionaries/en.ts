@@ -190,6 +190,7 @@ export const en: Dictionary = {
     released: "Released",
     recommended: "Recommended for your computer",
     downloadFor: "Download for {os}",
+    unavailable: "Not available",
     fallbackNote: "The latest release files could not be listed, so the buttons open the release page on GitHub.",
     platforms: {
       mac: {
@@ -335,6 +336,8 @@ export const en: Dictionary = {
   },
   privacy: {
     metaTitle: "Privacy policy",
+    updatedDate: "October 8, 2026",
+    updatedDateTime: "2026-10-08",
     metaDescription: "What data FaamOffice processes, why, and how you control it — for the desktop app, web accounts and Faam AI Cloud.",
     title: "Privacy policy",
     intro:
@@ -384,6 +387,7 @@ export const en: Dictionary = {
       {
         heading: "5. Other services and connections",
         paragraphs: [
+          "When you click an installer download link on this website, your browser sends the chosen package, version, language and button location so we can count clicks by Vietnam calendar day. These statistics store aggregate counts only, without IP addresses, user agents, cookies, accounts, emails or visitor identifiers. IP addresses are used briefly in memory for request rate limiting; the statistics do not confirm completed downloads or installations. This feature adds no cookies and does not delay downloads. File links go directly to GitHub, which handles download requests under its own privacy policy.",
           "The faamoffice.net website and API are routed through Cloudflare Tunnel. Cloudflare processes traffic and connection information to provide and protect the service under https://www.cloudflare.com/privacypolicy/. When opening Settings (including About), the app may retrieve the public star count from api.github.com; GitHub sees your IP under https://docs.github.com/en/site-policy/privacy-policies/github-general-privacy-statement. External links only open when clicked.",
           "Web/image search in Faam AI sends requests to the provider selected in Settings → AI Media or the free Parallel/DuckDuckGo sources. AI requests using your own key and search requests are governed by the respective service's policies; review your selected provider before sending sensitive content.",
           "Releases from this repository's workflow are not configured to send usage analytics or download CDN fonts. If a distributor enables Google Analytics 4 in a custom build, onboarding explains it and you can disable it under Settings → General → Send anonymous usage statistics. When enabled, data includes a random install UUID, app/OS versions, language, country code if available and app-launch/file-open/file-new events with the file extension or type; it excludes file names, paths, content, accounts and email addresses. PRIVACY.md lists all fields.",
@@ -705,8 +709,26 @@ export const en: Dictionary = {
     nav: {
       label: "Admin sections",
       users: "Users",
+      downloads: "Downloads",
       announcements: "Announcements",
       settings: "Settings",
+    },
+    downloads: {
+      metaTitle: "Download monitoring",
+      title: "Download monitoring",
+      subtitle: "Monitor installer download-link clicks from the FaamOffice website.",
+      today: "Today", last7: "Last 7 days", last30: "Last 30 days", total: "Total since tracking began",
+      ranges: { 7: "7 days", 30: "30 days", 90: "90 days" },
+      period: "Reporting period", refresh: "Refresh", updated: "Updated", count: "Clicks", day: "Day",
+      daily: "Clicks by day", dailyTable: "View daily counts", packages: "Installer packages and platforms",
+      versions: "By version", languages: "Website language", sources: "Download button location",
+      sourceLabels: { recommended: "Recommended download", platform: "Installer list" },
+      assets: { macArm: "macOS · Apple Silicon", macIntel: "macOS · Intel", winExe: "Windows · EXE", appImage: "Linux · AppImage", deb: "Linux · DEB", rpm: "Linux · RPM" },
+      empty: "No download clicks in this period yet.",
+      definition: "Counts download-link clicks from this website, not unique visitors or completed downloads/installations. Clicks before tracking was enabled are not recorded. Days use Vietnam time (GMT+7).",
+      githubTitle: "GitHub downloads · latest release",
+      githubNote: "GitHub's counts include all sources for the installer assets in this release. GitHub data refreshes hourly and is counted separately from website clicks.",
+      githubCount: "GitHub", githubUnavailable: "GitHub counts are currently unavailable. Direct download links still work.",
     },
     settings: {
       metaTitle: "Settings",

@@ -54,7 +54,7 @@ export function privacyWithAds(privacy: Dictionary["privacy"]): LegalContent {
     }
   }
   if (!inserted) sections.splice(Math.max(0, sections.length - 1), 0, ads.section);
-  return { title: privacy.title, intro: privacy.intro, sections: numberHeadings(sections) };
+  return { title: privacy.title, intro: privacy.intro, sections: numberHeadings(sections), updatedDate: privacy.updatedDate, updatedDateTime: privacy.updatedDateTime };
 }
 
 export function LegalPage({

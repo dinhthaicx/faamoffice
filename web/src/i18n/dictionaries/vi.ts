@@ -190,6 +190,7 @@ export const vi = {
     released: "Phát hành ngày",
     recommended: "Đề xuất cho máy của bạn",
     downloadFor: "Tải cho {os}",
+    unavailable: "Chưa có gói cài",
     fallbackNote: "Không lấy được danh sách tệp của bản mới nhất, các nút sẽ mở trang phát hành trên GitHub.",
     store: {
       recommended: "Khuyên dùng",
@@ -317,6 +318,8 @@ export const vi = {
   },
   privacy: {
     metaTitle: "Chính sách quyền riêng tư",
+    updatedDate: "08/10/2026",
+    updatedDateTime: "2026-10-08",
     metaDescription: "FaamOffice thu thập những dữ liệu gì, dùng vào việc gì và bạn kiểm soát chúng ra sao — cho ứng dụng desktop, tài khoản web và Faam AI Cloud.",
     title: "Chính sách quyền riêng tư",
     intro:
@@ -362,6 +365,7 @@ export const vi = {
       {
         heading: "5. Các dịch vụ và kết nối khác",
         paragraphs: [
+          "Khi bấm link tải bộ cài trên website, trình duyệt gửi lựa chọn gói cài, phiên bản, ngôn ngữ và vị trí nút để chúng tôi đếm lượt bấm theo ngày (giờ Việt Nam). Chúng tôi chỉ lưu số đếm tổng hợp, không lưu IP, user agent, cookie, tài khoản, email hoặc mã nhận diện khách truy cập trong thống kê này. IP chỉ được dùng tạm thời trong bộ nhớ để giới hạn yêu cầu; thống kê không xác nhận tải hoàn tất hay cài đặt. Chức năng này không thêm cookie và không làm chậm việc tải. Link file đi thẳng tới GitHub; GitHub xử lý yêu cầu tải theo chính sách của họ.",
           "Website và API faamoffice.net được chuyển qua Cloudflare Tunnel. Cloudflare xử lý lưu lượng và thông tin kết nối để cung cấp, bảo vệ dịch vụ theo https://www.cloudflare.com/privacypolicy/. Khi mở Cài đặt (bao gồm trang Giới thiệu), ứng dụng có thể đọc số sao công khai từ api.github.com; GitHub thấy IP theo https://docs.github.com/en/site-policy/privacy-policies/github-general-privacy-statement. Các liên kết ngoài chỉ mở khi bạn bấm.",
           "Tìm kiếm web/ảnh trong Faam AI gửi yêu cầu tới nhà cung cấp bạn chọn trong Cài đặt → AI Media hoặc nguồn miễn phí Parallel/DuckDuckGo. Yêu cầu tới API AI bằng key riêng và các nguồn tìm kiếm chịu chính sách của dịch vụ tương ứng; hãy kiểm tra nhà cung cấp trước khi gửi nội dung nhạy cảm.",
           "Các bản phát hành từ workflow của kho này không được cấu hình gửi thống kê sử dụng hoặc tải font từ CDN. Nếu bên tự build bật Google Analytics 4, màn hình chào thông báo và bạn có thể tắt trong Cài đặt → Chung → Gửi thống kê sử dụng ẩn danh. Khi bật, dữ liệu gồm UUID ngẫu nhiên của bản cài, phiên bản app/hệ điều hành, ngôn ngữ, mã quốc gia nếu có và sự kiện mở app, mở/tạo tệp với phần mở rộng hoặc loại tệp; không gồm tên, đường dẫn hay nội dung tệp, tài khoản hay email. Danh sách trường đầy đủ nằm trong PRIVACY.md.",
@@ -677,8 +681,26 @@ export const vi = {
     nav: {
       label: "Mục quản trị",
       users: "Người dùng",
+      downloads: "Lượt tải",
       announcements: "Thông báo",
       settings: "Cài đặt",
+    },
+    downloads: {
+      metaTitle: "Giám sát lượt tải",
+      title: "Giám sát lượt tải",
+      subtitle: "Theo dõi lượt bấm link tải bộ cài từ website FaamOffice.",
+      today: "Hôm nay", last7: "7 ngày gần nhất", last30: "30 ngày gần nhất", total: "Tổng từ khi theo dõi",
+      ranges: { 7: "7 ngày", 30: "30 ngày", 90: "90 ngày" },
+      period: "Khoảng thống kê", refresh: "Làm mới", updated: "Cập nhật", count: "Lượt bấm", day: "Ngày",
+      daily: "Lượt bấm theo ngày", dailyTable: "Xem số liệu từng ngày", packages: "Gói cài và hệ điều hành",
+      versions: "Theo phiên bản", languages: "Ngôn ngữ website", sources: "Vị trí nút tải",
+      sourceLabels: { recommended: "Nút tải gợi ý", platform: "Danh sách gói cài" },
+      assets: { macArm: "macOS · Apple Silicon", macIntel: "macOS · Intel", winExe: "Windows · EXE", appImage: "Linux · AppImage", deb: "Linux · DEB", rpm: "Linux · RPM" },
+      empty: "Chưa có lượt bấm tải nào trong khoảng này.",
+      definition: "Đếm lượt bấm tải từ website, không phải người dùng duy nhất hay xác nhận tải/cài đặt hoàn tất. Các lượt bấm trước khi bật theo dõi không được ghi nhận. Số liệu chia theo ngày giờ Việt Nam (GMT+7).",
+      githubTitle: "Lượt tải trên GitHub · bản mới nhất",
+      githubNote: "Số đếm do GitHub cung cấp, gồm mọi nguồn truy cập của các gói cài trong bản phát hành này. Dữ liệu GitHub được làm mới theo giờ và được đếm riêng với lượt bấm trên website.",
+      githubCount: "GitHub", githubUnavailable: "Chưa lấy được số đếm GitHub. Link tải trực tiếp vẫn hoạt động.",
     },
     settings: {
       metaTitle: "Cài đặt",

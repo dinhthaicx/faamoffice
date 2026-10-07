@@ -6,12 +6,13 @@ import { cx } from "./ui";
 import type { Locale } from "@/i18n/config";
 import type { Dictionary } from "@/i18n";
 
-export type AdminSection = "users" | "announcements" | "settings";
+export type AdminSection = "users" | "downloads" | "announcements" | "settings";
 
 export function AdminNav({ locale, dict, current }: { locale: Locale; dict: Dictionary; current: AdminSection }) {
   const t = dict.admin.nav;
   const items: { id: AdminSection; href: string; label: string }[] = [
     { id: "users", href: `/${locale}/admin`, label: t.users },
+    { id: "downloads", href: `/${locale}/admin/downloads`, label: t.downloads },
     { id: "announcements", href: `/${locale}/admin/announcements`, label: t.announcements },
     { id: "settings", href: `/${locale}/admin/settings`, label: t.settings },
   ];
