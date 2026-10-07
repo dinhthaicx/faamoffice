@@ -72,6 +72,38 @@ export function installResumeDownload(
 }
 
 /**
+ * A resumable, digest-verified download that electron-updater does not drive:
+ * the macOS installer of the notify flow (update-dmg.ts). Same part/meta
+ * layout (`resume/` beside the destination's directory), same sha512 pinning
+ * and final verification — but there is no stock executor behind it, so
+ * anything resumeDownload would hand to the fallback (a request it could not
+ * place, a non-2xx status) is a plain failure for the caller.
+ */
+export function downloadResumable(
+  url: URL,
+  destination: string,
+  options: ExecutorDownloadOptions,
+  /** shorter stall window for tests; production uses STALL_TIMEOUT_MS */
+  stallTimeoutMs: number = STALL_TIMEOUT_MS,
+  /** shorter response window for tests; production uses RESPONSE_TIMEOUT_MS */
+  responseTimeoutMs: number = RESPONSE_TIMEOUT_MS,
+): Promise<string> {
+  // without a digest nothing could be verified: refuse rather than guess
+  if (!options.sha512) return Promise.reject(new Error('resumable download needs a sha512'))
+  const fail = (): Promise<string> => Promise.reject(new Error(`could not download ${url.href}`))
+  return resumeDownload(url, destination, options, fail, stallTimeoutMs, responseTimeoutMs)
+}
+
+/** whether `file` exists and hashes to `sha512` (hex or base64, as the feed spells it) */
+export async function fileMatchesSha512(file: string, sha512: string): Promise<boolean> {
+  try {
+    return (await sha512Of(file, sha512Encoding(sha512))) === sha512
+  } catch {
+    return false
+  }
+}
+
+/**
  * Where the resume state lives, and why not next to the destination.
  *
  * electron-updater downloads into `<cacheDir>/pending/temp-<artifact>`, so a

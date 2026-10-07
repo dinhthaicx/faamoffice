@@ -3,15 +3,22 @@
  * auto-update feed URL can be injected at build time instead of living in
  * the repo).
  *
- * GENOFFICE_UPDATE_URL — public base URL of the update channel (the generic
- * provider prefix that serves latest.yml / latest-mac.yml). Required for
- * release builds; CI provides it as a repository secret. For local release
- * builds put it in apps/shell/electron-builder.env (gitignored) — the
- * electron-builder CLI loads that file automatically.
+ * GENOFFICE_UPDATE_URL — public base URL of the update feed (the generic
+ * provider prefix that serves latest.yml / latest-mac.yml /
+ * latest-linux.yml). .github/workflows/release.yml sets it for v* tag builds
+ * only, to https://github.com/<repo>/releases/latest/download (see
+ * src/main/updater.ts); it must be HTTPS, or plain http on a loopback host
+ * for local update tests. For local release builds it can also go in
+ * apps/shell/electron-builder.env (gitignored) — the electron-builder CLI
+ * loads that file automatically.
  *
- * When the variable is unset (forks, PR smoke builds, plain local packaging)
- * the publish config is omitted: electron-builder then bakes no
- * app-update.yml into the app and in-app auto-update stays disabled.
+ * When the variable is unset (forks, manual workflow runs, plain local
+ * packaging) the publish config is omitted: electron-builder then bakes no
+ * app-update.yml into the app and the app never checks for updates. The
+ * dist:* scripts pass --publish never, and no GH_TOKEN / GITHUB_TOKEN may be
+ * in the build environment: with either set and no publish config,
+ * electron-builder would infer a GitHub provider on its own. For the same
+ * reason package.json must not gain a "repository" field.
  *
  * GENOFFICE_GA4_MEASUREMENT_ID / GENOFFICE_GA4_API_SECRET — GA4 Measurement
  * Protocol credentials for anonymous usage analytics, injected the same way
@@ -43,7 +50,25 @@ function normalizeHttpsBaseUrl(name, value) {
   }
 }
 
-const updateUrl = process.env.GENOFFICE_UPDATE_URL
+/** the update feed base: HTTPS, or http on a loopback host (local tests) */
+function normalizeUpdateFeedUrl(value) {
+  if (!value || !value.trim()) return null
+  try {
+    const url = new URL(value.trim())
+    const loopback = ['127.0.0.1', 'localhost', '[::1]'].includes(url.hostname)
+    const trusted = url.protocol === 'https:' || (url.protocol === 'http:' && loopback)
+    if (!trusted || url.username || url.password || url.search || url.hash) {
+      throw new Error('invalid')
+    }
+    return `${url.origin}${url.pathname.replace(/\/+$/, '')}`
+  } catch {
+    throw new Error(
+      'GENOFFICE_UPDATE_URL must be an HTTPS base URL (http only on a loopback host) without credentials, query, or fragment',
+    )
+  }
+}
+
+const updateUrl = normalizeUpdateFeedUrl(process.env.GENOFFICE_UPDATE_URL)
 const ga4MeasurementId = process.env.GENOFFICE_GA4_MEASUREMENT_ID
 const ga4ApiSecret = process.env.GENOFFICE_GA4_API_SECRET
 const fontCdnUrl = normalizeHttpsBaseUrl(
@@ -596,6 +621,8 @@ const config = {
   // deb shipped with — apt treats a different Package name as an unrelated
   // install, breaking upgrades. Without it, fpm receives productName
   // "FaamOffice" and only happens to downcase it to the right value.
+  // The updater finds a deb install through dpkg's file list for this
+  // packageName (LINUX_PACKAGE_NAME in src/main/updater.ts).
   deb: {
     artifactName: 'faamoffice_${version}_${arch}.deb',
     packageName: 'faamoffice',
@@ -606,14 +633,15 @@ const config = {
   // Same "@genoffice/shell" naming problem as deb: spell the artifact name
   // out (${arch} expands to the rpm arch string, x86_64) and pin the rpm
   // Package name so dnf/zypper treat successive releases as upgrades of the
-  // same package. Like deb, rpm installs run no in-app updater — users
-  // upgrade with `dnf install ./<new>.rpm`. Packaging needs rpmbuild on the
-  // build host (the `rpm` apt package on Ubuntu; CI installs it).
+  // same package. Like deb, rpm installs never update themselves: the app
+  // only announces a new release and opens its package in the browser
+  // (src/main/updater.ts) — users upgrade with `dnf install ./<new>.rpm`.
+  // Packaging needs rpmbuild on the build host (the `rpm` apt package on
+  // Ubuntu; CI installs it).
   //
-  // publish: null (explicit) keeps the rpm out of the electron-updater feed
-  // and off the CDN entirely: the rpm is a GitHub-Release download only, so
-  // latest-linux.yml keeps listing exactly what the CDN pipeline uploads
-  // (AppImage + deb) and the promote workflow needs no rpm alias.
+  // publish: null (explicit) keeps the rpm out of latest-linux.yml, which
+  // lists the AppImage (self-update) and the deb. The updater rebuilds the
+  // rpm's release URL from the artifactName below, so keep the two in step.
   rpm: {
     artifactName: 'faamoffice-${version}.${arch}.rpm',
     packageName: 'faamoffice',
@@ -629,6 +657,15 @@ const config = {
     fpm: ['--rpm-rpmbuild-define=_build_id_links none'],
   },
   nsis: {
+    // No spaces: GitHub turns spaces in release asset names into dots, so the
+    // default "FaamOffice Setup <v>.exe" would not match the name latest.yml
+    // lists. scripts/release-feed.cjs refuses a feed whose files are missing.
+    // A custom name also drops the -arm64 suffix the default adds for ARM64,
+    // and the updater and the website (web/src/lib/releases.ts) tell the two
+    // installers apart only by it, so the GENOFFICE_WIN_ARM64 pass spells it out.
+    artifactName: winArm64
+      ? '${productName}-Setup-${version}-arm64.${ext}'
+      : '${productName}-Setup-${version}.${ext}',
     oneClick: false,
     allowToChangeInstallationDirectory: true,
   },
@@ -691,7 +728,7 @@ if (updateUrl) {
   config.publish = [
     {
       provider: 'generic',
-      url: updateUrl.replace(/\/+$/, ''),
+      url: updateUrl,
       channel: 'latest',
     },
   ]

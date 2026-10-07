@@ -112,6 +112,7 @@ import {
   guardAnnouncementFrames,
   registerAnnouncementsIpc,
 } from './announcements'
+import { SOCIAL_LINKS_KEY, createSocialLinksService, registerSocialLinksIpc } from './social-links'
 import {
   cancelFaamLogin,
   faamAccountServer,
@@ -367,7 +368,12 @@ import {
   setDockHost,
   takeTornTab,
 } from './detached-windows'
-import { applyUpdateChannel, checkForUpdatesNow, initAutoUpdater } from './updater'
+import {
+  applyUpdateChannel,
+  checkForUpdatesNow,
+  initAutoUpdater,
+  UPDATE_PROMPT_KEY,
+} from './updater'
 import { isUpdateChannel, type UpdateChannel } from '../shared/update-api'
 
 /**
@@ -740,6 +746,21 @@ const announcements = createAnnouncementsService({
   readState: () => readAppSettings(APP_SETTINGS_PATH())[ANNOUNCEMENTS_KEY],
   writeState: (state) => writeAppSetting(APP_SETTINGS_PATH(), ANNOUNCEMENTS_KEY, state),
   now: () => Date.now(),
+})
+
+// ---- follow buttons above Settings in the Home sidebar (see social-links.ts) ----
+
+/** cached on disk; refreshed once per app session together with the announcement query */
+const socialLinks = createSocialLinksService({
+  fetch: (input, init) => fetch(input, init),
+  serverUrl: () => faamAccountServer(),
+  readState: () => readAppSettings(APP_SETTINGS_PATH())[SOCIAL_LINKS_KEY],
+  writeState: (state) => writeAppSetting(APP_SETTINGS_PATH(), SOCIAL_LINKS_KEY, state),
+  onChange: (links) => {
+    for (const w of BrowserWindow.getAllWindows()) {
+      if (!w.isDestroyed()) w.webContents.send(HOME_CHANNELS.socialLinksChanged, links)
+    }
+  },
 })
 
 // ---- "open Office files with FaamOffice?" prompt (see default-app-prompt.ts) ----
@@ -3853,6 +3874,10 @@ function registerHomeIpc(): void {
       ...(status.user?.email ? { email: status.user.email } : {}),
       ...(status.user?.name ? { name: status.user.name } : {}),
       ...(typeof status.user?.credits === 'number' ? { credits: status.user.credits } : {}),
+      ...(typeof status.user?.creditsEnabled === 'boolean'
+        ? { creditsEnabled: status.user.creditsEnabled }
+        : {}),
+      ...(status.user?.quota ? { quota: status.user.quota } : {}),
       ...(status.offline ? { offline: true } : {}),
     }
   })
@@ -3884,9 +3909,14 @@ function registerHomeIpc(): void {
     await proxyBootstrap
     await faamLogout()
   })
-  ipcMain.handle(HOME_CHANNELS.faamAccountSetServer, (_event, url: unknown) =>
-    typeof url === 'string' ? setFaamAccountServer(url) : '',
-  )
+  ipcMain.handle(HOME_CHANNELS.faamAccountSetServer, (_event, url: unknown) => {
+    if (typeof url !== 'string') return ''
+    const before = faamAccountServer()
+    const normalized = setFaamAccountServer(url)
+    // the follow buttons belong to the account server: show the new one's
+    if (faamAccountServer() !== before) socialLinks.serverChanged()
+    return normalized
+  })
   ipcMain.handle(HOME_CHANNELS.faamAccountOpenWeb, (_event, page: unknown) => {
     const locale = currentLang() === 'vi' ? 'vi' : 'en'
     const path = page === 'register' ? 'register' : 'account'
@@ -4520,7 +4550,15 @@ function registerHomeIpc(): void {
     defaultAppPrompt.action(action),
   )
 
-  registerAnnouncementsIpc(ipcMain, announcements, (url) => shell.openExternal(url))
+  // the channel list is refreshed with the announcement query, so on a first
+  // run neither request goes out while onboarding is up
+  registerAnnouncementsIpc(
+    ipcMain,
+    announcements,
+    (url) => shell.openExternal(url),
+    () => socialLinks.start(),
+  )
+  registerSocialLinksIpc(ipcMain, socialLinks, (url) => shell.openExternal(url))
 
   ipcMain.handle(HOME_CHANNELS.pickDefaultSaveDir, async (): Promise<string | null> => {
     const result = await showOpenDialogWithMemory(dialog, shellWindow, {
@@ -6015,6 +6053,9 @@ app.whenReady().then(async () => {
   loginItem.repairMovedAppImage()
   initAutoUpdater(() => shellWindow, currentUpdateChannel(), {
     onAppImageMoved: (path) => loginItem.retarget(path),
+    // the automatic update card's once-a-day record
+    readPromptState: () => readAppSettings(APP_SETTINGS_PATH())[UPDATE_PROMPT_KEY],
+    writePromptState: (state) => writeAppSetting(APP_SETTINGS_PATH(), UPDATE_PROMPT_KEY, state),
   })
   // resource watchdog: a renderer that stays hot for minutes gets diagnostics
   // recorded and the user an offer to close the document (headless exports

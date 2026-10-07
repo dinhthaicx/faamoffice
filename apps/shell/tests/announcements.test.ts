@@ -815,6 +815,25 @@ describe('IPC handlers', () => {
     call(HOME_CHANNELS.openAnnouncementLink, 'a1')
     expect(openExternal).not.toHaveBeenCalled()
   })
+
+  it('runs the onPending hook on each announcement query only', async () => {
+    const handlers = new Map<string, (event: unknown, ...args: unknown[]) => unknown>()
+    const env = setup({ list: { announcements: [raw()] } })
+    const onPending = vi.fn()
+    registerAnnouncementsIpc(
+      { handle: (channel, listener) => handlers.set(channel, listener) },
+      env.service,
+      async () => undefined,
+      onPending,
+    )
+    handlers.get(HOME_CHANNELS.announcementAction)!({}, 'a1', 'shown')
+    handlers.get(HOME_CHANNELS.openAnnouncementLink)!({}, 'a1')
+    expect(onPending).not.toHaveBeenCalled()
+    const list = (await handlers.get(HOME_CHANNELS.announcementsPending)!({})) as unknown[]
+    expect(list).toHaveLength(1)
+    await handlers.get(HOME_CHANNELS.announcementsPending)!({})
+    expect(onPending).toHaveBeenCalledTimes(2)
+  })
 })
 
 describe('shell window frame guards', () => {

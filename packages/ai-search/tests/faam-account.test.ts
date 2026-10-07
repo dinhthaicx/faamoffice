@@ -167,6 +167,65 @@ describe('account status and sign-out', () => {
     expect((init.headers as Record<string, string>).Authorization).toBe('Bearer fo_t')
   })
 
+  it('reports the daily quota and no balance while the server runs without credits', async () => {
+    await signIn()
+    vi.stubGlobal(
+      'fetch',
+      vi.fn(async () =>
+        json(200, {
+          id: 'u1',
+          email: 'a@b.c',
+          name: 'A',
+          creditsEnabled: false,
+          // a stray balance is ignored while credits are off
+          credits: 99,
+          aiQuota: { limit: 300, used: 12, resetsAt: '2026-10-07T17:00:00.000Z' },
+        }),
+      ),
+    )
+    expect((await faamAccountStatus()).user).toEqual({
+      id: 'u1',
+      email: 'a@b.c',
+      name: 'A',
+      creditsEnabled: false,
+      quota: { limit: 300, used: 12, resetsAt: '2026-10-07T17:00:00.000Z' },
+    })
+  })
+
+  it('treats an older server (credits only) as credits on, and drops malformed fields', async () => {
+    await signIn()
+    const replies = [
+      json(200, { id: 'u1', email: 'a@b.c', name: 'A', credits: 7 }),
+      json(200, {
+        id: 'u1',
+        email: 'a@b.c',
+        name: 'A',
+        creditsEnabled: false,
+        aiQuota: { limit: '300', used: -1, resetsAt: 'soon' },
+      }),
+      json(200, { id: 'u1', email: 'a@b.c', name: 'A', creditsEnabled: false }),
+    ]
+    vi.stubGlobal(
+      'fetch',
+      vi.fn(async () => replies.shift()!),
+    )
+    expect((await faamAccountStatus()).user).toEqual({
+      id: 'u1',
+      email: 'a@b.c',
+      name: 'A',
+      credits: 7,
+    })
+    const malformed = (await faamAccountStatus()).user
+    expect(malformed).toEqual({ id: 'u1', email: 'a@b.c', name: 'A', creditsEnabled: false })
+    // credits off without a daily limit: neither a balance nor a quota
+    expect((await faamAccountStatus()).user).toEqual({
+      id: 'u1',
+      email: 'a@b.c',
+      name: 'A',
+      creditsEnabled: false,
+    })
+  })
+
   it('signs out locally when the server rejects the token', async () => {
     await signIn()
     vi.stubGlobal(

@@ -103,6 +103,33 @@ describe("release assets", () => {
     expect(out.rpm?.name).toBe("faamoffice-0.11.0.x86_64.rpm");
   });
 
+  it("recognises the space-free Windows installer name and skips update-feed files", () => {
+    const out = classifyAssets(
+      [
+        "latest.yml",
+        "latest-mac.yml",
+        "latest-linux.yml",
+        "FaamOffice-Setup-0.12.0.exe.blockmap",
+        "FaamOffice-Setup-0.12.0.exe",
+        "FaamOffice-0.12.0-arm64-mac.zip.blockmap",
+        "FaamOffice-0.12.0-arm64.dmg",
+      ].map(asset),
+    );
+    expect(out.winExe?.name).toBe("FaamOffice-Setup-0.12.0.exe");
+    expect(out.macArm?.name).toBe("FaamOffice-0.12.0-arm64.dmg");
+    const names = Object.values(out).map((a) => a?.name);
+    expect(names).not.toContainEqual(expect.stringMatching(/\.(yml|blockmap)$/));
+  });
+
+  it("never offers the Windows ARM64 installer as the x64 one", () => {
+    // electron-builder.cjs names the GENOFFICE_WIN_ARM64 build with an -arm64 suffix
+    const arm = "FaamOffice-Setup-0.12.0-arm64.exe";
+    const x64 = "FaamOffice-Setup-0.12.0.exe";
+    expect(classifyAssets([asset(arm), asset(x64)]).winExe?.name).toBe(x64);
+    expect(classifyAssets([asset(x64), asset(arm)]).winExe?.name).toBe(x64);
+    expect(classifyAssets([asset(arm)]).winExe).toBeUndefined();
+  });
+
   it("handles universal builds and missing platforms", () => {
     const out = classifyAssets([asset("FaamOffice-1.0.0-universal.dmg")]);
     expect(out.macArm?.name).toBe("FaamOffice-1.0.0-universal.dmg");

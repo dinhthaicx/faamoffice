@@ -17,7 +17,9 @@ import {
 import { join } from 'node:path'
 import {
   AiCreditsError,
+  AiDailyLimitError,
   AiTimeoutError,
+  formatAiRetryTime,
   isAiNetworkError,
   isAiOverloadedError,
   defaultAiSettings,
@@ -54,6 +56,7 @@ import { matchesElementRef } from '@genoffice/pptx-engine/identity'
 import { coverCropFractions } from '@genoffice/pipelines/slides'
 import type { AiRunFailure } from '../shared/ipc'
 import { EMU_PER_PX_96 } from '@genoffice/pptx-render'
+import { getUiLang } from '@genoffice/i18n'
 import { tm } from './i18n-main'
 import { pushHistory, rebuildSlide, scheduleHistoryNotify, sessions } from './session-state'
 
@@ -210,7 +213,11 @@ export function registerAiIpc(): void {
         send({
           requestId,
           type: 'error',
-          error: msg,
+          // Faam AI Cloud's daily limit, in the UI language with the reset time when known
+          error:
+            err instanceof AiDailyLimitError && err.retryAt
+              ? tm('errFaamDailyLimit', { time: formatAiRetryTime(err.retryAt, getUiLang()) })
+              : msg,
           ...(err instanceof AiTimeoutError
             ? { errorCode: 'timeout' as const }
             : err instanceof AiCreditsError

@@ -2,8 +2,19 @@ name: Release
 
 # Builds the FaamOffice installers for every platform on its native runner.
 #   - Run manually (Actions → Release → Run workflow) for test builds: the
-#     installers are attached to the run as artifacts.
-#   - Push a tag like v0.11.0-faam.1 to also publish a GitHub Release.
+#     installers are attached to the run as artifacts. These builds carry no
+#     update feed, so they never check for updates.
+#   - Push a tag like v0.12.0 (or v0.12.0-beta.1 for a prerelease) to also
+#     publish a GitHub Release. Tag builds bake the update feed
+#     https://github.com/<repo>/releases/latest/download into the app; the
+#     publish job turns the release into that feed (see
+#     scripts/release-feed.cjs and apps/shell/src/main/updater.ts):
+#       1. create the release as a draft with the installers and blockmaps
+#       2. validate latest.yml / latest-mac.yml / latest-linux.yml against the
+#          tag and the uploaded assets, pin their URLs to the tag, upload them
+#       3. publish; mark it Latest (= what installed apps update to) only when
+#          it is newer than the current Latest release
+#       4. smoke-check the feed URL installed apps read
 # No signing secrets are needed: macOS builds are ad-hoc signed (see
 # apps/shell/electron-builder.cjs) and Windows builds are unsigned.
 
@@ -40,6 +51,10 @@ jobs:
       # optional override of the account server baked into the app (repository
       # variable); empty = the app's own default, https://faamoffice.net
       FAAMOFFICE_ACCOUNT_URL: ${{ vars.FAAMOFFICE_ACCOUNT_URL }}
+      # the update feed (resources/app-update.yml), tag builds only; empty
+      # leaves it out. Never put GH_TOKEN / GITHUB_TOKEN in this job's env:
+      # electron-builder would then infer a GitHub publish provider itself.
+      GENOFFICE_UPDATE_URL: ${{ startsWith(github.ref, 'refs/tags/v') && format('https://github.com/{0}/releases/latest/download', github.repository) || '' }}
     steps:
       - name: Checkout
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -117,6 +132,8 @@ jobs:
         if: matrix.platform == 'linux'
         run: npm run dist:linux
 
+      # latest*.yml / *.blockmap exist only in tag builds (they need the
+      # update feed); builder-debug.yml is never shipped
       - name: Upload installers
         uses: actions/upload-artifact@v4
         with:
@@ -129,26 +146,106 @@ jobs:
             apps/shell/release/*.AppImage
             apps/shell/release/*.deb
             apps/shell/release/*.rpm
+            apps/shell/release/*.blockmap
+            apps/shell/release/latest*.yml
 
   publish:
     name: publish GitHub Release
     needs: build
     if: startsWith(github.ref, 'refs/tags/v')
     runs-on: ubuntu-22.04
+    # One publish at a time across all tags (the workflow-level group is per
+    # tag): "Publish release" reads the current Latest and then edits this
+    # release, so two tags pushed together could both read the same old Latest
+    # and the slower edit would leave the older tag as Latest. GitHub keeps
+    # only one job pending per group: a third tag queueing cancels the pending
+    # one, whose publish job then needs a re-run.
+    concurrency:
+      group: release-publish
+      cancel-in-progress: false
+    env:
+      GH_TOKEN: ${{ github.token }}
+      TAG: ${{ github.ref_name }}
+    defaults:
+      run:
+        shell: bash
     steps:
+      # only the dependency-free release scripts are needed here
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          sparse-checkout: scripts
+
+      - name: Setup Node
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: 22
+
       - name: Download installers
         uses: actions/download-artifact@v4
         with:
           path: dist
           merge-multiple: true
 
-      - name: Create release
-        env:
-          GH_TOKEN: ${{ github.token }}
-          TAG: ${{ github.ref_name }}
+      # A draft is invisible to releases/latest, so installed apps cannot see
+      # the release before its feed is complete. A re-run finds the draft
+      # (or the release) already there and only re-uploads.
+      - name: Create draft release
         run: |
           ls -la dist
-          gh release create "$TAG" dist/* \
-            --repo "$GITHUB_REPOSITORY" \
-            --title "FaamOffice ${TAG#v}" \
-            --generate-notes
+          mapfile -t assets < <(find dist -maxdepth 1 -type f ! -name 'latest*.yml' ! -name 'builder-debug.yml' | sort)
+          if gh release view "$TAG" --repo "$GITHUB_REPOSITORY" > /dev/null 2>&1; then
+            gh release upload "$TAG" "${assets[@]}" --repo "$GITHUB_REPOSITORY" --clobber
+          else
+            prerelease=()
+            if [[ "$TAG" == *-* ]]; then prerelease=(--prerelease); fi
+            gh release create "$TAG" "${assets[@]}" \
+              --repo "$GITHUB_REPOSITORY" \
+              --draft "${prerelease[@]}" \
+              --title "FaamOffice ${TAG#v}" \
+              --generate-notes
+          fi
+
+      - name: Publish the update feed
+        run: |
+          gh release view "$TAG" --repo "$GITHUB_REPOSITORY" --json assets \
+            --jq '.assets[].name' > release-assets.txt
+          node scripts/release-feed.cjs prepare --dir dist --out feed \
+            --tag "$TAG" --repo "$GITHUB_REPOSITORY" --assets release-assets.txt
+          gh release upload "$TAG" feed/latest.yml feed/latest-mac.yml feed/latest-linux.yml \
+            --repo "$GITHUB_REPOSITORY" --clobber
+
+      # Latest only moves forward: a backport tag or a slow run of an older tag
+      # is published without taking the feed back to it (the job's
+      # concurrency group keeps this read-then-edit from racing another tag).
+      - name: Publish release
+        id: publish
+        run: |
+          current="$(gh release view --repo "$GITHUB_REPOSITORY" --json tagName --jq .tagName 2> /dev/null || true)"
+          latest="$(node scripts/release-feed.cjs latest --tag "$TAG" --current "$current")"
+          echo "current Latest: ${current:-none}; mark $TAG as Latest: $latest"
+          gh release edit "$TAG" --repo "$GITHUB_REPOSITORY" --draft=false --latest="$latest"
+          echo "latest=$latest" >> "$GITHUB_OUTPUT"
+
+      # what installed apps fetch: the Latest feed, or this tag's own copy
+      # when the release did not become Latest
+      - name: Smoke-check the update feed
+        env:
+          MARKED_LATEST: ${{ steps.publish.outputs.latest }}
+        run: |
+          if [[ "$MARKED_LATEST" == true ]]; then
+            base="https://github.com/$GITHUB_REPOSITORY/releases/latest/download"
+          else
+            base="https://github.com/$GITHUB_REPOSITORY/releases/download/$TAG"
+          fi
+          for attempt in 1 2 3 4 5 6 7 8 9 10; do
+            feed="$(curl -fsSL "$base/latest.yml" || true)"
+            if grep -qx "version: ${TAG#v}" <<< "$feed"; then
+              echo "feed OK: $base/latest.yml serves ${TAG#v}"
+              exit 0
+            fi
+            echo "feed not serving ${TAG#v} yet (attempt $attempt)"
+            sleep 15
+          done
+          echo "::error::$base/latest.yml does not serve ${TAG#v}"
+          exit 1

@@ -4,8 +4,9 @@ Last updated: October 7, 2026
 
 FaamOffice opens, edits and saves documents on your computer. Editing a
 document never uploads it anywhere. The app only talks to the network for the
-features listed below. Apart from the announcement check at startup, it does so
-only when you use them.
+features listed below. Apart from the startup checks (announcements, the list of
+channels to follow and, in release builds, the update check), it does so only
+when you use them.
 
 ## AI (Faam AI)
 
@@ -21,14 +22,18 @@ only when you use them.
 
 ## FaamOffice account (optional)
 
-FaamOffice works without an account. If you sign in to a FaamOffice account to
-use Faam AI Cloud, the account server stores your email, name, a hash of your
-password, the devices you signed in from, and a usage record (time, model,
-token counts, credits) for each cloud AI request. The requests themselves are
+FaamOffice works without an account. Signing in to a FaamOffice account only
+gives the app access to the Faam AI Cloud models. The account server stores
+your email, name, a hash of your password, the devices you signed in from, and
+a usage record (time, model, token counts and, when the server operator charges
+credits, the credits used) for each cloud AI request. The operator may limit
+how many requests each account can make per day. The requests themselves are
 forwarded to the AI provider the server operator configured. See the privacy
 policy published on that server's website.
 
-## Announcements
+## Startup checks
+
+### Announcements
 
 Once per app start, the app asks the FaamOffice account server
 (https://faamoffice.net, or the account server set under Settings → Profile) for
@@ -37,19 +42,52 @@ the app version and the interface language, and no account token or other
 identifier. Images in an announcement are downloaded from the address its
 author used, and an HTML announcement may load images and fonts from other
 https sites, so those servers see your IP address. Which announcements you have
-seen or dismissed is stored only on this computer. To turn the check off, start
-the app with the environment variable `FAAMOFFICE_ANNOUNCEMENTS=0`.
+seen or dismissed is stored only on this computer.
+
+### Channels to follow
+
+Once per app start, together with the announcement check (on the very first
+start, once the welcome screens are done), the app also reads the list of the
+project's channels (Facebook, YouTube, TikTok and others) shown as follow
+buttons above Settings on the Home screen, from the same account server
+(`/api/v1/app/config`). The request carries no account token, no identifier and
+no other parameters. The last list received is kept on this computer so the
+buttons show offline. A channel opens in your browser only when you click its
+button.
+
+### Update check
+
+Builds published from a version tag in this repository check GitHub Releases
+for a newer version, about 15 seconds after start and then every few hours
+(https://github.com/dinhthaicx/faamoffice/releases/latest/download/, which
+GitHub serves from its own download servers). Each check downloads a small
+`latest*.yml` file. The request carries the random install ID that the updater
+library generates (the `x-user-staging-id` header, stored as `.updaterId` in the
+app's data folder) and no account or document information; GitHub sees your IP
+address. Downloading an update fetches the installer from the same release.
+Builds without an update address (development runs, manual workflow runs, local
+packaging, 0.11.1 and older) make no update request.
+
+### Turning the checks off
+
+- `FAAMOFFICE_ANNOUNCEMENTS=0` (environment variable at app start) turns off the
+  announcement check and the channel list request. Buttons already received
+  still show.
+- `FAAMOFFICE_UPDATES=0` turns off the update check. Help → Check for Updates
+  then points to the download page instead.
 
 ## Other network access
 
 - The About page and the GitHub prompt read the public star count of the
   FaamOffice repository from api.github.com.
 - Links you click (downloads, API-key pages, GitHub) open in your browser.
-- Builds from this repository send no usage analytics, check no update feed and
-  download no fonts unless whoever built them injected the corresponding
-  endpoints (`GENOFFICE_GA4_*`, `GENOFFICE_UPDATE_URL`, `GENOFFICE_FONT_CDN_URL`
-  in `apps/shell/electron-builder.cjs`). The release workflow in this repository
-  injects none of them.
+- Builds from this repository send no usage analytics and download no fonts
+  unless whoever built them injected the corresponding endpoints
+  (`GENOFFICE_GA4_*`, `GENOFFICE_FONT_CDN_URL` in
+  `apps/shell/electron-builder.cjs`); the release workflow in this repository
+  injects neither. It injects only the update address (`GENOFFICE_UPDATE_URL`,
+  the GitHub Releases feed above), and only into builds made from a version
+  tag.
 
 ## Usage analytics (only when enabled at build time)
 

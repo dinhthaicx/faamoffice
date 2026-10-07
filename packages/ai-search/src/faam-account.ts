@@ -2,8 +2,9 @@
  * FaamOffice account (optional): device-code sign-in against the FaamOffice
  * account server (web/ in this repository), the bearer token it issues, and
  * the account calls the desktop app makes with it. The token unlocks Faam AI
- * Cloud, an OpenAI-compatible endpoint at `<server>/api/v1/ai` billed in
- * credits.
+ * Cloud, an OpenAI-compatible endpoint at `<server>/api/v1/ai`. The server
+ * operator decides how it is metered: Faam credits, or (credits turned off) an
+ * optional number of requests per day.
  *
  * State lives in ~/.faamoffice/account.json (mode 0600, like other CLI
  * credentials) so both the app and the faamoffice command line can read it.
@@ -31,10 +32,27 @@ interface StoredAccount {
   user?: FaamAccountUser | undefined
 }
 
+/** today's Faam AI requests while the server runs without credits (daily limit > 0) */
+export interface FaamAiQuota {
+  limit: number
+  used: number
+  /** ISO time of the next reset */
+  resetsAt: string
+}
+
 export interface FaamAccountStatus {
   signedIn: boolean
   server: string
-  user?: (FaamAccountUser & { credits?: number; emailVerified?: boolean }) | undefined
+  user?:
+    | (FaamAccountUser & {
+        /** live balance; only sent while the server has Faam credits turned on */
+        credits?: number
+        /** false when the server runs without credits (older servers omit it: credits on) */
+        creditsEnabled?: boolean
+        quota?: FaamAiQuota
+        emailVerified?: boolean
+      })
+    | undefined
   /** the server could not be reached; `user` is the last known identity */
   offline?: boolean
 }
@@ -133,13 +151,27 @@ export function withFaamAccount<T extends { apiKey: string; baseUrl?: string | u
   return { ...config, apiKey: token, baseUrl: token ? faamAiBaseUrl() : undefined }
 }
 
+const isCount = (value: unknown): value is number =>
+  typeof value === 'number' && Number.isSafeInteger(value) && value >= 0
+
+/** the /me `aiQuota` object, or undefined when it is missing or malformed */
+export function parseFaamQuota(raw: unknown): FaamAiQuota | undefined {
+  if (!raw || typeof raw !== 'object') return undefined
+  const { limit, used, resetsAt } = raw as Record<string, unknown>
+  if (!isCount(limit) || limit === 0 || !isCount(used)) return undefined
+  if (typeof resetsAt !== 'string' || Number.isNaN(Date.parse(resetsAt))) return undefined
+  return { limit, used, resetsAt }
+}
+
 function authHeaders(token: string): Record<string, string> {
   return { Authorization: `Bearer ${token}`, Accept: 'application/json' }
 }
 
 /**
- * Who is signed in, with the live credit balance when the server answers. An
- * invalid token (revoked on the website, account disabled) signs the app out.
+ * Who is signed in, with the live credit balance (credits on) or today's
+ * request quota (credits off, daily limit set) when the server answers. Older
+ * servers only send `credits`. An invalid token (revoked on the website,
+ * account disabled) signs the app out.
  */
 export async function faamAccountStatus(buildDefault = ''): Promise<FaamAccountStatus> {
   const server = faamAccountServer(buildDefault)
@@ -156,8 +188,10 @@ export async function faamAccountStatus(buildDefault = ''): Promise<FaamAccountS
     }
     if (!res.ok) return { signedIn: true, server, user: stored.user, offline: true }
     const me = (await res.json()) as Partial<FaamAccountUser> & {
-      credits?: number
-      emailVerified?: boolean
+      credits?: unknown
+      creditsEnabled?: unknown
+      aiQuota?: unknown
+      emailVerified?: unknown
     }
     const user: FaamAccountUser = {
       id: String(me.id ?? stored.user?.id ?? ''),
@@ -165,12 +199,19 @@ export async function faamAccountStatus(buildDefault = ''): Promise<FaamAccountS
       name: String(me.name ?? stored.user?.name ?? ''),
     }
     if (JSON.stringify(user) !== JSON.stringify(stored.user)) writeStored({ ...stored, user })
+    const creditsEnabled = me.creditsEnabled !== false
+    const quota = creditsEnabled ? undefined : parseFaamQuota(me.aiQuota)
     return {
       signedIn: true,
       server,
       user: {
         ...user,
-        ...(typeof me.credits === 'number' ? { credits: me.credits } : {}),
+        ...(typeof me.creditsEnabled === 'boolean' ? { creditsEnabled: me.creditsEnabled } : {}),
+        // a balance means nothing while credits are off, even if a server sends one
+        ...(creditsEnabled && typeof me.credits === 'number' && Number.isFinite(me.credits)
+          ? { credits: me.credits }
+          : {}),
+        ...(quota ? { quota } : {}),
         ...(typeof me.emailVerified === 'boolean' ? { emailVerified: me.emailVerified } : {}),
       },
     }

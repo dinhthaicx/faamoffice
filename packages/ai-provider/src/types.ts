@@ -178,6 +178,11 @@ export interface AiChatResponse {
   ok: boolean
   content?: string
   error?: string
+  /** account refusal behind `error` (Faam AI Cloud): 'credits' = balance used up,
+   * 'daily-limit' = today's requests used up (until `retryAt`) */
+  errorCode?: 'credits' | 'daily-limit'
+  /** ISO time the daily limit resets, when the server said */
+  retryAt?: string
 }
 
 export interface AiStreamRequest {

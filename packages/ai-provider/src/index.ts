@@ -85,6 +85,13 @@ export { isAiNetworkError } from './network-error'
 export { isAiOverloadedError } from './overload-error'
 export { parseOutputCapRejection } from './output-cap'
 export { AiCreditsError, sseLines, streamForProvider } from './stream'
+export {
+  AiDailyLimitError,
+  accountLimitError,
+  formatAiRetryTime,
+  localizeChatFailure,
+} from './account-limit'
+export type { ChatFailureTexts } from './account-limit'
 export type { StreamCallbacks } from './stream'
 export {
   AI_CHAT_RESPONSE_TIMEOUT_MS,

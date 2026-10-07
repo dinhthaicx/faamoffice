@@ -53,6 +53,14 @@ function render(state: UpdateUiState): void {
       action.style.display = ''
       action.textContent = s.install
       break
+    case 'ready':
+      // notify flow (macOS): the installer is open; quitting lets the user
+      // drag the new app over this one
+      desc.textContent = s.ready
+      progress.style.display = 'none'
+      action.style.display = ''
+      action.textContent = s.quit
+      break
     case 'error':
       desc.textContent = s.failed
       progress.style.display = 'none'
@@ -69,7 +77,8 @@ function render(state: UpdateUiState): void {
 }
 
 action.addEventListener('click', () => {
-  if (phase === 'downloaded') api.install()
+  // 'ready' goes through install too: the main process quits instead
+  if (phase === 'downloaded' || phase === 'ready') api.install()
   else if (phase === 'manual') api.openDownload()
   else api.download()
 })

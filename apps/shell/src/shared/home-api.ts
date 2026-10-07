@@ -286,6 +286,9 @@ export interface HomeApi {
   /** re-open the (minimized) update dialog; a not-yet-started download also starts */
   openUpdateDialog(): Promise<boolean>
   onUpdateStateChanged(handler: (state: UpdateUiState) => void): () => void
+  /** report whether onboarding or an announcement is on screen: the automatic
+   * update card (a separate window that would cover them) waits meanwhile */
+  setUpdatePromptBlocked(blocked: boolean): Promise<void>
   /** whether the first-run onboarding has been completed or skipped (persisted in userData/app-settings.json) */
   onboardingSeen(): Promise<boolean>
   /** mark onboarding done; analytics remains enabled unless separately opted out */
@@ -369,6 +372,14 @@ export interface HomeApi {
   announcementAction(id: string, action: AnnouncementAction): Promise<void>
   /** open the link of this announcement in the browser (the URL never leaves the main process) */
   openAnnouncementLink(id: string): Promise<void>
+  /** the project's channels for the follow buttons: the last list fetched from the account
+   * server (cached on disk, so it shows at once and offline); the first call of a session
+   * also refreshes it in the background, and a change arrives through onSocialLinksChanged */
+  socialLinks(): Promise<SocialLinkView[]>
+  /** the follow-button list changed (the session's refresh); returns the unsubscribe */
+  onSocialLinksChanged(handler: (links: SocialLinkView[]) => void): () => void
+  /** open this channel in the browser (the URL never leaves the main process) */
+  openSocialLink(id: string): Promise<void>
   /** Escape was pressed in the shell window, possibly inside an html announcement's frame
    * (whose key events never reach the shell document); returns the unsubscribe */
   onAnnouncementEscape(handler: () => void): () => void
@@ -472,9 +483,47 @@ export interface FaamAccountInfo {
   server: string
   email?: string
   name?: string
+  /** live balance; present only while the server has Faam credits turned on */
   credits?: number
+  /** false when the server runs without credits (sign-in only unlocks Faam AI Cloud) */
+  creditsEnabled?: boolean
+  /** today's Faam AI requests (credits off and a daily limit set) */
+  quota?: { limit: number; used: number; resetsAt: string }
   /** signed in, but the server could not be reached just now */
   offline?: boolean
+}
+
+/** channels the follow buttons may point at (GET /api/v1/app/config on the account server) */
+export const SOCIAL_PLATFORMS = [
+  'facebook',
+  'youtube',
+  'tiktok',
+  'zalo',
+  'x',
+  'instagram',
+  'threads',
+  'telegram',
+  'discord',
+  'github',
+  'linkedin',
+  'website',
+] as const
+
+export type SocialPlatform = (typeof SOCIAL_PLATFORMS)[number]
+
+export function isSocialPlatform(value: unknown): value is SocialPlatform {
+  return typeof value === 'string' && (SOCIAL_PLATFORMS as readonly string[]).includes(value)
+}
+
+/**
+ * One follow button in the Home sidebar. The URL stays in the main process:
+ * the renderer opens a link with openSocialLink(id).
+ */
+export interface SocialLinkView {
+  id: string
+  platform: SocialPlatform
+  /** optional caption set by the admin (e.g. the channel name) */
+  label?: string
 }
 
 /** device-code sign-in progress pushed from the main process */
@@ -638,4 +687,7 @@ export const HOME_CHANNELS = {
   openAnnouncementLink: 'home:announcement-open-link',
   announcementEscape: 'home:announcement-escape',
   announcementFrameFailed: 'home:announcement-frame-failed',
+  socialLinks: 'home:social-links',
+  socialLinksChanged: 'home:social-links-changed',
+  openSocialLink: 'home:social-link-open',
 } as const

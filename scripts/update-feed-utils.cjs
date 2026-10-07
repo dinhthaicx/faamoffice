@@ -2,8 +2,9 @@
 /**
  * scripts/update-feed-utils.cjs — shared helpers for the electron-updater
  * feed files (latest*.yml / beta*.yml): version parsing and the
- * forward-only promote/upload guard. Used by mac-release-upload.cjs and
- * promote-stable.cjs; kept dependency-free so vitest can require it directly.
+ * forward-only promote/upload guard. Used by release-feed.cjs (the release
+ * workflow's feed step); kept dependency-free so the publish job needs no
+ * npm install and vitest can require it directly.
  */
 
 function ymlVersion(text) {

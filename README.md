@@ -37,7 +37,7 @@ Vào **Cài đặt → Mô hình AI** và chọn nhà cung cấp:
 | ----------------- | ----------------------------------------------------------------------------------------------------------------- | ------------------------------ |
 | **AI cục bộ**     | Ollama, LM Studio, llama.cpp server                                                                               | Không cần API key              |
 | **Đám mây**       | OpenAI, Anthropic Claude, Google Gemini, DeepSeek, xAI Grok, Mistral, Groq, OpenRouter, Kimi, Qwen, GLM, MiniMax… | API key của bạn                |
-| **Faam AI Cloud** | AI trên máy chủ FaamOffice, trả bằng credit                                                                       | Đăng nhập tài khoản FaamOffice |
+| **Faam AI Cloud** | Các mô hình AI trên máy chủ FaamOffice, có thể giới hạn số lượt mỗi ngày                                          | Đăng nhập tài khoản FaamOffice |
 | **Tuỳ chỉnh**     | Bất kỳ máy chủ nào tương thích OpenAI (vLLM, LocalAI, Jan…)                                                       | Base URL, key nếu máy chủ cần  |
 
 ### Dùng AI chạy trên máy (không gửi dữ liệu ra ngoài)
@@ -59,10 +59,17 @@ Máy chủ chạy ở máy khác trong mạng LAN thì điền địa chỉ đó
 ## Tài khoản FaamOffice (không bắt buộc)
 
 App dùng được hoàn toàn mà không cần tài khoản. Đăng nhập (Cài đặt → Hồ sơ → Đăng nhập) chỉ để dùng
-**Faam AI Cloud**: app mở trình duyệt, bạn xác nhận mã, rồi app nhận token và hiện số credit còn lại.
+các mô hình **Faam AI Cloud** ngay trong app: app mở trình duyệt, bạn xác nhận mã, rồi app nhận token.
+Tuỳ cấu hình máy chủ, Cài đặt → Hồ sơ hiện số credit còn lại (khi bật Faam credit) hoặc số lượt Faam AI
+đã dùng hôm nay (khi tắt credit và đặt giới hạn mỗi ngày).
+
+Các nút theo dõi kênh (Facebook, YouTube, TikTok…) ngay phía trên **Cài đặt** ở màn hình chính, và ở
+chân trang website, do quản trị viên đặt trong **Admin → Cài đặt** trên website. App đọc danh sách này
+mỗi lần khởi động và nhớ lại để vẫn hiện khi không có mạng.
 
 Máy chủ tài khoản và website giới thiệu nằm trong thư mục [`web/`](web/) (Next.js + Prisma).
-Xem [web/README.md](web/README.md) để chạy thử trên máy, cấu hình AI phía máy chủ và quản trị credit.
+Xem [web/README.md](web/README.md) để chạy thử trên máy, cấu hình AI phía máy chủ, bật/tắt Faam credit
+và giới hạn số lượt mỗi ngày.
 Máy chủ tài khoản mặc định là **https://faamoffice.net**. Có thể thay bằng biến `FAAMOFFICE_ACCOUNT_URL` lúc
 build, và người dùng có thể đổi trong Cài đặt → Hồ sơ (ví dụ trỏ về máy chủ tự dựng).
 
@@ -85,6 +92,24 @@ Bản build hiện chưa có chữ ký số của Apple/Microsoft, nên lần m�
   "Unknown publisher" là bình thường. Nếu Smart App Control của Windows 11 chặn thì không có nút chạy tiếp;
   hãy chờ bản đã ký số hoặc bản trên Microsoft Store.
 
+### Cập nhật phiên bản mới
+
+Các bản phát hành sau 0.11.1 tự kiểm tra bản mới trên trang Releases (khoảng 15 giây sau khi mở app,
+rồi vài giờ một lần) và hiện thông báo; mỗi phiên bản chỉ tự nhắc tối đa một lần mỗi ngày. Có thể kiểm tra
+bất cứ lúc nào bằng **Help → Check for Updates**.
+
+- **Windows và Linux AppImage:** app tải bản mới về, rồi bấm **Restart & Install**.
+- **macOS:** bấm **Update Now**, app tải đúng file `.dmg` cho máy (Apple Silicon hoặc Intel), kiểm tra
+  mã sha512 rồi mở nó. Thoát FaamOffice, kéo FaamOffice vào Applications và chọn **Replace**. File do
+  app tự tải không bị macOS gắn cờ tải từ Internet, nên không phải bấm **Open Anyway** lần nữa. Nếu tải
+  lỗi, app mở link tải trong trình duyệt.
+- **Linux .deb / .rpm:** thông báo có nút mở gói mới trong trình duyệt để cài.
+- **Đang dùng 0.11.1 hoặc cũ hơn:** các bản này không có địa chỉ cập nhật, nên cần tải và cài lại thủ
+  công **một lần** từ trang [Releases](../../releases/latest). Từ bản đó trở đi app tự báo bản mới.
+
+Đặt biến môi trường `FAAMOFFICE_UPDATES=0` khi mở app để tắt việc kiểm tra. Xem [PRIVACY.md](PRIVACY.md)
+về những gì app gửi đi khi khởi động.
+
 ## Build từ mã nguồn
 
 Cần Node.js 22 (xem `.nvmrc`) và Rust (`cargo`, cài qua [rustup](https://rustup.rs)).
@@ -101,7 +126,9 @@ npm run dist:linux   # Linux: AppImage, .deb, .rpm (chạy trên Linux)
 
 Bản build cho cả ba nền tảng chạy tự động bằng GitHub Actions
 ([`.github/workflows/release.yml`](.github/workflows/release.yml)): vào **Actions → Release → Run
-workflow** để build thử, hoặc đẩy một tag `v*` (ví dụ `v0.11.0-faam.1`) để tạo bản phát hành.
+workflow** để build thử (bản này không tự cập nhật), hoặc đẩy một tag `v*` (ví dụ `v0.11.2`) để tạo bản
+phát hành có tự cập nhật. Tag có dấu `-` (ví dụ `v0.12.0-beta.1`) thành bản prerelease và không được
+đẩy tới người dùng qua thông báo cập nhật.
 
 ## Cập nhật theo GenOffice gốc
 

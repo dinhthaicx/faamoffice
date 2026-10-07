@@ -70,11 +70,6 @@ const AI_FONT_SIZE_OPTIONS = [
   { value: 'custom', labelKey: 'aiFontSizeCustom' },
 ] as const satisfies readonly { value: AiFontSize; labelKey: StringKey }[]
 
-const CHANNEL_OPTIONS = [
-  { value: 'stable', labelKey: 'channelStable' },
-  { value: 'beta', labelKey: 'channelBeta' },
-] as const satisfies readonly { value: 'stable' | 'beta'; labelKey: StringKey }[]
-
 /** GitHub-style abbreviated stargazer count (2591 → "2.6k") — the number is
  * social proof, not a metric; the cached/exact value would only look stale */
 function formatStars(n: number): string {
@@ -1347,8 +1342,10 @@ const FAAM_ERROR_KEYS = {
 
 /**
  * Optional FaamOffice account: browser sign-in with a device code, the live
- * credit balance, sign-out, and the account server address. Signing in unlocks
- * the Faam AI Cloud provider; nothing else in the app needs an account.
+ * credit balance (only while the server has Faam credits on) or today's Faam AI
+ * requests (credits off, daily limit set), sign-out, and the account server
+ * address. Signing in unlocks the Faam AI Cloud provider; nothing else in the
+ * app needs an account.
  */
 function FaamAccountBlock({ t }: { t: TFunc }) {
   const [info, setInfo] = useState<FaamAccountInfo | null>(null)
@@ -1416,8 +1413,14 @@ function FaamAccountBlock({ t }: { t: TFunc }) {
               {signedIn
                 ? [
                     info?.email || info?.name,
-                    typeof info?.credits === 'number'
+                    typeof info?.credits === 'number' && info.creditsEnabled !== false
                       ? t('setFaamCredits', { n: info.credits.toLocaleString() })
+                      : null,
+                    info?.quota
+                      ? t('setFaamQuota', {
+                          used: info.quota.used.toLocaleString(),
+                          limit: info.quota.limit.toLocaleString(),
+                        })
                       : null,
                     info?.offline ? t('setFaamOffline') : null,
                   ]
@@ -1534,7 +1537,6 @@ export function SettingsModal({
   // the approval note describes the switch: macOS reads "on" while approval is pending
   const loginNoteId = useId()
   const [aiPrefs, setAiPrefs] = useState<AiPanelPrefs>(DEFAULT_AI_PANEL_PREFS)
-  const [channel, setChannel] = useState<'stable' | 'beta'>('stable')
   const [appVersion, setAppVersion] = useState('')
   const [githubStars, setGithubStars] = useState<number | null>(null)
   const [updateState, setUpdateState] = useState<UpdateUiState | null>(null)
@@ -1567,9 +1569,6 @@ export function SettingsModal({
       .catch(() => undefined)
     void window.aiOffice.getAiPanelPrefs?.().then((prefs) => {
       if (alive) setAiPrefs(prefs)
-    })
-    void window.aiOffice.getUpdateChannel?.().then((ch) => {
-      if (alive) setChannel(ch)
     })
     void window.aiOffice.getAppVersion?.().then((v) => {
       if (alive && v) setAppVersion(v)
@@ -2016,25 +2015,8 @@ export function SettingsModal({
                     </button>
                   </div>
                 )}
-                <div className="set-field">
-                  <div className="set-field-text">
-                    <label className="set-field-label">{t('updateChannel')}</label>
-                  </div>
-                  <Dropdown
-                    className="set-dd"
-                    value={channel}
-                    ariaLabel={t('updateChannel')}
-                    options={CHANNEL_OPTIONS.map((opt) => ({
-                      value: opt.value,
-                      label: t(opt.labelKey),
-                    }))}
-                    onPick={(v) => {
-                      const next = v === 'beta' ? 'beta' : 'stable'
-                      setChannel(next)
-                      void window.aiOffice.setUpdateChannel(next)
-                    }}
-                  />
-                </div>
+                {/* no update-channel picker: only the stable feed is published (a stored
+                    'beta' choice reads it too, see CHANNEL_FEED in main/updater.ts) */}
                 <Field
                   label={t('setGithub')}
                   value={

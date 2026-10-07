@@ -12,6 +12,13 @@ import { UPDATE_CHANNELS } from '../shared/update-api'
  * surface, plus the settings-facing get-state / open-for-update entry — the
  * last two are registered at module load, since the shell window invokes them
  * before any update is known (see registerSettingsIpc).
+ *
+ * The card is a child window, so it paints above everything in the shell
+ * window — the first-run onboarding and the startup announcement dialog
+ * included. The shell window therefore reports whether either is up
+ * (promptBlocked) and the updater routes its automatic card through
+ * whenUpdatePromptAllowed, which holds it until both are gone. Explicit
+ * requests (Help → Check for Updates, Settings → About) never wait.
  */
 
 interface UpdateActions {
@@ -27,6 +34,12 @@ let actions: UpdateActions | null = null
 let ipcRegistered = false
 /** the shell window the card belongs to; also the state-changed listener */
 let lastParent: BrowserWindow | null = null
+/** last report from the shell window: onboarding or an announcement is on
+ * screen. Starts false so a shell that never reports (stale preload) keeps
+ * the old behaviour instead of holding the card forever. */
+let promptBlocked = false
+/** the automatic card waiting for promptBlocked to clear (latest wins) */
+let pendingPrompt: (() => void) | null = null
 // distinguishes programmatic close (install/quit) from the user closing the
 // window some other way (Alt+F4…), which counts as "later"
 let closingProgrammatically = false
@@ -37,8 +50,9 @@ function broadcastState(): void {
 }
 
 /**
- * The two channels the shell window invokes from Settings → About. That call
- * happens on mount — long before any update is known, which on a fresh launch
+ * The channels the shell window invokes: Settings → About's two, plus the
+ * onboarding / announcement report AppFrame sends. Those calls happen on
+ * mount — long before any update is known, which on a fresh launch
  * is every launch — so these cannot live behind showUpdateWindow: a handler
  * that only exists once the dialog has opened cannot answer the very first
  * invoke, and ipcRenderer.invoke rejects with "No handler registered".
@@ -63,6 +77,9 @@ function registerSettingsIpc(): void {
     }
     if (currentState.phase === 'available' || currentState.phase === 'error') actions?.onDownload()
     return true
+  })
+  ipcMain.handle(UPDATE_CHANNELS.promptBlocked, (_event, blocked: unknown) => {
+    setUpdatePromptBlocked(blocked === true)
   })
 }
 registerSettingsIpc()
@@ -95,6 +112,50 @@ export function currentUpdateUiState(): UpdateUiState | null {
   return currentState
 }
 
+/** the shell window's onboarding / announcement report (see the header) */
+export function setUpdatePromptBlocked(blocked: boolean): void {
+  promptBlocked = blocked
+  if (blocked || !pendingPrompt) return
+  const run = pendingPrompt
+  pendingPrompt = null
+  run()
+}
+
+/**
+ * Run `show` now when nothing on the shell window must stay uncovered, else as
+ * soon as the shell window reports it clear. Only the latest waiting card is
+ * kept; `show` re-checks whatever it depends on, since time passes in between.
+ */
+export function whenUpdatePromptAllowed(show: () => void): void {
+  if (!promptBlocked) {
+    pendingPrompt = null
+    show()
+    return
+  }
+  pendingPrompt = show
+}
+
+/**
+ * Make an update known without opening the card (an automatic card waiting
+ * for the shell window, or one the user put away less than a day ago): the
+ * Settings → About row offers it, and open-for-update opens the card with
+ * these actions. An open card is refreshed in place.
+ */
+export function rememberUpdate(
+  parent: BrowserWindow | null,
+  state: UpdateUiState,
+  windowActions: UpdateActions,
+): void {
+  currentState = state
+  actions = windowActions
+  if (parent && !parent.isDestroyed()) lastParent = parent
+  registerIpc()
+  broadcastState()
+  if (updateWin && !updateWin.isDestroyed()) {
+    updateWin.webContents.send(UPDATE_CHANNELS.changed, currentState)
+  }
+}
+
 export function showUpdateWindow(
   parent: BrowserWindow | null,
   state: UpdateUiState,
@@ -115,7 +176,9 @@ export function showUpdateWindow(
 
   const win = new BrowserWindow({
     width: 400,
-    height: 430,
+    // room for the longer notify-flow instructions (macOS: quit, then drag
+    // into Applications) in the wordier locales
+    height: 450,
     ...(parent && !parent.isDestroyed() ? { parent } : {}),
     frame: false,
     transparent: true,

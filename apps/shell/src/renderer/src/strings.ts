@@ -379,12 +379,13 @@ export const strings = {
     setAiLocalToolsTip: 'Faam AI 通过调用工具来编辑文档，不支持工具调用的模型只能聊天。',
     setAiSearchAutoHint: '免费，无需密钥：通过 Parallel 搜索，失败时改用 DuckDuckGo。',
     setFaamAccount: 'FaamOffice 账号',
-    setFaamAccountDesc: '可选。登录后可使用按积分计费的 Faam AI Cloud。',
+    setFaamAccountDesc: '可选。登录后即可在应用中使用 Faam AI Cloud 模型。',
     setFaamSignIn: '登录',
     setFaamRegister: '创建账号',
     setFaamSignOut: '退出登录',
     setFaamManage: '管理账号',
     setFaamCredits: '{n} 积分',
+    setFaamQuota: '今日：已用 {used}/{limit} 次 Faam AI',
     setFaamOffline: '暂时无法连接账号服务器',
     setFaamWaiting: '已在浏览器中打开登录页面。请确认代码 {code} 以完成登录…',
     setFaamErrNetwork: '无法连接账号服务器，请检查服务器地址。',
@@ -394,7 +395,8 @@ export const strings = {
     setFaamServer: '账号服务器',
     setFaamServerHint: '你注册账号的 FaamOffice 网站地址。更换服务器会退出登录。',
     setFaamServerInvalid: '地址无效：应以 http:// 或 https:// 开头。',
-    setAiFaamCloudNote: '使用你的 FaamOffice 账号，每次请求扣除积分。请在“设置 → 个人资料”中登录。',
+    setAiFaamCloudNote:
+      '使用你的 FaamOffice 账号，服务器可能会限制每日请求次数。请在“设置 → 个人资料”中登录。',
     // Startup announcements from the account server
     announcementClose: '关闭',
     announcementDontShowAgain: '不再显示',
@@ -405,6 +407,10 @@ export const strings = {
     announcementLinkFallback: '了解更多',
     announcementLoading: '正在加载…',
     announcementLoadFailed: '无法加载此公告。',
+    // Follow buttons above Settings in the Home sidebar (brand names stay untranslated)
+    socialFollowGroup: '关注 FaamOffice',
+    socialFollowOn: '在 {platform} 上关注',
+    socialOpenWebsite: '访问网站',
   },
   en: {
     addFolderRoot: 'Add folder…',
@@ -799,12 +805,13 @@ export const strings = {
     setAiSearchAutoHint:
       'Free, no key needed: searches through Parallel, falling back to DuckDuckGo.',
     setFaamAccount: 'FaamOffice account',
-    setFaamAccountDesc: 'Optional. Sign in to use Faam AI Cloud, paid with credits.',
+    setFaamAccountDesc: 'Optional. Sign in to use Faam AI Cloud models right in the app.',
     setFaamSignIn: 'Sign in',
     setFaamRegister: 'Create account',
     setFaamSignOut: 'Sign out',
     setFaamManage: 'Manage account',
     setFaamCredits: '{n} credits',
+    setFaamQuota: 'Today: {used}/{limit} Faam AI requests',
     setFaamOffline: 'account server unreachable right now',
     setFaamWaiting:
       'A sign-in page opened in your browser. Confirm the code {code} there to finish…',
@@ -817,7 +824,7 @@ export const strings = {
       'Address of the FaamOffice website where you have your account. Changing it signs you out.',
     setFaamServerInvalid: 'Invalid address: it must start with http:// or https://.',
     setAiFaamCloudNote:
-      'Uses your FaamOffice account; each request spends credits. Sign in under Settings → Profile.',
+      'Uses your FaamOffice account; the server may limit requests per day. Sign in under Settings → Profile.',
     // Startup announcements from the account server
     announcementClose: 'Close',
     announcementDontShowAgain: "Don't show this again",
@@ -828,6 +835,10 @@ export const strings = {
     announcementLinkFallback: 'Learn more',
     announcementLoading: 'Loading…',
     announcementLoadFailed: "Couldn't load this announcement.",
+    // Follow buttons above Settings in the Home sidebar (brand names stay untranslated)
+    socialFollowGroup: 'Follow FaamOffice',
+    socialFollowOn: 'Follow on {platform}',
+    socialOpenWebsite: 'Visit the website',
   },
   vi: {
     addFolderRoot: 'Thêm thư mục…',
@@ -1221,12 +1232,14 @@ export const strings = {
     setAiSearchAutoHint:
       'Miễn phí, không cần key: tìm qua Parallel, nếu không được thì dùng DuckDuckGo.',
     setFaamAccount: 'Tài khoản FaamOffice',
-    setFaamAccountDesc: 'Không bắt buộc. Đăng nhập để dùng Faam AI Cloud, trả bằng credit.',
+    setFaamAccountDesc:
+      'Không bắt buộc. Đăng nhập để dùng các mô hình Faam AI Cloud ngay trong ứng dụng.',
     setFaamSignIn: 'Đăng nhập',
     setFaamRegister: 'Tạo tài khoản',
     setFaamSignOut: 'Đăng xuất',
     setFaamManage: 'Quản lý tài khoản',
     setFaamCredits: '{n} credit',
+    setFaamQuota: 'Hôm nay: {used}/{limit} lượt Faam AI',
     setFaamOffline: 'tạm thời không kết nối được máy chủ tài khoản',
     setFaamWaiting:
       'Đã mở trang đăng nhập trên trình duyệt. Hãy xác nhận mã {code} ở đó để hoàn tất…',
@@ -1238,7 +1251,7 @@ export const strings = {
     setFaamServerHint: 'Địa chỉ website FaamOffice nơi bạn có tài khoản. Đổi máy chủ sẽ đăng xuất.',
     setFaamServerInvalid: 'Địa chỉ không hợp lệ: cần bắt đầu bằng http:// hoặc https://.',
     setAiFaamCloudNote:
-      'Dùng tài khoản FaamOffice của bạn; mỗi yêu cầu trừ credit. Đăng nhập trong Cài đặt → Hồ sơ.',
+      'Dùng tài khoản FaamOffice của bạn; máy chủ có thể giới hạn số lượt mỗi ngày. Đăng nhập trong Cài đặt → Hồ sơ.',
     // Startup announcements from the account server
     announcementClose: 'Đóng',
     announcementDontShowAgain: 'Không hiển thị lại',
@@ -1249,6 +1262,10 @@ export const strings = {
     announcementLinkFallback: 'Xem chi tiết',
     announcementLoading: 'Đang tải…',
     announcementLoadFailed: 'Không tải được thông báo này.',
+    // Follow buttons above Settings in the Home sidebar (brand names stay untranslated)
+    socialFollowGroup: 'Theo dõi FaamOffice',
+    socialFollowOn: 'Theo dõi trên {platform}',
+    socialOpenWebsite: 'Truy cập trang web',
   },
   ja: {
     addFolderRoot: 'フォルダーを追加…',
@@ -1655,12 +1672,13 @@ export const strings = {
       'Faam AI はツール呼び出しで文書を編集するため、ツール呼び出しに対応しないモデルは会話のみ可能です。',
     setAiSearchAutoHint: '無料・キー不要：Parallel で検索し、失敗時は DuckDuckGo を使います。',
     setFaamAccount: 'FaamOffice アカウント',
-    setFaamAccountDesc: '任意です。サインインすると、クレジット制の Faam AI Cloud を使えます。',
+    setFaamAccountDesc: '任意です。サインインすると、アプリ内で Faam AI Cloud のモデルを使えます。',
     setFaamSignIn: 'サインイン',
     setFaamRegister: 'アカウントを作成',
     setFaamSignOut: 'サインアウト',
     setFaamManage: 'アカウントを管理',
     setFaamCredits: '{n} クレジット',
+    setFaamQuota: '今日: Faam AI {used}/{limit} 回',
     setFaamOffline: 'アカウントサーバーに一時的に接続できません',
     setFaamWaiting:
       'ブラウザーでサインインページを開きました。コード {code} を確認して完了してください…',
@@ -1673,7 +1691,7 @@ export const strings = {
       'アカウントを登録した FaamOffice サイトのアドレス。変更するとサインアウトします。',
     setFaamServerInvalid: '無効なアドレスです。http:// または https:// で始めてください。',
     setAiFaamCloudNote:
-      'FaamOffice アカウントを使い、リクエストごとにクレジットを消費します。「設定 → プロフィール」でサインインしてください。',
+      'FaamOffice アカウントを使います。1 日のリクエスト数はサーバー側で制限される場合があります。「設定 → プロフィール」でサインインしてください。',
     // Startup announcements from the account server
     announcementClose: '閉じる',
     announcementDontShowAgain: '今後表示しない',
@@ -1684,6 +1702,10 @@ export const strings = {
     announcementLinkFallback: '詳しく見る',
     announcementLoading: '読み込み中…',
     announcementLoadFailed: 'このお知らせを読み込めませんでした。',
+    // Follow buttons above Settings in the Home sidebar (brand names stay untranslated)
+    socialFollowGroup: 'FaamOffice をフォロー',
+    socialFollowOn: '{platform} でフォロー',
+    socialOpenWebsite: 'Web サイトを開く',
   },
   ko: {
     addFolderRoot: '폴더 추가…',
@@ -2082,12 +2104,13 @@ export const strings = {
     setAiSearchAutoHint: '무료, 키 불필요: Parallel로 검색하고 실패하면 DuckDuckGo를 사용합니다.',
     setFaamAccount: 'FaamOffice 계정',
     setFaamAccountDesc:
-      '선택 사항입니다. 로그인하면 크레딧으로 결제하는 Faam AI Cloud를 사용할 수 있습니다.',
+      '선택 사항입니다. 로그인하면 앱에서 바로 Faam AI Cloud 모델을 사용할 수 있습니다.',
     setFaamSignIn: '로그인',
     setFaamRegister: '계정 만들기',
     setFaamSignOut: '로그아웃',
     setFaamManage: '계정 관리',
     setFaamCredits: '{n} 크레딧',
+    setFaamQuota: '오늘: Faam AI {used}/{limit}회',
     setFaamOffline: '지금은 계정 서버에 연결할 수 없습니다',
     setFaamWaiting: '브라우저에서 로그인 페이지를 열었습니다. 코드 {code}를 확인하면 완료됩니다…',
     setFaamErrNetwork: '계정 서버에 연결할 수 없습니다. 서버 주소를 확인하세요.',
@@ -2098,7 +2121,7 @@ export const strings = {
     setFaamServerHint: '계정이 있는 FaamOffice 웹사이트 주소입니다. 바꾸면 로그아웃됩니다.',
     setFaamServerInvalid: '잘못된 주소입니다. http:// 또는 https://로 시작해야 합니다.',
     setAiFaamCloudNote:
-      'FaamOffice 계정을 사용하며 요청마다 크레딧이 차감됩니다. 설정 → 프로필에서 로그인하세요.',
+      'FaamOffice 계정을 사용하며, 서버에서 하루 요청 수를 제한할 수 있습니다. 설정 → 프로필에서 로그인하세요.',
     // Startup announcements from the account server
     announcementClose: '닫기',
     announcementDontShowAgain: '다시 표시하지 않기',
@@ -2109,6 +2132,10 @@ export const strings = {
     announcementLinkFallback: '자세히 보기',
     announcementLoading: '불러오는 중…',
     announcementLoadFailed: '이 공지를 불러오지 못했습니다.',
+    // Follow buttons above Settings in the Home sidebar (brand names stay untranslated)
+    socialFollowGroup: 'FaamOffice 팔로우',
+    socialFollowOn: '{platform}에서 팔로우',
+    socialOpenWebsite: '웹사이트 방문',
   },
   fr: {
     addFolderRoot: 'Ajouter un dossier…',
@@ -2521,12 +2548,14 @@ export const strings = {
       'Faam AI modifie les documents par appels d’outils : un modèle qui ne les gère pas peut seulement discuter.',
     setAiSearchAutoHint: 'Gratuit, sans clé : recherche via Parallel, avec DuckDuckGo en secours.',
     setFaamAccount: 'Compte FaamOffice',
-    setFaamAccountDesc: 'Facultatif. Connectez-vous pour utiliser Faam AI Cloud, payé en crédits.',
+    setFaamAccountDesc:
+      "Facultatif. Connectez-vous pour utiliser les modèles Faam AI Cloud directement dans l'application.",
     setFaamSignIn: 'Se connecter',
     setFaamRegister: 'Créer un compte',
     setFaamSignOut: 'Se déconnecter',
     setFaamManage: 'Gérer le compte',
     setFaamCredits: '{n} crédits',
+    setFaamQuota: "Aujourd'hui : {used}/{limit} requêtes Faam AI",
     setFaamOffline: 'serveur de compte injoignable pour le moment',
     setFaamWaiting:
       'Une page de connexion s’est ouverte dans votre navigateur. Confirmez-y le code {code} pour terminer…',
@@ -2539,7 +2568,7 @@ export const strings = {
       'Adresse du site FaamOffice où se trouve votre compte. La changer vous déconnecte.',
     setFaamServerInvalid: 'Adresse invalide : elle doit commencer par http:// ou https://.',
     setAiFaamCloudNote:
-      'Utilise votre compte FaamOffice ; chaque requête consomme des crédits. Connectez-vous dans Réglages → Profil.',
+      'Utilise votre compte FaamOffice ; le serveur peut limiter le nombre de requêtes par jour. Connectez-vous dans Réglages → Profil.',
     // Startup announcements from the account server
     announcementClose: 'Fermer',
     announcementDontShowAgain: 'Ne plus afficher',
@@ -2550,6 +2579,10 @@ export const strings = {
     announcementLinkFallback: 'En savoir plus',
     announcementLoading: 'Chargement…',
     announcementLoadFailed: 'Impossible de charger cette annonce.',
+    // Follow buttons above Settings in the Home sidebar (brand names stay untranslated)
+    socialFollowGroup: 'Suivre FaamOffice',
+    socialFollowOn: 'Suivre sur {platform}',
+    socialOpenWebsite: 'Visiter le site web',
   },
   de: {
     addFolderRoot: 'Ordner hinzufügen…',
@@ -2967,12 +3000,13 @@ export const strings = {
       'Kostenlos, ohne Schlüssel: sucht über Parallel, ersatzweise über DuckDuckGo.',
     setFaamAccount: 'FaamOffice-Konto',
     setFaamAccountDesc:
-      'Optional. Melden Sie sich an, um Faam AI Cloud zu nutzen, abgerechnet in Credits.',
+      'Optional. Melden Sie sich an, um die Modelle von Faam AI Cloud direkt in der App zu nutzen.',
     setFaamSignIn: 'Anmelden',
     setFaamRegister: 'Konto erstellen',
     setFaamSignOut: 'Abmelden',
     setFaamManage: 'Konto verwalten',
     setFaamCredits: '{n} Credits',
+    setFaamQuota: 'Heute: {used}/{limit} Faam-AI-Anfragen',
     setFaamOffline: 'Kontoserver gerade nicht erreichbar',
     setFaamWaiting:
       'Im Browser wurde eine Anmeldeseite geöffnet. Bestätigen Sie dort den Code {code}…',
@@ -2985,7 +3019,7 @@ export const strings = {
       'Adresse der FaamOffice-Website mit Ihrem Konto. Eine Änderung meldet Sie ab.',
     setFaamServerInvalid: 'Ungültige Adresse: Sie muss mit http:// oder https:// beginnen.',
     setAiFaamCloudNote:
-      'Nutzt Ihr FaamOffice-Konto; jede Anfrage verbraucht Credits. Anmelden unter Einstellungen → Profil.',
+      'Nutzt Ihr FaamOffice-Konto; der Server kann die Anfragen pro Tag begrenzen. Anmelden unter Einstellungen → Profil.',
     // Startup announcements from the account server
     announcementClose: 'Schließen',
     announcementDontShowAgain: 'Nicht mehr anzeigen',
@@ -2996,6 +3030,10 @@ export const strings = {
     announcementLinkFallback: 'Mehr erfahren',
     announcementLoading: 'Wird geladen…',
     announcementLoadFailed: 'Diese Ankündigung konnte nicht geladen werden.',
+    // Follow buttons above Settings in the Home sidebar (brand names stay untranslated)
+    socialFollowGroup: 'FaamOffice folgen',
+    socialFollowOn: 'Auf {platform} folgen',
+    socialOpenWebsite: 'Website besuchen',
   },
   es: {
     addFolderRoot: 'Añadir carpeta…',
@@ -3409,12 +3447,13 @@ export const strings = {
     setAiSearchAutoHint: 'Gratis, sin clave: busca con Parallel y, si falla, con DuckDuckGo.',
     setFaamAccount: 'Cuenta de FaamOffice',
     setFaamAccountDesc:
-      'Opcional. Inicia sesión para usar Faam AI Cloud, que se paga con créditos.',
+      'Opcional. Inicia sesión para usar los modelos de Faam AI Cloud directamente en la app.',
     setFaamSignIn: 'Iniciar sesión',
     setFaamRegister: 'Crear cuenta',
     setFaamSignOut: 'Cerrar sesión',
     setFaamManage: 'Administrar cuenta',
     setFaamCredits: '{n} créditos',
+    setFaamQuota: 'Hoy: {used}/{limit} solicitudes de Faam AI',
     setFaamOffline: 'el servidor de cuentas no responde ahora',
     setFaamWaiting:
       'Se abrió una página de inicio de sesión en tu navegador. Confirma allí el código {code} para terminar…',
@@ -3427,7 +3466,7 @@ export const strings = {
       'Dirección del sitio de FaamOffice donde tienes tu cuenta. Cambiarla cierra la sesión.',
     setFaamServerInvalid: 'Dirección no válida: debe empezar por http:// o https://.',
     setAiFaamCloudNote:
-      'Usa tu cuenta de FaamOffice; cada solicitud gasta créditos. Inicia sesión en Ajustes → Perfil.',
+      'Usa tu cuenta de FaamOffice; el servidor puede limitar las solicitudes diarias. Inicia sesión en Ajustes → Perfil.',
     // Startup announcements from the account server
     announcementClose: 'Cerrar',
     announcementDontShowAgain: 'No volver a mostrar',
@@ -3438,6 +3477,10 @@ export const strings = {
     announcementLinkFallback: 'Más información',
     announcementLoading: 'Cargando…',
     announcementLoadFailed: 'No se pudo cargar este anuncio.',
+    // Follow buttons above Settings in the Home sidebar (brand names stay untranslated)
+    socialFollowGroup: 'Sigue a FaamOffice',
+    socialFollowOn: 'Seguir en {platform}',
+    socialOpenWebsite: 'Visitar el sitio web',
   },
   th: {
     addFolderRoot: 'เพิ่มโฟลเดอร์…',
@@ -3830,12 +3873,13 @@ export const strings = {
       'Faam AI แก้ไขเอกสารผ่านการเรียกใช้เครื่องมือ โมเดลที่ไม่รองรับจึงทำได้แค่สนทนา',
     setAiSearchAutoHint: 'ฟรี ไม่ต้องใช้คีย์: ค้นหาผ่าน Parallel และใช้ DuckDuckGo หากไม่สำเร็จ',
     setFaamAccount: 'บัญชี FaamOffice',
-    setFaamAccountDesc: 'ไม่บังคับ ลงชื่อเข้าใช้เพื่อใช้ Faam AI Cloud ที่ชำระด้วยเครดิต',
+    setFaamAccountDesc: 'ไม่บังคับ ลงชื่อเข้าใช้เพื่อใช้โมเดลของ Faam AI Cloud ได้ในแอปทันที',
     setFaamSignIn: 'ลงชื่อเข้าใช้',
     setFaamRegister: 'สร้างบัญชี',
     setFaamSignOut: 'ออกจากระบบ',
     setFaamManage: 'จัดการบัญชี',
     setFaamCredits: '{n} เครดิต',
+    setFaamQuota: 'วันนี้: Faam AI {used}/{limit} ครั้ง',
     setFaamOffline: 'ขณะนี้เชื่อมต่อเซิร์ฟเวอร์บัญชีไม่ได้',
     setFaamWaiting:
       'เปิดหน้าลงชื่อเข้าใช้ในเบราว์เซอร์แล้ว ยืนยันรหัส {code} ที่นั่นเพื่อดำเนินการให้เสร็จ…',
@@ -3847,7 +3891,7 @@ export const strings = {
     setFaamServerHint: 'ที่อยู่เว็บไซต์ FaamOffice ที่คุณมีบัญชี การเปลี่ยนจะออกจากระบบ',
     setFaamServerInvalid: 'ที่อยู่ไม่ถูกต้อง ต้องขึ้นต้นด้วย http:// หรือ https://',
     setAiFaamCloudNote:
-      'ใช้บัญชี FaamOffice ของคุณ แต่ละคำขอจะหักเครดิต ลงชื่อเข้าใช้ที่การตั้งค่า → โปรไฟล์',
+      'ใช้บัญชี FaamOffice ของคุณ เซิร์ฟเวอร์อาจจำกัดจำนวนคำขอต่อวัน ลงชื่อเข้าใช้ที่การตั้งค่า → โปรไฟล์',
     // Startup announcements from the account server
     announcementClose: 'ปิด',
     announcementDontShowAgain: 'ไม่ต้องแสดงอีก',
@@ -3858,6 +3902,10 @@ export const strings = {
     announcementLinkFallback: 'ดูรายละเอียด',
     announcementLoading: 'กำลังโหลด…',
     announcementLoadFailed: 'โหลดประกาศนี้ไม่ได้',
+    // Follow buttons above Settings in the Home sidebar (brand names stay untranslated)
+    socialFollowGroup: 'ติดตาม FaamOffice',
+    socialFollowOn: 'ติดตามบน {platform}',
+    socialOpenWebsite: 'เยี่ยมชมเว็บไซต์',
   },
   id: {
     addFolderRoot: 'Tambah folder…',
@@ -4263,12 +4311,13 @@ export const strings = {
       'Faam AI mengedit dokumen lewat pemanggilan alat, jadi model tanpa tool calling hanya bisa mengobrol.',
     setAiSearchAutoHint: 'Gratis, tanpa kunci: mencari lewat Parallel, lalu DuckDuckGo bila gagal.',
     setFaamAccount: 'Akun FaamOffice',
-    setFaamAccountDesc: 'Opsional. Masuk untuk memakai Faam AI Cloud yang dibayar dengan kredit.',
+    setFaamAccountDesc: 'Opsional. Masuk untuk memakai model Faam AI Cloud langsung di aplikasi.',
     setFaamSignIn: 'Masuk',
     setFaamRegister: 'Buat akun',
     setFaamSignOut: 'Keluar',
     setFaamManage: 'Kelola akun',
     setFaamCredits: '{n} kredit',
+    setFaamQuota: 'Hari ini: {used}/{limit} permintaan Faam AI',
     setFaamOffline: 'server akun sedang tidak terjangkau',
     setFaamWaiting:
       'Halaman masuk terbuka di peramban. Konfirmasikan kode {code} di sana untuk menyelesaikan…',
@@ -4281,7 +4330,7 @@ export const strings = {
       'Alamat situs FaamOffice tempat akun Anda. Mengubahnya akan mengeluarkan Anda.',
     setFaamServerInvalid: 'Alamat tidak valid: harus diawali http:// atau https://.',
     setAiFaamCloudNote:
-      'Memakai akun FaamOffice Anda; setiap permintaan memotong kredit. Masuk di Pengaturan → Profil.',
+      'Memakai akun FaamOffice Anda; server dapat membatasi jumlah permintaan per hari. Masuk di Pengaturan → Profil.',
     // Startup announcements from the account server
     announcementClose: 'Tutup',
     announcementDontShowAgain: 'Jangan tampilkan lagi',
@@ -4292,6 +4341,10 @@ export const strings = {
     announcementLinkFallback: 'Selengkapnya',
     announcementLoading: 'Memuat…',
     announcementLoadFailed: 'Pengumuman ini tidak dapat dimuat.',
+    // Follow buttons above Settings in the Home sidebar (brand names stay untranslated)
+    socialFollowGroup: 'Ikuti FaamOffice',
+    socialFollowOn: 'Ikuti di {platform}',
+    socialOpenWebsite: 'Kunjungi situs web',
   },
   ru: {
     addFolderRoot: 'Добавить папку…',
@@ -4700,12 +4753,13 @@ export const strings = {
       'Бесплатно и без ключа: поиск через Parallel, при сбое — через DuckDuckGo.',
     setFaamAccount: 'Аккаунт FaamOffice',
     setFaamAccountDesc:
-      'Необязательно. Войдите, чтобы пользоваться Faam AI Cloud с оплатой кредитами.',
+      'Необязательно. Войдите, чтобы пользоваться моделями Faam AI Cloud прямо в приложении.',
     setFaamSignIn: 'Войти',
     setFaamRegister: 'Создать аккаунт',
     setFaamSignOut: 'Выйти',
     setFaamManage: 'Управление аккаунтом',
     setFaamCredits: 'Кредитов: {n}',
+    setFaamQuota: 'Сегодня: {used}/{limit} запросов к Faam AI',
     setFaamOffline: 'сервер аккаунтов сейчас недоступен',
     setFaamWaiting:
       'В браузере открылась страница входа. Подтвердите там код {code}, чтобы завершить…',
@@ -4718,7 +4772,7 @@ export const strings = {
       'Адрес сайта FaamOffice, где у вас аккаунт. При смене вы выйдете из аккаунта.',
     setFaamServerInvalid: 'Неверный адрес: он должен начинаться с http:// или https://.',
     setAiFaamCloudNote:
-      'Использует ваш аккаунт FaamOffice; каждый запрос расходует кредиты. Войдите в «Настройки → Профиль».',
+      'Использует ваш аккаунт FaamOffice; сервер может ограничивать число запросов в день. Войдите в «Настройки → Профиль».',
     // Startup announcements from the account server
     announcementClose: 'Закрыть',
     announcementDontShowAgain: 'Больше не показывать',
@@ -4729,6 +4783,10 @@ export const strings = {
     announcementLinkFallback: 'Подробнее',
     announcementLoading: 'Загрузка…',
     announcementLoadFailed: 'Не удалось загрузить объявление.',
+    // Follow buttons above Settings in the Home sidebar (brand names stay untranslated)
+    socialFollowGroup: 'Следите за FaamOffice',
+    socialFollowOn: 'Подписаться в {platform}',
+    socialOpenWebsite: 'Открыть сайт',
   },
   ar: {
     addFolderRoot: 'إضافة مجلد…',
@@ -5123,12 +5181,13 @@ export const strings = {
       'يحرّر Faam AI المستندات عبر استدعاء الأدوات، لذا فالنموذج الذي لا يدعمها يمكنه الدردشة فقط.',
     setAiSearchAutoHint: 'مجاني ومن دون مفتاح: يبحث عبر Parallel، ثم DuckDuckGo عند التعذّر.',
     setFaamAccount: 'حساب FaamOffice',
-    setFaamAccountDesc: 'اختياري. سجّل الدخول لاستخدام Faam AI Cloud المدفوع بالرصيد.',
+    setFaamAccountDesc: 'اختياري. سجّل الدخول لاستخدام نماذج Faam AI Cloud مباشرةً داخل التطبيق.',
     setFaamSignIn: 'تسجيل الدخول',
     setFaamRegister: 'إنشاء حساب',
     setFaamSignOut: 'تسجيل الخروج',
     setFaamManage: 'إدارة الحساب',
     setFaamCredits: 'الرصيد: {n}',
+    setFaamQuota: 'اليوم: {used}/{limit} من طلبات Faam AI',
     setFaamOffline: 'تعذّر الوصول إلى خادم الحسابات حاليًا',
     setFaamWaiting: 'فُتحت صفحة تسجيل الدخول في المتصفح. أكّد الرمز {code} هناك لإكمال العملية…',
     setFaamErrNetwork: 'تعذّر الوصول إلى خادم الحسابات. تحقّق من عنوان الخادم.',
@@ -5139,7 +5198,7 @@ export const strings = {
     setFaamServerHint: 'عنوان موقع FaamOffice الذي يوجد فيه حسابك. تغييره يسجّل خروجك.',
     setFaamServerInvalid: 'عنوان غير صالح: يجب أن يبدأ بـ http:// أو https://.',
     setAiFaamCloudNote:
-      'يستخدم حساب FaamOffice الخاص بك؛ وكل طلب يستهلك رصيدًا. سجّل الدخول من الإعدادات ← الملف الشخصي.',
+      'يستخدم حساب FaamOffice الخاص بك؛ وقد يحدّ الخادم من عدد الطلبات اليومية. سجّل الدخول من الإعدادات ← الملف الشخصي.',
     // Startup announcements from the account server
     announcementClose: 'إغلاق',
     announcementDontShowAgain: 'عدم الإظهار مرة أخرى',
@@ -5150,6 +5209,10 @@ export const strings = {
     announcementLinkFallback: 'اعرف المزيد',
     announcementLoading: 'جارٍ التحميل…',
     announcementLoadFailed: 'تعذّر تحميل هذا الإعلان.',
+    // Follow buttons above Settings in the Home sidebar (brand names stay untranslated)
+    socialFollowGroup: 'تابع FaamOffice',
+    socialFollowOn: 'تابعنا على {platform}',
+    socialOpenWebsite: 'زيارة الموقع الإلكتروني',
   },
   pt: {
     addFolderRoot: 'Adicionar pasta…',
@@ -5552,12 +5615,13 @@ export const strings = {
       'O Faam AI edita documentos por chamadas de ferramentas; um modelo sem esse recurso só consegue conversar.',
     setAiSearchAutoHint: 'Grátis, sem chave: busca pelo Parallel e, se falhar, pelo DuckDuckGo.',
     setFaamAccount: 'Conta FaamOffice',
-    setFaamAccountDesc: 'Opcional. Entre para usar o Faam AI Cloud, pago com créditos.',
+    setFaamAccountDesc: 'Opcional. Entre para usar os modelos do Faam AI Cloud direto no app.',
     setFaamSignIn: 'Entrar',
     setFaamRegister: 'Criar conta',
     setFaamSignOut: 'Sair',
     setFaamManage: 'Gerenciar conta',
     setFaamCredits: '{n} créditos',
+    setFaamQuota: 'Hoje: {used}/{limit} solicitações do Faam AI',
     setFaamOffline: 'servidor de contas inacessível no momento',
     setFaamWaiting:
       'Uma página de login abriu no navegador. Confirme lá o código {code} para concluir…',
@@ -5570,7 +5634,7 @@ export const strings = {
       'Endereço do site do FaamOffice onde está sua conta. Alterá-lo encerra a sessão.',
     setFaamServerInvalid: 'Endereço inválido: deve começar com http:// ou https://.',
     setAiFaamCloudNote:
-      'Usa sua conta FaamOffice; cada solicitação gasta créditos. Entre em Configurações → Perfil.',
+      'Usa sua conta FaamOffice; o servidor pode limitar as solicitações diárias. Entre em Configurações → Perfil.',
     // Startup announcements from the account server
     announcementClose: 'Fechar',
     announcementDontShowAgain: 'Não mostrar novamente',
@@ -5581,6 +5645,10 @@ export const strings = {
     announcementLinkFallback: 'Saiba mais',
     announcementLoading: 'Carregando…',
     announcementLoadFailed: 'Não foi possível carregar este comunicado.',
+    // Follow buttons above Settings in the Home sidebar (brand names stay untranslated)
+    socialFollowGroup: 'Siga o FaamOffice',
+    socialFollowOn: 'Seguir no {platform}',
+    socialOpenWebsite: 'Visitar o site',
   },
   it: {
     addFolderRoot: 'Aggiungi cartella…',
@@ -5980,12 +6048,14 @@ export const strings = {
     setAiSearchAutoHint:
       'Gratuito, senza chiave: cerca tramite Parallel, con DuckDuckGo come riserva.',
     setFaamAccount: 'Account FaamOffice',
-    setFaamAccountDesc: 'Facoltativo. Accedi per usare Faam AI Cloud, pagato con crediti.',
+    setFaamAccountDesc:
+      "Facoltativo. Accedi per usare i modelli di Faam AI Cloud direttamente nell'app.",
     setFaamSignIn: 'Accedi',
     setFaamRegister: 'Crea account',
     setFaamSignOut: 'Esci',
     setFaamManage: 'Gestisci account',
     setFaamCredits: '{n} crediti',
+    setFaamQuota: 'Oggi: {used}/{limit} richieste a Faam AI',
     setFaamOffline: 'server degli account non raggiungibile al momento',
     setFaamWaiting:
       'Nel browser si è aperta una pagina di accesso. Conferma lì il codice {code} per completare…',
@@ -5998,7 +6068,7 @@ export const strings = {
       'Indirizzo del sito FaamOffice dove hai l’account. Cambiarlo ti disconnette.',
     setFaamServerInvalid: 'Indirizzo non valido: deve iniziare con http:// o https://.',
     setAiFaamCloudNote:
-      'Usa il tuo account FaamOffice; ogni richiesta consuma crediti. Accedi da Impostazioni → Profilo.',
+      'Usa il tuo account FaamOffice; il server può limitare le richieste giornaliere. Accedi da Impostazioni → Profilo.',
     // Startup announcements from the account server
     announcementClose: 'Chiudi',
     announcementDontShowAgain: 'Non mostrare più',
@@ -6009,6 +6079,10 @@ export const strings = {
     announcementLinkFallback: 'Scopri di più',
     announcementLoading: 'Caricamento…',
     announcementLoadFailed: 'Impossibile caricare questo annuncio.',
+    // Follow buttons above Settings in the Home sidebar (brand names stay untranslated)
+    socialFollowGroup: 'Segui FaamOffice',
+    socialFollowOn: 'Segui su {platform}',
+    socialOpenWebsite: 'Visita il sito web',
   },
   pl: {
     addFolderRoot: 'Dodaj folder…',
@@ -6408,12 +6482,13 @@ export const strings = {
       'Bezpłatnie, bez klucza: wyszukuje przez Parallel, a w razie problemu przez DuckDuckGo.',
     setFaamAccount: 'Konto FaamOffice',
     setFaamAccountDesc:
-      'Opcjonalnie. Zaloguj się, aby korzystać z Faam AI Cloud rozliczanego w kredytach.',
+      'Opcjonalnie. Zaloguj się, aby korzystać z modeli Faam AI Cloud bezpośrednio w aplikacji.',
     setFaamSignIn: 'Zaloguj się',
     setFaamRegister: 'Utwórz konto',
     setFaamSignOut: 'Wyloguj się',
     setFaamManage: 'Zarządzaj kontem',
     setFaamCredits: 'Kredyty: {n}',
+    setFaamQuota: 'Dziś: {used}/{limit} zapytań do Faam AI',
     setFaamOffline: 'serwer kont jest teraz niedostępny',
     setFaamWaiting:
       'W przeglądarce otwarto stronę logowania. Potwierdź tam kod {code}, aby dokończyć…',
@@ -6425,7 +6500,7 @@ export const strings = {
     setFaamServerHint: 'Adres witryny FaamOffice, na której masz konto. Zmiana wyloguje Cię.',
     setFaamServerInvalid: 'Nieprawidłowy adres: musi zaczynać się od http:// lub https://.',
     setAiFaamCloudNote:
-      'Korzysta z Twojego konta FaamOffice; każde żądanie zużywa kredyty. Zaloguj się w Ustawienia → Profil.',
+      'Korzysta z Twojego konta FaamOffice; serwer może ograniczać liczbę zapytań dziennie. Zaloguj się w Ustawienia → Profil.',
     // Startup announcements from the account server
     announcementClose: 'Zamknij',
     announcementDontShowAgain: 'Nie pokazuj ponownie',
@@ -6436,6 +6511,10 @@ export const strings = {
     announcementLinkFallback: 'Dowiedz się więcej',
     announcementLoading: 'Ładowanie…',
     announcementLoadFailed: 'Nie udało się wczytać tego ogłoszenia.',
+    // Follow buttons above Settings in the Home sidebar (brand names stay untranslated)
+    socialFollowGroup: 'Obserwuj FaamOffice',
+    socialFollowOn: 'Obserwuj na {platform}',
+    socialOpenWebsite: 'Odwiedź stronę internetową',
   },
   cs: {
     addFolderRoot: 'Přidat složku…',
@@ -6829,12 +6908,14 @@ export const strings = {
       'Faam AI upravuje dokumenty voláním nástrojů, takže model bez tool calling umí jen konverzovat.',
     setAiSearchAutoHint: 'Zdarma, bez klíče: hledá přes Parallel, při selhání přes DuckDuckGo.',
     setFaamAccount: 'Účet FaamOffice',
-    setFaamAccountDesc: 'Volitelné. Přihlaste se a používejte Faam AI Cloud placený kredity.',
+    setFaamAccountDesc:
+      'Volitelné. Přihlaste se a používejte modely Faam AI Cloud přímo v aplikaci.',
     setFaamSignIn: 'Přihlásit se',
     setFaamRegister: 'Vytvořit účet',
     setFaamSignOut: 'Odhlásit se',
     setFaamManage: 'Spravovat účet',
     setFaamCredits: 'Kredity: {n}',
+    setFaamQuota: 'Dnes: {used}/{limit} požadavků na Faam AI',
     setFaamOffline: 'server účtů je momentálně nedostupný',
     setFaamWaiting:
       'V prohlížeči se otevřela přihlašovací stránka. Dokončete potvrzením kódu {code}…',
@@ -6846,7 +6927,7 @@ export const strings = {
     setFaamServerHint: 'Adresa webu FaamOffice, kde máte účet. Změna vás odhlásí.',
     setFaamServerInvalid: 'Neplatná adresa: musí začínat http:// nebo https://.',
     setAiFaamCloudNote:
-      'Používá váš účet FaamOffice; každý požadavek spotřebuje kredity. Přihlaste se v Nastavení → Profil.',
+      'Používá váš účet FaamOffice; server může omezit počet požadavků za den. Přihlaste se v Nastavení → Profil.',
     // Startup announcements from the account server
     announcementClose: 'Zavřít',
     announcementDontShowAgain: 'Znovu nezobrazovat',
@@ -6857,6 +6938,10 @@ export const strings = {
     announcementLinkFallback: 'Další informace',
     announcementLoading: 'Načítání…',
     announcementLoadFailed: 'Toto oznámení se nepodařilo načíst.',
+    // Follow buttons above Settings in the Home sidebar (brand names stay untranslated)
+    socialFollowGroup: 'Sledujte FaamOffice',
+    socialFollowOn: 'Sledovat na {platform}',
+    socialOpenWebsite: 'Navštívit web',
   },
   nl: {
     addFolderRoot: 'Map toevoegen…',
@@ -7257,12 +7342,13 @@ export const strings = {
       'Gratis, geen sleutel nodig: zoekt via Parallel, met DuckDuckGo als terugval.',
     setFaamAccount: 'FaamOffice-account',
     setFaamAccountDesc:
-      'Optioneel. Meld je aan om Faam AI Cloud te gebruiken, betaald met credits.',
+      'Optioneel. Meld je aan om de modellen van Faam AI Cloud direct in de app te gebruiken.',
     setFaamSignIn: 'Aanmelden',
     setFaamRegister: 'Account maken',
     setFaamSignOut: 'Afmelden',
     setFaamManage: 'Account beheren',
     setFaamCredits: '{n} credits',
+    setFaamQuota: 'Vandaag: {used}/{limit} Faam AI-verzoeken',
     setFaamOffline: 'accountserver nu niet bereikbaar',
     setFaamWaiting:
       'Er is een aanmeldpagina geopend in je browser. Bevestig daar code {code} om af te ronden…',
@@ -7274,7 +7360,7 @@ export const strings = {
     setFaamServerHint: 'Adres van de FaamOffice-website met je account. Wijzigen meldt je af.',
     setFaamServerInvalid: 'Ongeldig adres: het moet beginnen met http:// of https://.',
     setAiFaamCloudNote:
-      'Gebruikt je FaamOffice-account; elk verzoek kost credits. Meld je aan via Instellingen → Profiel.',
+      'Gebruikt je FaamOffice-account; de server kan het aantal verzoeken per dag beperken. Meld je aan via Instellingen → Profiel.',
     // Startup announcements from the account server
     announcementClose: 'Sluiten',
     announcementDontShowAgain: 'Niet meer tonen',
@@ -7285,6 +7371,10 @@ export const strings = {
     announcementLinkFallback: 'Meer informatie',
     announcementLoading: 'Laden…',
     announcementLoadFailed: 'Deze aankondiging kan niet worden geladen.',
+    // Follow buttons above Settings in the Home sidebar (brand names stay untranslated)
+    socialFollowGroup: 'Volg FaamOffice',
+    socialFollowOn: 'Volgen op {platform}',
+    socialOpenWebsite: 'Website bezoeken',
   },
   ms: {
     addFolderRoot: 'Tambah folder…',
@@ -7688,12 +7778,13 @@ export const strings = {
       'Percuma, tanpa kunci: mencari melalui Parallel, kemudian DuckDuckGo jika gagal.',
     setFaamAccount: 'Akaun FaamOffice',
     setFaamAccountDesc:
-      'Pilihan. Log masuk untuk menggunakan Faam AI Cloud yang dibayar dengan kredit.',
+      'Pilihan. Log masuk untuk menggunakan model Faam AI Cloud terus dalam aplikasi.',
     setFaamSignIn: 'Log masuk',
     setFaamRegister: 'Cipta akaun',
     setFaamSignOut: 'Log keluar',
     setFaamManage: 'Urus akaun',
     setFaamCredits: '{n} kredit',
+    setFaamQuota: 'Hari ini: {used}/{limit} permintaan Faam AI',
     setFaamOffline: 'pelayan akaun tidak dapat dicapai buat masa ini',
     setFaamWaiting:
       'Halaman log masuk dibuka dalam pelayar. Sahkan kod {code} di sana untuk selesai…',
@@ -7706,7 +7797,7 @@ export const strings = {
       'Alamat laman FaamOffice tempat akaun anda. Menukarnya akan melog keluar anda.',
     setFaamServerInvalid: 'Alamat tidak sah: mesti bermula dengan http:// atau https://.',
     setAiFaamCloudNote:
-      'Menggunakan akaun FaamOffice anda; setiap permintaan menggunakan kredit. Log masuk di Tetapan → Profil.',
+      'Menggunakan akaun FaamOffice anda; pelayan mungkin mengehadkan permintaan harian. Log masuk di Tetapan → Profil.',
     // Startup announcements from the account server
     announcementClose: 'Tutup',
     announcementDontShowAgain: 'Jangan tunjukkan lagi',
@@ -7717,6 +7808,10 @@ export const strings = {
     announcementLinkFallback: 'Ketahui lebih lanjut',
     announcementLoading: 'Memuatkan…',
     announcementLoadFailed: 'Pengumuman ini tidak dapat dimuatkan.',
+    // Follow buttons above Settings in the Home sidebar (brand names stay untranslated)
+    socialFollowGroup: 'Ikuti FaamOffice',
+    socialFollowOn: 'Ikuti di {platform}',
+    socialOpenWebsite: 'Lawati laman web',
   },
   he: {
     addFolderRoot: 'הוספת תיקייה…',
@@ -8096,12 +8191,13 @@ export const strings = {
       'Faam AI עורך מסמכים באמצעות קריאה לכלים, ולכן מודל שאינו תומך בכך יכול רק לשוחח.',
     setAiSearchAutoHint: 'חינם וללא מפתח: מחפש דרך Parallel, ובמקרה של כישלון דרך DuckDuckGo.',
     setFaamAccount: 'חשבון FaamOffice',
-    setFaamAccountDesc: 'לא חובה. התחברו כדי להשתמש ב-Faam AI Cloud בתשלום בקרדיטים.',
+    setFaamAccountDesc: 'לא חובה. התחברו כדי להשתמש במודלים של Faam AI Cloud ישירות באפליקציה.',
     setFaamSignIn: 'התחברות',
     setFaamRegister: 'יצירת חשבון',
     setFaamSignOut: 'התנתקות',
     setFaamManage: 'ניהול החשבון',
     setFaamCredits: '{n} קרדיטים',
+    setFaamQuota: 'היום: {used}/{limit} בקשות Faam AI',
     setFaamOffline: 'שרת החשבונות אינו זמין כרגע',
     setFaamWaiting: 'נפתח דף התחברות בדפדפן. אשרו שם את הקוד {code} כדי לסיים…',
     setFaamErrNetwork: 'לא ניתן להתחבר לשרת החשבונות. בדקו את כתובת השרת.',
@@ -8112,7 +8208,7 @@ export const strings = {
     setFaamServerHint: 'כתובת אתר FaamOffice שבו נמצא החשבון שלך. שינוי הכתובת ינתק אותך.',
     setFaamServerInvalid: 'כתובת לא תקינה: עליה להתחיל ב-http:// או https://.',
     setAiFaamCloudNote:
-      'משתמש בחשבון FaamOffice שלך; כל בקשה מנכה קרדיטים. התחברו בהגדרות ← פרופיל.',
+      'משתמש בחשבון FaamOffice שלך; השרת עשוי להגביל את מספר הבקשות ביום. התחברו בהגדרות ← פרופיל.',
     // Startup announcements from the account server
     announcementClose: 'סגירה',
     announcementDontShowAgain: 'לא להציג שוב',
@@ -8123,6 +8219,10 @@ export const strings = {
     announcementLinkFallback: 'מידע נוסף',
     announcementLoading: 'טוען…',
     announcementLoadFailed: 'לא ניתן לטעון את ההודעה.',
+    // Follow buttons above Settings in the Home sidebar (brand names stay untranslated)
+    socialFollowGroup: 'עקבו אחרי FaamOffice',
+    socialFollowOn: 'עקבו ב-{platform}',
+    socialOpenWebsite: 'לביקור באתר',
   },
   hi: {
     addFolderRoot: 'फ़ोल्डर जोड़ें…',
@@ -8516,12 +8616,13 @@ export const strings = {
       'Faam AI टूल कॉल से दस्तावेज़ संपादित करता है, इसलिए बिना टूल कॉलिंग वाला मॉडल सिर्फ़ चैट कर सकता है।',
     setAiSearchAutoHint: 'मुफ़्त, बिना कुंजी: Parallel से खोजता है, नाकाम होने पर DuckDuckGo से।',
     setFaamAccount: 'FaamOffice खाता',
-    setFaamAccountDesc: 'वैकल्पिक। क्रेडिट से चलने वाले Faam AI Cloud के लिए साइन इन करें।',
+    setFaamAccountDesc: 'वैकल्पिक। ऐप में ही Faam AI Cloud मॉडल इस्तेमाल करने के लिए साइन इन करें।',
     setFaamSignIn: 'साइन इन करें',
     setFaamRegister: 'खाता बनाएँ',
     setFaamSignOut: 'साइन आउट करें',
     setFaamManage: 'खाता प्रबंधित करें',
     setFaamCredits: '{n} क्रेडिट',
+    setFaamQuota: 'आज: Faam AI के {used}/{limit} अनुरोध',
     setFaamOffline: 'खाता सर्वर अभी उपलब्ध नहीं है',
     setFaamWaiting:
       'ब्राउज़र में साइन-इन पेज खुल गया है। पूरा करने के लिए वहाँ कोड {code} की पुष्टि करें…',
@@ -8534,7 +8635,7 @@ export const strings = {
       'उस FaamOffice वेबसाइट का पता जहाँ आपका खाता है। बदलने पर आप साइन आउट हो जाएँगे।',
     setFaamServerInvalid: 'अमान्य पता: यह http:// या https:// से शुरू होना चाहिए।',
     setAiFaamCloudNote:
-      'आपके FaamOffice खाते का उपयोग करता है; हर अनुरोध में क्रेडिट खर्च होते हैं। सेटिंग्स → प्रोफ़ाइल में साइन इन करें।',
+      'आपके FaamOffice खाते का उपयोग करता है; सर्वर प्रतिदिन के अनुरोध सीमित कर सकता है। सेटिंग्स → प्रोफ़ाइल में साइन इन करें।',
     // Startup announcements from the account server
     announcementClose: 'बंद करें',
     announcementDontShowAgain: 'फिर से न दिखाएँ',
@@ -8545,6 +8646,10 @@ export const strings = {
     announcementLinkFallback: 'और जानें',
     announcementLoading: 'लोड हो रहा है…',
     announcementLoadFailed: 'यह घोषणा लोड नहीं हो सकी।',
+    // Follow buttons above Settings in the Home sidebar (brand names stay untranslated)
+    socialFollowGroup: 'FaamOffice को फ़ॉलो करें',
+    socialFollowOn: '{platform} पर फ़ॉलो करें',
+    socialOpenWebsite: 'वेबसाइट पर जाएँ',
   },
   'zh-TW': {
     addFolderRoot: '加入資料夾…',
@@ -8917,12 +9022,13 @@ export const strings = {
     setAiLocalToolsTip: 'Faam AI 透過呼叫工具編輯文件，不支援工具呼叫的模型只能聊天。',
     setAiSearchAutoHint: '免費，無需金鑰：透過 Parallel 搜尋，失敗時改用 DuckDuckGo。',
     setFaamAccount: 'FaamOffice 帳號',
-    setFaamAccountDesc: '選用。登入後可使用以點數計費的 Faam AI Cloud。',
+    setFaamAccountDesc: '選用。登入後即可在應用程式中使用 Faam AI Cloud 模型。',
     setFaamSignIn: '登入',
     setFaamRegister: '建立帳號',
     setFaamSignOut: '登出',
     setFaamManage: '管理帳號',
     setFaamCredits: '{n} 點數',
+    setFaamQuota: '今日：已用 {used}/{limit} 次 Faam AI',
     setFaamOffline: '暫時無法連線帳號伺服器',
     setFaamWaiting: '已在瀏覽器中開啟登入頁面。請確認代碼 {code} 以完成登入…',
     setFaamErrNetwork: '無法連線帳號伺服器，請檢查伺服器位址。',
@@ -8933,7 +9039,7 @@ export const strings = {
     setFaamServerHint: '你註冊帳號的 FaamOffice 網站位址。更換伺服器會登出。',
     setFaamServerInvalid: '位址無效：應以 http:// 或 https:// 開頭。',
     setAiFaamCloudNote:
-      '使用你的 FaamOffice 帳號，每次請求扣除點數。請在「設定 → 個人檔案」中登入。',
+      '使用你的 FaamOffice 帳號，伺服器可能會限制每日請求次數。請在「設定 → 個人檔案」中登入。',
     // Startup announcements from the account server
     announcementClose: '關閉',
     announcementDontShowAgain: '不再顯示',
@@ -8944,5 +9050,9 @@ export const strings = {
     announcementLinkFallback: '了解更多',
     announcementLoading: '載入中…',
     announcementLoadFailed: '無法載入此公告。',
+    // Follow buttons above Settings in the Home sidebar (brand names stay untranslated)
+    socialFollowGroup: '追蹤 FaamOffice',
+    socialFollowOn: '在 {platform} 上追蹤',
+    socialOpenWebsite: '造訪網站',
   },
 } as const

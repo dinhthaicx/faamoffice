@@ -21,6 +21,7 @@ import type {
   FolderRoot,
   MoveResult,
   HomeApi,
+  SocialLinkView,
   RecentEntry,
   RecentPage,
   RenameResult,
@@ -29,7 +30,7 @@ import type {
   FileSearchRerank,
   FileSearchSettings,
 } from '../shared/home-api'
-import { HOME_CHANNELS } from '../shared/home-api'
+import { HOME_CHANNELS, isSocialPlatform } from '../shared/home-api'
 import { INTEGRATIONS_CHANNELS } from '../shared/integrations-api'
 import type {
   IntegrationsApi,
@@ -155,6 +156,26 @@ function normalizeAnnouncements(result: unknown): AnnouncementView[] {
     if (link && typeof link === 'object') {
       view.link = { label: typeof link.label === 'string' ? link.label : '' }
     }
+    out.push(view)
+  }
+  return out
+}
+
+/** mirrors the main-side id check (social-links.ts) */
+function isSocialLinkId(value: unknown): value is string {
+  return typeof value === 'string' && /^[A-Za-z0-9_-]{1,64}$/.test(value)
+}
+
+/** re-check the follow-button list: ids, known platforms and short labels only */
+function normalizeSocialLinks(result: unknown): SocialLinkView[] {
+  if (!Array.isArray(result)) return []
+  const out: SocialLinkView[] = []
+  for (const item of result as unknown[]) {
+    if (!item || typeof item !== 'object') continue
+    const r = item as Record<string, unknown>
+    if (!isSocialLinkId(r.id) || !isSocialPlatform(r.platform)) continue
+    const view: SocialLinkView = { id: r.id, platform: r.platform }
+    if (typeof r.label === 'string' && r.label.trim()) view.label = r.label.trim().slice(0, 40)
     out.push(view)
   }
   return out
@@ -368,6 +389,9 @@ const homeApi: HomeApi = {
     ipcRenderer.on('update:state-changed', listener)
     return () => ipcRenderer.removeListener('update:state-changed', listener)
   },
+  async setUpdatePromptBlocked(blocked) {
+    await ipcRenderer.invoke('update:prompt-blocked', blocked === true)
+  },
   async onboardingSeen() {
     const result: unknown = await ipcRenderer.invoke(HOME_CHANNELS.onboardingSeen)
     return result === true
@@ -576,6 +600,19 @@ const homeApi: HomeApi = {
   async openAnnouncementLink(id) {
     if (!isAnnouncementId(id)) throw new Error('Invalid announcement id.')
     await ipcRenderer.invoke(HOME_CHANNELS.openAnnouncementLink, id)
+  },
+  async socialLinks() {
+    return normalizeSocialLinks(await ipcRenderer.invoke(HOME_CHANNELS.socialLinks))
+  },
+  onSocialLinksChanged(handler) {
+    const listener = (_event: IpcRendererEvent, links: unknown) =>
+      handler(normalizeSocialLinks(links))
+    ipcRenderer.on(HOME_CHANNELS.socialLinksChanged, listener)
+    return () => ipcRenderer.removeListener(HOME_CHANNELS.socialLinksChanged, listener)
+  },
+  async openSocialLink(id) {
+    if (!isSocialLinkId(id)) throw new Error('Invalid social link id.')
+    await ipcRenderer.invoke(HOME_CHANNELS.openSocialLink, id)
   },
   onAnnouncementEscape(handler) {
     const listener = () => handler()

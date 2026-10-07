@@ -26,6 +26,7 @@ import { fileCountLabel, visiblePageCount } from './counts'
 import { useI18n } from './locale'
 import type { I18n, StringKey } from './locale'
 import { SettingsModal } from './SettingsModal'
+import { SocialLinks } from './SocialLinks'
 import type { SettingsTarget } from './SettingsModal'
 import { skillUpdateDue } from './IntegrationsPane'
 import { onFilesChanged } from './file-events'
@@ -2732,6 +2733,7 @@ export function Home() {
         </nav>
         <div className="sidebar-divider" />
         {renderFolderPanel()}
+        <SocialLinks />
         <ProfileEntry
           onProfileChange={handleProfile}
           onFileSearchSettingsChange={() => setRerankSettingsTick((n) => n + 1)}

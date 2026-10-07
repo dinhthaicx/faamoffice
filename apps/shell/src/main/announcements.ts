@@ -633,13 +633,22 @@ interface IpcLike {
   handle(channel: string, listener: (event: unknown, ...args: unknown[]) => unknown): void
 }
 
-/** the three announcement channels; every argument is re-validated main-side */
+/**
+ * The three announcement channels; every argument is re-validated main-side.
+ * `onPending` runs on each announcement query, which the renderer makes only
+ * once first-run onboarding is done: the shell starts its other startup
+ * requests to the account server there.
+ */
 export function registerAnnouncementsIpc(
   ipc: IpcLike,
   service: AnnouncementsService,
   openExternal: (url: string) => Promise<void>,
+  onPending?: () => void,
 ): void {
-  ipc.handle(HOME_CHANNELS.announcementsPending, () => service.pending())
+  ipc.handle(HOME_CHANNELS.announcementsPending, () => {
+    onPending?.()
+    return service.pending()
+  })
   ipc.handle(HOME_CHANNELS.announcementAction, (_event, id, action) => {
     service.action(id, action)
   })

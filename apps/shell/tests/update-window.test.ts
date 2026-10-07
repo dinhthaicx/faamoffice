@@ -54,9 +54,13 @@ vi.mock('electron', () => ({
   },
 }))
 
-const state = (phase: UpdateUiState['phase']): UpdateUiState =>
+const state = (
+  phase: UpdateUiState['phase'],
+  flow: UpdateUiState['flow'] = 'install',
+): UpdateUiState =>
   ({
     phase,
+    flow,
     version: '1.2.3',
     currentVersion: '1.2.2',
     percent: 0,
@@ -73,6 +77,8 @@ const state = (phase: UpdateUiState['phase']): UpdateUiState =>
       retry: 'r',
       manualDesc: 'm',
       openDownload: 'o',
+      ready: 'rd',
+      quit: 'q',
     },
   }) as UpdateUiState
 
@@ -161,5 +167,98 @@ describe('update window — settings-facing surface', () => {
     const s = state('available')
     mod.showUpdateWindow(parent, s, actions())
     expect(mod.currentUpdateUiState()).toBe(s)
+  })
+})
+
+describe('update window — notify flow', () => {
+  it('open-for-update starts the notify download (macOS dmg / Linux package page)', async () => {
+    const mod = await loadModule()
+    const act = actions()
+    mod.showUpdateWindow(parent, state('available', 'notify'), act)
+    mod.closeUpdateWindow()
+    expect(handlers.get('update:open-for-update')!()).toBe(true)
+    expect(act.onDownload).toHaveBeenCalledTimes(1)
+  })
+
+  it('open-for-update only re-surfaces an opened installer (phase ready)', async () => {
+    const mod = await loadModule()
+    const act = actions()
+    mod.showUpdateWindow(parent, state('ready', 'notify'), act)
+    mod.closeUpdateWindow()
+    shown.mockClear()
+    expect(handlers.get('update:open-for-update')!()).toBe(true)
+    expect(act.onDownload).not.toHaveBeenCalled()
+    expect(winOptions).toHaveLength(2)
+  })
+
+  it('routes the card buttons to the notify actions', async () => {
+    const mod = await loadModule()
+    const act = actions()
+    mod.showUpdateWindow(parent, state('ready', 'notify'), act)
+    handlers.get('update:install')!()
+    expect(act.onInstall).toHaveBeenCalledTimes(1)
+    handlers.get('update:open-download')!()
+    expect(act.onOpenDownload).toHaveBeenCalledTimes(1)
+  })
+})
+
+describe('update window — remembered updates and the prompt gate', () => {
+  it('remembers an update for Settings → About without opening a window', async () => {
+    const mod = await loadModule()
+    const act = actions()
+    const s = state('available', 'notify')
+    mod.rememberUpdate(parent, s, act)
+    expect(winOptions).toHaveLength(0)
+    expect(mod.isUpdateWindowOpen()).toBe(false)
+    expect(mod.currentUpdateUiState()).toBe(s)
+    expect(sent.some((m) => m.channel === 'update:state-changed' && m.state === s)).toBe(true)
+    // About's button opens the card with the remembered actions
+    expect(handlers.get('update:open-for-update')!()).toBe(true)
+    expect(winOptions).toHaveLength(1)
+    expect(act.onDownload).toHaveBeenCalledTimes(1)
+  })
+
+  it('refreshes an open card in place', async () => {
+    const mod = await loadModule()
+    mod.showUpdateWindow(parent, state('available'), actions())
+    sent.length = 0
+    mod.rememberUpdate(parent, { ...state('available'), version: '1.2.4' }, actions())
+    expect(winOptions).toHaveLength(1)
+    expect(sent.some((m) => m.channel === 'update:changed' && m.state?.version === '1.2.4')).toBe(
+      true,
+    )
+  })
+
+  it('shows at once while the shell window reports nothing on screen', async () => {
+    const mod = await loadModule()
+    const show = vi.fn()
+    mod.whenUpdatePromptAllowed(show)
+    expect(show).toHaveBeenCalledTimes(1)
+  })
+
+  it('holds the card while onboarding or an announcement is up, then shows the latest one', async () => {
+    const mod = await loadModule()
+    await handlers.get('update:prompt-blocked')!(undefined, true)
+    const first = vi.fn()
+    const second = vi.fn()
+    mod.whenUpdatePromptAllowed(first)
+    mod.whenUpdatePromptAllowed(second)
+    expect(first).not.toHaveBeenCalled()
+    expect(second).not.toHaveBeenCalled()
+    await handlers.get('update:prompt-blocked')!(undefined, false)
+    expect(first).not.toHaveBeenCalled()
+    expect(second).toHaveBeenCalledTimes(1)
+    // released once: later reports do not replay it
+    await handlers.get('update:prompt-blocked')!(undefined, true)
+    await handlers.get('update:prompt-blocked')!(undefined, false)
+    expect(second).toHaveBeenCalledTimes(1)
+  })
+
+  it('treats anything but true as "nothing on screen"', async () => {
+    const mod = await loadModule()
+    await handlers.get('update:prompt-blocked')!(undefined, 'yes')
+    const show = vi.fn()
+    mod.whenUpdatePromptAllowed(show)
+    expect(show).toHaveBeenCalledTimes(1)
   })
 })

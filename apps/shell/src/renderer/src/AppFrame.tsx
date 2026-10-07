@@ -55,6 +55,13 @@ export function AppFrame({ initialOnboardingSeen }: AppFrameProps) {
   }, [showOnboarding])
 
   const announcementVisible = announcements.length > 0 && !showOnboarding && homeActive
+  // The automatic update card is its own window above this one, so it would
+  // cover onboarding and the announcement dialog: it waits until both are
+  // done (announcements still queued for Home count as well).
+  const updatePromptBlocked = showOnboarding || !announcementsSettled || announcements.length > 0
+  useEffect(() => {
+    void window.aiOffice.setUpdatePromptBlocked?.(updatePromptBlocked).catch(() => undefined)
+  }, [updatePromptBlocked])
   // the prompt cards wait for the announcements: never both at once
   const promptMayShow =
     !showOnboarding && homeActive && announcementsSettled && announcements.length === 0

@@ -18,6 +18,15 @@
   /* faamoffice-logo.svg: colour mark + black wordmark; dark themes flip it to 1
      (inverted, then hue-turned 180° so the mark keeps its greens and blues) */
   --logo-invert: 0;
+
+  /* follow buttons: brand tint shown on hover only (black-logo brands keep --text) */
+  --social-facebook: #0866ff;
+  --social-youtube: #ff0000;
+  --social-zalo: #0068ff;
+  --social-instagram: #e4405f;
+  --social-telegram: #229ed9;
+  --social-discord: #5865f2;
+  --social-linkedin: #0a66c2;
 }
 
 /* ── Dark mode overrides ─────────────────────────────────── */
@@ -34,6 +43,13 @@
   --timeline-user-text: #b0b0c0;
   --shadow-pill: 0 1px 2px rgb(0 0 0 / 40%);
   --logo-invert: 1;
+  --social-facebook: #4d94ff;
+  --social-youtube: #ff4e45;
+  --social-zalo: #4d94ff;
+  --social-instagram: #f06483;
+  --social-telegram: #4cb8e8;
+  --social-discord: #8891f7;
+  --social-linkedin: #4d9be6;
 }
 
 /* System dark: no data-theme or data-theme="system" — follow OS preference */
@@ -49,6 +65,13 @@
     --timeline-user-text: #b0b0c0;
     --shadow-pill: 0 1px 2px rgb(0 0 0 / 40%);
     --logo-invert: 1;
+    --social-facebook: #4d94ff;
+    --social-youtube: #ff4e45;
+    --social-zalo: #4d94ff;
+    --social-instagram: #f06483;
+    --social-telegram: #4cb8e8;
+    --social-discord: #8891f7;
+    --social-linkedin: #4d9be6;
   }
 }
 
@@ -171,6 +194,75 @@ body.vib .home {
   font-size: 12px;
   color: var(--text-muted);
   font-variant-numeric: tabular-nums;
+}
+
+/* ---- follow buttons (SocialLinks.tsx), right above the profile entry ---- */
+
+.social-follow {
+  display: flex;
+  flex-wrap: wrap;
+  flex-shrink: 0;
+  gap: 2px;
+  margin-top: auto;
+  padding: 8px 4px;
+}
+
+/* the row already sits at the bottom; the profile entry follows it directly */
+.social-follow + .account-entry {
+  margin-top: 0;
+}
+
+.social-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  border: none;
+  border-radius: 7px;
+  background: none;
+  color: var(--text-secondary);
+  cursor: pointer;
+}
+
+.social-btn:hover {
+  background: var(--hover);
+  color: var(--social-tint, var(--text));
+}
+
+.social-btn:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: -2px;
+  color: var(--text);
+}
+
+.social-btn[data-platform='facebook'] {
+  --social-tint: var(--social-facebook);
+}
+
+.social-btn[data-platform='youtube'] {
+  --social-tint: var(--social-youtube);
+}
+
+.social-btn[data-platform='zalo'] {
+  --social-tint: var(--social-zalo);
+}
+
+.social-btn[data-platform='instagram'] {
+  --social-tint: var(--social-instagram);
+}
+
+.social-btn[data-platform='telegram'] {
+  --social-tint: var(--social-telegram);
+}
+
+.social-btn[data-platform='discord'] {
+  --social-tint: var(--social-discord);
+}
+
+.social-btn[data-platform='linkedin'] {
+  --social-tint: var(--social-linkedin);
 }
 
 /* ---- bottom-left profile entry (opens Settings) ---- */

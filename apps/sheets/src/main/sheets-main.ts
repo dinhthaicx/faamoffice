@@ -61,9 +61,12 @@ import { ProjectStore } from '@genoffice/project-store'
 
 import {
   AiCreditsError,
+  AiDailyLimitError,
   AiTimeoutError,
+  formatAiRetryTime,
   isAiNetworkError,
   isAiOverloadedError,
+  localizeChatFailure,
   chatForProvider,
   defaultAiSettings,
   activeProvider,
@@ -183,6 +186,8 @@ const tMain = createI18n({
     errNotImage: '不是支持的图片类型',
     errNoApiKey: '未配置 {provider} 的 API Key',
     errFaamSignIn: '请在“设置 → 个人资料”中登录 FaamOffice 账号以使用 Faam AI Cloud',
+    errFaamDailyLimit: '今天的 Faam AI 请求次数已用完，请在 {time} 后重试',
+    errFaamCredits: '你的 Faam AI 积分已用完，请联系管理员充值',
     errAiBusy: 'AI 服务当前繁忙，请稍后重试',
     errNoModel: '未配置模型名称',
     errImgAbsPath: '图片路径必须是绝对路径。',
@@ -240,6 +245,8 @@ const tMain = createI18n({
     errNotImage: 'not a supported image type',
     errNoApiKey: 'No API key configured for {provider}',
     errFaamSignIn: 'Sign in to your FaamOffice account (Settings → Profile) to use Faam AI Cloud',
+    errFaamDailyLimit: "You've used all of today's Faam AI requests. Try again after {time}",
+    errFaamCredits: 'Your Faam AI credits are used up. Ask an administrator to add more',
     errAiBusy: 'The AI service is busy right now — please try again in a moment',
     errNoModel: 'No model name configured',
     errImgAbsPath: 'Image path must be absolute.',
@@ -300,6 +307,8 @@ const tMain = createI18n({
     errNotImage: 'loại hình ảnh không được hỗ trợ',
     errNoApiKey: 'Chưa cấu hình khóa API cho {provider}',
     errFaamSignIn: 'Hãy đăng nhập tài khoản FaamOffice (Cài đặt → Hồ sơ) để dùng Faam AI Cloud',
+    errFaamDailyLimit: 'Bạn đã dùng hết lượt Faam AI hôm nay, hãy thử lại sau {time}',
+    errFaamCredits: 'Bạn đã dùng hết credit Faam AI. Hãy nhờ quản trị viên nạp thêm',
     errAiBusy: 'Dịch vụ AI hiện đang bận — vui lòng thử lại sau giây lát',
     errNoModel: 'Chưa cấu hình tên mô hình',
     errImgAbsPath: 'Đường dẫn hình ảnh phải là đường dẫn tuyệt đối.',
@@ -362,6 +371,9 @@ const tMain = createI18n({
     errNoApiKey: '{provider} の API キーが設定されていません',
     errFaamSignIn:
       'Faam AI Cloud を使うには「設定 → プロフィール」で FaamOffice アカウントにサインインしてください',
+    errFaamDailyLimit:
+      '本日の Faam AI のリクエスト回数を使い切りました。{time} 以降にもう一度お試しください',
+    errFaamCredits: 'Faam AI のクレジットを使い切りました。管理者に追加を依頼してください',
     errAiBusy: 'AI サービスが混み合っています。しばらくしてからもう一度お試しください',
     errNoModel: 'モデル名が設定されていません',
     errImgAbsPath: '画像パスは絶対パスで指定してください。',
@@ -424,6 +436,9 @@ const tMain = createI18n({
     errNotImage: '지원되는 이미지 형식이 아닙니다',
     errNoApiKey: '{provider}의 API 키가 설정되지 않았습니다',
     errFaamSignIn: 'Faam AI Cloud를 사용하려면 설정 → 프로필에서 FaamOffice 계정에 로그인하세요',
+    errFaamDailyLimit:
+      '오늘의 Faam AI 요청 횟수를 모두 사용했습니다. {time} 이후에 다시 시도하세요',
+    errFaamCredits: 'Faam AI 크레딧을 모두 사용했습니다. 관리자에게 충전을 요청하세요',
     errAiBusy: 'AI 서비스가 혼잡합니다. 잠시 후 다시 시도해 주세요',
     errNoModel: '모델 이름이 설정되지 않았습니다',
     errImgAbsPath: '이미지 경로는 절대 경로여야 합니다.',
@@ -487,6 +502,9 @@ const tMain = createI18n({
     errNoApiKey: 'Aucune clé API configurée pour {provider}',
     errFaamSignIn:
       'Connectez-vous à votre compte FaamOffice (Réglages → Profil) pour utiliser Faam AI Cloud',
+    errFaamDailyLimit:
+      "Vous avez utilisé toutes vos requêtes Faam AI d'aujourd'hui. Réessayez après {time}",
+    errFaamCredits: "Vos crédits Faam AI sont épuisés. Demandez à un administrateur d'en ajouter",
     errAiBusy: "Le service d'IA est actuellement surchargé — réessayez dans un instant",
     errNoModel: 'Aucun nom de modèle configuré',
     errImgAbsPath: "Le chemin de l'image doit être absolu.",
@@ -551,6 +569,10 @@ const tMain = createI18n({
     errNoApiKey: 'Kein API-Schlüssel für {provider} konfiguriert',
     errFaamSignIn:
       'Melden Sie sich unter Einstellungen → Profil bei Ihrem FaamOffice-Konto an, um Faam AI Cloud zu nutzen',
+    errFaamDailyLimit:
+      'Sie haben alle heutigen Faam-AI-Anfragen verbraucht. Versuchen Sie es nach {time} erneut',
+    errFaamCredits:
+      'Ihre Faam-AI-Credits sind aufgebraucht. Bitten Sie einen Administrator um weitere Credits',
     errAiBusy: 'Der KI-Dienst ist derzeit überlastet — bitte gleich erneut versuchen',
     errNoModel: 'Kein Modellname konfiguriert',
     errImgAbsPath: 'Der Bildpfad muss absolut sein.',
@@ -614,6 +636,9 @@ const tMain = createI18n({
     errNoApiKey: 'No hay clave de API configurada para {provider}',
     errFaamSignIn:
       'Inicia sesión en tu cuenta de FaamOffice (Ajustes → Perfil) para usar Faam AI Cloud',
+    errFaamDailyLimit:
+      'Has usado todas las solicitudes de Faam AI de hoy. Vuelve a intentarlo después de {time}',
+    errFaamCredits: 'Se han agotado tus créditos de Faam AI. Pide a un administrador que añada más',
     errAiBusy:
       'El servicio de IA está saturado en este momento; inténtalo de nuevo en unos instantes',
     errNoModel: 'No hay nombre de modelo configurado',
@@ -676,6 +701,8 @@ const tMain = createI18n({
     errNotImage: 'ไม่ใช่ชนิดรูปภาพที่รองรับ',
     errNoApiKey: 'ยังไม่ได้ตั้งค่า API Key ของ {provider}',
     errFaamSignIn: 'ลงชื่อเข้าใช้บัญชี FaamOffice (การตั้งค่า → โปรไฟล์) เพื่อใช้ Faam AI Cloud',
+    errFaamDailyLimit: 'คุณใช้คำขอ Faam AI ของวันนี้ครบแล้ว โปรดลองอีกครั้งหลัง {time}',
+    errFaamCredits: 'เครดิต Faam AI ของคุณหมดแล้ว โปรดขอให้ผู้ดูแลระบบเติมเครดิต',
     errAiBusy: 'บริการ AI มีผู้ใช้งานจำนวนมากในขณะนี้ โปรดลองอีกครั้งในอีกสักครู่',
     errNoModel: 'ยังไม่ได้กำหนดชื่อโมเดล',
     errImgAbsPath: 'เส้นทางรูปภาพต้องเป็นเส้นทางแบบสัมบูรณ์',
@@ -737,6 +764,9 @@ const tMain = createI18n({
     errNoApiKey: 'API Key untuk {provider} belum dikonfigurasi',
     errFaamSignIn:
       'Masuk ke akun FaamOffice Anda (Pengaturan → Profil) untuk memakai Faam AI Cloud',
+    errFaamDailyLimit:
+      'Anda telah memakai semua permintaan Faam AI hari ini. Coba lagi setelah {time}',
+    errFaamCredits: 'Kredit Faam AI Anda sudah habis. Minta administrator untuk menambahkannya',
     errAiBusy: 'Layanan AI sedang sibuk — silakan coba lagi sebentar lagi',
     errNoModel: 'Nama model belum dikonfigurasi',
     errImgAbsPath: 'Jalur gambar harus berupa jalur absolut.',
@@ -799,6 +829,9 @@ const tMain = createI18n({
     errNoApiKey: 'API-ключ для {provider} не настроен',
     errFaamSignIn:
       'Войдите в аккаунт FaamOffice (Настройки → Профиль), чтобы пользоваться Faam AI Cloud',
+    errFaamDailyLimit:
+      'Вы израсходовали все запросы к Faam AI на сегодня. Повторите попытку после {time}',
+    errFaamCredits: 'Кредиты Faam AI закончились. Попросите администратора пополнить баланс',
     errAiBusy: 'Сервис ИИ сейчас перегружен — повторите попытку чуть позже',
     errNoModel: 'Имя модели не настроено',
     errImgAbsPath: 'Путь к изображению должен быть абсолютным.',
@@ -860,6 +893,8 @@ const tMain = createI18n({
     errNoApiKey: 'لم يتم تكوين مفتاح API لـ {provider}',
     errFaamSignIn:
       'سجّل الدخول إلى حساب FaamOffice (الإعدادات ← الملف الشخصي) لاستخدام Faam AI Cloud',
+    errFaamDailyLimit: 'لقد استخدمت كل طلبات Faam AI لهذا اليوم. حاول مرة أخرى بعد {time}',
+    errFaamCredits: 'نفد رصيد Faam AI لديك. اطلب من المسؤول إضافة المزيد',
     errAiBusy: 'خدمة الذكاء الاصطناعي مشغولة حاليًا — يرجى المحاولة مرة أخرى بعد قليل',
     errNoModel: 'لم يتم تكوين اسم النموذج',
     errImgAbsPath: 'يجب أن يكون مسار الصورة مسارًا مطلقًا.',
@@ -920,6 +955,10 @@ const tMain = createI18n({
     errNoApiKey: 'Nenhuma chave de API configurada para {provider}',
     errFaamSignIn:
       'Entre na sua conta FaamOffice (Configurações → Perfil) para usar o Faam AI Cloud',
+    errFaamDailyLimit:
+      'Você usou todas as solicitações do Faam AI de hoje. Tente novamente depois de {time}',
+    errFaamCredits:
+      'Seus créditos do Faam AI acabaram. Peça a um administrador para adicionar mais',
     errAiBusy: 'O serviço de IA está sobrecarregado no momento — tente novamente em instantes',
     errNoModel: 'Nenhum nome de modelo configurado',
     errImgAbsPath: 'O caminho da imagem deve ser absoluto.',
@@ -982,6 +1021,9 @@ const tMain = createI18n({
     errNoApiKey: 'Nessuna chiave API configurata per {provider}',
     errFaamSignIn:
       'Accedi al tuo account FaamOffice (Impostazioni → Profilo) per usare Faam AI Cloud',
+    errFaamDailyLimit: 'Hai usato tutte le richieste a Faam AI di oggi. Riprova dopo {time}',
+    errFaamCredits:
+      'Hai esaurito i crediti di Faam AI. Chiedi a un amministratore di aggiungerne altri',
     errAiBusy: 'Il servizio IA è momentaneamente sovraccarico — riprova tra poco',
     errNoModel: 'Nessun nome di modello configurato',
     errImgAbsPath: "Il percorso dell'immagine deve essere assoluto.",
@@ -1045,6 +1087,9 @@ const tMain = createI18n({
     errNoApiKey: 'Nie skonfigurowano klucza API dla {provider}',
     errFaamSignIn:
       'Zaloguj się na konto FaamOffice (Ustawienia → Profil), aby korzystać z Faam AI Cloud',
+    errFaamDailyLimit:
+      'Wykorzystano wszystkie dzisiejsze zapytania do Faam AI. Spróbuj ponownie po {time}',
+    errFaamCredits: 'Kredyty Faam AI się wyczerpały. Poproś administratora o doładowanie',
     errAiBusy: 'Usługa AI jest obecnie przeciążona — spróbuj ponownie za chwilę',
     errNoModel: 'Nie skonfigurowano nazwy modelu',
     errImgAbsPath: 'Ścieżka obrazu musi być bezwzględna.',
@@ -1106,6 +1151,9 @@ const tMain = createI18n({
     errNotImage: 'nepodporovaný typ obrázku',
     errNoApiKey: 'Pro {provider} není nakonfigurován žádný klíč API',
     errFaamSignIn: 'Pro Faam AI Cloud se přihlaste ke svému účtu FaamOffice (Nastavení → Profil)',
+    errFaamDailyLimit:
+      'Vyčerpali jste všechny dnešní požadavky na Faam AI. Zkuste to znovu po {time}',
+    errFaamCredits: 'Kredity Faam AI jsou vyčerpány. Požádejte správce o jejich doplnění',
     errAiBusy: 'Služba AI je momentálně zaneprázdněna — zkuste to prosím za chvíli znovu',
     errNoModel: 'Není nakonfigurován název modelu',
     errImgAbsPath: 'Cesta k obrázku musí být absolutní.',
@@ -1168,6 +1216,9 @@ const tMain = createI18n({
     errNoApiKey: 'Geen API-sleutel geconfigureerd voor {provider}',
     errFaamSignIn:
       'Meld je aan bij je FaamOffice-account (Instellingen → Profiel) om Faam AI Cloud te gebruiken',
+    errFaamDailyLimit:
+      'Je hebt alle Faam AI-verzoeken van vandaag gebruikt. Probeer het opnieuw na {time}',
+    errFaamCredits: 'Je Faam AI-credits zijn op. Vraag een beheerder om er meer toe te voegen',
     errAiBusy: 'De AI-service is momenteel overbelast — probeer het zo opnieuw',
     errNoModel: 'Geen modelnaam geconfigureerd',
     errImgAbsPath: 'Het afbeeldingspad moet absoluut zijn.',
@@ -1230,6 +1281,9 @@ const tMain = createI18n({
     errNoApiKey: 'Kunci API untuk {provider} belum dikonfigurasikan',
     errFaamSignIn:
       'Log masuk ke akaun FaamOffice anda (Tetapan → Profil) untuk menggunakan Faam AI Cloud',
+    errFaamDailyLimit:
+      'Anda telah menggunakan semua permintaan Faam AI hari ini. Cuba lagi selepas {time}',
+    errFaamCredits: 'Kredit Faam AI anda telah habis. Minta pentadbir untuk menambahnya',
     errAiBusy: 'Perkhidmatan AI sedang sibuk — sila cuba lagi sebentar lagi',
     errNoModel: 'Nama model belum dikonfigurasikan',
     errImgAbsPath: 'Laluan imej mestilah laluan mutlak.',
@@ -1291,6 +1345,8 @@ const tMain = createI18n({
     errNotImage: 'סוג תמונה שאינו נתמך',
     errNoApiKey: 'לא הוגדר מפתח API עבור {provider}',
     errFaamSignIn: 'התחברו לחשבון FaamOffice (הגדרות ← פרופיל) כדי להשתמש ב-Faam AI Cloud',
+    errFaamDailyLimit: 'ניצלתם את כל הבקשות ל-Faam AI להיום. נסו שוב אחרי {time}',
+    errFaamCredits: 'הקרדיטים שלכם ב-Faam AI נגמרו. בקשו ממנהל להוסיף עוד',
     errAiBusy: 'שירות ה-AI עמוס כרגע — נסו שוב בעוד רגע',
     errNoModel: 'לא הוגדר שם מודל',
     errImgAbsPath: 'נתיב התמונה חייב להיות מוחלט.',
@@ -1350,6 +1406,10 @@ const tMain = createI18n({
     errNoApiKey: '{provider} के लिए कोई API कुंजी कॉन्फ़िगर नहीं है',
     errFaamSignIn:
       'Faam AI Cloud इस्तेमाल करने के लिए सेटिंग्स → प्रोफ़ाइल में अपने FaamOffice खाते में साइन इन करें',
+    errFaamDailyLimit:
+      'आपने आज के सभी Faam AI अनुरोध इस्तेमाल कर लिए हैं। {time} के बाद फिर से कोशिश करें',
+    errFaamCredits:
+      'आपके Faam AI क्रेडिट खत्म हो गए हैं। व्यवस्थापक से और क्रेडिट जोड़ने के लिए कहें',
     errAiBusy: 'AI सेवा अभी व्यस्त है — कृपया थोड़ी देर बाद फिर से प्रयास करें',
     errNoModel: 'कोई मॉडल नाम कॉन्फ़िगर नहीं है',
     errImgAbsPath: 'छवि पथ निरपेक्ष होना चाहिए।',
@@ -1411,6 +1471,8 @@ const tMain = createI18n({
     errNotImage: '不是支援的圖片類型',
     errNoApiKey: '未設定 {provider} 的 API Key',
     errFaamSignIn: '請在「設定 → 個人檔案」中登入 FaamOffice 帳號以使用 Faam AI Cloud',
+    errFaamDailyLimit: '今天的 Faam AI 請求次數已用完，請在 {time} 後重試',
+    errFaamCredits: '你的 Faam AI 點數已用完，請聯絡管理員儲值',
     errAiBusy: 'AI 服務目前繁忙，請稍後重試',
     errNoModel: '未設定模型名稱',
     errImgAbsPath: '圖片路徑必須是絕對路徑。',
@@ -1452,6 +1514,13 @@ const tMain = createI18n({
 })
 const tm = (key: Parameters<typeof tMain>[1], params?: Parameters<typeof tMain>[2]) =>
   tMain(getUiLang(), key, params)
+
+/** Faam AI Cloud's "today's requests are used up" in the UI language; the
+ * server's own text when it gave no reset time */
+const faamDailyLimitText = (err: { message: string; retryAt?: string | undefined }): string =>
+  err.retryAt
+    ? tm('errFaamDailyLimit', { time: formatAiRetryTime(err.retryAt, getUiLang()) })
+    : err.message
 
 interface SessionInfo {
   readonly path: string
@@ -3616,12 +3685,14 @@ export function registerSheetsAiIpc(): void {
     if (provider !== 'codex' && !config.model) return { ok: false, error: tm('errNoModel') }
     try {
       const result = await chatForProvider(provider, config, request.system, request.user)
-      // the one-shot path reports HTTP failures as ok:false with the raw body —
-      // replace capacity/rate-limit dumps with the localized "busy" message
-      if (!result.ok && isAiOverloadedError(result.error)) {
-        return { ok: false, error: tm('errAiBusy') }
-      }
-      return result
+      // the one-shot path reports HTTP failures as ok:false with the server's
+      // text: Faam AI Cloud refusals and capacity/rate-limit dumps get the
+      // localized messages (Settings → AI "Test" shows them as is)
+      return localizeChatFailure(result, {
+        dailyLimit: faamDailyLimitText,
+        credits: () => tm('errFaamCredits'),
+        busy: () => tm('errAiBusy'),
+      })
     } catch (err) {
       return { ok: false, error: isAiOverloadedError(err) ? tm('errAiBusy') : String(err) }
     }
@@ -3688,7 +3759,12 @@ export function registerSheetsAiIpc(): void {
         send({
           requestId,
           type: 'error',
-          error: err instanceof Error ? err.message : String(err),
+          error:
+            err instanceof AiDailyLimitError
+              ? faamDailyLimitText(err)
+              : err instanceof Error
+                ? err.message
+                : String(err),
           ...(err instanceof AiTimeoutError
             ? { errorCode: 'timeout' as const }
             : err instanceof AiCreditsError

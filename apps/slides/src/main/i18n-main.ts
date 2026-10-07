@@ -72,6 +72,7 @@ export const tMain = createI18n({
     errNotImage: '不是支持的图片类型',
     errNoApiKey: '未配置 {provider} 的 API Key',
     errFaamSignIn: '请在“设置 → 个人资料”中登录 FaamOffice 账号以使用 Faam AI Cloud',
+    errFaamDailyLimit: '今天的 Faam AI 请求次数已用完，请在 {time} 后重试',
     errNoModel: '未配置模型名称',
     errNoDeckAppend:
       '当前没有可追加的文稿（会话不存在）。请先用 mode:"replace" 生成首页，或改用原生工具新增页面。',
@@ -181,6 +182,7 @@ export const tMain = createI18n({
     errNotImage: 'not a supported image type',
     errNoApiKey: 'No API key configured for {provider}',
     errFaamSignIn: 'Sign in to your FaamOffice account (Settings → Profile) to use Faam AI Cloud',
+    errFaamDailyLimit: "You've used all of today's Faam AI requests. Try again after {time}",
     errNoModel: 'No model name configured',
     errNoDeckAppend:
       'No deck to append to (session missing). Generate the first page with mode:"replace" or add pages with the native tools.',
@@ -291,6 +293,7 @@ export const tMain = createI18n({
     errNotImage: 'loại hình ảnh không được hỗ trợ',
     errNoApiKey: 'Chưa cấu hình khóa API cho {provider}',
     errFaamSignIn: 'Hãy đăng nhập tài khoản FaamOffice (Cài đặt → Hồ sơ) để dùng Faam AI Cloud',
+    errFaamDailyLimit: 'Bạn đã dùng hết lượt Faam AI hôm nay, hãy thử lại sau {time}',
     errNoModel: 'Chưa cấu hình tên mô hình',
     errNoDeckAppend:
       'Không có bản trình bày để nối thêm vào (thiếu phiên làm việc). Hãy tạo trang đầu tiên với mode:"replace" hoặc thêm trang bằng các công cụ gốc.',
@@ -404,6 +407,8 @@ export const tMain = createI18n({
     errNoApiKey: '{provider} の API キーが設定されていません',
     errFaamSignIn:
       'Faam AI Cloud を使うには「設定 → プロフィール」で FaamOffice アカウントにサインインしてください',
+    errFaamDailyLimit:
+      '本日の Faam AI のリクエスト回数を使い切りました。{time} 以降にもう一度お試しください',
     errNoModel: 'モデル名が設定されていません',
     errNoDeckAppend:
       '追加先のプレゼンテーションがありません（セッションが存在しません）。まず mode:"replace" で最初のページを生成するか、ネイティブ ツールでページを追加してください。',
@@ -517,6 +522,8 @@ export const tMain = createI18n({
     errNotImage: '지원되는 이미지 형식이 아님',
     errNoApiKey: '{provider}의 API 키가 설정되지 않았습니다',
     errFaamSignIn: 'Faam AI Cloud를 사용하려면 설정 → 프로필에서 FaamOffice 계정에 로그인하세요',
+    errFaamDailyLimit:
+      '오늘의 Faam AI 요청 횟수를 모두 사용했습니다. {time} 이후에 다시 시도하세요',
     errNoModel: '모델 이름이 설정되지 않았습니다',
     errNoDeckAppend:
       '추가할 수 있는 문서가 없습니다(세션 없음). 먼저 mode:"replace"로 첫 페이지를 생성하거나 네이티브 도구로 페이지를 추가하세요.',
@@ -628,6 +635,8 @@ export const tMain = createI18n({
     errNoApiKey: 'Aucune clé API configurée pour {provider}',
     errFaamSignIn:
       'Connectez-vous à votre compte FaamOffice (Réglages → Profil) pour utiliser Faam AI Cloud',
+    errFaamDailyLimit:
+      "Vous avez utilisé toutes vos requêtes Faam AI d'aujourd'hui. Réessayez après {time}",
     errNoModel: 'Aucun nom de modèle configuré',
     errNoDeckAppend:
       'Aucune présentation à compléter (session inexistante). Générez d\'abord la première page avec mode:"replace" ou ajoutez des pages avec les outils natifs.',
@@ -744,6 +753,8 @@ export const tMain = createI18n({
     errNoApiKey: 'Kein API-Schlüssel für {provider} konfiguriert',
     errFaamSignIn:
       'Melden Sie sich unter Einstellungen → Profil bei Ihrem FaamOffice-Konto an, um Faam AI Cloud zu nutzen',
+    errFaamDailyLimit:
+      'Sie haben alle heutigen Faam-AI-Anfragen verbraucht. Versuchen Sie es nach {time} erneut',
     errNoModel: 'Kein Modellname konfiguriert',
     errNoDeckAppend:
       'Keine Präsentation zum Anfügen vorhanden (Sitzung fehlt). Generieren Sie zuerst die erste Seite mit mode:"replace" oder fügen Sie Seiten mit den nativen Tools hinzu.',
@@ -859,6 +870,8 @@ export const tMain = createI18n({
     errNoApiKey: 'No hay clave de API configurada para {provider}',
     errFaamSignIn:
       'Inicia sesión en tu cuenta de FaamOffice (Ajustes → Perfil) para usar Faam AI Cloud',
+    errFaamDailyLimit:
+      'Has usado todas las solicitudes de Faam AI de hoy. Vuelve a intentarlo después de {time}',
     errNoModel: 'No hay nombre de modelo configurado',
     errNoDeckAppend:
       'No hay ninguna presentación a la que anexar (no existe la sesión). Genera primero la primera página con mode:"replace" o añade páginas con las herramientas nativas.',
@@ -972,6 +985,7 @@ export const tMain = createI18n({
     errNotImage: 'ไม่ใช่ชนิดรูปภาพที่รองรับ',
     errNoApiKey: 'ยังไม่ได้ตั้งค่า API Key ของ {provider}',
     errFaamSignIn: 'ลงชื่อเข้าใช้บัญชี FaamOffice (การตั้งค่า → โปรไฟล์) เพื่อใช้ Faam AI Cloud',
+    errFaamDailyLimit: 'คุณใช้คำขอ Faam AI ของวันนี้ครบแล้ว โปรดลองอีกครั้งหลัง {time}',
     errNoModel: 'ยังไม่ได้ตั้งค่าชื่อโมเดล',
     errNoDeckAppend:
       'ไม่มีเอกสารให้เพิ่มต่อท้าย (ไม่มีเซสชัน) โปรดสร้างหน้าแรกด้วย mode:"replace" ก่อน หรือใช้เครื่องมือเนทีฟเพิ่มหน้าแทน',
@@ -1083,6 +1097,8 @@ export const tMain = createI18n({
     errNoApiKey: 'API Key untuk {provider} belum dikonfigurasi',
     errFaamSignIn:
       'Masuk ke akun FaamOffice Anda (Pengaturan → Profil) untuk memakai Faam AI Cloud',
+    errFaamDailyLimit:
+      'Anda telah memakai semua permintaan Faam AI hari ini. Coba lagi setelah {time}',
     errNoModel: 'Nama model belum dikonfigurasi',
     errNoDeckAppend:
       'Tidak ada dokumen yang bisa ditambahi (sesi tidak ada). Buat halaman pertama dengan mode:"replace" dulu, atau tambahkan halaman dengan alat bawaan.',
@@ -1198,6 +1214,8 @@ export const tMain = createI18n({
     errNoApiKey: 'API-ключ для {provider} не настроен',
     errFaamSignIn:
       'Войдите в аккаунт FaamOffice (Настройки → Профиль), чтобы пользоваться Faam AI Cloud',
+    errFaamDailyLimit:
+      'Вы израсходовали все запросы к Faam AI на сегодня. Повторите попытку после {time}',
     errNoModel: 'Не указано имя модели',
     errNoDeckAppend:
       'Нет презентации для добавления страниц (сессия отсутствует). Сначала создайте первую страницу с mode:"replace" или добавьте страницы нативными инструментами.',
@@ -1312,6 +1330,7 @@ export const tMain = createI18n({
     errNoApiKey: 'لم يتم تكوين مفتاح API لـ {provider}',
     errFaamSignIn:
       'سجّل الدخول إلى حساب FaamOffice (الإعدادات ← الملف الشخصي) لاستخدام Faam AI Cloud',
+    errFaamDailyLimit: 'لقد استخدمت كل طلبات Faam AI لهذا اليوم. حاول مرة أخرى بعد {time}',
     errNoModel: 'لم يتم تكوين اسم النموذج',
     errNoDeckAppend:
       'لا يوجد مستند يمكن الإلحاق به (الجلسة غير موجودة). أنشئ الصفحة الأولى باستخدام mode:"replace" أولًا، أو أضف صفحات بالأدوات الأصلية.',
@@ -1423,6 +1442,8 @@ export const tMain = createI18n({
     errNoApiKey: 'Nenhuma chave de API configurada para {provider}',
     errFaamSignIn:
       'Entre na sua conta FaamOffice (Configurações → Perfil) para usar o Faam AI Cloud',
+    errFaamDailyLimit:
+      'Você usou todas as solicitações do Faam AI de hoje. Tente novamente depois de {time}',
     errNoModel: 'Nenhum nome de modelo configurado',
     errNoDeckAppend:
       'Não há apresentação para anexar (sessão inexistente). Gere a primeira página com mode:"replace" ou adicione páginas com as ferramentas nativas.',
@@ -1538,6 +1559,7 @@ export const tMain = createI18n({
     errNoApiKey: 'Nessuna chiave API configurata per {provider}',
     errFaamSignIn:
       'Accedi al tuo account FaamOffice (Impostazioni → Profilo) per usare Faam AI Cloud',
+    errFaamDailyLimit: 'Hai usato tutte le richieste a Faam AI di oggi. Riprova dopo {time}',
     errNoModel: 'Nessun nome di modello configurato',
     errNoDeckAppend:
       'Nessuna presentazione a cui aggiungere pagine (sessione mancante). Genera la prima pagina con mode:"replace" o aggiungi pagine con gli strumenti nativi.',
@@ -1654,6 +1676,8 @@ export const tMain = createI18n({
     errNoApiKey: 'Nie skonfigurowano klucza API dla {provider}',
     errFaamSignIn:
       'Zaloguj się na konto FaamOffice (Ustawienia → Profil), aby korzystać z Faam AI Cloud',
+    errFaamDailyLimit:
+      'Wykorzystano wszystkie dzisiejsze zapytania do Faam AI. Spróbuj ponownie po {time}',
     errNoModel: 'Nie skonfigurowano nazwy modelu',
     errNoDeckAppend:
       'Brak prezentacji do rozszerzenia (brak sesji). Najpierw wygeneruj pierwszą stronę z mode:"replace" albo dodaj strony narzędziami natywnymi.',
@@ -1767,6 +1791,8 @@ export const tMain = createI18n({
     errNotImage: 'nepodporovaný typ obrázku',
     errNoApiKey: 'Pro {provider} není nakonfigurován žádný klíč API',
     errFaamSignIn: 'Pro Faam AI Cloud se přihlaste ke svému účtu FaamOffice (Nastavení → Profil)',
+    errFaamDailyLimit:
+      'Vyčerpali jste všechny dnešní požadavky na Faam AI. Zkuste to znovu po {time}',
     errNoModel: 'Není nakonfigurován název modelu',
     errNoDeckAppend:
       'Není k čemu přidávat (chybí relace). Vygenerujte první stránku s mode:"replace" nebo přidejte stránky nativními nástroji.',
@@ -1880,6 +1906,8 @@ export const tMain = createI18n({
     errNoApiKey: 'Geen API-sleutel geconfigureerd voor {provider}',
     errFaamSignIn:
       'Meld je aan bij je FaamOffice-account (Instellingen → Profiel) om Faam AI Cloud te gebruiken',
+    errFaamDailyLimit:
+      'Je hebt alle Faam AI-verzoeken van vandaag gebruikt. Probeer het opnieuw na {time}',
     errNoModel: 'Geen modelnaam geconfigureerd',
     errNoDeckAppend:
       'Geen presentatie om aan toe te voegen (sessie ontbreekt). Genereer eerst de eerste pagina met mode:"replace" of voeg pagina\'s toe met de native tools.',
@@ -1993,6 +2021,8 @@ export const tMain = createI18n({
     errNoApiKey: 'Kunci API untuk {provider} belum dikonfigurasikan',
     errFaamSignIn:
       'Log masuk ke akaun FaamOffice anda (Tetapan → Profil) untuk menggunakan Faam AI Cloud',
+    errFaamDailyLimit:
+      'Anda telah menggunakan semua permintaan Faam AI hari ini. Cuba lagi selepas {time}',
     errNoModel: 'Nama model belum dikonfigurasikan',
     errNoDeckAppend:
       'Tiada persembahan untuk ditambah (sesi tidak wujud). Jana halaman pertama dengan mode:"replace" dahulu, atau tambah halaman dengan alat asli.',
@@ -2104,6 +2134,7 @@ export const tMain = createI18n({
     errNotImage: 'סוג תמונה שאינו נתמך',
     errNoApiKey: 'לא הוגדר מפתח API עבור {provider}',
     errFaamSignIn: 'התחברו לחשבון FaamOffice (הגדרות ← פרופיל) כדי להשתמש ב-Faam AI Cloud',
+    errFaamDailyLimit: 'ניצלתם את כל הבקשות ל-Faam AI להיום. נסו שוב אחרי {time}',
     errNoModel: 'לא הוגדר שם מודל',
     errNoDeckAppend:
       'אין מצגת להוסיף אליה (הפעלה חסרה). צור תחילה את העמוד הראשון עם mode:"replace" או הוסף עמודים בכלים המקוריים.',
@@ -2214,6 +2245,8 @@ export const tMain = createI18n({
     errNoApiKey: '{provider} के लिए कोई API कुंजी कॉन्फ़िगर नहीं है',
     errFaamSignIn:
       'Faam AI Cloud इस्तेमाल करने के लिए सेटिंग्स → प्रोफ़ाइल में अपने FaamOffice खाते में साइन इन करें',
+    errFaamDailyLimit:
+      'आपने आज के सभी Faam AI अनुरोध इस्तेमाल कर लिए हैं। {time} के बाद फिर से कोशिश करें',
     errNoModel: 'कोई मॉडल नाम कॉन्फ़िगर नहीं है',
     errNoDeckAppend:
       'जोड़ने के लिए कोई प्रस्तुति नहीं है (सत्र मौजूद नहीं)। पहले mode:"replace" से पहला पृष्ठ बनाएँ, या नेटिव टूल से पृष्ठ जोड़ें।',
@@ -2325,6 +2358,7 @@ export const tMain = createI18n({
     errNotImage: '不是支援的圖片類型',
     errNoApiKey: '未設定 {provider} 的 API Key',
     errFaamSignIn: '請在「設定 → 個人檔案」中登入 FaamOffice 帳號以使用 Faam AI Cloud',
+    errFaamDailyLimit: '今天的 Faam AI 請求次數已用完，請在 {time} 後重試',
     errNoModel: '未設定模型名稱',
     errNoDeckAppend:
       '目前沒有可附加的簡報（工作階段不存在）。請先用 mode:"replace" 產生首頁，或改用原生工具新增頁面。',

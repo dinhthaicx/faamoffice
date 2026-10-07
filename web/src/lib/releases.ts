@@ -18,8 +18,11 @@ const ARM = /(arm64|aarch64)/i;
 /**
  * Map release assets to download slots. Matches the electron-builder names
  * used by FaamOffice (FaamOffice-<v>-arm64.dmg, FaamOffice-<v>.dmg,
- * FaamOffice Setup <v>.exe, FaamOffice-<v>.AppImage, faamoffice_<v>_amd64.deb,
- * faamoffice-<v>.x86_64.rpm) and is lenient with other naming schemes.
+ * FaamOffice-Setup-<v>.exe — releases up to 0.11.x carry it as
+ * FaamOffice.Setup.<v>.exe, GitHub's rendering of the old spaced name —,
+ * FaamOffice-<v>.AppImage, faamoffice_<v>_amd64.deb, faamoffice-<v>.x86_64.rpm)
+ * and is lenient with other naming schemes. Update-feed files (latest*.yml,
+ * *.blockmap) are never offered as downloads.
  */
 export function classifyAssets(assets: GithubAsset[]): Partial<Record<AssetKey, ReleaseAsset>> {
   const out: Partial<Record<AssetKey, ReleaseAsset>> = {};

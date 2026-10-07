@@ -163,6 +163,32 @@ describe('Settings profile — FaamOffice account', () => {
     expect(buttonByText('Sign out')).toBeDefined()
   })
 
+  it('shows today’s Faam AI requests and no balance while the server runs without credits', async () => {
+    installApi('Thai', {
+      signedIn: true,
+      server: 'http://acct.test',
+      email: 'a@b.c',
+      creditsEnabled: false,
+      quota: { limit: 1500, used: 12, resetsAt: '2026-10-07T17:00:00.000Z' },
+    })
+    await renderModal()
+    expect(host.textContent).toContain('a@b.c · Today: 12/1,500 Faam AI requests')
+    expect(host.textContent).not.toContain('credits')
+  })
+
+  it('never shows a balance the server marks as unused (credits off)', async () => {
+    installApi('Thai', {
+      signedIn: true,
+      server: 'http://acct.test',
+      email: 'a@b.c',
+      credits: 40,
+      creditsEnabled: false,
+    })
+    await renderModal()
+    expect(host.textContent).toContain('a@b.c')
+    expect(host.textContent).not.toContain('40 credits')
+  })
+
   it('explains a declined sign-in and signs out on request', async () => {
     const api = installApi('Thai', {
       signedIn: true,
@@ -182,5 +208,24 @@ describe('Settings profile — FaamOffice account', () => {
       await Promise.resolve()
     })
     expect(host.textContent).toContain('Sign-in was declined in the browser.')
+  })
+})
+
+describe('Settings about', () => {
+  it('offers no update-channel picker (only the stable feed is published)', async () => {
+    installApi('Thai')
+    await renderModal()
+    const about = Array.from(host.querySelectorAll<HTMLButtonElement>('.set-nav-item')).find((b) =>
+      b.textContent?.includes('About'),
+    )
+    expect(about).toBeDefined()
+    await act(async () => {
+      about!.click()
+      await Promise.resolve()
+    })
+    expect(host.querySelector('.set-pane-title')?.textContent).toBe('About')
+    expect(host.textContent).toContain('1.0.0')
+    expect(host.textContent).not.toContain('Update Channel')
+    expect(host.textContent).not.toContain('Beta')
   })
 })
