@@ -1,9 +1,11 @@
 // GET /api/v1/usage?limit=20&cursor=<id> — Faam AI Cloud usage, newest first.
+// `creditsEnabled` tells the app whether to show the per-item credits (0 while off).
 
 import { z } from "zod";
 import { authenticateBearer } from "@/lib/api-token";
 import { prisma } from "@/lib/db";
 import { HttpError, json, route } from "@/lib/http";
+import { getSiteSettings } from "@/lib/site-settings";
 
 const querySchema = z.object({
   limit: z.coerce.number().int().min(1).max(100).catch(20),
@@ -29,7 +31,9 @@ export const GET = route(async (req) => {
     ...(cursor ? { cursor: { id: cursor }, skip: 1 } : {}),
   });
   const page = rows.slice(0, limit);
+  const { creditsEnabled } = await getSiteSettings();
   return json({
+    creditsEnabled,
     items: page.map((r) => ({
       id: r.id,
       createdAt: r.createdAt.toISOString(),

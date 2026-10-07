@@ -4,10 +4,12 @@ import { ApiForm } from "@/components/api-form";
 import { LocalTime } from "@/components/local-time";
 import { Alert, buttonClass, Card, Container, cx, Field } from "@/components/ui";
 import { configuredModels } from "@/lib/ai-proxy";
+import { getAiQuota } from "@/lib/ai-quota";
 import { requirePageUser } from "@/lib/auth";
 import { prisma } from "@/lib/db";
 import { PASSWORD_MIN_LENGTH } from "@/lib/password";
 import { privateMetadata } from "@/lib/seo";
+import { getSiteSettings } from "@/lib/site-settings";
 import { toLocale } from "@/i18n/config";
 import { format, getDictionary } from "@/i18n";
 
@@ -27,7 +29,9 @@ export default async function AccountPage({ params, searchParams }: PageProps<"/
   const nf = new Intl.NumberFormat(locale === "vi" ? "vi-VN" : "en-US");
   const page = Math.max(1, Math.min(10_000, Number.parseInt(typeof sp.page === "string" ? sp.page : "1", 10) || 1));
 
-  const [usageRows, tokens, ledger] = await Promise.all([
+  const settings = await getSiteSettings();
+  const creditsOn = settings.creditsEnabled;
+  const [usageRows, tokens, ledger, quota] = await Promise.all([
     prisma.usageRecord.findMany({
       where: { userId: user.id },
       orderBy: [{ createdAt: "desc" }, { id: "desc" }],
@@ -35,7 +39,10 @@ export default async function AccountPage({ params, searchParams }: PageProps<"/
       take: USAGE_PAGE_SIZE + 1,
     }),
     prisma.apiToken.findMany({ where: { userId: user.id, revokedAt: null }, orderBy: { createdAt: "desc" } }),
-    prisma.creditTransaction.findMany({ where: { userId: user.id }, orderBy: [{ createdAt: "desc" }, { id: "desc" }], take: 8 }),
+    creditsOn
+      ? prisma.creditTransaction.findMany({ where: { userId: user.id }, orderBy: [{ createdAt: "desc" }, { id: "desc" }], take: 8 })
+      : [],
+    getAiQuota(user.id, settings),
   ]);
   const hasMoreUsage = usageRows.length > USAGE_PAGE_SIZE;
   const usage = usageRows.slice(0, USAGE_PAGE_SIZE);
@@ -94,53 +101,91 @@ export default async function AccountPage({ params, searchParams }: PageProps<"/
 
       {/* Overview */}
       <section id="overview" aria-labelledby="credits-title" className="mt-6 grid scroll-mt-24 gap-6 lg:grid-cols-5">
-        <Card className="lg:col-span-2">
-          <h2 id="credits-title" className="text-lg font-semibold">
-            {t.credits.title}
-          </h2>
-          <p className="mt-4 text-sm text-muted">{t.credits.balance}</p>
-          <p className={cx("text-4xl font-extrabold tracking-tight", user.credits < 0 && "text-danger")}>
-            {nf.format(user.credits)} <span className="text-base font-medium text-muted">{dict.common.credits}</span>
-          </p>
-          {user.credits < 0 ? (
-            <Alert tone="warn" className="mt-4">
-              {t.credits.negative}
-            </Alert>
-          ) : null}
-          <p className="mt-4 text-sm leading-relaxed text-muted">{t.credits.explain}</p>
+        {creditsOn ? (
+          <Card className="lg:col-span-2">
+            <h2 id="credits-title" className="text-lg font-semibold">
+              {t.credits.title}
+            </h2>
+            <p className="mt-4 text-sm text-muted">{t.credits.balance}</p>
+            <p className={cx("text-4xl font-extrabold tracking-tight", user.credits < 0 && "text-danger")}>
+              {nf.format(user.credits)} <span className="text-base font-medium text-muted">{dict.common.credits}</span>
+            </p>
+            {user.credits < 0 ? (
+              <Alert tone="warn" className="mt-4">
+                {t.credits.negative}
+              </Alert>
+            ) : null}
+            <p className="mt-4 text-sm leading-relaxed text-muted">{t.credits.explain}</p>
 
-          <h3 className="mt-6 text-sm font-semibold">{t.credits.pricingTitle}</h3>
-          {models ? (
-            <div className="mt-2 overflow-x-auto">
-              <table className="w-full text-left text-sm">
-                <thead className="text-muted">
-                  <tr>
-                    <th scope="col" className="py-1.5 pr-3 font-medium">
-                      {t.credits.pricingModel}
-                    </th>
-                    <th scope="col" className="py-1.5 pr-3 text-right font-medium">
-                      {t.credits.pricingInput}
-                    </th>
-                    <th scope="col" className="py-1.5 text-right font-medium">
-                      {t.credits.pricingOutput}
-                    </th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {models.map((m) => (
-                    <tr key={m.id} className="border-t border-border">
-                      <td className="py-1.5 pr-3 font-mono text-xs">{m.id}</td>
-                      <td className="py-1.5 pr-3 text-right">{nf.format(m.inputPer1K)}</td>
-                      <td className="py-1.5 text-right">{nf.format(m.outputPer1K)}</td>
+            <h3 className="mt-6 text-sm font-semibold">{t.credits.pricingTitle}</h3>
+            {models ? (
+              <div className="mt-2 overflow-x-auto">
+                <table className="w-full text-left text-sm">
+                  <thead className="text-muted">
+                    <tr>
+                      <th scope="col" className="py-1.5 pr-3 font-medium">
+                        {t.credits.pricingModel}
+                      </th>
+                      <th scope="col" className="py-1.5 pr-3 text-right font-medium">
+                        {t.credits.pricingInput}
+                      </th>
+                      <th scope="col" className="py-1.5 text-right font-medium">
+                        {t.credits.pricingOutput}
+                      </th>
                     </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          ) : (
-            <p className="mt-2 text-sm text-muted">{t.credits.notConfigured}</p>
-          )}
-        </Card>
+                  </thead>
+                  <tbody>
+                    {models.map((m) => (
+                      <tr key={m.id} className="border-t border-border">
+                        <td className="py-1.5 pr-3 font-mono text-xs">{m.id}</td>
+                        <td className="py-1.5 pr-3 text-right">{nf.format(m.inputPer1K)}</td>
+                        <td className="py-1.5 text-right">{nf.format(m.outputPer1K)}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            ) : (
+              <p className="mt-2 text-sm text-muted">{t.credits.notConfigured}</p>
+            )}
+          </Card>
+        ) : (
+          // Credits off: no balance or top-up text, only today's quota (when an admin set one).
+          <Card className="lg:col-span-2">
+            <h2 id="credits-title" className="text-lg font-semibold">
+              {t.ai.title}
+            </h2>
+            {quota ? (
+              <>
+                <p className="mt-4 text-sm text-muted">{t.ai.today}</p>
+                <p className="text-4xl font-extrabold tracking-tight">
+                  {format(t.ai.quota, { used: nf.format(quota.used), limit: nf.format(quota.limit) })}
+                </p>
+                {quota.used >= quota.limit ? (
+                  <Alert tone="warn" className="mt-4">
+                    {t.ai.quotaReached}
+                  </Alert>
+                ) : null}
+                <p className="mt-2 text-xs text-muted">{t.ai.quotaResets}</p>
+              </>
+            ) : (
+              <p className="mt-4 text-sm text-muted">{t.ai.unlimited}</p>
+            )}
+            <p className="mt-4 text-sm leading-relaxed text-muted">{t.ai.explain}</p>
+            <h3 className="mt-6 text-sm font-semibold">{t.ai.modelsTitle}</h3>
+            {models ? (
+              <ul className="mt-2 flex flex-wrap gap-2">
+                {models.map((m) => (
+                  <li key={m.id} className="rounded-full border border-border bg-bg-soft px-2.5 py-1 font-mono text-xs">
+                    {m.id}
+                  </li>
+                ))}
+              </ul>
+            ) : (
+              <p className="mt-2 text-sm text-muted">{t.credits.notConfigured}</p>
+            )}
+          </Card>
+        )}
 
         <div className="space-y-6 lg:col-span-3">
           <Card>
@@ -176,30 +221,32 @@ export default async function AccountPage({ params, searchParams }: PageProps<"/
             </ApiForm>
           </Card>
 
-          <Card>
-            <h2 className="text-lg font-semibold">{t.credits.ledgerTitle}</h2>
-            {ledger.length ? (
-              <ul className="mt-3 divide-y divide-border text-sm">
-                {ledger.map((entry) => (
-                  <li key={entry.id} className="flex items-center justify-between gap-4 py-2">
-                    <div className="min-w-0">
-                      <p className="font-medium">{t.credits.reasons[entry.reason]}</p>
-                      <p className="truncate text-xs text-muted">
-                        <LocalTime iso={entry.createdAt.toISOString()} locale={locale} />
-                        {entry.reason === "admin_adjust" && entry.note ? ` · ${entry.note}` : ""}
-                      </p>
-                    </div>
-                    <span className={cx("shrink-0 font-semibold tabular-nums", entry.delta < 0 ? "text-muted" : "text-success-fg")}>
-                      {entry.delta > 0 ? "+" : ""}
-                      {nf.format(entry.delta)}
-                    </span>
-                  </li>
-                ))}
-              </ul>
-            ) : (
-              <p className="mt-3 text-sm text-muted">{t.credits.ledgerEmpty}</p>
-            )}
-          </Card>
+          {creditsOn ? (
+            <Card>
+              <h2 className="text-lg font-semibold">{t.credits.ledgerTitle}</h2>
+              {ledger.length ? (
+                <ul className="mt-3 divide-y divide-border text-sm">
+                  {ledger.map((entry) => (
+                    <li key={entry.id} className="flex items-center justify-between gap-4 py-2">
+                      <div className="min-w-0">
+                        <p className="font-medium">{t.credits.reasons[entry.reason]}</p>
+                        <p className="truncate text-xs text-muted">
+                          <LocalTime iso={entry.createdAt.toISOString()} locale={locale} />
+                          {entry.reason === "admin_adjust" && entry.note ? ` · ${entry.note}` : ""}
+                        </p>
+                      </div>
+                      <span className={cx("shrink-0 font-semibold tabular-nums", entry.delta < 0 ? "text-muted" : "text-success-fg")}>
+                        {entry.delta > 0 ? "+" : ""}
+                        {nf.format(entry.delta)}
+                      </span>
+                    </li>
+                  ))}
+                </ul>
+              ) : (
+                <p className="mt-3 text-sm text-muted">{t.credits.ledgerEmpty}</p>
+              )}
+            </Card>
+          ) : null}
         </div>
       </section>
 
@@ -218,7 +265,7 @@ export default async function AccountPage({ params, searchParams }: PageProps<"/
                     <th scope="col" className="px-4 py-3 font-medium">{t.usage.model}</th>
                     <th scope="col" className="px-4 py-3 text-right font-medium">{t.usage.input}</th>
                     <th scope="col" className="px-4 py-3 text-right font-medium">{t.usage.output}</th>
-                    <th scope="col" className="px-4 py-3 text-right font-medium">{t.usage.credits}</th>
+                    {creditsOn ? <th scope="col" className="px-4 py-3 text-right font-medium">{t.usage.credits}</th> : null}
                   </tr>
                 </thead>
                 <tbody>
@@ -230,10 +277,12 @@ export default async function AccountPage({ params, searchParams }: PageProps<"/
                       <td className="px-4 py-2.5 font-mono text-xs">{u.model}</td>
                       <td className="px-4 py-2.5 text-right tabular-nums">{nf.format(u.promptTokens)}</td>
                       <td className="px-4 py-2.5 text-right tabular-nums">{nf.format(u.completionTokens)}</td>
-                      <td className="px-4 py-2.5 text-right tabular-nums">
-                        {nf.format(u.credits)}
-                        {u.estimated ? <span className="ml-1 text-xs text-muted">({t.usage.estimated})</span> : null}
-                      </td>
+                      {creditsOn ? (
+                        <td className="px-4 py-2.5 text-right tabular-nums">
+                          {nf.format(u.credits)}
+                          {u.estimated ? <span className="ml-1 text-xs text-muted">({t.usage.estimated})</span> : null}
+                        </td>
+                      ) : null}
                     </tr>
                   ))}
                 </tbody>

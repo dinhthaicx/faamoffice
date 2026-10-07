@@ -6,6 +6,7 @@ import { buttonClass, Card, Container, cx } from "@/components/ui";
 import { requirePageAdmin } from "@/lib/auth";
 import { prisma } from "@/lib/db";
 import { privateMetadata } from "@/lib/seo";
+import { getSiteSettings } from "@/lib/site-settings";
 import type { Prisma } from "@/generated/prisma/client";
 import { toLocale } from "@/i18n/config";
 import { format, getDictionary } from "@/i18n";
@@ -18,13 +19,16 @@ async function loadStats() {
   const now = Date.now();
   const since7 = new Date(now - 7 * DAY);
   const since30 = new Date(now - 30 * DAY);
-  const [userCount, newUsers, activeTokens, used7, used30, requests30] = await Promise.all([
+  const [userCount, newUsers, activeTokens, used7, used30] = await Promise.all([
     prisma.user.count(),
     prisma.user.count({ where: { createdAt: { gte: since7 } } }),
     prisma.apiToken.count({ where: { revokedAt: null, user: { disabledAt: null } } }),
-    prisma.usageRecord.aggregate({ _sum: { credits: true }, where: { createdAt: { gte: since7 } } }),
-    prisma.usageRecord.aggregate({ _sum: { credits: true }, where: { createdAt: { gte: since30 } } }),
-    prisma.usageRecord.count({ where: { createdAt: { gte: since30 } } }),
+    prisma.usageRecord.aggregate({ _sum: { credits: true }, _count: true, where: { createdAt: { gte: since7 } } }),
+    prisma.usageRecord.aggregate({
+      _sum: { credits: true, promptTokens: true, completionTokens: true },
+      _count: true,
+      where: { createdAt: { gte: since30 } },
+    }),
   ]);
   return {
     userCount,
@@ -32,8 +36,21 @@ async function loadStats() {
     activeTokens,
     credits7: used7._sum.credits ?? 0,
     credits30: used30._sum.credits ?? 0,
-    requests30,
+    requests7: used7._count,
+    requests30: used30._count,
+    tokens30: (used30._sum.promptTokens ?? 0) + (used30._sum.completionTokens ?? 0),
   };
+}
+
+/** AI requests per user over the last 30 days (users table while credits are off). */
+async function requestsByUser(userIds: string[]): Promise<Map<string, number>> {
+  if (!userIds.length) return new Map();
+  const rows = await prisma.usageRecord.groupBy({
+    by: ["userId"],
+    _count: { _all: true },
+    where: { userId: { in: userIds }, createdAt: { gte: new Date(Date.now() - 30 * DAY) } },
+  });
+  return new Map(rows.map((r) => [r.userId, r._count._all]));
 }
 
 export async function generateMetadata({ params }: PageProps<"/[locale]/admin">): Promise<Metadata> {
@@ -56,7 +73,7 @@ export default async function AdminPage({ params, searchParams }: PageProps<"/[l
     ? { OR: [{ email: { contains: q.toLowerCase() } }, { name: { contains: q } }, { id: q }] }
     : {};
 
-  const [s, total, users] = await Promise.all([
+  const [s, total, users, settings] = await Promise.all([
     loadStats(),
     prisma.user.count({ where }),
     prisma.user.findMany({
@@ -65,22 +82,44 @@ export default async function AdminPage({ params, searchParams }: PageProps<"/[l
       skip: (page - 1) * PAGE_SIZE,
       take: PAGE_SIZE,
     }),
+    getSiteSettings(),
   ]);
+  const creditsOn = settings.creditsEnabled;
+  // Credits off: no balances anywhere, request/token counts instead.
+  const userRequests = creditsOn ? null : await requestsByUser(users.map((u) => u.id));
 
   const stats = [
     { label: t.stats.users, value: s.userCount },
     { label: t.stats.newUsers, value: s.newUsers },
     { label: t.stats.activeTokens, value: s.activeTokens },
-    { label: t.stats.credits7, value: s.credits7 },
-    { label: t.stats.credits30, value: s.credits30 },
-    { label: t.stats.requests30, value: s.requests30 },
+    ...(creditsOn
+      ? [
+          { label: t.stats.credits7, value: s.credits7 },
+          { label: t.stats.credits30, value: s.credits30 },
+          { label: t.stats.requests30, value: s.requests30 },
+        ]
+      : [
+          { label: t.stats.requests7, value: s.requests7 },
+          { label: t.stats.requests30, value: s.requests30 },
+          { label: t.stats.tokens30, value: s.tokens30 },
+        ]),
   ];
+  const [offBefore, offAfter] = t.stats.creditsOff.split("{link}");
   const pageHref = (p: number) => `/${locale}/admin?${new URLSearchParams({ ...(q ? { q } : {}), page: String(p) })}`;
 
   return (
     <Container className="py-10">
       <h1 className="text-3xl font-bold tracking-tight">{t.title}</h1>
       <AdminNav locale={locale} dict={dict} current="users" />
+      {!creditsOn ? (
+        <p className="mt-6 rounded-xl border border-border bg-bg-soft px-4 py-3 text-sm text-muted">
+          {offBefore}
+          <a href={`/${locale}/admin/settings`} className="font-medium text-link hover:underline">
+            {dict.admin.nav.settings}
+          </a>
+          {offAfter}
+        </p>
+      ) : null}
 
       <section aria-label={t.title} className="mt-6 grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-6">
         {stats.map((s) => (
@@ -125,7 +164,9 @@ export default async function AdminPage({ params, searchParams }: PageProps<"/[l
                 <tr>
                   <th scope="col" className="px-4 py-3 font-medium">{t.users.email}</th>
                   <th scope="col" className="px-4 py-3 font-medium">{t.users.name}</th>
-                  <th scope="col" className="px-4 py-3 text-right font-medium">{t.users.credits}</th>
+                  <th scope="col" className="px-4 py-3 text-right font-medium">
+                    {creditsOn ? t.users.credits : t.users.requests30}
+                  </th>
                   <th scope="col" className="px-4 py-3 font-medium">{t.users.created}</th>
                   <th scope="col" className="px-4 py-3 font-medium">{t.users.status}</th>
                 </tr>
@@ -142,7 +183,11 @@ export default async function AdminPage({ params, searchParams }: PageProps<"/[l
                       ) : null}
                     </td>
                     <td className="px-4 py-2.5">{u.name}</td>
-                    <td className={cx("px-4 py-2.5 text-right tabular-nums", u.credits < 0 && "text-danger")}>{nf.format(u.credits)}</td>
+                    {userRequests ? (
+                      <td className="px-4 py-2.5 text-right tabular-nums">{nf.format(userRequests.get(u.id) ?? 0)}</td>
+                    ) : (
+                      <td className={cx("px-4 py-2.5 text-right tabular-nums", u.credits < 0 && "text-danger")}>{nf.format(u.credits)}</td>
+                    )}
                     <td className="whitespace-nowrap px-4 py-2.5">
                       <LocalTime iso={u.createdAt.toISOString()} locale={locale} dateOnly />
                     </td>

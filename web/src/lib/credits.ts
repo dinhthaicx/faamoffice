@@ -30,12 +30,7 @@ export async function adjustCredits(input: { userId: string; delta: number; note
   });
 }
 
-/**
- * Bill one Faam AI Cloud request: usage record + ledger entry + balance
- * decrement, atomically. The balance may go slightly negative for the request
- * that crosses zero; the next request is then rejected with 402.
- */
-export async function recordAiUsage(input: {
+export type AiUsageInput = {
   userId: string;
   tokenId: string | null;
   model: string;
@@ -43,7 +38,14 @@ export async function recordAiUsage(input: {
   completionTokens: number;
   credits: number;
   estimated: boolean;
-}) {
+};
+
+/**
+ * Bill one Faam AI Cloud request: usage record + ledger entry + balance
+ * decrement, atomically. The balance may go slightly negative for the request
+ * that crosses zero; the next request is then rejected with 402.
+ */
+export async function recordAiUsage(input: AiUsageInput) {
   return prisma.$transaction(async (tx) => {
     const usage = await tx.usageRecord.create({
       data: {
@@ -72,5 +74,24 @@ export async function recordAiUsage(input: {
       },
     });
     return { usage, balance: user.credits };
+  });
+}
+
+/**
+ * Record one Faam AI Cloud request while Faam credits are turned off: a usage
+ * record with 0 credits (it counts toward the daily quota), no ledger entry and
+ * no balance change.
+ */
+export async function recordUnbilledAiUsage(input: Omit<AiUsageInput, "credits">) {
+  return prisma.usageRecord.create({
+    data: {
+      userId: input.userId,
+      tokenId: input.tokenId,
+      model: input.model,
+      promptTokens: input.promptTokens,
+      completionTokens: input.completionTokens,
+      credits: 0,
+      estimated: input.estimated,
+    },
   });
 }

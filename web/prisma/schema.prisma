@@ -249,6 +249,18 @@ model Announcement {
   @@index([updatedAt])
 }
 
+/// Site-wide settings edited on the admin Settings page: one row per setting
+/// key, the value is JSON validated (with defaults) by src/lib/site-settings.ts.
+model SiteSetting {
+  /// "creditsEnabled" | "aiDailyRequestLimit" | "socialLinks".
+  key         String   @id
+  /// JSON-encoded value.
+  value       String
+  updatedAt   DateTime @updatedAt
+  /// Admin who saved it last (no foreign key: settings outlive deleted accounts).
+  updatedById String?
+}
+
 /// Images uploaded for announcements (png/jpeg/webp/gif, at most 2 MB, verified by magic bytes).
 model AnnouncementImage {
   id        String   @id @default(cuid())

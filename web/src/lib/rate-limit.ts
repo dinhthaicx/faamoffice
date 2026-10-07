@@ -78,12 +78,21 @@ function buildLimiters() {
     announcements: createRateLimiter({ limit: 300, windowMs: minute }),
     // Admin image uploads, per admin.
     announcementUpload: createRateLimiter({ limit: 30, windowMs: 10 * minute }),
+    // Faam AI Cloud chat completions, per user (credits on or off).
+    aiUser: createRateLimiter({ limit: 60, windowMs: minute }),
+    // Public app configuration (GET /api/v1/app/config), per IP.
+    appConfig: createRateLimiter({ limit: 300, windowMs: minute }),
   };
 }
 
 const globalForLimiters = globalThis as unknown as { __faamLimiters?: Limiters };
+let merged = false;
 
 export function limiters(): Limiters {
-  globalForLimiters.__faamLimiters ??= buildLimiters();
-  return globalForLimiters.__faamLimiters;
+  if (!merged) {
+    // Existing buckets win; limiters added since a dev hot reload cached the set are filled in.
+    globalForLimiters.__faamLimiters = { ...buildLimiters(), ...globalForLimiters.__faamLimiters };
+    merged = true;
+  }
+  return globalForLimiters.__faamLimiters!;
 }

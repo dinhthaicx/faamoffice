@@ -2,8 +2,10 @@
 
 Website and account backend for [FaamOffice](../README.md): bilingual marketing site
 (Vietnamese default, English), web accounts, desktop sign-in (device code flow),
-credits and usage history, an admin dashboard, and **Faam AI Cloud** — an
-OpenAI-compatible AI proxy that bills credits using the server's upstream key.
+usage history, an admin dashboard with site settings, and **Faam AI Cloud** — an
+OpenAI-compatible AI proxy using the server's upstream key, billed in credits or
+(when an admin turns credits off) free for signed-in users with an optional
+daily request limit.
 
 Standalone Next.js project (own `package.json` / `package-lock.json`); it is not
 part of the monorepo's npm workspaces. Run every npm command inside `web/`.
@@ -48,10 +50,11 @@ inlined into static pages at build time — rebuild after changing them.
 | `NEXT_PUBLIC_GITHUB_REPO` [build] | `dinhthaicx/faamoffice` | Repo whose GitHub Releases provide installers |
 | `GITHUB_TOKEN` | – | Optional, avoids GitHub API rate limits for the download page |
 | `DATABASE_URL` | `file:./data/faamoffice.db` | SQLite file (or PostgreSQL URL after switching) |
-| `SIGNUP_BONUS_CREDITS` | `100` | Credits for new accounts (ledger reason `signup_bonus`) |
+| `SIGNUP_BONUS_CREDITS` | `100` | Credits for new accounts (ledger reason `signup_bonus`; granted in both credit modes, only shown while credits are on) |
 | `ADMIN_EMAILS` | – | Comma-separated emails promoted to ADMIN at registration/login |
 | `COOKIE_SECURE` | `true` when `SITE_URL` is https | Secure session cookie (`__Host-fo_session`) |
 | `SEED_ADMIN_EMAIL` / `SEED_ADMIN_PASSWORD` | – | Used by `npm run db:seed` |
+| `SEED_CREDITS_ENABLED` / `SEED_AI_DAILY_LIMIT` | – | Optional for `npm run db:seed`: set the Faam credits mode (`true`/`false`) and the daily request limit (`0` = unlimited), like the admin Settings page |
 | `SMTP_HOST`, `SMTP_PORT`, `SMTP_SECURE`, `SMTP_USER`, `SMTP_PASS`, `MAIL_FROM` | – | Outgoing email; console fallback when `SMTP_HOST` is empty |
 | `FAAM_AI_UPSTREAM_BASE_URL` | – | OpenAI-compatible base URL (enables Faam AI Cloud) |
 | `FAAM_AI_UPSTREAM_API_KEY` | – | Upstream key (optional for local servers) |
@@ -69,7 +72,38 @@ The admin page (`/vi/admin`, `/en/admin`) lists and searches users, shows stats
 with a mandatory reason, written to the ledger) and disables/enables accounts.
 Disabled users cannot sign in, their browser sessions are deleted and their
 desktop tokens are rejected until the account is enabled again. There is no
-payment gateway: admins add credits manually.
+payment gateway: admins add credits manually. While Faam credits are off (see
+Settings) the dashboard, user list and user page show request/token counts
+instead of credits; the adjustment form keeps working (balances are preserved).
+
+### Settings (Faam credits, follow channels)
+
+`/vi/admin/settings` (`/en/…`, tab "Cài đặt" / "Settings") holds the site-wide
+settings, stored in the `SiteSetting` table (one JSON row per key, validated with
+defaults in `src/lib/site-settings.ts`; reads are cached for ~10 s per process
+and fall back to the defaults on any database error, retried after ~1 s; a
+stored social link that no longer validates is dropped on its own, not the
+whole list):
+
+| Setting | Default | Effect |
+| --- | --- | --- |
+| `creditsEnabled` | `true` | **On**: every Faam AI Cloud request is charged in credits; an empty balance gets 402. **Off**: signing in is all a user needs — no balance check, no charge, no ledger entry (usage is still recorded with 0 credits) and no credit UI on the website or in the app. Turning it back on restores charging; balances and ledgers are untouched. |
+| `aiDailyRequestLimit` | `300` | Only while credits are off: Faam AI requests per user per day (0 = unlimited). A day is a calendar day in Asia/Ho_Chi_Minh (fixed UTC+7); the count is the user's usage records since local midnight plus their requests still running on this server process. Soft limit: a request finishing at the moment another is checked can let one extra through, and requests that produced no output are not counted. FaamOffice 0.11.1 and older show the limit as "AI service busy" (see the API contract, §3). |
+| `socialLinks` | `[]` | Up to 12 follow buttons `{ id, platform, url, label?, enabled }`, in display order: shown at the bottom of every website page and in the desktop app (above Settings in the Home sidebar). |
+
+Social platforms and the hosts their https URLs must use (subdomains allowed):
+`facebook` (facebook.com, fb.com, fb.me), `youtube` (youtube.com, youtu.be),
+`tiktok` (tiktok.com), `zalo` (zalo.me), `x` (x.com, twitter.com), `instagram`
+(instagram.com), `threads` (threads.net, threads.com), `telegram` (t.me,
+telegram.me), `discord` (discord.gg, discord.com), `github` (github.com),
+`linkedin` (linkedin.com) and `website` (any https URL). Labels are optional (≤ 40
+characters); ids are short stable strings generated when a link is added.
+
+Public pages are prerendered: the footer is built from the settings read at
+build time (the defaults when the database is unreachable then, e.g. in a Docker
+build). Saving the settings revalidates every page under the `[locale]` layout,
+so the website updates on the next visit; the layout also revalidates hourly so
+a build without database access catches up on its own.
 
 ### Announcements (in-app dialogs)
 
@@ -212,11 +246,26 @@ Missing/unknown/revoked token or disabled user → 401 `{ "error": "invalid_toke
 
 | Endpoint | Response |
 | --- | --- |
-| `GET /api/v1/me` | `{ id, email, name, emailVerified, role, credits, createdAt }` |
+| `GET /api/v1/me` | `{ id, email, name, emailVerified, role, creditsEnabled, credits?, aiQuota?, createdAt }` (below) |
 | `POST /api/v1/logout` | 204, revokes the calling token |
-| `GET /api/v1/usage?limit=20&cursor=<id>` | `{ items: [{ id, createdAt, model, promptTokens, completionTokens, credits }], nextCursor }` (newest first, `limit` 1–100, `nextCursor` null on the last page) |
+| `GET /api/v1/usage?limit=20&cursor=<id>` | `{ creditsEnabled, items: [{ id, createdAt, model, promptTokens, completionTokens, credits }], nextCursor }` (newest first, `limit` 1–100, `nextCursor` null on the last page; `credits` is 0 for requests made while credits were off) |
 | `GET /api/v1/ai/models` | `{ object: "list", data: [{ id, object: "model", owned_by: "faam" }] }` |
 | `POST /api/v1/ai/chat/completions` | OpenAI-compatible proxy (below) |
+
+`/api/v1/me` depends on the Faam credits mode (admin Settings):
+
+```json
+{ "id": "…", "email": "…", "name": "…", "emailVerified": true, "role": "USER",
+  "creditsEnabled": true, "credits": 95, "createdAt": "…" }
+{ "id": "…", "email": "…", "name": "…", "emailVerified": true, "role": "USER",
+  "creditsEnabled": false, "aiQuota": { "limit": 300, "used": 12, "resetsAt": "2026-10-07T17:00:00.000Z" }, "createdAt": "…" }
+```
+
+- `credits` is present only while credits are on (older servers send it without
+  `creditsEnabled`: treat a missing `creditsEnabled` as `true`).
+- `aiQuota` is present only while credits are off **and** a daily limit is set:
+  `used` requests since local midnight (Asia/Ho_Chi_Minh, UTC+7), and `resetsAt`,
+  the next local midnight as an ISO instant. No `aiQuota` with credits off = unlimited.
 
 ### 3. `POST /api/v1/ai/chat/completions`
 
@@ -229,7 +278,26 @@ The app uses base URL `${SITE_URL}/api/v1/ai` and appends `/chat/completions`.
 - `stream: true` → SSE passthrough, chunks piped as they arrive (the final usage
   chunk with `choices: []` is passed through as well); otherwise the upstream JSON.
 - Unknown model → 400 `{ "error": "model_not_found", "message": … }`.
-- Credits ≤ 0 → 402 `{ "error": { "message": "Your Faam AI credits are insufficient. Ask an administrator to add credits.", "type": "insufficient_credits", "code": "insufficient_credits" } }`.
+- Per-user burst limit, in both credit modes: more than 60 requests per minute →
+  429 `{ "error": { "message": …, "type": "rate_limited", "code": "rate_limited" } }`
+  with `Retry-After` (seconds). Clients should treat it as "busy, retry shortly".
+- Credits on, balance ≤ 0 → 402 `{ "error": { "message": "Your Faam AI credits are insufficient. Ask an administrator to add credits.", "type": "insufficient_credits", "code": "insufficient_credits" } }`.
+- Credits off, daily limit reached → 429 `{ "error": { "message": "You have used all N Faam AI requests for today. …", "type": "daily_limit_reached", "code": "daily_limit_reached" } }`
+  with `Retry-After` = seconds until the next local midnight (UTC+7). The upstream
+  is not called. The count is the day's usage records plus the user's requests
+  still running (in memory, per server process), so a burst of long streams
+  cannot get past it. Soft limit: a request finishing at the moment another is
+  checked can let one extra through, and a request that produced no output
+  (upstream error, client gone before the first token) is not counted.
+- **Older apps**: FaamOffice 0.11.1 and older treat every 429 as "busy" (their
+  overload check matches `HTTP 429`) and show their localized "The AI service is
+  busy right now — please try again in a moment" instead of the server message,
+  so `daily_limit_reached` reaches those users without the reset time and they
+  keep retrying. The status cannot change without breaking newer clients; when
+  turning credits off with a daily limit, publish an in-app announcement with
+  "Up to version" 0.11.1 asking them to install the latest release (0.11.1 has
+  no update feed, so it must be reinstalled by hand). The admin Settings page
+  says the same next to the switch.
 - Not configured → 503 `{ "error": { "message": "Faam AI Cloud is not configured on this server", "type": "unavailable" } }`.
 - Body limit 20 MB → 413 `payload_too_large`; invalid JSON → 400 `invalid_json`;
   missing `model`/`messages` → 400 `invalid_request`.
@@ -239,8 +307,11 @@ The app uses base URL `${SITE_URL}/api/v1/ai` and appends `/chat/completions`.
 - Billing: after completion, usage (`prompt_tokens`, `completion_tokens`) is priced
   per model and a UsageRecord, a ledger entry and the balance decrement are
   written in one transaction (the balance may go slightly negative on the last
-  request). Without upstream usage, tokens are estimated as characters ÷ 4
-  (images count 765 tokens) and the record is flagged `estimated`.
+  request). With credits off only the UsageRecord is written, with `credits: 0`
+  (no ledger entry, balance untouched). The mode is read once per request, so a
+  request in flight keeps the mode it started with. Without upstream usage,
+  tokens are estimated as characters ÷ 4 (images count 765 tokens) and the
+  record is flagged `estimated`.
 - When the client disconnects, the upstream request is aborted and the partial
   output is billed by estimate.
 
@@ -313,6 +384,30 @@ https:; base-uri 'none'; form-action 'none'; frame-ancestors *`,
 `X-Content-Type-Options: nosniff`, `Referrer-Policy: no-referrer`, and **no**
 `X-Frame-Options`. Drafts and `rich` announcements → 404.
 
+### 5. App configuration (no auth)
+
+`GET /api/v1/app/config` — public settings for the desktop app (fetched once
+per session, without a token):
+
+```json
+{ "socials": [ { "id": "k3v9x2", "platform": "youtube", "url": "https://www.youtube.com/@faamoffice", "label": "Kênh chính" },
+               { "id": "p0q7aa", "platform": "zalo", "url": "https://zalo.me/123456789" } ] }
+```
+
+- `socials`: the enabled social links in display order; `label` is omitted when
+  empty. `platform` is one of `facebook`, `youtube`, `tiktok`, `zalo`, `x`,
+  `instagram`, `threads`, `telegram`, `discord`, `github`, `linkedin`, `website`;
+  every `url` is https on the platform's own hosts (see Settings above), but
+  clients should still validate before opening.
+- More keys may be added later: ignore unknown keys.
+- 503 `{ "error": "unavailable", … }` (`Cache-Control: no-store`, `Retry-After`)
+  when the stored settings cannot be read (database error, unreadable row): keep
+  the cached list. Only a 200 is an authoritative list; an empty `socials` there
+  means there really are no channels.
+- Cookie-free and CORS-readable (`Access-Control-Allow-Origin: *`, errors
+  included), `Cache-Control: public, max-age=300`; 300 requests per minute per IP
+  (429 `rate_limited` with `Retry-After`).
+
 ### Web (cookie) endpoints
 
 Used by the website; they require the session cookie (where relevant) and a
@@ -321,6 +416,12 @@ same-site `Origin` header (CSRF), and are rate limited per process:
 `POST /api/auth/device/approve` (`{ user_code, action: "approve" | "deny" }`),
 `POST /api/account/{profile,password,delete,resend-verification,tokens/revoke}`,
 `POST /api/admin/users/:id/{credits,status}`,
+`PATCH /api/admin/settings` (any subset of `{ creditsEnabled, aiDailyRequestLimit,
+socialLinks }`; `PUT` takes all three; both reply `{ ok: true, settings }` with the
+stored values; invalid input → 400 `invalid_request` with `fields`, e.g.
+`{ "socialLinks.2.url": "wrong_host" }`; codes `required`, `https_only`,
+`wrong_host`, `too_long`, `too_many`, `duplicate`, `out_of_range`, `invalid`;
+`creditsEnabled` must be a JSON boolean),
 `POST /api/admin/announcements` (create), `POST /api/admin/announcements/:id`
 (update; replies with the stored editor `values` and `image`),
 `POST /api/admin/announcements/:id/{status,delete}` and
@@ -334,15 +435,20 @@ reads: `GET /api/admin/announcements/images/:id` (editor preview, drafts include
 npm test
 ```
 
-117 tests: scrypt hashing, user codes, the device-flow state machine, a SQLite
+Suites: scrypt hashing, user codes, the device-flow state machine, a SQLite
 integration suite (device flow end to end, bearer auth, ledger), token hashing,
 billing math and estimation, model mapping/request rewriting, the rate limiter,
 the SSE usage parser, locale negotiation, dictionary parity, request guards,
-release asset mapping, and announcements (version/platform/locale matching,
+release asset mapping, announcements (version/platform/locale matching,
 input validation, image magic bytes and size cap, the frame's sandbox headers
 and routing, CORS on public errors, a SQLite suite over the public and admin
 route handlers, and the editor's server-rendered markup: accessibility and
-error placement).
+error placement), site settings (schemas, social link hosts, defaults, cache and
+fallbacks, the admin route's auth/Origin/validation, `/api/v1/app/config`, the
+footer's follow links, `/api/v1/me` and `/api/v1/usage` in both credit modes) and
+the AI proxy with credits on and off (402, 0-credit usage without ledger, the
+UTC+7 daily limit with `Retry-After` and running requests counted, the per-user
+burst limit).
 
 Smoke test — start a server pointed at the mock upstream the script runs on port
 4555, then run the script (it starts nothing else):
@@ -355,16 +461,20 @@ npm run smoke                                               # SMOKE_BASE_URL ove
 
 It registers a user, signs in, runs the device flow (approving with the web
 session), calls `/api/v1/me`, streams and non-streams through the proxy and
-verifies the upstream request, credit deduction, usage records and abort
-handling. Admin checks (402, credit adjustment, disable/enable) run when
-`smoke-admin@faamoffice.test` is in `ADMIN_EMAILS`. Registration is limited to
+verifies the upstream request, usage records, abort handling and — depending on
+the server's Faam credits mode — credit deduction or free, quota-counted usage
+(with credits off, the daily limit must allow at least 5 requests, or be 0).
+Admin checks run when `smoke-admin@faamoffice.test` is in `ADMIN_EMAILS`: the
+Settings page and API, credit adjustment and 402 with credits on, the 0-credit
+path and 429 `daily_limit_reached` with credits off, a social link in
+`/api/v1/app/config`, disable/enable; the original settings are restored at the end. Registration is limited to
 10 per hour per IP, so restart the server if you run it many times.
 `npx tsx scripts/mock-upstream.ts` runs the mock alone for manual testing.
 
 ## SEO checklist
 
 - [x] `/vi/…` and `/en/…` routes; `/` (and any unprefixed path, e.g. `/device`) redirects by `fo_locale` cookie → `Accept-Language` → Vietnamese
-- [x] Static generation for public pages (download page revalidates hourly from GitHub Releases)
+- [x] Static generation for public pages, revalidated hourly and whenever an admin saves the site settings (footer follow links); the download page reads GitHub Releases hourly
 - [x] Per-page title/description, canonical, `hreflang` vi/en/x-default, Open Graph + Twitter card
 - [x] 1200×630 OG/Twitter images per locale (`next/og`, Inter with Vietnamese glyphs, built at build time)
 - [x] `metadataBase` from `SITE_URL`; `sitemap.xml` with both locales and alternates; `robots.txt` disallowing `/api`, `/announcement-frame`, `/account`, `/admin`, `/device` (+ localized)
@@ -385,7 +495,7 @@ src/proxy.ts         locale redirects (Next 16 "proxy", formerly middleware)
 src/app/[locale]/    pages (home, download, faam-ai, privacy, terms, auth, device, account, admin)
 src/app/api/         route handlers (auth, device flow, account, admin, v1)
 src/app/announcement-frame/  sandboxed HTML of announcements (outside the locale routing)
-src/lib/             auth/session, device flow, tokens, billing, AI proxy, mail, SEO, announcements
+src/lib/             auth/session, device flow, tokens, billing, AI proxy and daily quota, mail, SEO, announcements, site settings
 src/i18n/            locale config and vi/en dictionaries
 tests/               vitest suites
 ```
@@ -416,5 +526,13 @@ npm run dev                   # http://localhost:3000
   tạo hộp thoại hiện khi FaamOffice khởi động — loại "Ảnh và văn bản" hoặc "Trang HTML" (chạy trong
   khung cách ly, không có script), chọn mức độ, cách hiển thị, nền tảng, khoảng phiên bản và thời gian,
   xem trước rồi xuất bản. Ứng dụng đọc `GET /api/v1/announcements` (xem mục "4. Announcements").
+- Cài đặt chung: vào `/vi/admin/settings` (thẻ "Cài đặt"). Thẻ **Faam credit** bật/tắt việc tính
+  credit: khi tắt, người dùng chỉ cần đăng nhập tài khoản để dùng các mô hình Faam AI Cloud trong ứng
+  dụng (không trừ credit, không hiện credit), có thể giới hạn "Số lượt Faam AI mỗi người mỗi ngày"
+  (0 = không giới hạn, tính theo giờ Việt Nam); bật lại bất cứ lúc nào, số dư được giữ nguyên.
+  FaamOffice 0.11.1 trở về trước báo hết lượt thành “Dịch vụ AI hiện đang bận”, nên khi đặt giới hạn
+  hãy đăng một thông báo ("Đến phiên bản" 0.11.1) nhắc người dùng cài bản mới. Thẻ
+  **Kênh theo dõi** thêm/sửa/xóa/sắp xếp tối đa 12 nút theo dõi (Facebook, YouTube, TikTok, Zalo…),
+  hiện ở chân trang web và trong ứng dụng (phía trên nút Cài đặt). Ứng dụng đọc `GET /api/v1/app/config`.
 - Chính sách quyền riêng tư và điều khoản dịch vụ là văn bản mẫu: đơn vị vận hành cần xem lại
   và điền thông tin trước khi dùng.

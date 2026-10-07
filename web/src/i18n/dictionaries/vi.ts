@@ -38,6 +38,10 @@ export const vi = {
     privacy: "Chính sách quyền riêng tư",
     terms: "Điều khoản dịch vụ",
     license: "Phát hành theo giấy phép Apache-2.0.",
+    follow: "Theo dõi FaamOffice",
+    followOn: "Theo dõi FaamOffice trên {platform}",
+    website: "Trang web",
+    visitWebsite: "Truy cập trang web FaamOffice",
     basedOn:
       "FaamOffice là bản fork của GenOffice. GenOffice và Genspark là nhãn hiệu của Mainfunc, Inc.; FaamOffice không liên kết với và không được Mainfunc, Inc. bảo trợ.",
   },
@@ -98,8 +102,8 @@ export const vi = {
         {
           key: "cloud",
           title: "Faam AI Cloud",
-          description: "Đăng nhập tài khoản FaamOffice là dùng được ngay, không cần cấu hình. Mỗi lần dùng trừ credit trong tài khoản.",
-          points: ["Không cần API key", "Xem credit và lịch sử dùng trên web", "Đăng xuất thiết bị bất cứ lúc nào"],
+          description: "Đăng nhập tài khoản FaamOffice để dùng các mô hình AI ngay trong ứng dụng, không cần cấu hình. Số lượt dùng mỗi ngày có thể được giới hạn.",
+          points: ["Không cần API key", "Xem lịch sử dùng trên web", "Đăng xuất thiết bị bất cứ lúc nào"],
         },
         {
           key: "byok",
@@ -152,12 +156,12 @@ export const vi = {
     faq: {
       title: "Câu hỏi thường gặp",
       items: [
-        { q: "FaamOffice có miễn phí không?", a: "Có. FaamOffice miễn phí và mã nguồn mở theo giấy phép Apache-2.0. Bạn chỉ trả tiền nếu dùng API key của một nhà cung cấp AI trả phí, hoặc dùng credit Faam AI Cloud." },
+        { q: "FaamOffice có miễn phí không?", a: "Có. FaamOffice miễn phí và mã nguồn mở theo giấy phép Apache-2.0. Bạn chỉ trả tiền nếu dùng API key của một nhà cung cấp AI trả phí." },
         { q: "FaamOffice chạy trên hệ điều hành nào?", a: "macOS (Apple Silicon và Intel), Windows 64-bit và Linux (AppImage, .deb, .rpm)." },
         { q: "Có cần tạo tài khoản không?", a: "Không. Mọi trình soạn thảo, cùng Faam AI dùng API key riêng hoặc AI cục bộ, đều hoạt động mà không cần đăng nhập. Tài khoản FaamOffice chỉ cần cho Faam AI Cloud." },
         { q: "Tài liệu của tôi có bị gửi lên máy chủ không?", a: "Tệp luôn nằm trên máy của bạn. Khi bạn nhờ Faam AI, phần nội dung cần thiết được gửi tới dịch vụ AI bạn chọn; với AI cục bộ (Ollama, LM Studio, llama.cpp) thì không có gì rời khỏi máy." },
         { q: "Faam AI dùng được những mô hình nào?", a: "Faam AI Cloud, hoặc API key của OpenAI, Anthropic Claude, Google Gemini, DeepSeek, xAI Grok, Mistral, Groq, OpenRouter, Qwen, Kimi, GLM, MiniMax và mọi máy chủ tương thích OpenAI. Để Faam AI sửa được tài liệu, hãy chọn mô hình hỗ trợ gọi công cụ (tool calling)." },
-        { q: "Credit Faam AI Cloud là gì?", a: "Credit là đơn vị tính khi dùng Faam AI Cloud. Tài khoản mới được tặng credit để dùng thử, mỗi yêu cầu trừ credit theo số token đã dùng. Bạn xem số dư và lịch sử trong trang Tài khoản. Hiện chưa có thanh toán trực tuyến; quản trị viên sẽ cộng thêm credit khi cần." },
+        { q: "Faam AI Cloud là gì?", a: "Faam AI Cloud cho phép bạn dùng các mô hình AI ngay trong ứng dụng chỉ bằng tài khoản FaamOffice, không cần API key: vào Cài đặt → Mô hình AI, chọn Faam AI Cloud rồi đăng nhập là xong. Để dịch vụ ổn định cho mọi người, số lượt dùng mỗi ngày có thể được giới hạn. Lịch sử sử dụng hiển thị trong trang Tài khoản." },
         { q: "Vì sao macOS hoặc Windows cảnh báo khi mở lần đầu?", a: "Bản cài chưa được Apple hay Microsoft ký số. Trên macOS 15 trở lên: mở app, bấm Done khi bị chặn, rồi vào System Settings → Privacy & Security và bấm Open Anyway (macOS 14 trở về trước: nhấp chuột phải → Open). Trên Windows, khi thấy “Windows protected your PC”, chọn More info rồi Run anyway; nếu Smart App Control của Windows 11 chặn thì không có nút chạy tiếp. Chúng tôi đang chuẩn bị bản ký số để bỏ các bước này." },
         { q: "Mở tệp Word, Excel có giữ nguyên định dạng không?", a: "FaamOffice đọc và ghi trực tiếp định dạng gốc (.docx, .xlsx, .pptx), nên tệp lưu ra vẫn mở được trong Microsoft Office, Google Docs hay LibreOffice. Với tài liệu rất phức tạp, một vài chi tiết hiển thị có thể khác đôi chút." },
       ],
@@ -223,7 +227,7 @@ export const vi = {
       headers: ["Tiêu chí", "Faam AI Cloud", "API key của bạn", "AI cục bộ"],
       rows: [
         ["Bắt đầu", "Đăng nhập tài khoản FaamOffice", "Dán API key của nhà cung cấp", "Cài Ollama, LM Studio hoặc llama.cpp"],
-        ["Chi phí", "Trừ credit trong tài khoản", "Nhà cung cấp tính phí trực tiếp", "Miễn phí (dùng phần cứng của bạn)"],
+        ["Chi phí", "Đi kèm tài khoản FaamOffice; có thể giới hạn số lượt mỗi ngày", "Nhà cung cấp tính phí trực tiếp", "Miễn phí (dùng phần cứng của bạn)"],
         ["Dữ liệu đi đâu", "Máy chủ Faam AI Cloud và nhà cung cấp AI phía sau", "Thẳng tới nhà cung cấp bạn chọn", "Không rời khỏi máy (hoặc mạng LAN của bạn)"],
         ["Cần internet", "Có", "Có", "Không"],
         ["Phù hợp khi", "Muốn dùng ngay, không cấu hình", "Đã có tài khoản OpenAI, Claude, Gemini…", "Tài liệu nhạy cảm, làm việc ngoại tuyến"],
@@ -231,7 +235,7 @@ export const vi = {
     },
     cloud: {
       title: "Faam AI Cloud",
-      text: "Cách nhanh nhất để bắt đầu: không cần API key, chỉ cần tài khoản FaamOffice. Tài khoản mới được tặng credit dùng thử; số dư và lịch sử sử dụng hiển thị trên trang Tài khoản.",
+      text: "Cách nhanh nhất để bắt đầu: không cần API key, chỉ cần tài khoản FaamOffice. Đăng nhập là dùng được các mô hình AI ngay trong ứng dụng; số lượt dùng mỗi ngày có thể được giới hạn, và lịch sử sử dụng hiển thị trên trang Tài khoản.",
       steps: [
         "Tạo tài khoản FaamOffice miễn phí trên trang web này.",
         "Trong ứng dụng, mở Cài đặt → Mô hình AI, chọn Faam AI Cloud rồi bấm Đăng nhập.",
@@ -261,7 +265,7 @@ export const vi = {
     reviewNote:
       "Đây là văn bản mẫu. Đơn vị vận hành trang web và Faam AI Cloud phải xem xét, điền thông tin còn thiếu (tên pháp lý, địa chỉ, email liên hệ, luật áp dụng) và điều chỉnh theo quy định pháp luật nơi mình hoạt động trước khi sử dụng.",
     updated: "Cập nhật lần cuối",
-    updatedDate: "06/10/2026",
+    updatedDate: "07/10/2026",
     contact: "Liên hệ",
   },
   privacy: {
@@ -285,7 +289,7 @@ export const vi = {
           "Họ tên và địa chỉ email; trạng thái xác nhận email.",
           "Mật khẩu dưới dạng băm một chiều (scrypt) — chúng tôi không biết mật khẩu của bạn.",
           "Danh sách thiết bị đã đăng nhập (tên thiết bị, thời điểm đăng nhập và lần dùng gần nhất).",
-          "Số dư credit và lịch sử biến động credit.",
+          "Lịch sử sử dụng Faam AI Cloud và hạn mức sử dụng gắn với tài khoản.",
           "Phiên đăng nhập trên trình duyệt, kèm trình duyệt (user agent) và địa chỉ IP lúc đăng nhập để bảo vệ tài khoản.",
         ],
       },
@@ -293,7 +297,7 @@ export const vi = {
         heading: "3. Faam AI Cloud",
         paragraphs: [
           "Khi bạn dùng Faam AI Cloud, nội dung yêu cầu (bao gồm phần tài liệu được gửi kèm) được chuyển qua máy chủ của chúng tôi tới nhà cung cấp mô hình AI phía sau để tạo câu trả lời. Chúng tôi không lưu nội dung yêu cầu hay câu trả lời.",
-          "Với mỗi yêu cầu, chúng tôi lưu thời gian, tên mô hình, số token đầu vào/đầu ra và số credit đã trừ, để tính phí và hiển thị lịch sử cho bạn.",
+          "Với mỗi yêu cầu, chúng tôi lưu thời gian, tên mô hình và số token đầu vào/đầu ra, để áp dụng hạn mức sử dụng và hiển thị lịch sử cho bạn.",
           "Nhà cung cấp mô hình phía sau xử lý dữ liệu theo chính sách của họ: [LIỆT KÊ NHÀ CUNG CẤP VÀ LIÊN KẾT CHÍNH SÁCH].",
         ],
       },
@@ -321,7 +325,7 @@ export const vi = {
       {
         heading: "7. Quyền của bạn",
         paragraphs: [
-          "Bạn có thể xem và sửa tên, đổi mật khẩu, đăng xuất thiết bị và xóa vĩnh viễn tài khoản ngay trong trang Tài khoản. Xóa tài khoản sẽ xóa hồ sơ, credit, lịch sử sử dụng và mọi thiết bị đã đăng nhập. Với các yêu cầu khác về dữ liệu cá nhân, hãy liên hệ với chúng tôi.",
+          "Bạn có thể xem và sửa tên, đổi mật khẩu, đăng xuất thiết bị và xóa vĩnh viễn tài khoản ngay trong trang Tài khoản. Xóa tài khoản sẽ xóa hồ sơ, lịch sử sử dụng và mọi thiết bị đã đăng nhập. Với các yêu cầu khác về dữ liệu cá nhân, hãy liên hệ với chúng tôi.",
         ],
       },
       {
@@ -362,13 +366,13 @@ export const vi = {
         paragraphs: ["Bạn cần cung cấp email chính xác và giữ bí mật mật khẩu. Bạn chịu trách nhiệm cho mọi hoạt động trên tài khoản và các thiết bị đã đăng nhập. Hãy đăng xuất thiết bị bị mất hoặc không còn dùng trong trang Tài khoản."],
       },
       {
-        heading: "3. Faam AI Cloud và credit",
-        paragraphs: ["Faam AI Cloud cung cấp mô hình AI được lưu trữ, tính phí bằng credit:"],
+        heading: "3. Faam AI Cloud",
+        paragraphs: ["Faam AI Cloud cung cấp các mô hình AI được lưu trữ cho người dùng đăng nhập bằng tài khoản FaamOffice:"],
         list: [
-          "Credit chỉ dùng cho Faam AI Cloud, không có giá trị quy đổi thành tiền và không chuyển nhượng được.",
-          "Credit được trừ theo số token của từng yêu cầu và bảng giá của mô hình tại thời điểm sử dụng. Yêu cầu cuối cùng có thể làm số dư âm nhẹ.",
-          "Credit được cấp bởi quản trị viên (ví dụ: quà đăng ký). Hiện không có thanh toán trực tuyến.",
-          "Chúng tôi có thể thay đổi danh sách mô hình, bảng giá hoặc tạm ngừng dịch vụ để bảo trì.",
+          "Chúng tôi có thể giới hạn mức sử dụng, ví dụ số lượt mỗi ngày, để dịch vụ ổn định cho mọi người; yêu cầu vượt hạn mức bị từ chối cho đến khi hạn mức được đặt lại.",
+          "Hạn mức sử dụng chỉ dùng cho Faam AI Cloud, không có giá trị quy đổi thành tiền và không chuyển nhượng được.",
+          "Hiện không có thanh toán trực tuyến.",
+          "Chúng tôi có thể thay đổi danh sách mô hình, hạn mức hoặc tạm ngừng dịch vụ để bảo trì.",
         ],
       },
       {
@@ -387,7 +391,7 @@ export const vi = {
       },
       {
         heading: "6. Tạm ngừng và chấm dứt",
-        paragraphs: ["Chúng tôi có thể khóa tài khoản vi phạm các điều khoản này. Bạn có thể xóa tài khoản bất cứ lúc nào trong trang Tài khoản; credit còn lại sẽ mất khi xóa."],
+        paragraphs: ["Chúng tôi có thể khóa tài khoản vi phạm các điều khoản này. Bạn có thể xóa tài khoản bất cứ lúc nào trong trang Tài khoản; hạn mức sử dụng còn lại (nếu có) sẽ mất khi xóa."],
       },
       {
         heading: "7. Miễn trừ bảo đảm",
@@ -411,7 +415,7 @@ export const vi = {
     login: {
       metaTitle: "Đăng nhập",
       title: "Đăng nhập",
-      subtitle: "Dùng tài khoản FaamOffice để quản lý credit, thiết bị và đăng nhập Faam AI Cloud.",
+      subtitle: "Dùng tài khoản FaamOffice để quản lý thiết bị và đăng nhập Faam AI Cloud trong ứng dụng.",
       email: "Email",
       password: "Mật khẩu",
       submit: "Đăng nhập",
@@ -527,6 +531,17 @@ export const vi = {
       reasons: { signup_bonus: "Quà đăng ký", admin_adjust: "Điều chỉnh bởi quản trị viên", ai_usage: "Dùng Faam AI" },
       ledgerEmpty: "Chưa có biến động nào.",
     },
+    ai: {
+      title: "Faam AI Cloud",
+      explain:
+        "Đăng nhập tài khoản này trong ứng dụng FaamOffice (Cài đặt → Mô hình AI → Faam AI Cloud) để dùng các mô hình AI ngay trong tài liệu, không cần API key.",
+      today: "Hôm nay",
+      quota: "{used}/{limit} lượt",
+      quotaResets: "Số lượt được đặt lại lúc 0 giờ mỗi ngày (giờ Việt Nam, UTC+7).",
+      quotaReached: "Bạn đã dùng hết lượt Faam AI hôm nay. Hãy thử lại sau 0 giờ (giờ Việt Nam).",
+      unlimited: "Không giới hạn số lượt mỗi ngày.",
+      modelsTitle: "Mô hình có sẵn",
+    },
     usage: {
       title: "Lịch sử sử dụng",
       time: "Thời gian",
@@ -562,7 +577,7 @@ export const vi = {
     },
     danger: {
       title: "Xóa tài khoản",
-      text: "Xóa vĩnh viễn tài khoản, credit, lịch sử sử dụng và đăng xuất mọi thiết bị. Không thể hoàn tác.",
+      text: "Xóa vĩnh viễn tài khoản, lịch sử sử dụng và đăng xuất mọi thiết bị. Không thể hoàn tác.",
       password: "Nhập mật khẩu để xác nhận",
       submit: "Xóa tài khoản vĩnh viễn",
       confirm: "Bạn chắc chắn muốn xóa tài khoản? Thao tác này không thể hoàn tác.",
@@ -575,6 +590,72 @@ export const vi = {
       label: "Mục quản trị",
       users: "Người dùng",
       announcements: "Thông báo",
+      settings: "Cài đặt",
+    },
+    settings: {
+      metaTitle: "Cài đặt",
+      title: "Cài đặt",
+      subtitle: "Cài đặt chung cho Faam AI Cloud, trang web và ứng dụng FaamOffice.",
+      saving: "Đang lưu…",
+      credits: {
+        title: "Faam credit",
+        on: "Đang bật",
+        off: "Đang tắt",
+        explainOn:
+          "Mỗi yêu cầu Faam AI Cloud trừ credit theo số token. Khi hết credit, người dùng không gửi được yêu cầu cho đến khi quản trị viên cộng thêm.",
+        explainOff:
+          "Người dùng chỉ cần đăng nhập tài khoản để dùng các mô hình Faam AI Cloud trong ứng dụng: không trừ credit, không hiện credit ở đâu cả. Mỗi yêu cầu vẫn được ghi lại (0 credit) để thống kê và đếm số lượt mỗi ngày.",
+        keep: "Có thể bật lại bất cứ lúc nào: số dư và sổ credit của từng người dùng được giữ nguyên.",
+        switchLabel: "Dùng Faam credit",
+        turnOff: "Tắt Faam credit",
+        turnOn: "Bật Faam credit",
+        confirmOff:
+          "Tắt Faam credit? Người dùng đã đăng nhập sẽ dùng Faam AI Cloud mà không bị trừ credit, chỉ bị giới hạn bởi số lượt mỗi ngày (nếu có). Số dư được giữ nguyên.",
+        confirmOn: "Bật lại Faam credit? Mỗi yêu cầu sẽ lại bị trừ credit và người dùng hết credit sẽ không gửi được yêu cầu.",
+        turnedOff: "Đã tắt Faam credit.",
+        turnedOn: "Đã bật Faam credit.",
+        limitLabel: "Số lượt Faam AI mỗi người mỗi ngày khi tắt credit (0 = không giới hạn)",
+        limitHint:
+          "Một ngày tính theo giờ Việt Nam (UTC+7), đặt lại lúc 0 giờ. Chỉ áp dụng khi Faam credit đang tắt. Các yêu cầu đang chạy cũng được tính; đây là giới hạn mềm nên đôi khi có thể lọt thêm một lượt.",
+        limitSave: "Lưu giới hạn",
+        limitSaved: "Đã lưu giới hạn.",
+        rateNote: "Ở cả hai chế độ, mỗi người dùng gửi tối đa 60 yêu cầu mỗi phút.",
+        oldAppsNote:
+          "FaamOffice 0.11.1 trở về trước chưa hỗ trợ giới hạn số lượt mỗi ngày: khi hết lượt, ứng dụng chỉ báo “Dịch vụ AI hiện đang bận” mà không cho biết khi nào được dùng lại. Khi tắt credit và đặt giới hạn, hãy đăng một thông báo trong ứng dụng cho các phiên bản đó (Thông báo → “Đến phiên bản” 0.11.1) để nhắc người dùng cài bản mới nhất.",
+      },
+      socials: {
+        title: "Kênh theo dõi",
+        subtitle:
+          "Nút theo dõi hiện ở chân mọi trang của website và trong ứng dụng FaamOffice (ngay phía trên nút Cài đặt ở thanh bên). Thứ tự trong danh sách là thứ tự hiển thị.",
+        empty: "Chưa có kênh nào. Bấm “Thêm kênh” để bắt đầu.",
+        add: "Thêm kênh",
+        count: "{count}/{max} kênh",
+        item: "Kênh {n}",
+        platform: "Nền tảng",
+        url: "Địa chỉ (https)",
+        label: "Nhãn (không bắt buộc)",
+        labelHint: "Tối đa 40 ký tự, ví dụ tên trang hoặc tên kênh.",
+        hosts: "Tên miền hợp lệ: {hosts}.",
+        anyHost: "Bất kỳ địa chỉ https nào.",
+        enabled: "Hiển thị",
+        moveUp: "Đưa lên",
+        moveDown: "Đưa xuống",
+        remove: "Xóa",
+        save: "Lưu các kênh",
+        saved: "Đã lưu. Trang web cập nhật ngay; ứng dụng nhận danh sách mới ở lần khởi động sau.",
+        unsaved: "Có thay đổi chưa lưu.",
+        fixErrors: "Hãy sửa các ô được đánh dấu rồi lưu lại.",
+      },
+      errors: {
+        required: "Bắt buộc.",
+        https_only: "Phải là địa chỉ https:// hợp lệ.",
+        wrong_host: "Địa chỉ không thuộc nền tảng đã chọn.",
+        too_long: "Quá dài.",
+        too_many: "Tối đa 12 kênh.",
+        duplicate: "Trùng mã kênh.",
+        out_of_range: "Phải là số nguyên từ 0 đến 1.000.000.",
+        invalid: "Giá trị không hợp lệ.",
+      },
     },
     announcements: {
       metaTitle: "Thông báo trong ứng dụng",
@@ -708,6 +789,9 @@ export const vi = {
       credits7: "Credit đã dùng (7 ngày)",
       credits30: "Credit đã dùng (30 ngày)",
       requests30: "Yêu cầu AI (30 ngày)",
+      requests7: "Yêu cầu AI (7 ngày)",
+      tokens30: "Token đã dùng (30 ngày)",
+      creditsOff: "Faam credit đang tắt: người dùng chỉ cần đăng nhập để dùng Faam AI Cloud. Đổi trong {link}.",
     },
     users: {
       title: "Người dùng",
@@ -726,6 +810,7 @@ export const vi = {
       prev: "Trang trước",
       next: "Trang sau",
       total: "{count} người dùng",
+      requests30: "Yêu cầu AI (30 ngày)",
     },
     detail: {
       back: "← Danh sách người dùng",
@@ -756,6 +841,11 @@ export const vi = {
       usageTitle: "Sử dụng gần đây",
       revoked: "Đã đăng xuất",
       none: "Không có dữ liệu.",
+      requestsToday: "Yêu cầu AI hôm nay",
+      requests30: "Yêu cầu AI (30 ngày)",
+      tokens30: "Token (30 ngày)",
+      creditsOffNote:
+        "Faam credit đang tắt nên số dư không được dùng. Số dư hiện tại ({balance}) vẫn được giữ và có hiệu lực lại khi bật credit; bạn vẫn có thể điều chỉnh.",
     },
   },
   errors: {

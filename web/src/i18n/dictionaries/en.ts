@@ -38,6 +38,10 @@ export const en: Dictionary = {
     privacy: "Privacy policy",
     terms: "Terms of service",
     license: "Released under the Apache-2.0 license.",
+    follow: "Follow FaamOffice",
+    followOn: "Follow FaamOffice on {platform}",
+    website: "Website",
+    visitWebsite: "Visit the FaamOffice website",
     basedOn:
       "FaamOffice is a fork of GenOffice. GenOffice and Genspark are trademarks of Mainfunc, Inc.; FaamOffice is not affiliated with or endorsed by Mainfunc, Inc.",
   },
@@ -98,8 +102,8 @@ export const en: Dictionary = {
         {
           key: "cloud",
           title: "Faam AI Cloud",
-          description: "Sign in with your FaamOffice account and start right away — nothing to configure. Each request uses credits from your account.",
-          points: ["No API key needed", "Credits and usage history on the web", "Sign devices out at any time"],
+          description: "Sign in with your FaamOffice account to use AI models right inside the app — nothing to configure. Daily usage may be limited.",
+          points: ["No API key needed", "Usage history on the web", "Sign devices out at any time"],
         },
         {
           key: "byok",
@@ -152,12 +156,12 @@ export const en: Dictionary = {
     faq: {
       title: "Frequently asked questions",
       items: [
-        { q: "Is FaamOffice free?", a: "Yes. FaamOffice is free and open source under the Apache-2.0 license. You only pay if you use an API key from a paid AI provider, or Faam AI Cloud credits." },
+        { q: "Is FaamOffice free?", a: "Yes. FaamOffice is free and open source under the Apache-2.0 license. You only pay if you use an API key from a paid AI provider." },
         { q: "Which operating systems does FaamOffice support?", a: "macOS (Apple Silicon and Intel), 64-bit Windows, and Linux (AppImage, .deb, .rpm)." },
         { q: "Do I need an account?", a: "No. Every editor — and Faam AI with your own API key or local AI — works without signing in. A FaamOffice account is only needed for Faam AI Cloud." },
         { q: "Are my documents uploaded to a server?", a: "Your files always stay on your computer. When you ask Faam AI for help, the relevant content is sent to the AI service you chose; with local AI (Ollama, LM Studio, llama.cpp) nothing leaves your machine." },
         { q: "Which models can Faam AI use?", a: "Faam AI Cloud, or your API key for OpenAI, Anthropic Claude, Google Gemini, DeepSeek, xAI Grok, Mistral, Groq, OpenRouter, Qwen, Kimi, GLM, MiniMax, and any OpenAI-compatible server. To let Faam AI edit documents, choose a model that supports tool calling." },
-        { q: "What are Faam AI Cloud credits?", a: "Credits are the unit used to bill Faam AI Cloud. New accounts get free credits to try it, and each request uses credits based on the tokens processed. Your balance and history are on the Account page. There is no online payment yet; an administrator adds credits when needed." },
+        { q: "What is Faam AI Cloud?", a: "Faam AI Cloud lets you use AI models right inside the app with just your FaamOffice account, no API key: open Settings → AI models, choose Faam AI Cloud and sign in. To keep the service reliable for everyone, daily usage may be limited. Your usage history is on the Account page." },
         { q: "Why does macOS or Windows warn me on first launch?", a: "The installers are not yet signed by Apple or Microsoft. On macOS 15 and later, open the app, click Done when it is blocked, then go to System Settings → Privacy & Security and click Open Anyway (macOS 14 and earlier: right-click → Open). On Windows, when you see “Windows protected your PC”, choose More info and then Run anyway; if Windows 11 Smart App Control blocks it, there is no way to continue. Signed builds that skip these steps are on the way." },
         { q: "Is formatting preserved when I open Word or Excel files?", a: "FaamOffice reads and writes the real formats (.docx, .xlsx, .pptx), so saved files open in Microsoft Office, Google Docs or LibreOffice. Very complex documents may show small visual differences." },
       ],
@@ -223,7 +227,7 @@ export const en: Dictionary = {
       headers: ["Criteria", "Faam AI Cloud", "Your own API key", "Local AI"],
       rows: [
         ["Getting started", "Sign in with a FaamOffice account", "Paste your provider's API key", "Install Ollama, LM Studio or llama.cpp"],
-        ["Cost", "Credits from your account", "Billed directly by the provider", "Free (runs on your hardware)"],
+        ["Cost", "Included with your FaamOffice account; daily usage may be limited", "Billed directly by the provider", "Free (runs on your hardware)"],
         ["Where data goes", "Faam AI Cloud servers and the AI provider behind them", "Straight to the provider you chose", "Never leaves your machine (or your LAN)"],
         ["Needs internet", "Yes", "Yes", "No"],
         ["Best for", "Starting right away, no setup", "Existing OpenAI, Claude, Gemini… accounts", "Sensitive documents, working offline"],
@@ -231,7 +235,7 @@ export const en: Dictionary = {
     },
     cloud: {
       title: "Faam AI Cloud",
-      text: "The fastest way to start: no API key, just a FaamOffice account. New accounts get free trial credits; your balance and usage history are on the Account page.",
+      text: "The fastest way to start: no API key, just a FaamOffice account. Sign in and use AI models right inside the app; daily usage may be limited, and your usage history is on the Account page.",
       steps: [
         "Create a free FaamOffice account on this website.",
         "In the app, open Settings → AI models, choose Faam AI Cloud and click Sign in.",
@@ -261,7 +265,7 @@ export const en: Dictionary = {
     reviewNote:
       "This is a template. The operator of this website and of Faam AI Cloud must review it, fill in the missing details (legal name, address, contact email, governing law) and adapt it to the laws where they operate before relying on it.",
     updated: "Last updated",
-    updatedDate: "October 6, 2026",
+    updatedDate: "October 7, 2026",
     contact: "Contact",
   },
   privacy: {
@@ -285,7 +289,7 @@ export const en: Dictionary = {
           "Your name and email address, and whether the email is verified.",
           "Your password as a one-way hash (scrypt) — we never know your password.",
           "The devices signed in to your account (device name, sign-in time and last use).",
-          "Your credit balance and credit history.",
+          "Your Faam AI Cloud usage history and the usage allowance attached to your account.",
           "Browser sessions, with the browser (user agent) and IP address at sign-in, to protect your account.",
         ],
       },
@@ -293,7 +297,7 @@ export const en: Dictionary = {
         heading: "3. Faam AI Cloud",
         paragraphs: [
           "When you use Faam AI Cloud, the content of your request (including any document content sent with it) passes through our servers to the AI model provider behind the service so that a reply can be generated. We do not store request or response content.",
-          "For each request we store the time, model name, input/output token counts and the credits charged, for billing and to show you your history.",
+          "For each request we store the time, model name and input/output token counts, to apply usage limits and to show you your history.",
           "The model provider behind the service processes data under its own policy: [LIST PROVIDERS AND POLICY LINKS].",
         ],
       },
@@ -321,7 +325,7 @@ export const en: Dictionary = {
       {
         heading: "7. Your rights",
         paragraphs: [
-          "You can view and edit your name, change your password, sign devices out and permanently delete your account from the Account page. Deleting your account removes your profile, credits, usage history and all signed-in devices. For any other request about your personal data, contact us.",
+          "You can view and edit your name, change your password, sign devices out and permanently delete your account from the Account page. Deleting your account removes your profile, usage history and all signed-in devices. For any other request about your personal data, contact us.",
         ],
       },
       {
@@ -362,13 +366,13 @@ export const en: Dictionary = {
         paragraphs: ["You must provide an accurate email address and keep your password secret. You are responsible for all activity on your account and its signed-in devices. Sign out lost or unused devices from the Account page."],
       },
       {
-        heading: "3. Faam AI Cloud and credits",
-        paragraphs: ["Faam AI Cloud provides hosted AI models billed in credits:"],
+        heading: "3. Faam AI Cloud",
+        paragraphs: ["Faam AI Cloud provides hosted AI models to users signed in with a FaamOffice account:"],
         list: [
-          "Credits can only be used for Faam AI Cloud, have no cash value and cannot be transferred.",
-          "Credits are charged per request based on tokens and the model's price at the time of use. The last request may leave a slightly negative balance.",
-          "Credits are granted by administrators (for example, as a sign-up bonus). There is currently no online payment.",
-          "We may change the available models and prices, or pause the service for maintenance.",
+          "We may limit usage, for example the number of requests per day, to keep the service reliable for everyone; requests over the limit are refused until it resets.",
+          "Usage allowances apply only to Faam AI Cloud, have no cash value and cannot be transferred.",
+          "There is currently no online payment.",
+          "We may change the available models or the limits, or pause the service for maintenance.",
         ],
       },
       {
@@ -387,7 +391,7 @@ export const en: Dictionary = {
       },
       {
         heading: "6. Suspension and termination",
-        paragraphs: ["We may disable accounts that violate these terms. You can delete your account at any time from the Account page; remaining credits are lost on deletion."],
+        paragraphs: ["We may disable accounts that violate these terms. You can delete your account at any time from the Account page; any remaining usage allowance is lost on deletion."],
       },
       {
         heading: "7. Disclaimer of warranties",
@@ -411,7 +415,7 @@ export const en: Dictionary = {
     login: {
       metaTitle: "Sign in",
       title: "Sign in",
-      subtitle: "Use your FaamOffice account to manage credits and devices, and to sign in to Faam AI Cloud.",
+      subtitle: "Use your FaamOffice account to manage your devices and to sign in to Faam AI Cloud in the app.",
       email: "Email",
       password: "Password",
       submit: "Sign in",
@@ -527,6 +531,17 @@ export const en: Dictionary = {
       reasons: { signup_bonus: "Sign-up bonus", admin_adjust: "Adjusted by an administrator", ai_usage: "Faam AI usage" },
       ledgerEmpty: "No activity yet.",
     },
+    ai: {
+      title: "Faam AI Cloud",
+      explain:
+        "Sign in with this account in the FaamOffice app (Settings → AI models → Faam AI Cloud) to use AI models right in your documents — no API key needed.",
+      today: "Today",
+      quota: "{used}/{limit} requests",
+      quotaResets: "The count resets every day at midnight Vietnam time (UTC+7).",
+      quotaReached: "You have used all of today's Faam AI requests. Try again after midnight Vietnam time.",
+      unlimited: "No daily request limit.",
+      modelsTitle: "Available models",
+    },
     usage: {
       title: "Usage history",
       time: "Time",
@@ -562,7 +577,7 @@ export const en: Dictionary = {
     },
     danger: {
       title: "Delete account",
-      text: "Permanently delete your account, credits and usage history, and sign out every device. This cannot be undone.",
+      text: "Permanently delete your account and usage history, and sign out every device. This cannot be undone.",
       password: "Enter your password to confirm",
       submit: "Delete my account permanently",
       confirm: "Are you sure you want to delete your account? This cannot be undone.",
@@ -575,6 +590,72 @@ export const en: Dictionary = {
       label: "Admin sections",
       users: "Users",
       announcements: "Announcements",
+      settings: "Settings",
+    },
+    settings: {
+      metaTitle: "Settings",
+      title: "Settings",
+      subtitle: "Site-wide settings for Faam AI Cloud, the website and the FaamOffice app.",
+      saving: "Saving…",
+      credits: {
+        title: "Faam credits",
+        on: "On",
+        off: "Off",
+        explainOn:
+          "Each Faam AI Cloud request is charged in credits by tokens. When their credits run out, users cannot send requests until an administrator adds more.",
+        explainOff:
+          "Signing in is all users need to use the Faam AI Cloud models in the app: nothing is charged and credits are not shown anywhere. Every request is still recorded (0 credits) for statistics and the daily request count.",
+        keep: "Turn them back on at any time: every user's balance and credit ledger are kept.",
+        switchLabel: "Use Faam credits",
+        turnOff: "Turn Faam credits off",
+        turnOn: "Turn Faam credits on",
+        confirmOff:
+          "Turn Faam credits off? Signed-in users will use Faam AI Cloud without being charged, limited only by the daily request limit (if set). Balances are kept.",
+        confirmOn: "Turn Faam credits back on? Every request will be charged again and users without credits will not be able to send requests.",
+        turnedOff: "Faam credits are now off.",
+        turnedOn: "Faam credits are now on.",
+        limitLabel: "Faam AI requests per user per day while credits are off (0 = unlimited)",
+        limitHint:
+          "A day runs in Vietnam time (UTC+7) and resets at midnight. Only applies while Faam credits are off. Requests still running count too; it is a soft limit, so occasionally one extra request may get through.",
+        limitSave: "Save limit",
+        limitSaved: "Limit saved.",
+        rateNote: "In both modes each user can send at most 60 requests per minute.",
+        oldAppsNote:
+          "FaamOffice 0.11.1 and older do not recognize the daily limit: once it is reached they only say “The AI service is busy right now”, without the reset time. When you turn credits off with a limit, publish an in-app announcement for those versions (Announcements → “Up to version” 0.11.1) asking users to install the latest release.",
+      },
+      socials: {
+        title: "Follow channels",
+        subtitle:
+          "Follow buttons appear at the bottom of every website page and in the FaamOffice app (right above Settings in the sidebar). The list order is the display order.",
+        empty: "No channels yet. Click “Add channel” to start.",
+        add: "Add channel",
+        count: "{count}/{max} channels",
+        item: "Channel {n}",
+        platform: "Platform",
+        url: "Address (https)",
+        label: "Label (optional)",
+        labelHint: "Up to 40 characters, e.g. the page or channel name.",
+        hosts: "Allowed domains: {hosts}.",
+        anyHost: "Any https address.",
+        enabled: "Show",
+        moveUp: "Move up",
+        moveDown: "Move down",
+        remove: "Remove",
+        save: "Save channels",
+        saved: "Saved. The website updates right away; the app gets the new list the next time it starts.",
+        unsaved: "You have unsaved changes.",
+        fixErrors: "Fix the highlighted fields, then save again.",
+      },
+      errors: {
+        required: "Required.",
+        https_only: "Must be a valid https:// address.",
+        wrong_host: "This address does not belong to the selected platform.",
+        too_long: "Too long.",
+        too_many: "At most 12 channels.",
+        duplicate: "Duplicate channel id.",
+        out_of_range: "Must be a whole number from 0 to 1,000,000.",
+        invalid: "Invalid value.",
+      },
     },
     announcements: {
       metaTitle: "In-app announcements",
@@ -708,6 +789,9 @@ export const en: Dictionary = {
       credits7: "Credits used (7 days)",
       credits30: "Credits used (30 days)",
       requests30: "AI requests (30 days)",
+      requests7: "AI requests (7 days)",
+      tokens30: "Tokens used (30 days)",
+      creditsOff: "Faam credits are off: signing in is all users need for Faam AI Cloud. Change it in {link}.",
     },
     users: {
       title: "Users",
@@ -726,6 +810,7 @@ export const en: Dictionary = {
       prev: "Previous",
       next: "Next",
       total: "{count} users",
+      requests30: "AI requests (30 days)",
     },
     detail: {
       back: "← All users",
@@ -756,6 +841,11 @@ export const en: Dictionary = {
       usageTitle: "Recent usage",
       revoked: "Signed out",
       none: "No data.",
+      requestsToday: "AI requests today",
+      requests30: "AI requests (30 days)",
+      tokens30: "Tokens (30 days)",
+      creditsOffNote:
+        "Faam credits are off, so balances are not used. The current balance ({balance}) is kept and applies again when credits are turned back on; you can still adjust it.",
     },
   },
   errors: {

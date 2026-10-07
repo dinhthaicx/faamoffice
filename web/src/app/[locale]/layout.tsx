@@ -5,12 +5,19 @@ import { notFound } from "next/navigation";
 import { SiteFooter } from "@/components/site-footer";
 import { SiteHeader } from "@/components/site-header";
 import { getSiteUrl } from "@/lib/env";
+import { getSiteSettings, publicSocialLinks } from "@/lib/site-settings";
 import { isLocale, localeMeta, locales, toLocale } from "@/i18n/config";
 import { getDictionary } from "@/i18n";
 
 // Only /vi and /en exist; anything else is a 404 (the proxy redirects
 // unprefixed paths to a locale first).
 export const dynamicParams = false;
+
+// Public pages are prerendered with the site settings read at build time (the
+// defaults when the database is not reachable then, e.g. in a Docker build).
+// Saving the settings revalidates this layout (src/lib/site-settings.ts); the
+// time-based revalidation below only catches up after such a build.
+export const revalidate = 3600;
 
 export function generateStaticParams() {
   return locales.map((locale) => ({ locale }));
@@ -47,6 +54,7 @@ export default async function LocaleLayout({ children, params }: LayoutProps<"/[
   const { locale } = await params;
   if (!isLocale(locale)) notFound();
   const dict = getDictionary(locale);
+  const { socialLinks } = await getSiteSettings();
   return (
     <html lang={localeMeta[locale].htmlLang} data-scroll-behavior="smooth">
       <body className="flex min-h-screen flex-col">
@@ -60,7 +68,7 @@ export default async function LocaleLayout({ children, params }: LayoutProps<"/[
         <main id="main" className="flex-1" tabIndex={-1}>
           {children}
         </main>
-        <SiteFooter locale={locale} dict={dict} />
+        <SiteFooter locale={locale} dict={dict} socials={publicSocialLinks(socialLinks)} />
       </body>
     </html>
   );

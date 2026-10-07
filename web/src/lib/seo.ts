@@ -54,7 +54,8 @@ export function privateMetadata(title: string): Metadata {
 
 type JsonLd = Record<string, unknown>;
 
-export function organizationLd(): JsonLd {
+/** `sameAs` lists the GitHub repository plus the enabled social links (admin Settings). */
+export function organizationLd(socialUrls: readonly string[] = []): JsonLd {
   return {
     "@context": "https://schema.org",
     "@type": "Organization",
@@ -62,7 +63,7 @@ export function organizationLd(): JsonLd {
     name: "FaamOffice",
     url: getSiteUrl(),
     logo: absoluteUrl("/icons/icon-512.png"),
-    sameAs: [GITHUB_URL],
+    sameAs: [GITHUB_URL, ...socialUrls.filter((url) => url !== GITHUB_URL)],
   };
 }
 

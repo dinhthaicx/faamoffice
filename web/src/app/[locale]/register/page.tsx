@@ -8,6 +8,7 @@ import { safeNextPath } from "@/lib/auth";
 import { getConfig } from "@/lib/env";
 import { privateMetadata } from "@/lib/seo";
 import { getSession } from "@/lib/session";
+import { getSiteSettings } from "@/lib/site-settings";
 import { PASSWORD_MIN_LENGTH } from "@/lib/password";
 import { toLocale } from "@/i18n/config";
 import { format, getDictionary } from "@/i18n";
@@ -26,7 +27,8 @@ export default async function RegisterPage({ params, searchParams }: PageProps<"
 
   if (await getSession()) redirect(next || `/${locale}/account`);
 
-  const bonus = getConfig().signupBonusCredits;
+  // The sign-up bonus is only advertised while Faam credits are on (it is still granted silently when off).
+  const bonus = (await getSiteSettings()).creditsEnabled ? getConfig().signupBonusCredits : 0;
   const [beforeTerms, rest] = t.agree.split("{terms}");
   const [between, afterPrivacy] = (rest ?? "").split("{privacy}");
 

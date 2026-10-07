@@ -6,6 +6,7 @@ import { JsonLd } from "@/components/json-ld";
 import { LogoMark } from "@/components/logo";
 import { ArrowRightIcon, buttonClass, Card, CheckIcon, Container, DownloadIcon, Eyebrow, SectionHeading } from "@/components/ui";
 import { faqLd, organizationLd, pageMetadata, softwareApplicationLd, websiteLd } from "@/lib/seo";
+import { getSiteSettings, publicSocialLinks } from "@/lib/site-settings";
 import { AI_PROVIDERS, GITHUB_URL, LOCAL_AI } from "@/lib/site";
 import { toLocale } from "@/i18n/config";
 import { getDictionary } from "@/i18n";
@@ -97,10 +98,11 @@ export default async function HomePage({ params }: PageProps<"/[locale]">) {
   const locale = toLocale((await params).locale);
   const dict = getDictionary(locale);
   const h = dict.home;
+  const socialUrls = publicSocialLinks((await getSiteSettings()).socialLinks).map((s) => s.url);
 
   return (
     <>
-      <JsonLd data={[organizationLd(), websiteLd(locale, dict), softwareApplicationLd(locale, dict), faqLd(h.faq.items)]} />
+      <JsonLd data={[organizationLd(socialUrls), websiteLd(locale, dict), softwareApplicationLd(locale, dict), faqLd(h.faq.items)]} />
 
       {/* Hero */}
       <section className="hero-glow overflow-hidden pb-20 pt-16 sm:pt-24" aria-labelledby="hero-title">

@@ -1,6 +1,12 @@
-// Faam AI Cloud: OpenAI-compatible chat completions proxy billed in credits.
+// Faam AI Cloud: OpenAI-compatible chat completions proxy.
+//
+// Credits on (default): each request is billed in credits and refused (402)
+// once the balance is used up. Credits off (admin Settings): signing in is
+// enough; requests are recorded with 0 credits and limited per day by the
+// optional daily request quota. A per-user rate limit applies in both modes.
 
 import { z } from "zod";
+import { aiRequestsInFlight, countRequestsToday, quotaResetsAt, secondsUntilReset, trackAiRequest } from "./ai-quota";
 import { authenticateBearer } from "./api-token";
 import { buildUpstreamBody, findModel, parseModels, type ModelConfig } from "./ai-models";
 import {
@@ -11,9 +17,11 @@ import {
   readUsage,
   type TokenUsage,
 } from "./billing";
-import { recordAiUsage } from "./credits";
+import { recordAiUsage, recordUnbilledAiUsage } from "./credits";
 import { getConfig } from "./env";
 import { HttpError, jsonError, readJson } from "./http";
+import { limiters } from "./rate-limit";
+import { getSiteSettings } from "./site-settings";
 import { SseUsageTracker } from "./sse-usage";
 
 export const AI_MAX_BODY_BYTES = 20 * 1024 * 1024;
@@ -44,6 +52,25 @@ export function insufficientCredits(): Response {
     "insufficient_credits",
     "insufficient_credits",
   );
+}
+
+/** Per-user burst limit (429 rate_limited); the app treats it as "busy, retry later". */
+export function aiRateLimited(retryAfter: number): Response {
+  const res = openAiError(429, "Too many Faam AI requests. Please slow down and try again shortly.", "rate_limited", "rate_limited");
+  res.headers.set("Retry-After", String(Math.max(1, retryAfter)));
+  return res;
+}
+
+/** Daily quota used up (credits off): 429 daily_limit_reached until the next local midnight. */
+export function dailyLimitReached(limit: number, now: Date): Response {
+  const res = openAiError(
+    429,
+    `You have used all ${limit} Faam AI requests for today. The quota resets at ${quotaResetsAt(now).toISOString()} (midnight, UTC+7).`,
+    "daily_limit_reached",
+    "daily_limit_reached",
+  );
+  res.headers.set("Retry-After", String(secondsUntilReset(now)));
+  return res;
 }
 
 let modelsCache: { json: string | undefined; models: ModelConfig[] } | null = null;
@@ -117,6 +144,8 @@ export async function handleChatCompletions(req: Request): Promise<Response> {
     throw err;
   }
   const { user, token } = auth;
+  const burst = limiters().aiUser.check(`ai|${user.id}`);
+  if (!burst.ok) return aiRateLimited(burst.retryAfter);
   const cfg = getConfig();
   const models = configuredModels();
   if (!models || !cfg.ai.upstreamBaseUrl) return notConfigured();
@@ -138,10 +167,23 @@ export async function handleChatCompletions(req: Request): Promise<Response> {
   if (!model) {
     return jsonError(400, "model_not_found", `Unknown model "${String(body.model).slice(0, 100)}". Call /api/v1/ai/models for the list.`);
   }
-  if (user.credits <= 0) return insufficientCredits();
-
   const upstreamBody = buildUpstreamBody(body, model);
   const wantsStream = body.stream === true;
+
+  // Read once: a request keeps the mode it started with, even if an admin flips it meanwhile.
+  const settings = await getSiteSettings();
+  const charge = settings.creditsEnabled;
+  if (charge) {
+    if (user.credits <= 0) return insufficientCredits();
+  } else if (settings.aiDailyRequestLimit > 0) {
+    const now = new Date();
+    // Running requests count too: they are only recorded once they finish.
+    const used = (await countRequestsToday(user.id, now)) + aiRequestsInFlight(user.id);
+    if (used >= settings.aiDailyRequestLimit) return dailyLimitReached(settings.aiDailyRequestLimit, now);
+  }
+  // No await between the check and this, so concurrent requests see each other.
+  // Every exit below releases it, after recording the usage when there is any.
+  const release = trackAiRequest(user.id);
 
   // Abort the upstream call when the desktop app disconnects or on timeout.
   const controller = new AbortController();
@@ -172,12 +214,14 @@ export async function handleChatCompletions(req: Request): Promise<Response> {
     });
   } catch (err) {
     cleanup();
+    release();
     if (req.signal.aborted) return new Response(null, { status: 499 });
     console.error("[faam-ai] upstream request failed", (err as Error)?.message);
     return openAiError(502, "Could not reach the Faam AI upstream service.", "upstream_error");
   }
   if (!upstream.ok) {
     cleanup();
+    release();
     return upstreamFailure(upstream);
   }
 
@@ -186,18 +230,21 @@ export async function handleChatCompletions(req: Request): Promise<Response> {
     if (billed) return;
     billed = true;
     const final = usage ?? estimate();
+    const record = {
+      userId: user.id,
+      tokenId: token.id,
+      model: model.id,
+      promptTokens: final.promptTokens,
+      completionTokens: final.completionTokens,
+      estimated: usage === null,
+    };
     try {
-      await recordAiUsage({
-        userId: user.id,
-        tokenId: token.id,
-        model: model.id,
-        promptTokens: final.promptTokens,
-        completionTokens: final.completionTokens,
-        credits: computeCredits(model, final),
-        estimated: usage === null,
-      });
+      if (charge) await recordAiUsage({ ...record, credits: computeCredits(model, final) });
+      else await recordUnbilledAiUsage(record);
     } catch (err) {
       console.error("[faam-ai] failed to record usage", err);
+    } finally {
+      release();
     }
   };
 
@@ -226,6 +273,7 @@ export async function handleChatCompletions(req: Request): Promise<Response> {
           cleanup();
           // Upstream aborted (client gone / timeout) or broke mid-stream: bill what was produced.
           if (tracker.chunks > 0 || tracker.usage) await bill(tracker.usage, estimate);
+          release();
           try {
             ctrl.error(err);
           } catch {
@@ -238,6 +286,7 @@ export async function handleChatCompletions(req: Request): Promise<Response> {
         cleanup();
         await reader.cancel().catch(() => {});
         if (tracker.chunks > 0 || tracker.usage) await bill(tracker.usage, estimate);
+        release();
       },
     });
     return new Response(stream, {
@@ -256,6 +305,7 @@ export async function handleChatCompletions(req: Request): Promise<Response> {
     text = await upstream.text();
   } catch (err) {
     cleanup();
+    release();
     if (req.signal.aborted) return new Response(null, { status: 499 });
     console.error("[faam-ai] failed to read upstream response", (err as Error)?.message);
     return openAiError(502, "The Faam AI upstream response was interrupted.", "upstream_error");

@@ -6,13 +6,14 @@ import { cx } from "./ui";
 import type { Locale } from "@/i18n/config";
 import type { Dictionary } from "@/i18n";
 
-export type AdminSection = "users" | "announcements";
+export type AdminSection = "users" | "announcements" | "settings";
 
 export function AdminNav({ locale, dict, current }: { locale: Locale; dict: Dictionary; current: AdminSection }) {
   const t = dict.admin.nav;
   const items: { id: AdminSection; href: string; label: string }[] = [
     { id: "users", href: `/${locale}/admin`, label: t.users },
     { id: "announcements", href: `/${locale}/admin/announcements`, label: t.announcements },
+    { id: "settings", href: `/${locale}/admin/settings`, label: t.settings },
   ];
   return (
     <nav aria-label={t.label} className="mt-4 flex flex-wrap gap-2 text-sm">

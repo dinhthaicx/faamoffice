@@ -9,9 +9,12 @@
 //
 // The script registers a user, signs in, runs the device flow (approving with
 // the web session cookie), calls /api/v1/me, streams and non-streams through
-// the AI proxy, and checks that credits are deducted and usage is recorded.
-// Admin checks (credit adjustment, 402, disable/enable) run when the server
-// lists SMOKE_ADMIN_EMAIL in ADMIN_EMAILS.
+// the AI proxy, and checks that usage is recorded — and charged when Faam
+// credits are on, free (0 credits, daily quota) when an admin turned them off;
+// it adapts to the mode the server is in. Admin checks (credit adjustment, 402,
+// the Settings page and API, both credit modes, the daily limit, the public
+// app config, disable/enable) run when the server lists SMOKE_ADMIN_EMAIL in
+// ADMIN_EMAILS; the settings are restored afterwards.
 
 import "./load-env";
 import assert from "node:assert/strict";
@@ -85,6 +88,22 @@ function sessionCookie(res: Response): string {
     }
   }
   throw new Error("no session cookie in response");
+}
+
+/** /api/v1/me fields that depend on the Faam credits mode. */
+function assertCreditsShape(me: Json, creditsOn: boolean) {
+  assert.equal(me.creditsEnabled, creditsOn, `expected creditsEnabled ${creditsOn}`);
+  if (creditsOn) {
+    assert.equal(typeof me.credits, "number");
+    assert.equal(me.aiQuota, undefined, "no aiQuota while credits are on");
+  } else {
+    assert.ok(!("credits" in me), "credits must be hidden while credits are off");
+    if (me.aiQuota !== undefined) {
+      assert.equal(typeof me.aiQuota.limit, "number");
+      assert.equal(typeof me.aiQuota.used, "number");
+      assert.ok(Date.parse(me.aiQuota.resetsAt) > Date.now(), "aiQuota.resetsAt must be in the future");
+    }
+  }
 }
 
 async function login(email: string, password: string): Promise<{ status: number; cookie?: string; json: Json }> {
@@ -250,11 +269,37 @@ async function main() {
     assert.equal(me.json.email, email);
     assert.equal(me.json.emailVerified, false);
     assert.equal(me.json.role, "USER");
-    assert.equal(typeof me.json.credits, "number");
-    assert.ok(me.json.credits > 0, "new account should have signup bonus credits (SIGNUP_BONUS_CREDITS > 0)");
+    assert.equal(typeof me.json.creditsEnabled, "boolean", "/api/v1/me must report creditsEnabled");
+    const creditsOn: boolean = me.json.creditsEnabled;
+    assertCreditsShape(me.json, creditsOn);
+    if (creditsOn) assert.ok(me.json.credits > 0, "new account should have signup bonus credits (SIGNUP_BONUS_CREDITS > 0)");
     const userId: string = me.json.id;
-    let credits: number = me.json.credits;
-    ok(`GET /api/v1/me → ${credits} credits`);
+    let credits: number = creditsOn ? me.json.credits : 0;
+    let usedToday: number | null = me.json.aiQuota?.used ?? null;
+    ok(
+      creditsOn
+        ? `GET /api/v1/me → Faam credits on, ${credits} credits`
+        : `GET /api/v1/me → Faam credits off, ${me.json.aiQuota ? `quota ${usedToday}/${me.json.aiQuota.limit} today` : "no daily limit"}`,
+    );
+
+    /** After an AI request: charged (credits on) or recorded for free, counting toward the quota (credits off). */
+    const expectRecorded = async (label: string, cost: number | "estimate") => {
+      await sleep(300);
+      const now = await call("/api/v1/me", { bearer: token });
+      assertCreditsShape(now.json, creditsOn);
+      if (creditsOn) {
+        if (cost === "estimate") assert.ok(now.json.credits < credits, `${label}: should be billed (estimated)`);
+        else assert.equal(now.json.credits, credits - cost, `${label}: expected ${credits} - ${cost}, got ${now.json.credits}`);
+        ok(`${label}: credits ${credits} → ${now.json.credits}`);
+        credits = now.json.credits;
+      } else {
+        if (usedToday !== null) {
+          assert.equal(now.json.aiQuota.used, usedToday + 1, `${label}: the daily count should grow by one`);
+          usedToday = now.json.aiQuota.used;
+        }
+        ok(`${label}: recorded without charge${usedToday !== null ? ` (${usedToday} today)` : ""}`);
+      }
+    };
     const noToken = await call("/api/v1/me");
     assert.equal(noToken.status, 401);
     assert.equal(noToken.json.error, "invalid_token");
@@ -309,20 +354,17 @@ async function main() {
     if (localModel.maxOutputTokens) assert.equal(sent.max_tokens, localModel.maxOutputTokens);
     ok(`upstream got model ${localModel.upstream}, include_usage, tools and image untouched, max_tokens capped`);
 
-    await sleep(300);
-    const me2 = await call("/api/v1/me", { bearer: token });
-    assert.equal(me2.json.credits, credits - expected, `expected ${credits} - ${expected}, got ${me2.json.credits}`);
-    ok(`credits deducted: ${credits} → ${me2.json.credits} (−${expected})`);
-    credits = me2.json.credits;
+    await expectRecorded("streamed request", expected);
 
     const usage = await call("/api/v1/usage?limit=1", { bearer: token });
     assert.equal(usage.status, 200);
+    assert.equal(usage.json.creditsEnabled, creditsOn);
     assert.equal(usage.json.items.length, 1);
     assert.equal(usage.json.items[0].model, modelId);
     assert.equal(usage.json.items[0].promptTokens, MOCK_USAGE.prompt_tokens);
     assert.equal(usage.json.items[0].completionTokens, MOCK_USAGE.completion_tokens);
-    assert.equal(usage.json.items[0].credits, expected);
-    ok("GET /api/v1/usage records the request");
+    assert.equal(usage.json.items[0].credits, creditsOn ? expected : 0);
+    ok(`GET /api/v1/usage records the request (${creditsOn ? `${expected} credits` : "0 credits"})`);
 
     // ------------------------------------------------------------------ AI proxy (non-stream)
     const plain = await call("/api/v1/ai/chat/completions", {
@@ -334,11 +376,7 @@ async function main() {
     assert.equal(plain.json.choices[0].message.content, MOCK_TEXT.join(""));
     const sentPlain = mock.requests[mock.requests.length - 1].body;
     assert.equal(sentPlain.stream_options, undefined, "non-stream requests must not get stream_options");
-    await sleep(100);
-    const me3 = await call("/api/v1/me", { bearer: token });
-    assert.equal(me3.json.credits, credits - expected);
-    credits = me3.json.credits;
-    ok(`non-streaming request billed (−${expected})`);
+    await expectRecorded("non-streaming request", expected);
 
     const first = await call("/api/v1/usage?limit=1", { bearer: token });
     assert.ok(first.json.nextCursor, "nextCursor expected with more items");
@@ -372,11 +410,7 @@ async function main() {
     assert.equal(slowLog.aborted, true, "upstream request should be aborted when the client disconnects");
     assert.equal(slowLog.completed, false);
     ok("client disconnect aborts the upstream request");
-    await sleep(300);
-    const me4 = await call("/api/v1/me", { bearer: token });
-    assert.ok(me4.json.credits < credits, "partial stream should be billed (estimated)");
-    credits = me4.json.credits;
-    ok(`partial stream billed by estimate (balance ${credits})`);
+    await expectRecorded("partial stream", "estimate");
 
     const dash = await call("/en/account", { cookie });
     assert.ok(dash.text.includes(modelId), "account dashboard should list usage");
@@ -401,36 +435,105 @@ async function main() {
       assert.equal(nonAdmin.status, 404);
       ok("non-admins get 404 on /en/admin");
 
-      const drain = await call(`/api/admin/users/${userId}/credits`, { cookie: admin.cookie, body: { delta: -credits, note: "smoke: drain" } });
-      assert.equal(drain.status, 200, drain.text);
-      assert.equal(drain.json.balance, 0);
-      ok("admin credit adjustment (−balance) → 0");
-      const noReason = await call(`/api/admin/users/${userId}/credits`, { cookie: admin.cookie, body: { delta: 5, note: "" } });
-      assert.equal(noReason.status, 400);
-      ok("adjustment without a reason → 400");
+      const adminCookie = admin.cookie;
+      const chatOnce = () =>
+        call("/api/v1/ai/chat/completions", {
+          bearer: token,
+          origin: null,
+          body: { model: modelId, messages: [{ role: "user", content: "Hi" }] },
+        });
+      const adjust = async (delta: number, note: string) => {
+        const r = await call(`/api/admin/users/${userId}/credits`, { cookie: adminCookie, body: { delta, note } });
+        assert.equal(r.status, 200, r.text);
+        return r.json.balance as number;
+      };
+      const patchSettings = async (body: Json, method: "PATCH" | "PUT" = "PATCH") => {
+        const r = await call("/api/admin/settings", { method, cookie: adminCookie, body });
+        assert.equal(r.status, 200, r.text);
+        return r.json.settings as Json;
+      };
 
-      const upstreamCalls = mock.requests.length;
-      const broke = await call("/api/v1/ai/chat/completions", {
-        bearer: token,
-        origin: null,
-        body: { model: modelId, messages: [{ role: "user", content: "Hi" }] },
+      // Settings page and API.
+      assert.equal((await call("/en/admin/settings", { cookie: adminCookie })).status, 200);
+      assert.equal((await call("/en/admin/settings", { cookie })).status, 404);
+      ok("GET /en/admin/settings → 200 for admins, 404 for others");
+      const forgedSettings = await call("/api/admin/settings", { method: "PATCH", cookie: adminCookie, body: {}, origin: "https://evil.example" });
+      assert.equal(forgedSettings.status, 403);
+      const userSettings = await call("/api/admin/settings", { method: "PATCH", cookie, body: { creditsEnabled: false } });
+      assert.equal(userSettings.status, 403);
+      const badLink = await call("/api/admin/settings", {
+        method: "PATCH",
+        cookie: adminCookie,
+        body: { socialLinks: [{ platform: "facebook", url: "https://www.youtube.com/@x", enabled: true }] },
       });
-      assert.equal(broke.status, 402);
-      assert.deepEqual(broke.json, {
-        error: {
-          message: "Your Faam AI credits are insufficient. Ask an administrator to add credits.",
-          type: "insufficient_credits",
-          code: "insufficient_credits",
-        },
-      });
-      assert.equal(mock.requests.length, upstreamCalls, "402 must not call the upstream");
-      ok("credits ≤ 0 → 402 insufficient_credits (no upstream call)");
+      assert.equal(badLink.status, 400);
+      assert.equal(badLink.json.fields["socialLinks.0.url"], "wrong_host");
+      ok("settings API: foreign Origin / non-admin → 403, wrong host → 400 wrong_host");
 
-      const refill = await call(`/api/admin/users/${userId}/credits`, { cookie: admin.cookie, body: { delta: "25", note: "smoke: refill" } });
-      assert.equal(refill.json.balance, 25);
-      ok("admin refill +25");
+      const original = await patchSettings({});
+      assert.equal(original.creditsEnabled, creditsOn, "admin settings and /api/v1/me disagree on the credits mode");
+      try {
+        // Credits on: charging, 402 and refills.
+        if (!creditsOn) await patchSettings({ creditsEnabled: true });
+        const onMe = await call("/api/v1/me", { bearer: token });
+        assertCreditsShape(onMe.json, true);
+        if (onMe.json.credits !== 0) assert.equal(await adjust(-onMe.json.credits, "smoke: drain"), 0);
+        ok("admin credit adjustment (−balance) → 0");
+        const noReason = await call(`/api/admin/users/${userId}/credits`, { cookie: adminCookie, body: { delta: 5, note: "" } });
+        assert.equal(noReason.status, 400);
+        ok("adjustment without a reason → 400");
 
-      const disable = await call(`/api/admin/users/${userId}/status`, { cookie: admin.cookie, body: { disabled: true } });
+        const upstreamCalls = mock.requests.length;
+        const broke = await chatOnce();
+        assert.equal(broke.status, 402);
+        assert.deepEqual(broke.json, {
+          error: {
+            message: "Your Faam AI credits are insufficient. Ask an administrator to add credits.",
+            type: "insufficient_credits",
+            code: "insufficient_credits",
+          },
+        });
+        assert.equal(mock.requests.length, upstreamCalls, "402 must not call the upstream");
+        ok("credits on, balance ≤ 0 → 402 insufficient_credits (no upstream call)");
+
+        const refill = await call(`/api/admin/users/${userId}/credits`, { cookie: adminCookie, body: { delta: "25", note: "smoke: refill" } });
+        assert.equal(refill.json.balance, 25);
+        ok("admin refill +25");
+
+        // Credits off: no balance check, a daily limit, and the follow links in the public app config.
+        const smokeLink = { id: "smoke", platform: "website", url: `${ORIGIN.startsWith("https://") ? ORIGIN : "https://faamoffice.example"}/smoke`, label: "Smoke", enabled: true };
+        await patchSettings({ creditsEnabled: false, aiDailyRequestLimit: 1_000_000, socialLinks: [...original.socialLinks, smokeLink] });
+        const offMe = await call("/api/v1/me", { bearer: token });
+        assertCreditsShape(offMe.json, false);
+        const used: number = offMe.json.aiQuota.used;
+        await patchSettings({ aiDailyRequestLimit: used + 1 });
+        assert.equal(await adjust(-25, "smoke: drain while credits are off"), 0);
+        const free = await chatOnce();
+        assert.equal(free.status, 200, `credits off must not check the balance: ${free.text}`);
+        ok("credits off: a user with 0 credits is served");
+        await sleep(300);
+        const after = await call("/api/v1/me", { bearer: token });
+        assert.deepEqual([after.json.aiQuota.used, after.json.aiQuota.limit], [used + 1, used + 1]);
+        const capped = await chatOnce();
+        assert.equal(capped.status, 429, capped.text);
+        assert.equal(capped.json.error.code, "daily_limit_reached");
+        assert.ok(Number(capped.res.headers.get("retry-after")) > 0, "Retry-After until the next local midnight");
+        ok(`daily limit reached → 429 daily_limit_reached (Retry-After ${capped.res.headers.get("retry-after")} s)`);
+        const config = await call("/api/v1/app/config", { origin: null });
+        assert.equal(config.status, 200);
+        assert.equal(config.res.headers.get("access-control-allow-origin"), "*");
+        assert.ok(
+          config.json.socials.some((l: Json) => l.id === "smoke" && l.platform === "website" && l.label === "Smoke"),
+          "the saved social link must be listed by /api/v1/app/config",
+        );
+        ok("GET /api/v1/app/config lists the enabled social links");
+        assert.equal(await adjust(25, "smoke: refill"), 25);
+      } finally {
+        await patchSettings(original, "PUT");
+        ok(`settings restored (Faam credits ${original.creditsEnabled ? "on" : "off"})`);
+      }
+
+      const disable = await call(`/api/admin/users/${userId}/status`, { cookie: adminCookie, body: { disabled: true } });
       assert.equal(disable.status, 200);
       assert.equal((await call("/api/v1/me", { bearer: token })).status, 401);
       const disabledLogin = await login(email, password);
@@ -438,7 +541,7 @@ async function main() {
       assert.equal(disabledLogin.json.error, "account_disabled");
       assert.equal((await call("/en/account", { cookie })).status, 307, "disabled user's session must stop working");
       ok("disabled user: tokens → 401, login → 403, sessions dropped");
-      const enable = await call(`/api/admin/users/${userId}/status`, { cookie: admin.cookie, body: { disabled: false } });
+      const enable = await call(`/api/admin/users/${userId}/status`, { cookie: adminCookie, body: { disabled: false } });
       assert.equal(enable.status, 200);
       assert.equal((await call("/api/v1/me", { bearer: token })).status, 200);
       ok("re-enabled user: token works again");
