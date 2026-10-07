@@ -47,7 +47,9 @@ function createSamples(locale) {
   const md = join(samples, `${locale}-project.md`)
   const docx = join(samples, `${locale}-project.docx`)
   writeFileSync(md, report)
-  cli(['create', '--type', 'docx', '--from', md, '--out', docx, '--force'])
+  // A synthetic OOXML fixture keeps capture independent of the CLI's jsdom
+  // runtime. The unmodified release app opens and renders this real document.
+  execFileSync('python', [join(__dirname, 'store-screenshot-docx.py'), md, docx])
   const json = join(samples, `${locale}-budget.json`)
   writeFileSync(
     json,
@@ -149,7 +151,7 @@ function createSamples(locale) {
 }
 
 async function launch(locale, file) {
-  const { ELECTRON_RUN_AS_NODE, ...env } = process.env
+  const { ELECTRON_RUN_AS_NODE: _electronRunAsNode, ...env } = process.env
   const app = await _electron.launch({
     executablePath: exe,
     args: ['--force-device-scale-factor=1', ...(file ? [file] : [])],
