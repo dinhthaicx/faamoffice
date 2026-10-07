@@ -336,6 +336,46 @@ describe('initAutoUpdater', () => {
   })
 })
 
+describe('AppImage moved by an update', () => {
+  afterEach(() => {
+    delete process.env.APPIMAGE
+  })
+
+  it('reports the new AppImage path to the hook (Linux AppImage runs)', async () => {
+    platformSpy?.restore()
+    setPlatform('linux')
+    process.env.APPIMAGE = '/home/me/Apps/FaamOffice-0.1.0.AppImage'
+    const onAppImageMoved = vi.fn()
+    const { initAutoUpdater } = await loadUpdater()
+    initAutoUpdater(() => null, 'stable', { onAppImageMoved })
+    const listener = updaterState.listeners.get('appimage-filename-updated')
+    expect(listener).toBeDefined()
+    listener!('/home/me/Apps/FaamOffice-0.2.0.AppImage')
+    expect(onAppImageMoved).toHaveBeenCalledWith('/home/me/Apps/FaamOffice-0.2.0.AppImage')
+  })
+
+  it('keeps installing when the hook throws', async () => {
+    platformSpy?.restore()
+    setPlatform('linux')
+    process.env.APPIMAGE = '/home/me/Apps/FaamOffice-0.1.0.AppImage'
+    const { initAutoUpdater } = await loadUpdater()
+    initAutoUpdater(() => null, 'stable', {
+      onAppImageMoved: () => {
+        throw new Error('EROFS')
+      },
+    })
+    expect(() =>
+      updaterState.listeners.get('appimage-filename-updated')!('/home/me/Apps/x.AppImage'),
+    ).not.toThrow()
+  })
+
+  it('does not listen outside Linux AppImage runs', async () => {
+    const { initAutoUpdater } = await loadUpdater()
+    initAutoUpdater(() => null, 'stable', { onAppImageMoved: vi.fn() })
+    expect(updaterState.listeners.has('appimage-filename-updated')).toBe(false)
+  })
+})
+
 describe('manual download fallback', () => {
   const macFiles = [
     { url: 'FaamOffice-0.2.0-arm64.zip' },

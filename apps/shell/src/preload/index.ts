@@ -15,6 +15,7 @@ import type {
   FaamAccountEvent,
   FaamAccountInfo,
   DefaultAppStatus,
+  LoginItemStatus,
   FolderListing,
   FolderRoot,
   MoveResult,
@@ -95,6 +96,14 @@ function normalizeDefaultAppStatus(result: unknown): DefaultAppStatus {
     others: Array.isArray(r.others) ? r.others.filter((x) => typeof x === 'string') : [],
     manualOnly: r.manualOnly === true,
   }
+}
+
+function normalizeLoginItemStatus(result: unknown): LoginItemStatus {
+  const r = (result ?? {}) as Partial<LoginItemStatus>
+  if (r.supported !== true) return { supported: false, enabled: false }
+  return r.needsApproval === true
+    ? { supported: true, enabled: r.enabled === true, needsApproval: true }
+    : { supported: true, enabled: r.enabled === true }
 }
 
 const homeApi: HomeApi = {
@@ -432,6 +441,16 @@ const homeApi: HomeApi = {
   },
   async setDefaultApp() {
     return normalizeDefaultAppStatus(await ipcRenderer.invoke(HOME_CHANNELS.setDefaultApp))
+  },
+  async getOpenAtLogin() {
+    return normalizeLoginItemStatus(await ipcRenderer.invoke(HOME_CHANNELS.getOpenAtLogin))
+  },
+  async setOpenAtLogin(enabled) {
+    if (typeof enabled !== 'boolean') throw new Error('Invalid open-at-login value.')
+    return normalizeLoginItemStatus(await ipcRenderer.invoke(HOME_CHANNELS.setOpenAtLogin, enabled))
+  },
+  async openLoginItemsSettings() {
+    await ipcRenderer.invoke(HOME_CHANNELS.openLoginItemsSettings)
   },
   async pickDefaultSaveDir() {
     const result: unknown = await ipcRenderer.invoke(HOME_CHANNELS.pickDefaultSaveDir)

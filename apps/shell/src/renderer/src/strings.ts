@@ -159,6 +159,12 @@ export const strings = {
     setDefaultAppSet: '设为默认',
     setDefaultAppOpenSettings: '打开系统设置',
     setDefaultAppFailed: '设置失败，请在系统设置中手动更改。',
+    setOpenAtLogin: '登录电脑时打开 FaamOffice',
+    setOpenAtLoginDesc: '每次登录这台电脑时自动打开 FaamOffice。',
+    setOpenAtLoginApprovalMac: '还需在“系统设置 → 通用 → 登录项”中允许 FaamOffice。',
+    setOpenAtLoginApprovalWin:
+      'FaamOffice 已在 Windows 启动应用中被关闭。打开此开关即可重新允许，或在“设置 → 应用 → 启动”中更改。',
+    setOpenAtLoginFailed: '无法更改此设置，请重试或检查系统设置。',
     setAiSpellcheckDesc: '在 AI 对话输入框中输入时标出拼写错误的单词。',
     setAiOpenInNewDocs: '新文档中打开 AI 面板',
     setAiOpenInNewDocsDesc: '关闭后，新打开的文档默认收起 AI 面板；需要时点一下即可展开。',
@@ -545,6 +551,14 @@ export const strings = {
     setDefaultAppSet: 'Make default',
     setDefaultAppOpenSettings: 'Open system settings',
     setDefaultAppFailed: 'Could not change it. Please set it in the system settings.',
+    setOpenAtLogin: 'Open FaamOffice when you sign in to this computer',
+    setOpenAtLoginDesc:
+      'FaamOffice will open automatically each time you sign in to your computer.',
+    setOpenAtLoginApprovalMac:
+      'To finish, allow FaamOffice in System Settings → General → Login Items.',
+    setOpenAtLoginApprovalWin:
+      'Windows Startup apps has FaamOffice turned off. Turn this switch on to allow it again, or change it in Settings → Apps → Startup.',
+    setOpenAtLoginFailed: 'Could not change this. Please try again or check your system settings.',
     setAiSpellcheckDesc: 'Underline misspelled words while typing in the AI chat input.',
     setAiOpenInNewDocs: 'Open the AI panel in new documents',
     setAiOpenInNewDocsDesc:
@@ -949,6 +963,13 @@ export const strings = {
     setDefaultAppSet: 'Đặt làm mặc định',
     setDefaultAppOpenSettings: 'Mở cài đặt hệ thống',
     setDefaultAppFailed: 'Không thể thay đổi. Vui lòng đặt trong cài đặt hệ thống.',
+    setOpenAtLogin: 'Mở FaamOffice khi đăng nhập máy tính',
+    setOpenAtLoginDesc: 'FaamOffice sẽ tự mở mỗi khi bạn đăng nhập vào máy tính.',
+    setOpenAtLoginApprovalMac:
+      'Để hoàn tất, hãy cho phép FaamOffice trong Cài đặt hệ thống → Cài đặt chung → Mục đăng nhập.',
+    setOpenAtLoginApprovalWin:
+      'FaamOffice đang bị tắt trong danh sách ứng dụng khởi động của Windows. Bật công tắc này để cho phép lại, hoặc thay đổi trong Cài đặt → Ứng dụng → Khởi động.',
+    setOpenAtLoginFailed: 'Không thể thay đổi. Vui lòng thử lại hoặc kiểm tra cài đặt hệ thống.',
     setAiSpellcheckDesc: 'Gạch chân các từ sai chính tả khi nhập vào ô trò chuyện AI.',
     setAiOpenInNewDocs: 'Mở bảng AI trong tài liệu mới',
     setAiOpenInNewDocsDesc:
@@ -1362,6 +1383,14 @@ export const strings = {
     setDefaultAppSet: '既定にする',
     setDefaultAppOpenSettings: 'システム設定を開く',
     setDefaultAppFailed: '変更できませんでした。システム設定で設定してください。',
+    setOpenAtLogin: 'コンピュータへのサインイン時に FaamOffice を開く',
+    setOpenAtLoginDesc: 'このコンピュータにサインインするたびに FaamOffice が自動的に開きます。',
+    setOpenAtLoginApprovalMac:
+      '完了するには、「システム設定 → 一般 → ログイン項目」で FaamOffice を許可してください。',
+    setOpenAtLoginApprovalWin:
+      'FaamOffice は Windows のスタートアップ アプリでオフになっています。このスイッチをオンにすると再び許可されます。「設定 → アプリ → スタートアップ」で変更することもできます。',
+    setOpenAtLoginFailed:
+      '変更できませんでした。もう一度お試しいただくか、システム設定を確認してください。',
     setAiSpellcheckDesc: 'AI チャットの入力欄で入力中にスペルミスの単語に下線を表示します。',
     setAiOpenInNewDocs: '新しいドキュメントで AI パネルを開く',
     setAiOpenInNewDocsDesc:
@@ -1776,6 +1805,13 @@ export const strings = {
     setDefaultAppSet: '기본으로 설정',
     setDefaultAppOpenSettings: '시스템 설정 열기',
     setDefaultAppFailed: '변경할 수 없습니다. 시스템 설정에서 직접 설정해 주세요.',
+    setOpenAtLogin: '컴퓨터에 로그인할 때 FaamOffice 열기',
+    setOpenAtLoginDesc: '이 컴퓨터에 로그인할 때마다 FaamOffice가 자동으로 열립니다.',
+    setOpenAtLoginApprovalMac:
+      '완료하려면 시스템 설정 → 일반 → 로그인 항목에서 FaamOffice를 허용하세요.',
+    setOpenAtLoginApprovalWin:
+      'Windows 시작 프로그램에서 FaamOffice가 꺼져 있습니다. 이 스위치를 켜면 다시 허용되며, 설정 → 앱 → 시작 프로그램에서 변경할 수도 있습니다.',
+    setOpenAtLoginFailed: '변경할 수 없습니다. 다시 시도하거나 시스템 설정을 확인해 주세요.',
     setAiSpellcheckDesc: 'AI 채팅 입력란에 입력할 때 잘못된 단어에 밑줄을 표시합니다.',
     setAiOpenInNewDocs: '새 문서에서 AI 패널 열기',
     setAiOpenInNewDocsDesc:
@@ -2188,6 +2224,14 @@ export const strings = {
     setDefaultAppSet: 'Définir par défaut',
     setDefaultAppOpenSettings: 'Ouvrir les réglages système',
     setDefaultAppFailed: 'Modification impossible. Définissez-la dans les réglages système.',
+    setOpenAtLogin: 'Ouvrir FaamOffice lorsque vous vous connectez à cet ordinateur',
+    setOpenAtLoginDesc:
+      "FaamOffice s'ouvrira automatiquement chaque fois que vous vous connecterez à votre ordinateur.",
+    setOpenAtLoginApprovalMac:
+      'Pour terminer, autorisez FaamOffice dans Réglages Système → Général → Ouverture.',
+    setOpenAtLoginApprovalWin:
+      "FaamOffice est désactivé dans les applications de démarrage de Windows. Activez ce bouton pour l'autoriser à nouveau, ou modifiez-le dans Paramètres → Applications → Démarrage.",
+    setOpenAtLoginFailed: 'Modification impossible. Réessayez ou vérifiez les réglages système.',
     setAiSpellcheckDesc: 'Souligne les mots mal orthographiés pendant la saisie dans le chat IA.',
     setAiOpenInNewDocs: 'Ouvrir le panneau IA dans les nouveaux documents',
     setAiOpenInNewDocsDesc:
@@ -2614,6 +2658,15 @@ export const strings = {
     setDefaultAppSet: 'Als Standard festlegen',
     setDefaultAppOpenSettings: 'Systemeinstellungen öffnen',
     setDefaultAppFailed: 'Änderung nicht möglich. Bitte in den Systemeinstellungen festlegen.',
+    setOpenAtLogin: 'FaamOffice bei der Anmeldung an diesem Computer öffnen',
+    setOpenAtLoginDesc:
+      'FaamOffice wird bei jeder Anmeldung an Ihrem Computer automatisch geöffnet.',
+    setOpenAtLoginApprovalMac:
+      'Erlauben Sie FaamOffice abschließend unter Systemeinstellungen → Allgemein → Anmeldeobjekte.',
+    setOpenAtLoginApprovalWin:
+      'FaamOffice ist in den Windows-Autostart-Apps deaktiviert. Aktivieren Sie diesen Schalter, um es wieder zuzulassen, oder ändern Sie es unter Einstellungen → Apps → Autostart.',
+    setOpenAtLoginFailed:
+      'Änderung nicht möglich. Bitte versuchen Sie es erneut oder prüfen Sie die Systemeinstellungen.',
     setAiSpellcheckDesc:
       'Unterstreicht falsch geschriebene Wörter beim Tippen im KI-Chat-Eingabefeld.',
     setAiOpenInNewDocs: 'KI-Panel in neuen Dokumenten öffnen',
@@ -3039,6 +3092,15 @@ export const strings = {
     setDefaultAppSet: 'Establecer como predeterminada',
     setDefaultAppOpenSettings: 'Abrir ajustes del sistema',
     setDefaultAppFailed: 'No se pudo cambiar. Configúralo en los ajustes del sistema.',
+    setOpenAtLogin: 'Abrir FaamOffice al iniciar sesión en este equipo',
+    setOpenAtLoginDesc:
+      'FaamOffice se abrirá automáticamente cada vez que inicies sesión en tu equipo.',
+    setOpenAtLoginApprovalMac:
+      'Para terminar, permite FaamOffice en Ajustes del Sistema → General → Ítems de inicio.',
+    setOpenAtLoginApprovalWin:
+      'FaamOffice está desactivado en las aplicaciones de inicio de Windows. Activa este interruptor para volver a permitirlo o cámbialo en Configuración → Aplicaciones → Inicio.',
+    setOpenAtLoginFailed:
+      'No se pudo cambiar. Inténtalo de nuevo o revisa los ajustes del sistema.',
     setAiSpellcheckDesc:
       'Subraya las palabras mal escritas al escribir en el cuadro del chat de IA.',
     setAiOpenInNewDocs: 'Abrir el panel de IA en documentos nuevos',
@@ -3457,6 +3519,13 @@ export const strings = {
     setDefaultAppSet: 'ตั้งเป็นค่าเริ่มต้น',
     setDefaultAppOpenSettings: 'เปิดการตั้งค่าระบบ',
     setDefaultAppFailed: 'เปลี่ยนไม่สำเร็จ โปรดตั้งค่าในการตั้งค่าระบบ',
+    setOpenAtLogin: 'เปิด FaamOffice เมื่อลงชื่อเข้าใช้คอมพิวเตอร์เครื่องนี้',
+    setOpenAtLoginDesc: 'FaamOffice จะเปิดโดยอัตโนมัติทุกครั้งที่คุณลงชื่อเข้าใช้คอมพิวเตอร์',
+    setOpenAtLoginApprovalMac:
+      'เพื่อให้เสร็จสิ้น โปรดอนุญาต FaamOffice ใน การตั้งค่าระบบ → ทั่วไป → รายการเข้าสู่ระบบ',
+    setOpenAtLoginApprovalWin:
+      'FaamOffice ถูกปิดอยู่ในแอปเริ่มต้นระบบของ Windows เปิดสวิตช์นี้เพื่ออนุญาตอีกครั้ง หรือเปลี่ยนใน การตั้งค่า → แอป → เริ่มต้นระบบ',
+    setOpenAtLoginFailed: 'เปลี่ยนไม่สำเร็จ โปรดลองอีกครั้งหรือตรวจสอบการตั้งค่าระบบ',
     setAiSpellcheckDesc: 'ขีดเส้นใต้คำที่สะกดผิดขณะพิมพ์ในช่องแชท AI',
     setAiOpenInNewDocs: 'เปิดแผง AI ในเอกสารใหม่',
     setAiOpenInNewDocsDesc:
@@ -3864,6 +3933,13 @@ export const strings = {
     setDefaultAppSet: 'Jadikan default',
     setDefaultAppOpenSettings: 'Buka pengaturan sistem',
     setDefaultAppFailed: 'Tidak dapat mengubahnya. Atur di pengaturan sistem.',
+    setOpenAtLogin: 'Buka FaamOffice saat masuk ke komputer ini',
+    setOpenAtLoginDesc: 'FaamOffice akan terbuka otomatis setiap kali Anda masuk ke komputer.',
+    setOpenAtLoginApprovalMac:
+      'Untuk menyelesaikan, izinkan FaamOffice di Pengaturan Sistem → Umum → Item Masuk.',
+    setOpenAtLoginApprovalWin:
+      'FaamOffice dinonaktifkan di aplikasi startup Windows. Aktifkan sakelar ini untuk mengizinkannya lagi, atau ubah di Pengaturan → Aplikasi → Startup.',
+    setOpenAtLoginFailed: 'Tidak dapat mengubahnya. Coba lagi atau periksa pengaturan sistem.',
     setAiSpellcheckDesc: 'Garis bawahi kata yang salah eja saat mengetik di kotak obrolan AI.',
     setAiOpenInNewDocs: 'Buka panel AI di dokumen baru',
     setAiOpenInNewDocsDesc:
@@ -4279,6 +4355,15 @@ export const strings = {
     setDefaultAppSet: 'Сделать по умолчанию',
     setDefaultAppOpenSettings: 'Открыть системные настройки',
     setDefaultAppFailed: 'Не удалось изменить. Задайте в системных настройках.',
+    setOpenAtLogin: 'Открывать FaamOffice при входе в систему',
+    setOpenAtLoginDesc:
+      'FaamOffice будет автоматически открываться при каждом входе в систему на этом компьютере.',
+    setOpenAtLoginApprovalMac:
+      'Чтобы завершить, разрешите FaamOffice в разделе «Системные настройки → Основные → Объекты входа».',
+    setOpenAtLoginApprovalWin:
+      'Автозапуск FaamOffice отключён в Windows. Включите этот переключатель, чтобы снова разрешить его, или измените это в разделе «Параметры → Приложения → Автозагрузка».',
+    setOpenAtLoginFailed:
+      'Не удалось изменить. Повторите попытку или проверьте системные настройки.',
     setAiSpellcheckDesc: 'Подчёркивать слова с ошибками при вводе в поле чата ИИ.',
     setAiOpenInNewDocs: 'Открывать панель ИИ в новых документах',
     setAiOpenInNewDocsDesc:
@@ -4696,6 +4781,13 @@ export const strings = {
     setDefaultAppSet: 'تعيين كافتراضي',
     setDefaultAppOpenSettings: 'فتح إعدادات النظام',
     setDefaultAppFailed: 'تعذّر التغيير. يرجى تعيينه من إعدادات النظام.',
+    setOpenAtLogin: 'فتح FaamOffice عند تسجيل الدخول إلى هذا الكمبيوتر',
+    setOpenAtLoginDesc: 'سيفتح FaamOffice تلقائيًا في كل مرة تسجّل فيها الدخول إلى الكمبيوتر.',
+    setOpenAtLoginApprovalMac:
+      'لإكمال الإعداد، اسمح لـ FaamOffice في إعدادات النظام ← عام ← عناصر تسجيل الدخول.',
+    setOpenAtLoginApprovalWin:
+      'تم إيقاف FaamOffice في تطبيقات بدء التشغيل في Windows. شغّل هذا المفتاح للسماح به مجددًا، أو غيّر ذلك من الإعدادات ← التطبيقات ← بدء التشغيل.',
+    setOpenAtLoginFailed: 'تعذّر التغيير. يرجى المحاولة مرة أخرى أو التحقق من إعدادات النظام.',
     setAiSpellcheckDesc:
       'وضع خط تحت الكلمات الخاطئة إملائيًا أثناء الكتابة في حقل محادثة الذكاء الاصطناعي.',
     setAiOpenInNewDocs: 'فتح لوحة الذكاء الاصطناعي في المستندات الجديدة',
@@ -5096,6 +5188,15 @@ export const strings = {
     setDefaultAppSet: 'Definir como padrão',
     setDefaultAppOpenSettings: 'Abrir configurações do sistema',
     setDefaultAppFailed: 'Não foi possível alterar. Defina nas configurações do sistema.',
+    setOpenAtLogin: 'Abrir o FaamOffice ao fazer login neste computador',
+    setOpenAtLoginDesc:
+      'O FaamOffice será aberto automaticamente sempre que você fizer login no computador.',
+    setOpenAtLoginApprovalMac:
+      'Para concluir, permita o FaamOffice em Ajustes do Sistema → Geral → Itens de Início.',
+    setOpenAtLoginApprovalWin:
+      'O FaamOffice está desativado nos aplicativos de inicialização do Windows. Ative esta opção para permiti-lo novamente ou altere em Configurações → Aplicativos → Inicialização.',
+    setOpenAtLoginFailed:
+      'Não foi possível alterar. Tente novamente ou verifique as configurações do sistema.',
     setAiSpellcheckDesc:
       'Sublinha palavras com erros ortográficos ao digitar na caixa do chat de IA.',
     setAiOpenInNewDocs: 'Abrir o painel de IA em novos documentos',
@@ -5508,6 +5609,13 @@ export const strings = {
     setDefaultAppSet: 'Imposta come predefinita',
     setDefaultAppOpenSettings: 'Apri impostazioni di sistema',
     setDefaultAppFailed: 'Impossibile modificare. Impostala nelle impostazioni di sistema.',
+    setOpenAtLogin: "Apri FaamOffice all'accesso a questo computer",
+    setOpenAtLoginDesc: 'FaamOffice si aprirà automaticamente ogni volta che accedi al computer.',
+    setOpenAtLoginApprovalMac:
+      'Per completare, consenti FaamOffice in Impostazioni di Sistema → Generali → Elementi login.',
+    setOpenAtLoginApprovalWin:
+      'FaamOffice è disattivato nelle app di avvio di Windows. Attiva questo interruttore per consentirlo di nuovo, oppure modificalo in Impostazioni → App → Avvio.',
+    setOpenAtLoginFailed: 'Impossibile modificare. Riprova o controlla le impostazioni di sistema.',
     setAiSpellcheckDesc: 'Sottolinea le parole errate durante la digitazione nella chat IA.',
     setAiOpenInNewDocs: 'Apri il pannello IA nei nuovi documenti',
     setAiOpenInNewDocsDesc:
@@ -5918,6 +6026,14 @@ export const strings = {
     setDefaultAppSet: 'Ustaw jako domyślną',
     setDefaultAppOpenSettings: 'Otwórz ustawienia systemu',
     setDefaultAppFailed: 'Nie udało się zmienić. Ustaw w ustawieniach systemu.',
+    setOpenAtLogin: 'Otwieraj FaamOffice po zalogowaniu się do tego komputera',
+    setOpenAtLoginDesc:
+      'FaamOffice otworzy się automatycznie za każdym razem, gdy zalogujesz się do komputera.',
+    setOpenAtLoginApprovalMac:
+      'Aby dokończyć, zezwól na FaamOffice w Ustawieniach systemowych → Ogólne → Rzeczy otwierane podczas logowania.',
+    setOpenAtLoginApprovalWin:
+      'FaamOffice jest wyłączony w aplikacjach autostartu systemu Windows. Włącz ten przełącznik, aby ponownie na to zezwolić, lub zmień to w Ustawieniach → Aplikacje → Uruchamianie.',
+    setOpenAtLoginFailed: 'Nie udało się zmienić. Spróbuj ponownie lub sprawdź ustawienia systemu.',
     setAiSpellcheckDesc: 'Podkreśla błędnie napisane słowa podczas pisania w polu czatu AI.',
     setAiOpenInNewDocs: 'Otwieraj panel AI w nowych dokumentach',
     setAiOpenInNewDocsDesc:
@@ -6531,6 +6647,14 @@ export const strings = {
     setDefaultAppSet: 'Nastavit jako výchozí',
     setDefaultAppOpenSettings: 'Otevřít nastavení systému',
     setDefaultAppFailed: 'Změna se nezdařila. Nastavte ji v nastavení systému.',
+    setOpenAtLogin: 'Otevírat FaamOffice po přihlášení k tomuto počítači',
+    setOpenAtLoginDesc: 'FaamOffice se automaticky otevře při každém přihlášení k počítači.',
+    setOpenAtLoginApprovalMac:
+      'Pro dokončení povolte FaamOffice v Nastavení systému → Obecné → Položky otevírané po přihlášení.',
+    setOpenAtLoginApprovalWin:
+      'FaamOffice je v aplikacích po spuštění systému Windows vypnutý. Zapnutím tohoto přepínače ho znovu povolíte, případně to změňte v Nastavení → Aplikace → Po spuštění.',
+    setOpenAtLoginFailed:
+      'Změna se nezdařila. Zkuste to znovu nebo zkontrolujte nastavení systému.',
     setAiSpellcheckDesc: 'Podtrhávat překlepy při psaní do vstupního pole chatu AI.',
     setAiOpenInNewDocs: 'Otevírat panel AI v nových dokumentech',
     setAiOpenInNewDocsDesc:
@@ -6730,6 +6854,15 @@ export const strings = {
     setDefaultAppSet: 'Als standaard instellen',
     setDefaultAppOpenSettings: 'Systeeminstellingen openen',
     setDefaultAppFailed: 'Wijzigen is niet gelukt. Stel dit in via de systeeminstellingen.',
+    setOpenAtLogin: 'FaamOffice openen wanneer u zich aanmeldt bij deze computer',
+    setOpenAtLoginDesc:
+      'FaamOffice wordt automatisch geopend telkens wanneer u zich aanmeldt bij uw computer.',
+    setOpenAtLoginApprovalMac:
+      'Sta FaamOffice ter afronding toe via Systeeminstellingen → Algemeen → Inlogonderdelen.',
+    setOpenAtLoginApprovalWin:
+      'FaamOffice is uitgeschakeld bij de opstart-apps van Windows. Zet deze schakelaar aan om het weer toe te staan, of wijzig het via Instellingen → Apps → Opstarten.',
+    setOpenAtLoginFailed:
+      'Wijzigen is niet gelukt. Probeer het opnieuw of controleer de systeeminstellingen.',
     setAiSpellcheckDesc:
       'Onderstreept verkeerd gespelde woorden tijdens het typen in het AI-chatveld.',
     setAiOpenInNewDocs: 'AI-paneel openen in nieuwe documenten',
@@ -7139,6 +7272,14 @@ export const strings = {
     setDefaultAppSet: 'Jadikan lalai',
     setDefaultAppOpenSettings: 'Buka tetapan sistem',
     setDefaultAppFailed: 'Tidak dapat mengubahnya. Tetapkan dalam tetapan sistem.',
+    setOpenAtLogin: 'Buka FaamOffice apabila anda log masuk ke komputer ini',
+    setOpenAtLoginDesc:
+      'FaamOffice akan dibuka secara automatik setiap kali anda log masuk ke komputer.',
+    setOpenAtLoginApprovalMac:
+      'Untuk selesai, benarkan FaamOffice dalam Seting Sistem → Umum → Item Log Masuk.',
+    setOpenAtLoginApprovalWin:
+      'FaamOffice dimatikan dalam apl permulaan Windows. Hidupkan suis ini untuk membenarkannya semula, atau ubah dalam Tetapan → Aplikasi → Permulaan.',
+    setOpenAtLoginFailed: 'Tidak dapat mengubahnya. Cuba lagi atau semak tetapan sistem.',
     setAiSpellcheckDesc:
       'Gariskan perkataan yang salah ejaan semasa menaip dalam kotak sembang AI.',
     setAiOpenInNewDocs: 'Buka panel AI dalam dokumen baharu',
@@ -7550,6 +7691,13 @@ export const strings = {
     setDefaultAppSet: 'הגדרה כברירת מחדל',
     setDefaultAppOpenSettings: 'פתיחת הגדרות המערכת',
     setDefaultAppFailed: 'לא ניתן לשנות. יש להגדיר בהגדרות המערכת.',
+    setOpenAtLogin: 'פתיחת FaamOffice בעת ההתחברות למחשב',
+    setOpenAtLoginDesc: 'FaamOffice ייפתח אוטומטית בכל התחברות למחשב.',
+    setOpenAtLoginApprovalMac:
+      'כדי לסיים, יש לאשר את FaamOffice בהגדרות המערכת ← כללי ← פריטי התחברות.',
+    setOpenAtLoginApprovalWin:
+      'FaamOffice מושבת באפליקציות ההפעלה של Windows. אפשר להפעיל את המתג הזה כדי לאשר אותו שוב, או לשנות זאת בהגדרות ← אפליקציות ← הפעלה.',
+    setOpenAtLoginFailed: 'לא ניתן לשנות. יש לנסות שוב או לבדוק את הגדרות המערכת.',
     setAiSpellcheckDesc: 'סימון מילים עם שגיאות כתיב בעת הקלדה בתיבת הצ׳אט של ה-AI.',
     setAiOpenInNewDocs: 'פתיחת לוח ה-AI במסמכים חדשים',
     setAiOpenInNewDocsDesc:
@@ -7942,6 +8090,13 @@ export const strings = {
     setDefaultAppSet: 'डिफ़ॉल्ट बनाएँ',
     setDefaultAppOpenSettings: 'सिस्टम सेटिंग खोलें',
     setDefaultAppFailed: 'बदला नहीं जा सका। कृपया सिस्टम सेटिंग में सेट करें।',
+    setOpenAtLogin: 'इस कंप्यूटर में साइन इन करने पर FaamOffice खोलें',
+    setOpenAtLoginDesc: 'जब भी आप कंप्यूटर में साइन इन करेंगे, FaamOffice अपने आप खुल जाएगा।',
+    setOpenAtLoginApprovalMac:
+      'पूरा करने के लिए, सिस्टम सेटिंग्स → सामान्य → लॉगिन आइटम में FaamOffice को अनुमति दें।',
+    setOpenAtLoginApprovalWin:
+      'Windows के स्टार्टअप ऐप्स में FaamOffice बंद है। इसे फिर से अनुमति देने के लिए यह स्विच चालू करें, या सेटिंग्स → ऐप्स → स्टार्टअप में बदलें।',
+    setOpenAtLoginFailed: 'बदला नहीं जा सका। कृपया फिर से कोशिश करें या सिस्टम सेटिंग जाँचें।',
     setAiSpellcheckDesc: 'AI चैट इनपुट में टाइप करते समय गलत वर्तनी वाले शब्दों को रेखांकित करें।',
     setAiOpenInNewDocs: 'नए दस्तावेज़ों में AI पैनल खोलें',
     setAiOpenInNewDocsDesc:
@@ -8344,6 +8499,12 @@ export const strings = {
     setDefaultAppSet: '設為預設',
     setDefaultAppOpenSettings: '開啟系統設定',
     setDefaultAppFailed: '設定失敗，請在系統設定中手動更改。',
+    setOpenAtLogin: '登入電腦時開啟 FaamOffice',
+    setOpenAtLoginDesc: '每次登入這台電腦時自動開啟 FaamOffice。',
+    setOpenAtLoginApprovalMac: '還需在「系統設定 → 一般 → 登入項目」中允許 FaamOffice。',
+    setOpenAtLoginApprovalWin:
+      'FaamOffice 已在 Windows 啟動應用程式中被關閉。開啟此開關即可重新允許，或在「設定 → 應用程式 → 啟動」中變更。',
+    setOpenAtLoginFailed: '無法變更此設定，請重試或檢查系統設定。',
     setAiSpellcheckDesc: '在 AI 對話輸入框中輸入時標示拼錯的單字。',
     setAiOpenInNewDocs: '在新文件中開啟 AI 面板',
     setAiOpenInNewDocsDesc: '關閉後，新開啟的文件預設收合 AI 面板；需要時點一下即可展開。',

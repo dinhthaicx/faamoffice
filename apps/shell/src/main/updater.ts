@@ -587,9 +587,19 @@ export async function checkForUpdatesNow(): Promise<void> {
   }
 }
 
+export interface AutoUpdaterHooks {
+  /**
+   * Linux AppImage: the update replaced the running AppImage with a new,
+   * versioned file name. Fires synchronously while installing, before the
+   * relaunch, so anything pointing at the old path can follow it.
+   */
+  onAppImageMoved?: (path: string) => void
+}
+
 export function initAutoUpdater(
   getWindow: () => BrowserWindow | null,
   initialChannel: UpdateChannel = 'stable',
+  hooks: AutoUpdaterHooks = {},
 ): void {
   if (started) return
   started = true
@@ -718,6 +728,19 @@ export function initAutoUpdater(
     if (sameVersionRecheck && isUpdateWindowOpen()) return
     showUpdateWindow(getWindow(), { ...initialState(info.version), phase, percent }, actions)
   })
+
+  if (isLinuxAppImage) {
+    // electron-updater deletes the running FaamOffice-<v>.AppImage and moves
+    // the update to its own versioned name
+    autoUpdater.on('appimage-filename-updated', (newPath: string) => {
+      log('AppImage moved to', newPath)
+      try {
+        hooks.onAppImageMoved?.(newPath)
+      } catch (err) {
+        log('AppImage move hook failed:', (err as Error)?.message ?? err)
+      }
+    })
+  }
 
   autoUpdater.on('download-progress', (progress) => {
     setPhase({ phase: 'downloading', percent: progress.percent })

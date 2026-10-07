@@ -229,6 +229,16 @@
   color: var(--text-secondary);
 }
 
+/* "open at sign-in" row: the system still has to approve the login item —
+   short note with a button to the system page, under the description */
+.set-login-approval {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px 10px;
+  margin-top: 4px;
+}
+
 /* MCP service row: the label + description + status stack reads better with the
    switch aligned to the label line instead of centered against three lines */
 .set-field-top {

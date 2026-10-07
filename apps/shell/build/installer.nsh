@@ -105,6 +105,12 @@
   !insertmacro GenOfficeUnregisterShellNew "xlsx" "Excel Workbook"
   !insertmacro GenOfficeUnregisterShellNew "pptx" "PowerPoint Presentation"
   Pop $0
+  ; the open-at-login entry the app writes (login-item.ts WINDOWS_RUN_VALUE_NAME
+  ; = productName); an update keeps it, only a real uninstall removes it
+  ${ifNot} ${isUpdated}
+    DeleteRegValue HKCU "Software\Microsoft\Windows\CurrentVersion\Run" "${PRODUCT_NAME}"
+    DeleteRegValue HKCU "Software\Microsoft\Windows\CurrentVersion\Explorer\StartupApproved\Run" "${PRODUCT_NAME}"
+  ${endIf}
   !insertmacro UPDATEFILEASSOC
 !macroend
 

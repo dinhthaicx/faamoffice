@@ -163,6 +163,20 @@ export interface DefaultAppStatus {
   manualOnly: boolean
 }
 
+/**
+ * "Open FaamOffice when you sign in" state (Settings → General). `supported` is
+ * false in dev builds and on platforms without a login item mechanism.
+ * `needsApproval`: macOS registered the item but the user must still allow it
+ * in System Settings → General → Login Items (enabled stays true); Windows has
+ * the entry but the user turned it off in Task Manager / Settings → Apps →
+ * Startup (enabled is false).
+ */
+export interface LoginItemStatus {
+  supported: boolean
+  enabled: boolean
+  needsApproval?: boolean
+}
+
 import type { UpdateUiState } from './update-api'
 
 export interface HomeApi {
@@ -319,6 +333,12 @@ export interface HomeApi {
   getDefaultAppStatus(): Promise<DefaultAppStatus>
   /** claim the Office types (mac/linux) or open the system Default Apps page (win); resolves to the refreshed status */
   setDefaultApp(): Promise<DefaultAppStatus>
+  /** whether FaamOffice opens when the user signs in to this computer */
+  getOpenAtLogin(): Promise<LoginItemStatus>
+  /** turn opening at sign-in on/off; resolves to the state read back afterwards */
+  setOpenAtLogin(enabled: boolean): Promise<LoginItemStatus>
+  /** open the system Login Items (macOS) / Startup apps (Windows) page; no-op elsewhere */
+  openLoginItemsSettings(): Promise<void>
   /** theme switched anywhere (broadcast from the main process) */
   onThemeChanged(handler: (theme: UiTheme) => void): () => void
   /** document page theme switched anywhere (broadcast from the main process) */
@@ -561,6 +581,9 @@ export const HOME_CHANNELS = {
   getDefaultAppStatus: 'home:get-default-app-status',
   setDefaultApp: 'home:set-default-app',
   pickDefaultSaveDir: 'home:pick-default-save-dir',
+  getOpenAtLogin: 'home:get-open-at-login',
+  setOpenAtLogin: 'home:set-open-at-login',
+  openLoginItemsSettings: 'home:open-login-items-settings',
   openGenTeam: 'home:open-genteam',
   openAiProviderPage: 'home:open-ai-provider-page',
   openGitHubRepo: 'home:open-github-repo',

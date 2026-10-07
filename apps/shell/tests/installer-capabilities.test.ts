@@ -4,6 +4,7 @@ import { dirname, resolve } from 'node:path'
 import { runInNewContext } from 'node:vm'
 import { describe, expect, it } from 'vitest'
 import { OFFICE_TYPES, WINDOWS_REGISTERED_APP_NAME } from '../src/main/default-app'
+import { WINDOWS_RUN_VALUE_NAME } from '../src/main/login-item'
 
 /**
  * Static checks of the Default Programs registration in build/installer.nsh
@@ -397,5 +398,25 @@ describe('installer Default Programs registration', () => {
     )
     expect(nsisTarget).toMatch(/insertMacro\("APP_ASSOCIATE",[^\n]*item\.name \|\| ext/)
     expect(nsisTarget).toContain('PRODUCT_NAME: appInfo.productName')
+  })
+
+  it('removes the open-at-login Run entry on a real uninstall only', () => {
+    expect(WINDOWS_RUN_VALUE_NAME).toBe(config.productName)
+    const body = nsh.slice(
+      nsh.indexOf('!macro customUnInstall'),
+      nsh.indexOf('!macroend', nsh.indexOf('!macro customUnInstall')),
+    )
+    const guard = body.indexOf('${ifNot} ${isUpdated}')
+    const end = body.indexOf('${endIf}', guard)
+    expect(guard).toBeGreaterThan(-1)
+    const guarded = body.slice(guard, end)
+    for (const key of [
+      'Software\\Microsoft\\Windows\\CurrentVersion\\Run',
+      'Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\StartupApproved\\Run',
+    ]) {
+      expect(guarded).toContain(`DeleteRegValue HKCU "${key}" "\${PRODUCT_NAME}"`)
+      // never outside the update guard: an update must keep the entry
+      expect(body.replace(guarded, '')).not.toContain(key)
+    }
   })
 })

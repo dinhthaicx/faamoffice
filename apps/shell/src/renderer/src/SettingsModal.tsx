@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from 'react'
+import { useCallback, useEffect, useId, useRef, useState } from 'react'
 import type { ReactNode } from 'react'
 import {
   AI_CUSTOM_FONT_MAX_PX,
@@ -9,7 +9,12 @@ import {
   clampAiCustomFontSize,
 } from '@genoffice/ui'
 import type { AiFontSize, AiPanelPrefs, AiPanelSide } from '@genoffice/ui'
-import type { DefaultAppStatus, FileSearchSettings, JevEndpoint } from '../../shared/home-api'
+import type {
+  DefaultAppStatus,
+  FileSearchSettings,
+  JevEndpoint,
+  LoginItemStatus,
+} from '../../shared/home-api'
 import type { UpdateUiState } from '../../shared/update-api'
 import {
   DEFAULT_MAX_OUTPUT_TOKENS,
@@ -1522,6 +1527,12 @@ export function SettingsModal({
   const [defaultApp, setDefaultApp] = useState<DefaultAppStatus | null>(null)
   const [defaultAppBusy, setDefaultAppBusy] = useState(false)
   const [defaultAppFailed, setDefaultAppFailed] = useState(false)
+  const [loginItem, setLoginItem] = useState<LoginItemStatus | null>(null)
+  const [loginItemBusy, setLoginItemBusy] = useState(false)
+  // the OS refused the last change (the switch rolled back)
+  const [loginItemFailed, setLoginItemFailed] = useState(false)
+  // the approval note describes the switch: macOS reads "on" while approval is pending
+  const loginNoteId = useId()
   const [aiPrefs, setAiPrefs] = useState<AiPanelPrefs>(DEFAULT_AI_PANEL_PREFS)
   const [channel, setChannel] = useState<'stable' | 'beta'>('stable')
   const [appVersion, setAppVersion] = useState('')
@@ -1548,6 +1559,12 @@ export function SettingsModal({
     void window.aiOffice.getDefaultAppStatus?.().then((st) => {
       if (alive) setDefaultApp(st)
     })
+    void window.aiOffice
+      .getOpenAtLogin?.()
+      .then((st) => {
+        if (alive) setLoginItem(st)
+      })
+      .catch(() => undefined)
     void window.aiOffice.getAiPanelPrefs?.().then((prefs) => {
       if (alive) setAiPrefs(prefs)
     })
@@ -1632,6 +1649,43 @@ export function SettingsModal({
       })
       .catch(() => setDefaultAppFailed(true))
       .finally(() => setDefaultAppBusy(false))
+  }
+
+  // the user approves (macOS) or re-enables (Windows) the login item in system
+  // settings; re-read it when they come back
+  useEffect(() => {
+    if (!loginItem?.needsApproval) return
+    const refresh = () => {
+      void window.aiOffice
+        .getOpenAtLogin?.()
+        .then(setLoginItem)
+        .catch(() => undefined)
+    }
+    window.addEventListener('focus', refresh)
+    return () => window.removeEventListener('focus', refresh)
+  }, [loginItem?.needsApproval])
+
+  const toggleOpenAtLogin = () => {
+    if (!loginItem) return
+    const previous = loginItem
+    const next = !loginItem.enabled
+    // optimistic; the state the main process reads back wins, so a change the
+    // OS refused rolls the switch back
+    setLoginItem({ supported: true, enabled: next })
+    setLoginItemBusy(true)
+    setLoginItemFailed(false)
+    void window.aiOffice
+      .setOpenAtLogin(next)
+      .then((st) => {
+        setLoginItem(st)
+        // a pending approval has its own note; anything else is a refusal
+        if (st.enabled !== next && !st.needsApproval) setLoginItemFailed(true)
+      })
+      .catch(() => {
+        setLoginItem(previous)
+        setLoginItemFailed(true)
+      })
+      .finally(() => setLoginItemBusy(false))
   }
 
   const defaultAppDesc = (() => {
@@ -1830,6 +1884,52 @@ export function SettingsModal({
                         ? t('setDefaultAppOpenSettings')
                         : t('setDefaultAppSet')}
                     </button>
+                  </div>
+                )}
+                {loginItem?.supported && (
+                  <div
+                    className={`set-field${loginItem.needsApproval || loginItemFailed ? ' set-field-top' : ''}`}
+                  >
+                    <div className="set-field-text">
+                      <div className="set-field-stack">
+                        <div className="set-field-label">{t('setOpenAtLogin')}</div>
+                        <div className="set-field-desc">{t('setOpenAtLoginDesc')}</div>
+                        {loginItemFailed && (
+                          <div className="set-field-desc" role="alert">
+                            {t('setOpenAtLoginFailed')}
+                          </div>
+                        )}
+                        {loginItem.needsApproval && (
+                          <div className="set-login-approval">
+                            <div className="set-field-desc" id={loginNoteId} role="status">
+                              {t(
+                                navigator.platform.toLowerCase().includes('mac')
+                                  ? 'setOpenAtLoginApprovalMac'
+                                  : 'setOpenAtLoginApprovalWin',
+                              )}
+                            </div>
+                            <button
+                              type="button"
+                              className="set-btn"
+                              onClick={() =>
+                                void window.aiOffice.openLoginItemsSettings?.().catch(() => {})
+                              }
+                            >
+                              {t('setDefaultAppOpenSettings')}
+                            </button>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                    <button
+                      className="set-switch"
+                      role="switch"
+                      aria-checked={loginItem.enabled}
+                      aria-label={t('setOpenAtLogin')}
+                      aria-describedby={loginItem.needsApproval ? loginNoteId : undefined}
+                      disabled={loginItemBusy}
+                      onClick={toggleOpenAtLogin}
+                    />
                   </div>
                 )}
                 <Field

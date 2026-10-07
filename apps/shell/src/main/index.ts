@@ -8,10 +8,11 @@ import {
   renameSync,
   rmSync,
   statSync,
+  unlinkSync,
   writeFileSync,
 } from 'node:fs'
 import { randomUUID } from 'node:crypto'
-import { hostname } from 'node:os'
+import { homedir, hostname } from 'node:os'
 import { basename, dirname, extname, join, resolve } from 'node:path'
 import {
   BrowserWindow,
@@ -78,6 +79,7 @@ import { startControlServer, type ControlServer } from './control-server'
 import { controlHandler } from './control-handlers'
 import { installCliLinkBestEffort } from './cli-link'
 import { createDefaultAppService, execFileRunner } from './default-app'
+import { createLoginItemService, loginItemsSettingsUrl } from './login-item'
 import {
   DEFAULT_APP_PROMPT_KEY,
   asDefaultAppPromptState,
@@ -3779,6 +3781,29 @@ function statEntries(paths: string[]): RecentEntry[] {
   return statPathEntries(paths, new Set(readStarredFiles()))
 }
 
+// "Open FaamOffice when you sign in" (Settings → General); the updater also
+// moves a Linux autostart entry along with a replaced AppImage
+const loginItem = createLoginItemService({
+  platform: process.platform,
+  packaged: app.isPackaged,
+  getLoginItemSettings: (options) => app.getLoginItemSettings(options),
+  setLoginItemSettings: (settings) => app.setLoginItemSettings(settings),
+  execPath: process.execPath,
+  env: {
+    APPIMAGE: process.env.APPIMAGE,
+    APPDIR: process.env.APPDIR,
+    XDG_CONFIG_HOME: process.env.XDG_CONFIG_HOME,
+    HOME: process.env.HOME || homedir(),
+  },
+  fs: {
+    readFile: (path) => readFileSync(path, 'utf8'),
+    writeFile: (path, data) => writeFileSync(path, data, 'utf8'),
+    unlink: (path) => unlinkSync(path),
+    mkdir: (path) => mkdirSync(path, { recursive: true }),
+    exists: (path) => existsSync(path),
+  },
+})
+
 function registerHomeIpc(): void {
   applyFaamAccountBuildDefault()
   // local profile: FaamOffice has no account; the name lives in app-settings.json
@@ -4432,6 +4457,15 @@ function registerHomeIpc(): void {
   })
   ipcMain.handle(HOME_CHANNELS.getDefaultAppStatus, () => defaultApp.status())
   ipcMain.handle(HOME_CHANNELS.setDefaultApp, () => defaultApp.set())
+
+  ipcMain.handle(HOME_CHANNELS.getOpenAtLogin, () => loginItem.status())
+  ipcMain.handle(HOME_CHANNELS.setOpenAtLogin, (_event, enabled: unknown) =>
+    typeof enabled === 'boolean' ? loginItem.set(enabled) : loginItem.status(),
+  )
+  ipcMain.handle(HOME_CHANNELS.openLoginItemsSettings, async () => {
+    const url = loginItemsSettingsUrl(process.platform)
+    if (url) await shell.openExternal(url).catch(() => undefined)
+  })
 
   const defaultAppPrompt = createDefaultAppPromptController({
     readState: readDefaultAppPrompt,
@@ -5948,7 +5982,12 @@ app.whenReady().then(async () => {
   installBackToHomeItems()
   installDockMenu()
   setUpdateCheckInvoker(() => void checkForUpdatesNow())
-  initAutoUpdater(() => shellWindow, currentUpdateChannel())
+  // an update this build did not install (or a hand rename) may have left the
+  // autostart entry on a deleted AppImage; updates from here on move it along
+  loginItem.repairMovedAppImage()
+  initAutoUpdater(() => shellWindow, currentUpdateChannel(), {
+    onAppImageMoved: (path) => loginItem.retarget(path),
+  })
   // resource watchdog: a renderer that stays hot for minutes gets diagnostics
   // recorded and the user an offer to close the document (headless exports
   // are short-lived and unattended)
