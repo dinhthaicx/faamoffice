@@ -29,7 +29,7 @@ const pause = (ms) => new Promise((done) => setTimeout(done, ms))
 mkdirSync(samples, { recursive: true })
 
 function cli(args) {
-  const entry = join(exe, '..', 'resources', 'cli', 'genoffice.cjs')
+  const entry = join(exe, '..', 'resources', 'cli', 'faamoffice.cjs')
   console.log(
     execFileSync(exe, [entry, ...args], {
       env: { ...process.env, ELECTRON_RUN_AS_NODE: '1' },
