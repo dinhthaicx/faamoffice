@@ -111,14 +111,14 @@ về những gì app gửi đi khi khởi động.
 
 ## Code signing policy
 
-**Trạng thái: đang chuẩn bị đăng ký SignPath (preparing).** Chưa gửi đơn, chưa được chấp nhận
-và chưa có bản phát hành nào mang chữ ký SignPath. Chỉ chuyển sang **pending** sau khi thực sự
-gửi đơn; chỉ ghi SignPath cung cấp chữ ký sau khi được chấp nhận. Chữ ký của từng bản phát hành
-phải được kiểm tra và ghi riêng trong release notes.
+**Trạng thái: đã nộp đơn SignPath, đang chờ phản hồi (pending).** Người duy trì đã xác nhận
+đơn được gửi. Dự án chưa được chấp nhận và chưa có bản phát hành nào mang chữ ký SignPath.
+Chỉ ghi SignPath cung cấp chữ ký sau khi được chấp nhận. Chữ ký của từng bản phát hành phải
+được kiểm tra và ghi riêng trong release notes.
 
-**Status: preparing to apply to SignPath.** No application has been submitted, the project has
-not been accepted, and no release has a SignPath signature. Change to **pending** only after
-submission. Credit SignPath as providing code signing only after acceptance; verify and document
+**Status: application submitted to SignPath, awaiting a response (pending).** The maintainer
+has confirmed submission. The project has not been accepted, and no release has a SignPath
+signature. Credit SignPath as providing code signing only after acceptance; verify and document
 the signature status of each release separately.
 
 | Responsibility / Trách nhiệm | Person / Người phụ trách |

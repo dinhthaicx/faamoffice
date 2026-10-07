@@ -286,13 +286,13 @@ export const vi = {
   },
   codeSigning: {
     metaTitle: "Chính sách ký mã — Code signing policy",
-    metaDescription: "Trạng thái chuẩn bị đăng ký SignPath và trách nhiệm duy trì, rà soát mã nguồn, duyệt bản phát hành FaamOffice.",
+    metaDescription: "FaamOffice đã nộp đơn SignPath, đang chờ phản hồi; trách nhiệm duy trì, rà soát mã nguồn và duyệt bản phát hành.",
     title: "Chính sách ký mã (Code signing policy)",
-    intro: "FaamOffice đang chuẩn bị đăng ký chương trình ký mã miễn phí của SignPath Foundation. Chưa gửi đơn, chưa được chấp nhận và chưa có bản phát hành nào mang chữ ký SignPath.",
+    intro: "FaamOffice đã nộp đơn vào chương trình ký mã miễn phí của SignPath Foundation và đang chờ phản hồi (pending). Dự án chưa được chấp nhận và chưa có bản phát hành nào mang chữ ký SignPath.",
     sections: [
       {
         heading: "1. Trạng thái đăng ký",
-        paragraphs: ["Trạng thái hiện tại: đang chuẩn bị đăng ký (preparing). Chỉ chuyển sang chờ xét duyệt (pending) sau khi đơn thực sự được gửi. Chỉ công bố SignPath cung cấp chữ ký sau khi dự án được chấp nhận; trạng thái chữ ký của từng bản phát hành được ghi riêng trong ghi chú phát hành."],
+        paragraphs: ["Trạng thái hiện tại: đã nộp đơn, đang chờ phản hồi (pending), theo xác nhận của người duy trì. Chỉ công bố SignPath cung cấp chữ ký sau khi dự án được chấp nhận; trạng thái chữ ký của từng bản phát hành được ghi riêng trong ghi chú phát hành."],
       },
       {
         heading: "2. Người chịu trách nhiệm",
@@ -355,7 +355,7 @@ export const vi = {
           "Kênh theo dõi: cùng lúc kiểm tra thông báo, /api/v1/app/config lấy danh sách các nút theo dõi từ cùng máy chủ; không gửi token, định danh hay tham số khác. Danh sách được lưu đệm trên máy, liên kết chỉ mở trong trình duyệt khi bạn bấm.",
           "Cập nhật: các bản GitHub có địa chỉ cập nhật kiểm tra GitHub Releases khoảng 15 giây sau khởi động và sau đó mỗi vài giờ, tải tệp latest*.yml. Thư viện cập nhật gửi x-user-staging-id, một UUID ngẫu nhiên của bản cài lưu trong .updaterId; không gửi tài khoản hay tài liệu. GitHub thấy IP và phục vụ bộ cài khi tải cập nhật. Bản không có địa chỉ cập nhật không thực hiện kiểm tra này; gói Microsoft Store được Store quản lý cập nhật.",
         ],
-        after: "Hiện có thể đặt biến môi trường FAAMOFFICE_ANNOUNCEMENTS=0 trước khi chạy app để tắt cả thông báo và lấy danh sách kênh, hoặc FAAMOFFICE_UPDATES=0 để tắt kiểm tra cập nhật. Các nút theo dõi đã lưu vẫn có thể hiện. Bộ cài hiện chưa có màn hình privacy và lựa chọn tắt các kết nối này ngay lúc cài đặt; đây là phần đang cần bổ sung để chuẩn bị đăng ký SignPath. Chi tiết: https://github.com/dinhthaicx/faamoffice/blob/faamoffice/PRIVACY.md",
+        after: "Hiện có thể đặt biến môi trường FAAMOFFICE_ANNOUNCEMENTS=0 trước khi chạy app để tắt cả thông báo và lấy danh sách kênh, hoặc FAAMOFFICE_UPDATES=0 để tắt kiểm tra cập nhật. Các nút theo dõi đã lưu vẫn có thể hiện. Bộ cài hiện chưa có màn hình privacy và lựa chọn tắt các kết nối này ngay lúc cài đặt; đây là phần đang cần bổ sung để đáp ứng yêu cầu SignPath khi xét duyệt. Chi tiết: https://github.com/dinhthaicx/faamoffice/blob/faamoffice/PRIVACY.md",
       },
       {
         heading: "5. Các dịch vụ và kết nối khác",

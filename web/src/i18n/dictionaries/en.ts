@@ -287,14 +287,14 @@ export const en: Dictionary = {
   },
   codeSigning: {
     metaTitle: "Code signing policy",
-    metaDescription: "FaamOffice's SignPath application preparation and the responsibilities for maintenance, code review and release approval.",
+    metaDescription: "FaamOffice's SignPath application is submitted and awaiting a response; responsibilities for maintenance, code review and release approval.",
     title: "Code signing policy",
-    intro: "FaamOffice is preparing to apply to the SignPath Foundation free code signing program. No application has been submitted, the project has not been accepted, and no release has a SignPath signature.",
+    intro: "FaamOffice has submitted an application to the SignPath Foundation free code signing program and is awaiting a response (pending). The project has not been accepted, and no release has a SignPath signature.",
     sections: [
       {
         heading: "1. Application status",
         paragraphs: [
-          "Current status: preparing to apply. Change the status to pending only after an application has actually been submitted. Credit SignPath as a signing provider only after the project has been accepted; document each release's signature status separately in its release notes.",
+          "Current status: application submitted, awaiting a response (pending), as confirmed by the maintainer. Credit SignPath as a signing provider only after the project has been accepted; document each release's signature status separately in its release notes.",
         ],
       },
       {
@@ -376,7 +376,7 @@ export const en: Dictionary = {
           "Channels to follow: alongside the announcement check, /api/v1/app/config retrieves follow buttons from the same server, without a token, identifier or other parameters. The list is cached on your computer; links only open in your browser when clicked.",
           "Updates: GitHub builds with an update address check GitHub Releases about 15 seconds after startup and every few hours afterwards, downloading a latest*.yml file. The updater sends x-user-staging-id, a random install UUID stored in .updaterId, without account or document information. GitHub sees your IP and serves the installer when you download an update. Builds without an update address make no such check; Microsoft Store packages use Store-managed updates.",
         ],
-        after: "Currently, setting FAAMOFFICE_ANNOUNCEMENTS=0 in the environment before starting the app disables both announcements and channel-list requests; FAAMOFFICE_UPDATES=0 disables update checks. Previously cached follow buttons may still appear. The current installer has no privacy screen or installation options to disable these connections; adding them is part of preparing the SignPath application. Details: https://github.com/dinhthaicx/faamoffice/blob/faamoffice/PRIVACY.md",
+        after: "Currently, setting FAAMOFFICE_ANNOUNCEMENTS=0 in the environment before starting the app disables both announcements and channel-list requests; FAAMOFFICE_UPDATES=0 disables update checks. Previously cached follow buttons may still appear. The current installer has no privacy screen or installation options to disable these connections; these still need to be added to meet SignPath's requirements during application review. Details: https://github.com/dinhthaicx/faamoffice/blob/faamoffice/PRIVACY.md",
       },
       {
         heading: "5. Other services and connections",
