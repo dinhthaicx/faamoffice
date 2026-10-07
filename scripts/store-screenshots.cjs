@@ -193,7 +193,10 @@ async function capture(locale, kind, file) {
         // CDP attachment that can race its initial packaged navigation.
         ready = await app.evaluate(async ({ webContents }, domain) => {
           for (const wc of webContents.getAllWebContents()) {
-            if (wc.getURL().includes(`/modules/${domain}/`) && !wc.isLoading()) {
+            const url = wc.getURL()
+            const isEditor =
+              url.startsWith(`genoffice-app://${domain}/`) || url.includes(`/modules/${domain}/`)
+            if (isEditor && !wc.isLoading()) {
               if (
                 await wc
                   .executeJavaScript('document.readyState === "complete" && document.body !== null')
