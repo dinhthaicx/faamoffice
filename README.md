@@ -78,16 +78,13 @@ build, và người dùng có thể đổi trong Cài đặt → Hồ sơ (ví d
 Bộ cài cho macOS (Apple Silicon và Intel), Windows (x64) và Linux (AppImage, deb, rpm) nằm ở
 trang [Releases](../../releases/latest).
 
-Bản build hiện chưa có chữ ký số của Apple/Microsoft, nên lần mở đầu tiên sẽ bị hệ điều hành hỏi lại:
+Bộ cài **macOS 0.11.2** hiện được ký bằng Developer ID và được Apple xác minh (notarization),
+cho cả Apple Silicon và Intel.
 
-- **macOS 15 Sequoia trở lên (gồm 26 Tahoe):**
-  1. Kéo FaamOffice vào Applications rồi mở. Khi macOS báo không mở được, bấm **Done**. Đừng bấm Move to Trash.
-  2. Vào **System Settings → Privacy & Security**, kéo xuống mục **Security** và bấm **Open Anyway**. Nút
-     này chỉ hiện khoảng 1 giờ sau lần bị chặn.
-  3. Nhập mật khẩu máy và bấm **Open**. Từ lần sau app mở bình thường.
-- **macOS 14 trở về trước:** nhấp chuột phải (Control-click) vào FaamOffice → **Open** → **Open**.
-- **Cách khác (Terminal):** `xattr -dr com.apple.quarantine /Applications/FaamOffice.app`. Chỉ dùng cách này
-  với bản tải từ trang Releases chính thức.
+- **macOS:** kéo FaamOffice vào Applications rồi mở. Nếu bản 0.11.2 đã tải trước đây báo
+  "Apple không thể xác minh", tải lại bộ cài từ Releases, thoát FaamOffice rồi kéo bản mới vào
+  Applications và chọn **Replace**. Số phiên bản vẫn là 0.11.2; các file macOS đã được thay bằng
+  bản ký số và xác minh.
 - **Windows:** nếu thấy "Windows protected your PC", bấm **More info → Run anyway**. Dòng Publisher ghi
   "Unknown publisher" là bình thường. Nếu Smart App Control của Windows 11 chặn thì không có nút chạy tiếp;
   hãy chờ bản đã ký số hoặc bản trên Microsoft Store.
@@ -100,8 +97,7 @@ bất cứ lúc nào bằng **Help → Check for Updates**.
 
 - **Windows và Linux AppImage:** app tải bản mới về, rồi bấm **Restart & Install**.
 - **macOS:** bấm **Update Now**, app tải đúng file `.dmg` cho máy (Apple Silicon hoặc Intel), kiểm tra
-  mã sha512 rồi mở nó. Thoát FaamOffice, kéo FaamOffice vào Applications và chọn **Replace**. File do
-  app tự tải không bị macOS gắn cờ tải từ Internet, nên không phải bấm **Open Anyway** lần nữa. Nếu tải
+  mã sha512 rồi mở nó. Thoát FaamOffice, kéo FaamOffice vào Applications và chọn **Replace**. Nếu tải
   lỗi, app mở link tải trong trình duyệt.
 - **Linux .deb / .rpm:** thông báo có nút mở gói mới trong trình duyệt để cài.
 - **Đang dùng 0.11.1 hoặc cũ hơn:** các bản này không có địa chỉ cập nhật, nên cần tải và cài lại thủ
@@ -129,6 +125,24 @@ Bản build cho cả ba nền tảng chạy tự động bằng GitHub Actions
 workflow** để build thử (bản này không tự cập nhật), hoặc đẩy một tag `v*` (ví dụ `v0.11.2`) để tạo bản
 phát hành có tự cập nhật. Tag có dấu `-` (ví dụ `v0.12.0-beta.1`) thành bản prerelease và không được
 đẩy tới người dùng qua thông báo cập nhật.
+
+Runner macOS trên GitHub hiện chỉ tạo bản ad-hoc; bộ cài macOS chính thức cần được ký và notarize
+trên máy có chứng thư **Developer ID Application**. Với profile đã lưu trong Keychain:
+
+```bash
+CSC_NAME='Tên trên chứng thư (TEAM_ID)' \
+APPLE_KEYCHAIN_PROFILE='tên-profile-notarytool' \
+GENOFFICE_MAC_X64=1 \
+GENOFFICE_UPDATE_URL='https://github.com/dinhthaicx/faamoffice/releases/latest/download' \
+npm run dist:mac
+```
+
+Lệnh này ký và notarize cả `.app` lẫn `.dmg`, rồi tính lại blockmap và `latest-mac.yml` sau khi staple
+ticket Apple (staple làm thay đổi mã sha512 của DMG). Trước khi phát hành, kiểm tra `codesign --verify
+--deep --strict`, `xcrun stapler validate` và `spctl --assess --type execute` trên app; DMG dùng
+`spctl --assess --type open --context context:primary-signature`. Khi thay bộ cài trong một release
+đã có, tải lên cả DMG, ZIP và blockmap tương ứng, sau đó cập nhật `latest-mac.yml` đã ghim URL vào
+đúng tag bằng `scripts/release-feed.cjs`.
 
 ## Cập nhật theo GenOffice gốc
 

@@ -165,7 +165,7 @@ export const en: Dictionary = {
         { q: "What is Faam AI Cloud?", a: "Faam AI Cloud lets you use AI models right inside the app with just your FaamOffice account, no API key: open Settings → AI models, choose Faam AI Cloud and sign in. To keep the service reliable for everyone, daily usage may be limited. Your usage history is on the Account page." },
         {
           q: "Why does macOS or Windows warn me on first launch?",
-          a: "The installers are not yet signed by Apple or Microsoft. On macOS 15 and later, open the app and click Done when it is blocked. Then go to System Settings → Privacy & Security → Security, click Open Anyway (shown for about an hour), enter your password or use Touch ID, and click Open. On macOS 14 and earlier: right-click → Open, or use the xattr command on the Download page. On Windows, when you see “Windows protected your PC”, choose More info and then Run anyway; if Windows 11 Smart App Control blocks it, there is no way to continue. Signed builds that skip these steps are on the way.",
+          a: "The current macOS 0.11.2 installers are Developer ID signed and notarized by Apple. If an earlier download says “Apple cannot verify”, download the installer again, quit FaamOffice, drag the new copy into Applications and choose Replace. The Windows .exe installer is not yet Microsoft signed: when you see “Windows protected your PC”, choose More info and then Run anyway. If Smart App Control blocks it, use the Microsoft Store version.",
           storeNote:
             "On Windows 10 and 11 you can also install FaamOffice from the Microsoft Store. Microsoft signs this version and the Store updates it automatically.",
         },
@@ -209,8 +209,8 @@ export const en: Dictionary = {
     },
     firstLaunch: {
       title: "First launch",
-      intro: "The installers are not yet signed by Apple or Microsoft, so your operating system shows a warning the first time. Here is how to open FaamOffice safely:",
-      mac: "Drag FaamOffice to your Applications folder and open it. On macOS 15 and later, when macOS says it can’t be opened, click Done, go to System Settings → Privacy & Security, scroll to Security and click Open Anyway (shown for about an hour), then enter your password and click Open. On macOS 14 and earlier: right-click FaamOffice → Open → Open. Or run this in Terminal:",
+      intro: "Choose the installer for your computer and follow the steps below. The current macOS 0.11.2 installers are Developer ID signed and notarized by Apple; the Windows .exe installer may still show an operating system warning.",
+      mac: "Drag FaamOffice to your Applications folder and open it. If you downloaded 0.11.2 before the signed installers were available and still see “Apple cannot verify”, download it again using the buttons above, quit FaamOffice, drag the new copy into Applications and choose Replace. The version remains 0.11.2; the macOS downloads have been replaced with signed, notarized builds.",
       windows: "When you see “Windows protected your PC”, choose More info and then Run anyway (“Unknown publisher” is expected). If Windows 11 Smart App Control blocks it, there is no way to continue; please wait for the signed build.",
       linux: "The AppImage runs directly once it is executable; .deb and .rpm install through your package manager:",
       windowsStore:
@@ -220,7 +220,7 @@ export const en: Dictionary = {
       title: "Releases and source code",
       allReleases: "See all releases",
       source: "Build from source",
-      checksum: "Every release on GitHub is built automatically by GitHub Actions from the public source code.",
+      checksum: "The installers are built from the public source code. macOS builds are Developer ID signed and submitted to Apple for notarization before release.",
     },
     store: {
       recommended: "Recommended",

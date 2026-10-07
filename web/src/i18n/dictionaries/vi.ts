@@ -166,7 +166,7 @@ export const vi = {
         { q: "Faam AI Cloud là gì?", a: "Faam AI Cloud cho phép bạn dùng các mô hình AI ngay trong ứng dụng chỉ bằng tài khoản FaamOffice, không cần API key: vào Cài đặt → Mô hình AI, chọn Faam AI Cloud rồi đăng nhập là xong. Để dịch vụ ổn định cho mọi người, số lượt dùng mỗi ngày có thể được giới hạn. Lịch sử sử dụng hiển thị trong trang Tài khoản." },
         {
           q: "Vì sao macOS hoặc Windows cảnh báo khi mở lần đầu?",
-          a: "Bản cài chưa được Apple hay Microsoft ký số. Trên macOS 15 trở lên: mở app; khi hộp thoại báo “FaamOffice” chưa được mở, bấm “Xong” (Done) — KHÔNG bấm “Chuyển vào Thùng rác” (Move to Trash) — rồi vào Cài đặt hệ thống (System Settings) → Quyền riêng tư & Bảo mật (Privacy & Security) → mục Bảo mật (Security), bấm “Vẫn mở” (Open Anyway; nút này hiện khoảng 1 giờ), nhập mật khẩu hoặc dùng Touch ID rồi bấm “Mở” (Open). Trên macOS 14 trở về trước: nhấp chuột phải → Mở (Open), hoặc chạy lệnh xattr có trong trang Tải về. Trên Windows, khi thấy “Windows đã bảo vệ PC của bạn” (Windows protected your PC), bấm “Thông tin thêm” (More info) rồi “Vẫn chạy” (Run anyway); nếu Smart App Control của Windows 11 chặn thì không có nút chạy tiếp. Chúng tôi đang chuẩn bị bản ký số để bỏ các bước này.",
+          a: "Bộ cài macOS 0.11.2 hiện đã được ký bằng Developer ID và được Apple xác minh (notarization). Nếu bản đã tải trước đây báo “Apple không thể xác minh”, hãy tải lại bộ cài từ trang Tải về, thoát FaamOffice rồi kéo bản mới vào Applications và chọn Thay thế (Replace). Bộ cài Windows .exe chưa có chữ ký Microsoft: khi thấy “Windows đã bảo vệ PC của bạn”, bấm “Thông tin thêm” (More info) rồi “Vẫn chạy” (Run anyway); nếu Smart App Control chặn thì hãy dùng bản trên Microsoft Store.",
           storeNote: "Trên Windows 10 và 11, bạn cũng có thể cài FaamOffice từ Microsoft Store: bản này được Microsoft ký nên không có các cảnh báo trên và được Store tự cập nhật.",
         },
         { q: "Mở tệp Word, Excel có giữ nguyên định dạng không?", a: "FaamOffice đọc và ghi trực tiếp định dạng gốc (.docx, .xlsx, .pptx), nên tệp lưu ra vẫn mở được trong Microsoft Office, Google Docs hay LibreOffice. Với tài liệu rất phức tạp, một vài chi tiết hiển thị có thể khác đôi chút." },
@@ -216,8 +216,8 @@ export const vi = {
     },
     firstLaunch: {
       title: "Lần đầu mở ứng dụng",
-      intro: "Bản cài chưa được Apple và Microsoft ký số, nên hệ điều hành sẽ cảnh báo ở lần mở đầu tiên. Đây là cách mở an toàn:",
-      mac: "Kéo FaamOffice vào thư mục Ứng dụng (Applications) rồi mở. Trên macOS 15 trở lên, khi hộp thoại báo “FaamOffice” chưa được mở, hãy bấm “Xong” (Done) — KHÔNG bấm “Chuyển vào Thùng rác” (Move to Trash). Sau đó mở Cài đặt hệ thống (System Settings) → Quyền riêng tư & Bảo mật (Privacy & Security), kéo xuống mục Bảo mật (Security) và bấm “Vẫn mở” (Open Anyway) — nút này hiện khoảng 1 giờ sau khi ứng dụng bị chặn — rồi nhập mật khẩu hoặc dùng Touch ID và bấm “Mở” (Open). Trên macOS 14 trở về trước: nhấp chuột phải vào FaamOffice → Mở (Open) → Mở (Open). Hoặc chạy lệnh sau trong Terminal:",
+      intro: "Chọn bộ cài phù hợp với máy rồi làm theo hướng dẫn bên dưới. Bộ cài macOS 0.11.2 đã được ký bằng Developer ID và được Apple xác minh; bộ cài Windows .exe vẫn có thể hiện cảnh báo của hệ điều hành.",
+      mac: "Kéo FaamOffice vào thư mục Ứng dụng (Applications) rồi mở. Nếu bạn đã tải bản 0.11.2 trước khi có chữ ký Apple và vẫn thấy “Apple không thể xác minh”, hãy tải lại bộ cài bằng nút phía trên, thoát FaamOffice rồi kéo bản mới vào Applications và chọn Thay thế (Replace). Số phiên bản vẫn là 0.11.2; các file tải macOS đã được thay bằng bản ký số và xác minh.",
       windows: "Khi thấy “Windows đã bảo vệ PC của bạn” (Windows protected your PC), bấm “Thông tin thêm” (More info) rồi “Vẫn chạy” (Run anyway); nhà phát hành hiện là không xác định (Unknown publisher) là bình thường. Nếu Smart App Control của Windows 11 chặn thì không có nút chạy tiếp; hãy chờ bản đã ký số.",
       windowsStore: "Cách dễ nhất: cài FaamOffice từ Microsoft Store (nút “Tải từ Microsoft” ở thẻ Windows phía trên). Bản trên Store được Microsoft ký nên không hiện cảnh báo, không bị Smart App Control chặn và được Store tự cập nhật. Nếu dùng bộ cài .exe:",
       linux: "AppImage chạy trực tiếp sau khi cấp quyền thực thi; .deb và .rpm cài qua trình quản lý gói:",
@@ -226,7 +226,7 @@ export const vi = {
       title: "Bản phát hành và mã nguồn",
       allReleases: "Xem tất cả bản phát hành",
       source: "Tự build từ mã nguồn",
-      checksum: "Mỗi bản phát hành trên GitHub được build tự động bằng GitHub Actions từ mã nguồn công khai.",
+      checksum: "Các bộ cài được đóng gói từ mã nguồn công khai. Bản macOS được ký bằng Developer ID và gửi Apple xác minh trước khi phát hành.",
     },
   },
   faamAi: {

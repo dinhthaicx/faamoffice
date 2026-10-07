@@ -159,9 +159,7 @@ export default async function DownloadPage({ params }: PageProps<"/[locale]/down
                   <p className="mt-1 text-sm text-muted">{p.requirement}</p>
                   {p.id === "windows" && storeUrl ? (
                     <div className="mt-5">
-                      <p className="inline-flex rounded-full bg-success-bg px-2.5 py-0.5 text-xs font-semibold text-success-fg">
-                        {d.store.recommended}
-                      </p>
+                      <p className="inline-flex rounded-full bg-success-bg px-2.5 py-0.5 text-xs font-semibold text-success-fg">{d.store.recommended}</p>
                       <div className="mt-3">
                         <StoreBadge url={storeUrl} locale={locale} alt={d.store.badgeAlt} />
                       </div>
@@ -203,13 +201,6 @@ export default async function DownloadPage({ params }: PageProps<"/[locale]/down
             <div>
               <h3 className="text-lg font-semibold">{d.platforms.mac.name}</h3>
               <p className="mt-2 text-sm leading-relaxed text-muted">{d.firstLaunch.mac}</p>
-              <div className="mt-3">
-                <CodeBlock
-                  code="xattr -dr com.apple.quarantine /Applications/FaamOffice.app"
-                  copyLabel={dict.common.copy}
-                  copiedLabel={dict.common.copied}
-                />
-              </div>
             </div>
             <div>
               <h3 className="text-lg font-semibold">{d.platforms.windows.name}</h3>
