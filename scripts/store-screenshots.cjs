@@ -1,6 +1,5 @@
 // Capture the actual Windows executable extracted from the Store release appx.
 // No mocked UI, replacement window frame, marketing overlays or image resizing.
-/* global window */
 const { _electron } = require(
   require('node:path').join(process.env.CAPTURE_TOOLS, 'node_modules/playwright-core'),
 )
@@ -188,28 +187,31 @@ async function capture(locale, kind, file) {
     if (file) {
       const domain = { docx: 'docs', xlsx: 'sheets', pptx: 'slides' }[kind]
       const deadline = Date.now() + 90_000
-      let editor
-      while (Date.now() < deadline && !editor) {
-        for (const candidate of app.windows()) {
-          // Attach can race the packaged page's first navigation; Playwright's
-          // cached URL then stays empty even though the document is loaded.
-          const href =
-            candidate.url() ||
-            (await candidate.evaluate(() => window.location.href).catch(() => ''))
-          if (href.includes(`/modules/${domain}/`)) {
-            editor = candidate
-            break
+      let ready = false
+      while (Date.now() < deadline && !ready) {
+        // Read the live WebContentsView through Electron, avoiding a renderer
+        // CDP attachment that can race its initial packaged navigation.
+        ready = await app.evaluate(async ({ webContents }, domain) => {
+          for (const wc of webContents.getAllWebContents()) {
+            if (wc.getURL().includes(`/modules/${domain}/`) && !wc.isLoading()) {
+              if (
+                await wc
+                  .executeJavaScript('document.readyState === "complete" && document.body !== null')
+                  .catch(() => false)
+              )
+                return true
+            }
           }
-        }
-        if (!editor) await pause(250)
+          return false
+        }, domain)
+        if (!ready) await pause(250)
       }
-      if (!editor) {
+      if (!ready) {
         const urls = await app.evaluate(({ webContents }) =>
           webContents.getAllWebContents().map((wc) => wc.getURL()),
         )
         throw new Error(`Editor did not load: ${kind}; contents: ${JSON.stringify(urls)}`)
       }
-      await editor.locator('body').waitFor()
       await pause(12_000)
     } else {
       await app.firstWindow().then((page) => page.locator('body').waitFor())
