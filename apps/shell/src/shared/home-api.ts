@@ -285,6 +285,10 @@ export interface HomeApi {
   getUpdateState(): Promise<UpdateUiState | null>
   /** re-open the (minimized) update dialog; a not-yet-started download also starts */
   openUpdateDialog(): Promise<boolean>
+  /** whether this is the Microsoft Store package, which the Store updates (Settings → About) */
+  isStoreInstall(): Promise<boolean>
+  /** open FaamOffice's Store listing (the Store app, else the web page); no-op outside the Store package */
+  openStorePage(): Promise<void>
   onUpdateStateChanged(handler: (state: UpdateUiState) => void): () => void
   /** report whether onboarding or an announcement is on screen: the automatic
    * update card (a separate window that would cover them) waits meanwhile */
@@ -650,6 +654,8 @@ export const HOME_CHANNELS = {
   faamAccountOpenWeb: 'home:faam-account-open-web',
   faamCloudModels: 'home:faam-cloud-models',
   getAppVersion: 'home:get-app-version',
+  isStoreInstall: 'home:is-store-install',
+  openStorePage: 'home:open-store-page',
   onboardingSeen: 'home:onboarding-seen',
   setOnboardingSeen: 'home:set-onboarding-seen',
   getTheme: 'home:get-theme',

@@ -1540,6 +1540,8 @@ export function SettingsModal({
   const [appVersion, setAppVersion] = useState('')
   const [githubStars, setGithubStars] = useState<number | null>(null)
   const [updateState, setUpdateState] = useState<UpdateUiState | null>(null)
+  // the Microsoft Store package: the Store updates it (About says so)
+  const [storeInstall, setStoreInstall] = useState(false)
 
   useEffect(() => {
     let alive = true
@@ -1585,6 +1587,12 @@ export function SettingsModal({
     void window.aiOffice.githubStars?.().then((n) => {
       if (alive && n !== null) setGithubStars(n)
     })
+    void window.aiOffice
+      .isStoreInstall?.()
+      .then((store) => {
+        if (alive) setStoreInstall(store === true)
+      })
+      .catch(() => undefined)
     return () => {
       alive = false
     }
@@ -1995,6 +2003,23 @@ export function SettingsModal({
               <>
                 <h3 className="set-pane-title">{t('setSecAbout')}</h3>
                 <Field label={t('versionLabel')} value={appVersion || '—'} />
+                {storeInstall && (
+                  <div className="set-field">
+                    <div className="set-field-text">
+                      <div className="set-field-stack">
+                        <div className="set-field-label">{t('setStoreUpdatesLabel')}</div>
+                        <div className="set-field-desc">{t('setStoreUpdatesDesc')}</div>
+                      </div>
+                    </div>
+                    <button
+                      type="button"
+                      className="set-btn"
+                      onClick={() => void window.aiOffice.openStorePage?.().catch(() => {})}
+                    >
+                      {t('setStoreOpen')}
+                    </button>
+                  </div>
+                )}
                 {updateState && (
                   <div className="set-field">
                     <div className="set-field-text">

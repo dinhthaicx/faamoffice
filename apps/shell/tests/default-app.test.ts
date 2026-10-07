@@ -11,6 +11,68 @@ import type { RunCommand } from '../src/main/default-app'
 const ME = 'com.faamoffice.app'
 const WPS = 'com.kingsoft.wpsoffice.mac'
 
+describe('Microsoft Store default apps', () => {
+  const aumid = 'FaamOffice.FaamOffice_hangrx54z3vxj!FaamOffice'
+  const registry = (value: string) => `    Value    REG_SZ    ${value}\r\n`
+  const base = {
+    platform: 'win32' as const,
+    packaged: true,
+    exePath: 'C:\\Store\\FaamOffice.exe',
+    windowsStore: { aumid },
+  }
+
+  it('recognizes generated AppX ProgIds by AUMID instead of NSIS association names', async () => {
+    const run = vi.fn<RunCommand>(async (_cmd, args) => {
+      if (args.includes('ProgId')) return registry('AppXfaam')
+      if (args.includes('AppUserModelID')) return registry(aumid.toUpperCase())
+      throw new Error('unexpected query')
+    })
+    const svc = createDefaultAppService({ ...base, run, openExternal: vi.fn(async () => {}) })
+    expect(await svc.status()).toEqual({ state: 'default', others: [], manualOnly: true })
+    expect(run.mock.calls.filter(([, args]) => args.includes('AppUserModelID'))).toHaveLength(1)
+  })
+
+  it('does not mistake another Store package for FaamOffice', async () => {
+    const run = vi.fn<RunCommand>(async (_cmd, args) => {
+      if (args.includes('ProgId')) return registry('AppXother')
+      if (args.includes('AppUserModelID')) return registry('Other.App_8wekyb3d8bbwe!App')
+      return registry('Another editor')
+    })
+    const svc = createDefaultAppService({ ...base, run, openExternal: vi.fn(async () => {}) })
+    expect(await svc.status()).toEqual({
+      state: 'other',
+      others: ['Another editor'],
+      manualOnly: true,
+    })
+  })
+
+  it('opens its own Default apps page and falls back if Windows rejects the deep link', async () => {
+    const openExternal = vi.fn(async (url: string) => {
+      if (url.includes('?')) throw new Error('unsupported deep link')
+    })
+    const svc = createDefaultAppService({ ...base, run: vi.fn(async () => ''), openExternal })
+    await svc.set()
+    expect(openExternal.mock.calls.map(([url]) => url)).toEqual([
+      `ms-settings:defaultapps?registeredAUMID=${encodeURIComponent(aumid)}`,
+      'ms-settings:defaultapps',
+    ])
+  })
+
+  it('reports an unknown status without an AUMID and opens the generic Settings page', async () => {
+    const run = vi.fn<RunCommand>()
+    const openExternal = vi.fn(async () => {})
+    const svc = createDefaultAppService({
+      ...base,
+      windowsStore: { aumid: null },
+      run,
+      openExternal,
+    })
+    expect(await svc.set()).toEqual({ state: 'unknown', others: [], manualOnly: true })
+    expect(openExternal).toHaveBeenCalledExactlyOnceWith('ms-settings:defaultapps')
+    expect(run).not.toHaveBeenCalled()
+  })
+})
+
 function macStatusJson(
   owner: (uti: string) => string | null,
   name: string | null = 'WPS Office',

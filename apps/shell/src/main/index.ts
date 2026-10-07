@@ -80,6 +80,7 @@ import { controlHandler } from './control-handlers'
 import { installCliLinkBestEffort } from './cli-link'
 import { createDefaultAppService, execFileRunner } from './default-app'
 import { createLoginItemService, loginItemsSettingsUrl } from './login-item'
+import { isStoreInstall, openStorePage, storeListing } from './ms-store'
 import {
   DEFAULT_APP_PROMPT_KEY,
   asDefaultAppPromptState,
@@ -3832,6 +3833,7 @@ function statEntries(paths: string[]): RecentEntry[] {
 const loginItem = createLoginItemService({
   platform: process.platform,
   packaged: app.isPackaged,
+  windowsStore: isStoreInstall(),
   getLoginItemSettings: (options) => app.getLoginItemSettings(options),
   setLoginItemSettings: (settings) => app.setLoginItemSettings(settings),
   execPath: process.execPath,
@@ -3928,6 +3930,11 @@ function registerHomeIpc(): void {
   })
 
   ipcMain.handle(HOME_CHANNELS.getAppVersion, (): string => app.getVersion())
+  ipcMain.handle(HOME_CHANNELS.isStoreInstall, (): boolean => storeListing() !== null)
+  ipcMain.handle(HOME_CHANNELS.openStorePage, async () => {
+    const listing = storeListing()
+    if (listing) await openStorePage(listing, (url) => shell.openExternal(url))
+  })
 
   ipcMain.handle(HOME_CHANNELS.recents, (_event, query: unknown): RecentPage =>
     pageRecentPaths(readRecentFiles(), query, new Set(readStarredFiles())),
@@ -4506,6 +4513,7 @@ function registerHomeIpc(): void {
   const defaultApp = createDefaultAppService({
     platform: process.platform,
     packaged: app.isPackaged,
+    windowsStore: storeListing(),
     exePath: app.getPath('exe'),
     run: execFileRunner,
     openExternal: (url) => shell.openExternal(url),

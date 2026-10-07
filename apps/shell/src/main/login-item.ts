@@ -10,6 +10,11 @@ export const WINDOWS_RUN_VALUE_NAME = 'FaamOffice'
 // the HKCU Run key on Windows); Linux has no such API, so we manage one XDG
 // autostart entry ourselves. Every dependency is injected so the platform rules
 // are unit-testable without Electron.
+//
+// Microsoft Store (MSIX) installs have no switch: Electron's login item API
+// does not work for packaged apps (a packaged app starts at sign-in only
+// through a StartupTask its manifest declares, which this package does not),
+// and the Run key must not point into the versioned package folder.
 
 /** file name of our XDG autostart entry (the only file this module ever writes or removes) */
 export const LINUX_AUTOSTART_FILE = 'faamoffice.desktop'
@@ -33,6 +38,8 @@ export interface LoginItemDeps {
   platform: NodeJS.Platform
   /** packaged app only: a dev build would register Electron.app / electron.exe at login */
   packaged: boolean
+  /** process.windowsStore: the Microsoft Store package, where the switch is not offered */
+  windowsStore?: boolean
   getLoginItemSettings: (options?: LoginItemSettingsOptions) => Partial<LoginItemSettings>
   setLoginItemSettings: (settings: Settings) => void
   execPath: string
@@ -189,7 +196,9 @@ export function createLoginItemService(deps: LoginItemDeps): LoginItemService {
   const linuxDir = platform === 'linux' ? linuxAutostartDir(env) : null
   const supported =
     deps.packaged &&
-    (platform === 'darwin' || platform === 'win32' || (platform === 'linux' && linuxDir !== null))
+    (platform === 'darwin' ||
+      (platform === 'win32' && deps.windowsStore !== true) ||
+      (platform === 'linux' && linuxDir !== null))
   if (!supported) {
     return {
       status: () => ({ ...UNSUPPORTED }),

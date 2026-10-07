@@ -4,6 +4,7 @@ import { join } from 'node:path'
 import { app } from 'electron'
 import { installCliLink } from '@genoffice/cli/install'
 import { readAppSettings, writeAppSetting } from './app-settings'
+import { isStoreInstall } from './ms-store'
 
 const SETTING_KEY = 'cliLink'
 
@@ -20,9 +21,17 @@ interface CliLinkRecord {
  * macOS retries on each start until a writable directory turns up; Windows
  * gets its PATH entry from the installer and only re-checks once per version
  * (the check spawns PowerShell). Silent and best effort.
+ *
+ * Microsoft Store installs get neither: their package folder is versioned and
+ * replaced by every Store update, so a PATH entry or launcher pointing into it
+ * would break (ms-store.ts).
  */
 export function installCliLinkBestEffort(settingsPath: string): void {
   if (!app.isPackaged) return
+  if (isStoreInstall()) {
+    console.log('[faamoffice] cli link skipped: Microsoft Store install')
+    return
+  }
   try {
     if (isEphemeralInstall(process.resourcesPath, process.env)) {
       // a DMG under /Volumes or an AppImage FUSE mount vanishes on exit; linking

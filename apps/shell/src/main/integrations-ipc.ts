@@ -17,6 +17,7 @@ import {
 import { inspectCliLink } from '@genoffice/cli/install'
 import { readAppSettings, writeAppSetting } from './app-settings'
 import { isEphemeralInstall } from './cli-link'
+import { isStoreInstall } from './ms-store'
 import { isInstallableSkillDir } from './skill-target'
 import {
   INTEGRATIONS_CHANNELS,
@@ -60,11 +61,14 @@ export function registerIntegrationsIpc(deps: IntegrationsDeps): void {
       deps.cliDir,
       process.platform === 'win32' ? 'faamoffice.cmd' : 'faamoffice',
     )
+    const store = isStoreInstall()
     return {
       cli: {
-        ...inspectCliLink({ launcher }),
+        // nothing to probe in a Store install, which never links the CLI
+        ...(store ? { status: 'unsupported' as const } : inspectCliLink({ launcher })),
         launcherDir: deps.cliDir,
         ephemeral: app.isPackaged && isEphemeralInstall(process.resourcesPath, process.env),
+        store,
         version: cliVersion(deps.cliPackageJson),
       },
       skillVersion: skill.version,

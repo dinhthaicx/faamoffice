@@ -6,6 +6,9 @@ import type { DefaultAppStatus } from '../shared/home-api'
 
 // macOS writes the LaunchServices user choice via osascript (no helper binary to
 // ship), Linux via xdg-mime; Windows apps cannot set defaults, only open the page.
+// The Microsoft Store package (ms-store.ts) owns its types through ProgIds
+// Windows generates (AppX…), so there it is recognised by its AUMID and the
+// page opens at its own entry by AUMID; the NSIS names never apply.
 
 interface OfficeType {
   ext: string
@@ -68,6 +71,8 @@ export interface DefaultAppDeps {
   platform: NodeJS.Platform
   /** packaged app only: dev builds run inside Electron.app and must never claim the types */
   packaged: boolean
+  /** Windows, the Microsoft Store package: its AUMID (null when unknown); null/absent otherwise */
+  windowsStore?: { aumid: string | null } | null
   exePath: string
   run: RunCommand
   openExternal: (url: string) => Promise<void>
@@ -225,6 +230,7 @@ export function createDefaultAppService(deps: DefaultAppDeps): DefaultAppService
   const mimes = OFFICE_TYPES.map((t) => t.mime)
 
   const macBundle = deps.platform === 'darwin' ? macAppBundlePath(deps.exePath) : null
+  const store = deps.platform === 'win32' ? (deps.windowsStore ?? null) : null
 
   async function status(): Promise<DefaultAppStatus> {
     if (!deps.packaged) return UNSUPPORTED
@@ -250,8 +256,13 @@ export function createDefaultAppService(deps: DefaultAppDeps): DefaultAppService
         return { ...st, others: st.others.map((id) => linuxDesktopName(id, readFile)) }
       }
       if (deps.platform === 'win32') {
+        // without its AUMID a Store install cannot tell its own ProgIds apart
+        if (store && store.aumid === null) return { state: 'unknown', others: [], manualOnly: true }
         const owners = await Promise.all(OFFICE_TYPES.map((t) => windowsOwner(t)))
-        const st = summarize(owners, (id) => OFFICE_TYPES.some((t) => t.progId === id))
+        const ours = store?.aumid
+          ? await storeProgIds(owners, store.aumid)
+          : new Set(OFFICE_TYPES.map((t) => t.progId))
+        const st = summarize(owners, (id) => ours.has(id))
         const names = await Promise.all(st.others.map((id) => windowsProgIdName(id)))
         return { ...st, others: [...new Set(names)], manualOnly: true }
       }
@@ -274,6 +285,30 @@ export function createDefaultAppService(deps: DefaultAppDeps): DefaultAppService
     } catch {
       return null
     }
+  }
+
+  /**
+   * The owners that are this Store package: a packaged app's ProgId carries
+   * its AUMID under HKCR\<ProgId>\Application. Unreadable keys are not ours.
+   */
+  async function storeProgIds(owners: Array<string | null>, aumid: string): Promise<Set<string>> {
+    const candidates = [...new Set(owners.filter((owner): owner is string => owner !== null))]
+    const matches = await Promise.all(
+      candidates.map(async (progId) => {
+        try {
+          const out = await deps.run('reg', [
+            'query',
+            `HKCR\\${progId}\\Application`,
+            '/v',
+            'AppUserModelID',
+          ])
+          return parseRegValue(out)?.toLowerCase() === aumid.toLowerCase()
+        } catch {
+          return false
+        }
+      }),
+    )
+    return new Set(candidates.filter((_, i) => matches[i]))
   }
 
   async function windowsProgIdName(progId: string): Promise<string> {
@@ -310,6 +345,24 @@ export function createDefaultAppService(deps: DefaultAppDeps): DefaultAppService
     return WINDOWS_DEFAULT_APPS_URL
   }
 
+  /**
+   * The Store package's own page under Default apps (Windows 11 deep link by
+   * AUMID; older builds ignore the parameter), else the generic page.
+   */
+  async function openStoreDefaultApps(aumid: string | null): Promise<void> {
+    if (aumid) {
+      try {
+        await deps.openExternal(
+          `${WINDOWS_DEFAULT_APPS_URL}?registeredAUMID=${encodeURIComponent(aumid)}`,
+        )
+        return
+      } catch {
+        // the generic page below
+      }
+    }
+    await deps.openExternal(WINDOWS_DEFAULT_APPS_URL)
+  }
+
   async function set(): Promise<DefaultAppStatus> {
     if (!deps.packaged) return UNSUPPORTED
     try {
@@ -319,7 +372,8 @@ export function createDefaultAppService(deps: DefaultAppDeps): DefaultAppService
         if (!linuxDesktopInstalled(readFile)) return UNSUPPORTED
         await deps.run('xdg-mime', ['default', LINUX_DESKTOP_ID, ...mimes])
       } else if (deps.platform === 'win32') {
-        await deps.openExternal(await windowsDefaultAppsUrl())
+        if (store) await openStoreDefaultApps(store.aumid)
+        else await deps.openExternal(await windowsDefaultAppsUrl())
       }
     } catch {
       // status() below reports whatever actually stuck

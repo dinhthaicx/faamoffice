@@ -13,6 +13,8 @@ export interface CliStatus extends InstallOutcome {
   launcherDir: string
   /** app runs from a dmg / AppImage mount: the launcher path will not survive a restart */
   ephemeral: boolean
+  /** Microsoft Store install: no command line on the PATH (its package folder changes with every update) */
+  store?: boolean
   /** version of the bundled command line */
   version: string
 }

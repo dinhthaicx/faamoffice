@@ -7,8 +7,9 @@ import { describe, expect, it } from 'vitest'
  * The update-feed rules of .github/workflows/release.yml: only tag builds bake
  * the feed, no token reaches electron-builder, the feed files are uploaded,
  * and the publish job keeps the release a draft until its feed is complete
- * and moves Latest one tag at a time. scripts/release-feed.cjs itself is
- * release-feed.test.ts's subject.
+ * and moves Latest one tag at a time. The Microsoft Store appx is a separate,
+ * best-effort run artifact that never reaches the release. scripts/release-feed.cjs
+ * itself is release-feed.test.ts's subject.
  */
 
 // js-yaml as electron-updater (a shell dependency) resolves it
@@ -16,14 +17,25 @@ const require = createRequire(import.meta.url)
 const { load } = createRequire(require.resolve('electron-updater'))('js-yaml') as {
   load: (text: string) => unknown
 }
+// the matcher actions/download-artifact applies to its `pattern` input
+const { minimatch } = require('minimatch') as {
+  minimatch: (name: string, pattern: string) => boolean
+}
+
+const shellPackage = JSON.parse(
+  readFileSync(resolve(import.meta.dirname, '../package.json'), 'utf8'),
+) as { scripts: Record<string, string> }
 
 interface Step {
   name?: string
+  id?: string
   if?: string
   run?: string
   uses?: string
   env?: Record<string, string>
-  with?: Record<string, string>
+  with?: Record<string, string | number>
+  'continue-on-error'?: boolean
+  'timeout-minutes'?: number
 }
 
 interface Job {
@@ -85,7 +97,9 @@ describe('release workflow: build job', () => {
 
   it('uploads the feed files and blockmaps, never builder-debug.yml', () => {
     const upload = build.steps.find((step) => step.uses?.startsWith('actions/upload-artifact'))
-    const paths = (upload?.with?.path ?? '').split('\n').map((line) => line.trim())
+    const paths = String(upload?.with?.path ?? '')
+      .split('\n')
+      .map((line) => line.trim())
     expect(paths).toContain('apps/shell/release/latest*.yml')
     expect(paths).toContain('apps/shell/release/*.blockmap')
     // a broader yml glob would ship builder-debug.yml too
@@ -136,5 +150,88 @@ describe('release workflow: publish job', () => {
     const release = publish.steps[edit]!.run!
     expect(release).toMatch(/--draft=false/)
     expect(release).toMatch(/--latest="\$latest"/)
+  })
+})
+
+describe('release workflow: Microsoft Store appx', () => {
+  const stepAt = (find: (step: Step) => boolean): number => {
+    const index = build.steps.findIndex(find)
+    expect(index).toBeGreaterThanOrEqual(0)
+    return index
+  }
+  const appx = () => build.steps[stepAt((step) => step.env?.GENOFFICE_APPX === '1')]!
+  const appxUpload = () =>
+    build.steps[stepAt((step) => step.with?.name === 'faamoffice-store-appx')]!
+  const installersUpload = () =>
+    build.steps[
+      stepAt(
+        (step) =>
+          step.uses?.startsWith('actions/upload-artifact') === true &&
+          String(step.with?.name).startsWith('faamoffice-${{ matrix.platform }}'),
+      )
+    ]!
+  const paths = (step: Step) =>
+    String(step.with?.path ?? '')
+      .split('\n')
+      .map((line) => line.trim())
+      .filter(Boolean)
+
+  it('packages the appx on Windows through the never-publishing Store script', () => {
+    const step = appx()
+    expect(step.if).toBe("matrix.platform == 'win'")
+    expect(step.run).toBe('npm run dist:win:store -w @genoffice/shell')
+    expect(shellPackage.scripts['dist:win:store']).toMatch(
+      /electron-builder --win appx --x64 --publish never$/,
+    )
+    // its own output directory: nothing it writes lands next to the installers
+    expect(step.env?.BUILD_DIR).toBe('release/store')
+  })
+
+  it('runs after the NSIS installer is packaged and uploaded', () => {
+    const nsis = stepAt((step) => step.run === 'npm run dist:win')
+    const installers = build.steps.indexOf(installersUpload())
+    const store = build.steps.indexOf(appx())
+    const upload = build.steps.indexOf(appxUpload())
+    expect(nsis).toBeLessThan(store)
+    expect(installers).toBeLessThan(store)
+    expect(store).toBeLessThan(upload)
+  })
+
+  it('can never fail the release', () => {
+    expect(appx()['continue-on-error']).toBe(true)
+    expect(appx()['timeout-minutes']).toBeGreaterThan(0)
+    expect(appxUpload()['continue-on-error']).toBe(true)
+    // uploads only what a successful pass produced
+    expect(appxUpload().if).toBe(
+      `matrix.platform == 'win' && steps.${appx().id}.outcome == 'success'`,
+    )
+  })
+
+  it('uploads only the .appx as faamoffice-store-appx, kept 30 days', () => {
+    const upload = appxUpload()
+    expect(upload.uses).toMatch(/^actions\/upload-artifact@/)
+    expect(paths(upload)).toEqual(['apps/shell/release/store/*.appx'])
+    expect(upload.with?.['retention-days']).toBe(30)
+  })
+
+  it('keeps the appx out of the installer artifact', () => {
+    for (const path of paths(installersUpload())) {
+      expect(path).not.toMatch(/\.appx$|\/store\//)
+      expect(minimatch('apps/shell/release/store/FaamOffice-1.0.0-store.appx', path)).toBe(false)
+    }
+  })
+
+  it('never puts the appx on the GitHub Release or in the feed', () => {
+    const download = publish.steps.find((step) =>
+      step.uses?.startsWith('actions/download-artifact'),
+    )!
+    const pattern = String(download.with?.pattern)
+    expect(minimatch('faamoffice-store-appx', pattern)).toBe(false)
+    for (const platform of ['mac', 'win', 'linux']) {
+      expect(minimatch(`faamoffice-${platform}-0.12.0`, pattern)).toBe(true)
+      expect(minimatch(`faamoffice-${platform}-0.12.0-beta.1`, pattern)).toBe(true)
+    }
+    // and should one ever be downloaded, the draft upload still skips it
+    expect(publish.steps[stepIndex(/gh release create "\$TAG"/)]!.run).toContain("! -name '*.appx'")
   })
 })

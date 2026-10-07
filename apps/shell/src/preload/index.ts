@@ -384,6 +384,13 @@ const homeApi: HomeApi = {
     const result: unknown = await ipcRenderer.invoke('update:open-for-update')
     return result === true
   },
+  async isStoreInstall() {
+    const result: unknown = await ipcRenderer.invoke(HOME_CHANNELS.isStoreInstall)
+    return result === true
+  },
+  async openStorePage() {
+    await ipcRenderer.invoke(HOME_CHANNELS.openStorePage)
+  },
   onUpdateStateChanged(handler: (state: UpdateUiState) => void) {
     const listener = (_e: IpcRendererEvent, state: UpdateUiState) => handler(state)
     ipcRenderer.on('update:state-changed', listener)

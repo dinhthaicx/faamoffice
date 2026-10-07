@@ -95,6 +95,24 @@ describe('dev / unsupported builds', () => {
     expect(svc.status()).toEqual({ supported: false, enabled: false })
   })
 
+  it('never reads or writes Electron login items for a Microsoft Store install', () => {
+    const get = vi.fn(() => ({ openAtLogin: true }))
+    const set = vi.fn()
+    const svc = createLoginItemService(
+      deps({
+        platform: 'win32',
+        windowsStore: true,
+        getLoginItemSettings: get,
+        setLoginItemSettings: set,
+      }),
+    )
+    expect(svc.status()).toEqual({ supported: false, enabled: false })
+    expect(svc.set(true)).toEqual({ supported: false, enabled: false })
+    expect(svc.set(false)).toEqual({ supported: false, enabled: false })
+    expect(get).not.toHaveBeenCalled()
+    expect(set).not.toHaveBeenCalled()
+  })
+
   it('is unsupported on Linux without a usable config/home directory', () => {
     const svc = createLoginItemService(deps({ platform: 'linux', env: {} }))
     expect(svc.status().supported).toBe(false)

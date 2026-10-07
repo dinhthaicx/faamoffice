@@ -26,7 +26,12 @@ function loadConfig(opts: {
   extraMetadataVersion?: string
   rebuildApplies?: boolean
 }): {
-  config: { beforePack: (context: { electronPlatformName: string }) => Promise<void> }
+  config: {
+    beforePack: (context: {
+      electronPlatformName: string
+      targets: { name: string }[]
+    }) => Promise<void>
+  }
   rebuilds: Rebuild[]
 } {
   const rebuilds: Rebuild[] = []
@@ -68,7 +73,10 @@ function loadConfig(opts: {
     },
   })
   const config = configModule.exports as {
-    beforePack: (context: { electronPlatformName: string }) => Promise<void>
+    beforePack: (context: {
+      electronPlatformName: string
+      targets: { name: string }[]
+    }) => Promise<void>
     extraMetadata?: { version?: string }
   }
   if (opts.extraMetadataVersion) {
@@ -80,7 +88,7 @@ function loadConfig(opts: {
 describe('packaged CLI version agreement', () => {
   it('rebuilds the CLI bundle with the app version when the two disagree', async () => {
     const { config, rebuilds } = loadConfig({ baked: '9.9.9' })
-    await config.beforePack({ electronPlatformName: 'linux' })
+    await config.beforePack({ electronPlatformName: 'linux', targets: [] })
     expect(rebuilds).toHaveLength(1)
     expect(rebuilds[0].script.replace(/\\/g, '/').endsWith('packages/cli/build.mjs')).toBe(true)
     expect(rebuilds[0].appVersion).toBe(shellPackage.version)
@@ -91,20 +99,20 @@ describe('packaged CLI version agreement', () => {
       baked: shellPackage.version,
       extraMetadataVersion: '0.5.149',
     })
-    await config.beforePack({ electronPlatformName: 'linux' })
+    await config.beforePack({ electronPlatformName: 'linux', targets: [] })
     expect(rebuilds).toHaveLength(1)
     expect(rebuilds[0].appVersion).toBe('0.5.149')
   })
 
   it('leaves an already matching bundle alone', async () => {
     const { config, rebuilds } = loadConfig({ baked: shellPackage.version })
-    await config.beforePack({ electronPlatformName: 'linux' })
+    await config.beforePack({ electronPlatformName: 'linux', targets: [] })
     expect(rebuilds).toEqual([])
   })
 
   it('fails the package when the bundle still disagrees after the rebuild', async () => {
     const { config, rebuilds } = loadConfig({ baked: '9.9.9', rebuildApplies: false })
-    await expect(config.beforePack({ electronPlatformName: 'linux' })).rejects.toThrow(
+    await expect(config.beforePack({ electronPlatformName: 'linux', targets: [] })).rejects.toThrow(
       /but the app ships/,
     )
     expect(rebuilds).toHaveLength(1)

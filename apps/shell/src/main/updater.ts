@@ -4,6 +4,7 @@ import { app, dialog, shell } from 'electron'
 import type { BrowserWindow } from 'electron'
 import { autoUpdater } from 'electron-updater'
 import { installResumeDownload } from './update-resume'
+import { isStoreInstall, openStorePage, storeListing } from './ms-store'
 import { downloadMacDmg, feedFileName, pickMacDmg } from './update-dmg'
 import type { UpdateInfo } from 'electron-updater'
 import { createI18n, getUiLang, htmlLang } from '@genoffice/i18n'
@@ -51,6 +52,10 @@ import {
  * - notify, Linux deb/rpm (resources/package-type; dpkg's file list tells the
  *   two apart, see linuxPackageType) — the card opens the release's package
  *   for that format in the browser.
+ *
+ * Microsoft Store installs (ms-store.ts) never start electron-updater: the
+ * Store updates the package, and Help → Check for Updates says so and offers
+ * the listing.
  *
  * Nagging: the automatic card shows a given version at most once a day
  * (UPDATE_PROMPT_KEY in app-settings) and waits while onboarding or an
@@ -110,6 +115,8 @@ const tUpd = createI18n({
     updQuitApp: '退出 FaamOffice',
     updBrowserFallback:
       '无法在应用内下载更新，已在浏览器中打开下载链接。请打开下载的文件，退出 FaamOffice，然后将 FaamOffice 拖到“应用程序”文件夹。',
+    updStore: '来自 Microsoft Store 的 FaamOffice 由 Microsoft Store 自动更新。',
+    updOpenStore: '打开 Microsoft Store',
   },
   en: {
     updTitle: 'Software Update',
@@ -138,6 +145,8 @@ const tUpd = createI18n({
     updQuitApp: 'Quit FaamOffice',
     updBrowserFallback:
       "The update couldn't be downloaded in the app, so it was opened in your browser. Open the downloaded file, quit FaamOffice, and drag FaamOffice into the Applications folder.",
+    updStore: 'FaamOffice from Microsoft Store is updated automatically by the Store.',
+    updOpenStore: 'Open Microsoft Store',
   },
   vi: {
     updTitle: 'Cập nhật phần mềm',
@@ -166,6 +175,8 @@ const tUpd = createI18n({
     updQuitApp: 'Thoát FaamOffice',
     updBrowserFallback:
       'Không thể tải bản cập nhật ngay trong ứng dụng nên liên kết tải đã được mở trong trình duyệt. Hãy mở tệp vừa tải, thoát FaamOffice rồi kéo FaamOffice vào thư mục Ứng dụng (Applications).',
+    updStore: 'FaamOffice cài từ Microsoft Store được Microsoft Store tự động cập nhật.',
+    updOpenStore: 'Mở Microsoft Store',
   },
   ja: {
     updTitle: 'ソフトウェアアップデート',
@@ -195,6 +206,8 @@ const tUpd = createI18n({
     updQuitApp: 'FaamOffice を終了',
     updBrowserFallback:
       'アプリ内でアップデートをダウンロードできなかったため、ブラウザで開きました。ダウンロードしたファイルを開き、FaamOffice を終了してから FaamOffice を「アプリケーション」フォルダにドラッグしてください。',
+    updStore: 'Microsoft Store 版の FaamOffice は、Microsoft Store によって自動的に更新されます。',
+    updOpenStore: 'Microsoft Store を開く',
   },
   ko: {
     updTitle: '소프트웨어 업데이트',
@@ -223,6 +236,8 @@ const tUpd = createI18n({
     updQuitApp: 'FaamOffice 종료',
     updBrowserFallback:
       '앱에서 업데이트를 다운로드할 수 없어 브라우저에서 열었습니다. 다운로드한 파일을 열고 FaamOffice를 종료한 다음 FaamOffice를 응용 프로그램 폴더로 드래그하세요.',
+    updStore: 'Microsoft Store에서 설치한 FaamOffice는 Microsoft Store가 자동으로 업데이트합니다.',
+    updOpenStore: 'Microsoft Store 열기',
   },
   fr: {
     updTitle: 'Mise à jour logicielle',
@@ -253,6 +268,9 @@ const tUpd = createI18n({
     updQuitApp: 'Quitter FaamOffice',
     updBrowserFallback:
       "La mise à jour n'a pas pu être téléchargée dans l'application, elle a donc été ouverte dans votre navigateur. Ouvrez le fichier téléchargé, quittez FaamOffice et faites glisser FaamOffice dans le dossier Applications.",
+    updStore:
+      'FaamOffice installé depuis le Microsoft Store est mis à jour automatiquement par le Store.',
+    updOpenStore: 'Ouvrir le Microsoft Store',
   },
   de: {
     updTitle: 'Softwareaktualisierung',
@@ -284,6 +302,8 @@ const tUpd = createI18n({
     updQuitApp: 'FaamOffice beenden',
     updBrowserFallback:
       'Das Update konnte nicht in der App heruntergeladen werden und wurde daher im Browser geöffnet. Öffnen Sie die heruntergeladene Datei, beenden Sie FaamOffice und ziehen Sie FaamOffice in den Ordner „Programme“.',
+    updStore: 'FaamOffice aus dem Microsoft Store wird automatisch vom Store aktualisiert.',
+    updOpenStore: 'Microsoft Store öffnen',
   },
   es: {
     updTitle: 'Actualización de software',
@@ -313,6 +333,8 @@ const tUpd = createI18n({
     updQuitApp: 'Salir de FaamOffice',
     updBrowserFallback:
       'No se pudo descargar la actualización en la aplicación, así que se abrió en su navegador. Abra el archivo descargado, salga de FaamOffice y arrastre FaamOffice a la carpeta Aplicaciones.',
+    updStore: 'FaamOffice de Microsoft Store se actualiza automáticamente desde la Store.',
+    updOpenStore: 'Abrir Microsoft Store',
   },
   th: {
     updTitle: 'อัปเดตซอฟต์แวร์',
@@ -339,6 +361,8 @@ const tUpd = createI18n({
     updQuitApp: 'ออกจาก FaamOffice',
     updBrowserFallback:
       'ไม่สามารถดาวน์โหลดอัปเดตภายในแอปได้ จึงเปิดในเบราว์เซอร์แทน โปรดเปิดไฟล์ที่ดาวน์โหลด ออกจาก FaamOffice แล้วลาก FaamOffice ไปไว้ในโฟลเดอร์แอปพลิเคชัน',
+    updStore: 'FaamOffice จาก Microsoft Store จะได้รับการอัปเดตโดยอัตโนมัติผ่าน Microsoft Store',
+    updOpenStore: 'เปิด Microsoft Store',
   },
   id: {
     updTitle: 'Pembaruan Perangkat Lunak',
@@ -367,6 +391,8 @@ const tUpd = createI18n({
     updQuitApp: 'Keluar dari FaamOffice',
     updBrowserFallback:
       'Pembaruan tidak dapat diunduh di dalam aplikasi, jadi dibuka di browser Anda. Buka file yang diunduh, keluar dari FaamOffice, lalu seret FaamOffice ke folder Aplikasi.',
+    updStore: 'FaamOffice dari Microsoft Store diperbarui secara otomatis oleh Store.',
+    updOpenStore: 'Buka Microsoft Store',
   },
   ru: {
     updTitle: 'Обновление программы',
@@ -396,6 +422,8 @@ const tUpd = createI18n({
     updQuitApp: 'Завершить FaamOffice',
     updBrowserFallback:
       'Не удалось загрузить обновление в приложении, поэтому оно открыто в браузере. Откройте загруженный файл, завершите FaamOffice и перетащите FaamOffice в папку «Программы».',
+    updStore: 'FaamOffice из Microsoft Store обновляется автоматически через Store.',
+    updOpenStore: 'Открыть Microsoft Store',
   },
   ar: {
     updTitle: 'تحديث البرنامج',
@@ -421,6 +449,8 @@ const tUpd = createI18n({
     updQuitApp: 'إنهاء FaamOffice',
     updBrowserFallback:
       'تعذّر تنزيل التحديث داخل التطبيق، لذا فُتح في متصفحك. افتح الملف الذي تم تنزيله، وأغلق FaamOffice، ثم اسحب FaamOffice إلى مجلد التطبيقات.',
+    updStore: 'يتم تحديث FaamOffice المثبّت من Microsoft Store تلقائيًا عبر المتجر.',
+    updOpenStore: 'فتح Microsoft Store',
   },
   pt: {
     updTitle: 'Atualização de Software',
@@ -449,6 +479,8 @@ const tUpd = createI18n({
     updQuitApp: 'Encerrar o FaamOffice',
     updBrowserFallback:
       'Não foi possível baixar a atualização no aplicativo, então ela foi aberta no seu navegador. Abra o arquivo baixado, encerre o FaamOffice e arraste o FaamOffice para a pasta Aplicativos.',
+    updStore: 'O FaamOffice da Microsoft Store é atualizado automaticamente pela Store.',
+    updOpenStore: 'Abrir a Microsoft Store',
   },
   it: {
     updTitle: 'Aggiornamento software',
@@ -478,6 +510,8 @@ const tUpd = createI18n({
     updQuitApp: 'Esci da FaamOffice',
     updBrowserFallback:
       "Non è stato possibile scaricare l'aggiornamento nell'app, quindi è stato aperto nel browser. Apri il file scaricato, esci da FaamOffice e trascina FaamOffice nella cartella Applicazioni.",
+    updStore: 'FaamOffice dal Microsoft Store viene aggiornato automaticamente dallo Store.',
+    updOpenStore: 'Apri Microsoft Store',
   },
   pl: {
     updTitle: 'Aktualizacja oprogramowania',
@@ -507,6 +541,8 @@ const tUpd = createI18n({
     updQuitApp: 'Zakończ FaamOffice',
     updBrowserFallback:
       'Nie udało się pobrać aktualizacji w aplikacji, więc otwarto ją w przeglądarce. Otwórz pobrany plik, zakończ FaamOffice i przeciągnij FaamOffice do folderu Aplikacje.',
+    updStore: 'FaamOffice ze sklepu Microsoft Store jest aktualizowany automatycznie przez sklep.',
+    updOpenStore: 'Otwórz Microsoft Store',
   },
   cs: {
     updTitle: 'Aktualizace softwaru',
@@ -536,6 +572,8 @@ const tUpd = createI18n({
     updQuitApp: 'Ukončit FaamOffice',
     updBrowserFallback:
       'Aktualizaci se nepodařilo stáhnout v aplikaci, proto byla otevřena v prohlížeči. Otevřete stažený soubor, ukončete FaamOffice a přetáhněte FaamOffice do složky Aplikace.',
+    updStore: 'FaamOffice z Microsoft Storu se aktualizuje automaticky přes Microsoft Store.',
+    updOpenStore: 'Otevřít Microsoft Store',
   },
   nl: {
     updTitle: 'Software-update',
@@ -566,6 +604,8 @@ const tUpd = createI18n({
     updQuitApp: 'Stop FaamOffice',
     updBrowserFallback:
       'De update kon niet in de app worden gedownload en is daarom in uw browser geopend. Open het gedownloade bestand, stop FaamOffice en sleep FaamOffice naar de map Apps.',
+    updStore: 'FaamOffice uit de Microsoft Store wordt automatisch bijgewerkt door de Store.',
+    updOpenStore: 'Microsoft Store openen',
   },
   ms: {
     updTitle: 'Kemas Kini Perisian',
@@ -595,6 +635,8 @@ const tUpd = createI18n({
     updQuitApp: 'Keluar dari FaamOffice',
     updBrowserFallback:
       'Kemas kini tidak dapat dimuat turun dalam aplikasi, jadi ia dibuka dalam pelayar anda. Buka fail yang dimuat turun, keluar dari FaamOffice dan seret FaamOffice ke folder Aplikasi.',
+    updStore: 'FaamOffice daripada Microsoft Store dikemas kini secara automatik oleh Store.',
+    updOpenStore: 'Buka Microsoft Store',
   },
   he: {
     updTitle: 'עדכון תוכנה',
@@ -620,6 +662,8 @@ const tUpd = createI18n({
     updQuitApp: 'צא מ-FaamOffice',
     updBrowserFallback:
       'לא ניתן היה להוריד את העדכון בתוך האפליקציה, ולכן הוא נפתח בדפדפן. פתח את הקובץ שהורד, צא מ-FaamOffice וגרור את FaamOffice לתיקיית היישומים.',
+    updStore: 'FaamOffice מ-Microsoft Store מתעדכן אוטומטית דרך החנות.',
+    updOpenStore: 'פתח את Microsoft Store',
   },
   hi: {
     updTitle: 'सॉफ़्टवेयर अपडेट',
@@ -648,6 +692,8 @@ const tUpd = createI18n({
     updQuitApp: 'FaamOffice बंद करें',
     updBrowserFallback:
       'अपडेट ऐप में डाउनलोड नहीं हो सका, इसलिए इसे आपके ब्राउज़र में खोला गया है। डाउनलोड की गई फ़ाइल खोलें, FaamOffice बंद करें और FaamOffice को Applications फ़ोल्डर में खींचें।',
+    updStore: 'Microsoft Store से इंस्टॉल किया गया FaamOffice, Store द्वारा अपने आप अपडेट होता है।',
+    updOpenStore: 'Microsoft Store खोलें',
   },
   'zh-TW': {
     updTitle: '軟體更新',
@@ -673,6 +719,8 @@ const tUpd = createI18n({
     updQuitApp: '結束 FaamOffice',
     updBrowserFallback:
       '無法在應用程式內下載更新，已改在瀏覽器中開啟。請開啟下載的檔案、結束 FaamOffice，然後將 FaamOffice 拖到「應用程式」檔案夾。',
+    updStore: '來自 Microsoft Store 的 FaamOffice 會由 Microsoft Store 自動更新。',
+    updOpenStore: '開啟 Microsoft Store',
   },
 })
 
@@ -975,12 +1023,26 @@ export function applyUpdateChannel(channel: UpdateChannel): void {
  * version put away earlier today — the user just asked for it), up-to-date
  * and failure each get a dialog, and builds that do not check at all (no
  * feed baked in, FAAMOFFICE_UPDATES=0, dev runs, unsupported Linux installs)
- * say so and offer the download page instead of claiming to be current. */
+ * say so and offer the download page instead of claiming to be current. A
+ * Microsoft Store install points at its Store listing instead. */
 export async function checkForUpdatesNow(): Promise<void> {
   if (manualCheckInFlight) return
   manualCheckInFlight = true
   try {
     const lang = getUiLang()
+    const store = storeListing()
+    if (store) {
+      const { response } = await dialog.showMessageBox({
+        type: 'info',
+        title: tUpd(lang, 'updTitle'),
+        message: tUpd(lang, 'updStore'),
+        buttons: ['OK', tUpd(lang, 'updOpenStore')],
+        defaultId: 0,
+        cancelId: 0,
+      })
+      if (response === 1) await openStorePage(store, (url) => shell.openExternal(url))
+      return
+    }
     if (fakeShowAgain) {
       fakeShowAgain()
       return
@@ -1049,6 +1111,12 @@ export function initAutoUpdater(
 ): void {
   if (started) return
   started = true
+
+  // the Store updates its package; electron-updater must not touch it
+  if (isStoreInstall()) {
+    log('Microsoft Store install: updates come from the Store')
+    return
+  }
 
   // dev preview of the update window with a simulated download
   if (!app.isPackaged && process.env.GENOFFICE_FAKE_UPDATE) {

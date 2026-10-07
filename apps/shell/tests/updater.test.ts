@@ -28,6 +28,8 @@ vi.mock('electron', () => ({
     },
     getVersion: () => '0.1.0',
     getPath: (name: string) => `/fake/${name}`,
+    // resources/app.asar: its package.json is read like the other resources
+    getAppPath: () => '/res/app.asar',
     quit: () => quitApp(),
   },
   shell: {
@@ -1215,5 +1217,83 @@ describe('checkForUpdatesNow (r148 manual check)', () => {
     expect(showUpdateWindow).toHaveBeenCalledTimes(1)
     expect(lastShownState().version).toBe('9.9.9')
     expect(showMessageBox).not.toHaveBeenCalled()
+  })
+})
+
+describe('Microsoft Store install (process.windowsStore)', () => {
+  const STORE_APP_URL = 'ms-windows-store://pdp/?ProductId=9P0RJ9J87ZNQ'
+  const STORE_WEB_URL = 'https://apps.microsoft.com/detail/9P0RJ9J87ZNQ'
+
+  function lastDialogOpts(): { type: string; message: string; buttons: string[] } {
+    return showMessageBox.mock.calls.at(-1)![0] as never
+  }
+
+  beforeEach(() => {
+    Object.defineProperty(process, 'windowsStore', { value: true, configurable: true })
+    restorers.push(() => {
+      delete (process as { windowsStore?: boolean }).windowsStore
+    })
+    resources.set(
+      'package.json',
+      JSON.stringify({
+        faamofficeStore: {
+          productId: '9P0RJ9J87ZNQ',
+          aumid: 'FaamOffice.FaamOffice_hangrx54z3vxj!FaamOffice',
+        },
+      }),
+    )
+  })
+
+  it('never starts electron-updater, even with a feed baked in', async () => {
+    const { initAutoUpdater, applyUpdateChannel } = await loadUpdater()
+    initAutoUpdater(() => null)
+    vi.advanceTimersByTime(FIRST_CHECK_DELAY_MS + RECHECK_INTERVAL_MS)
+    applyUpdateChannel('beta')
+    expect(updaterState.listeners.size).toBe(0)
+    expect(updaterState.channel).toBeNull()
+    expect(updaterState.autoDownload).toBe(true)
+    expect(checkForUpdates).not.toHaveBeenCalled()
+    expect(rememberUpdate).not.toHaveBeenCalled()
+  })
+
+  it('answers Check for Updates with the Store and opens the listing', async () => {
+    ;(await import('@genoffice/i18n')).setUiLang('en')
+    showMessageBox.mockImplementation(() => Promise.resolve({ response: 1 }))
+    const { initAutoUpdater, checkForUpdatesNow } = await loadUpdater()
+    initAutoUpdater(() => null)
+    await checkForUpdatesNow()
+    expect(lastDialogOpts()).toMatchObject({
+      type: 'info',
+      message: 'FaamOffice from Microsoft Store is updated automatically by the Store.',
+      buttons: ['OK', 'Open Microsoft Store'],
+    })
+    expect(openExternal).toHaveBeenCalledExactlyOnceWith(STORE_APP_URL)
+    expect(checkForUpdates).not.toHaveBeenCalled()
+    expect(showUpdateWindow).not.toHaveBeenCalled()
+  })
+
+  it('opens the web listing when the Store app cannot be opened', async () => {
+    showMessageBox.mockImplementation(() => Promise.resolve({ response: 1 }))
+    openExternal.mockImplementationOnce(() => Promise.reject(new Error('no handler')))
+    const { checkForUpdatesNow } = await loadUpdater()
+    await checkForUpdatesNow()
+    expect(openExternal.mock.calls.map(([url]) => url)).toEqual([STORE_APP_URL, STORE_WEB_URL])
+  })
+
+  it('opens nothing when the dialog is just closed', async () => {
+    const { checkForUpdatesNow } = await loadUpdater()
+    await checkForUpdatesNow()
+    expect(showMessageBox).toHaveBeenCalledTimes(1)
+    expect(openExternal).not.toHaveBeenCalled()
+  })
+
+  it('speaks Vietnamese to Vietnamese users', async () => {
+    ;(await import('@genoffice/i18n')).setUiLang('vi')
+    const { checkForUpdatesNow } = await loadUpdater()
+    await checkForUpdatesNow()
+    expect(lastDialogOpts().message).toBe(
+      'FaamOffice cài từ Microsoft Store được Microsoft Store tự động cập nhật.',
+    )
+    expect(lastDialogOpts().buttons).toEqual(['OK', 'Mở Microsoft Store'])
   })
 })

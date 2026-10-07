@@ -1,4 +1,31 @@
-# Linux packaging: Flatpak and NixOS
+# Packaging: Microsoft Store, Flatpak and NixOS
+
+## Microsoft Store (Windows x64)
+
+The Windows release job builds the usual NSIS installer, then separately
+packages an unsigned AppX with FaamOffice's Partner Center identity. Download
+the `faamoffice-store-appx` workflow artifact and upload its `.appx` to Partner
+Center. Store packaging is best effort and does not block the other release
+artifacts; the AppX never enters GitHub Releases or the desktop update feed.
+
+On a Windows build machine, after preparing the normal release dependencies:
+
+```sh
+npm run dist:win:store -w @genoffice/shell
+```
+
+This command sets Store mode and writes to `apps/shell/release/store/`. It
+packages x64 only; leave `GENOFFICE_WIN_ARM64` unset. Store identity and listing
+metadata live in `apps/shell/electron-builder.cjs`, and tile assets are generated
+from the logo with `node tools/gen-appx-assets.mjs`.
+
+The Store install opens its Store listing for updates, omits login-item and
+CLI-on-PATH registration, and opens Windows Default apps using its packaged
+AUMID. The ordinary installer retains its existing behavior. Validate the AppX
+on Windows and complete Partner Center review before enabling the website's
+Microsoft Store badge in Admin → Settings.
+
+## Linux packaging
 
 The release pipeline publishes AppImage, deb and rpm artifacts (see
 `apps/shell/electron-builder.cjs`). This directory adds two community-maintained

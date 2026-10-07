@@ -1,7 +1,7 @@
 {
   "name": "@genoffice/shell",
   "productName": "FaamOffice",
-  "version": "0.11.1",
+  "version": "0.11.2",
   "license": "Apache-2.0",
   "homepage": "https://github.com/dinhthaicx/faamoffice",
   "private": true,
@@ -17,6 +17,7 @@
     "start": "electron-vite build && electron .",
     "dist:mac": "npm run notices && electron-vite build && electron-builder --mac --publish never",
     "dist:win": "npm run notices && electron-vite build && electron-builder --win --publish never",
+    "dist:win:store": "npm run notices && electron-vite build && cross-env GENOFFICE_APPX=1 BUILD_DIR=release/store electron-builder --win appx --x64 --publish never",
     "dist:linux": "npm run notices && electron-vite build && electron-builder --linux --publish never"
   },
   "devDependencies": {

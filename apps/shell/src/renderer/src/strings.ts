@@ -411,6 +411,11 @@ export const strings = {
     socialFollowGroup: '关注 FaamOffice',
     socialFollowOn: '在 {platform} 上关注',
     socialOpenWebsite: '访问网站',
+    setStoreUpdatesLabel: '更新',
+    setStoreUpdatesDesc: '来自 Microsoft Store 的 FaamOffice 由 Microsoft Store 自动更新。',
+    setStoreOpen: '在 Microsoft Store 中打开',
+    intgCliStore:
+      'Microsoft Store 版 FaamOffice 不提供 faamoffice 命令行。如需使用，请从 faamoffice.net 安装 FaamOffice；下方的本地 MCP 服务器在两个版本中都可用。',
   },
   en: {
     addFolderRoot: 'Add folder…',
@@ -839,6 +844,11 @@ export const strings = {
     socialFollowGroup: 'Follow FaamOffice',
     socialFollowOn: 'Follow on {platform}',
     socialOpenWebsite: 'Visit the website',
+    setStoreUpdatesLabel: 'Updates',
+    setStoreUpdatesDesc: 'FaamOffice from Microsoft Store is updated automatically by the Store.',
+    setStoreOpen: 'Open in Microsoft Store',
+    intgCliStore:
+      "The faamoffice command line isn't available in FaamOffice from Microsoft Store. To use it, install FaamOffice from faamoffice.net; the local MCP server below works in both versions.",
   },
   vi: {
     addFolderRoot: 'Thêm thư mục…',
@@ -1266,6 +1276,11 @@ export const strings = {
     socialFollowGroup: 'Theo dõi FaamOffice',
     socialFollowOn: 'Theo dõi trên {platform}',
     socialOpenWebsite: 'Truy cập trang web',
+    setStoreUpdatesLabel: 'Cập nhật',
+    setStoreUpdatesDesc: 'FaamOffice cài từ Microsoft Store được Microsoft Store tự động cập nhật.',
+    setStoreOpen: 'Mở trong Microsoft Store',
+    intgCliStore:
+      'Bản FaamOffice từ Microsoft Store không có dòng lệnh faamoffice. Muốn dùng dòng lệnh, hãy cài FaamOffice từ faamoffice.net; máy chủ MCP cục bộ bên dưới dùng được ở cả hai bản.',
   },
   ja: {
     addFolderRoot: 'フォルダーを追加…',
@@ -1706,6 +1721,12 @@ export const strings = {
     socialFollowGroup: 'FaamOffice をフォロー',
     socialFollowOn: '{platform} でフォロー',
     socialOpenWebsite: 'Web サイトを開く',
+    setStoreUpdatesLabel: 'アップデート',
+    setStoreUpdatesDesc:
+      'Microsoft Store 版の FaamOffice は、Microsoft Store によって自動的に更新されます。',
+    setStoreOpen: 'Microsoft Store で開く',
+    intgCliStore:
+      'Microsoft Store 版の FaamOffice では faamoffice コマンドラインを利用できません。利用するには faamoffice.net から FaamOffice をインストールしてください。下のローカル MCP サーバーはどちらの版でも使えます。',
   },
   ko: {
     addFolderRoot: '폴더 추가…',
@@ -2136,6 +2157,12 @@ export const strings = {
     socialFollowGroup: 'FaamOffice 팔로우',
     socialFollowOn: '{platform}에서 팔로우',
     socialOpenWebsite: '웹사이트 방문',
+    setStoreUpdatesLabel: '업데이트',
+    setStoreUpdatesDesc:
+      'Microsoft Store에서 설치한 FaamOffice는 Microsoft Store가 자동으로 업데이트합니다.',
+    setStoreOpen: 'Microsoft Store에서 열기',
+    intgCliStore:
+      'Microsoft Store 버전 FaamOffice에서는 faamoffice 명령줄을 사용할 수 없습니다. 사용하려면 faamoffice.net에서 FaamOffice를 설치하세요. 아래의 로컬 MCP 서버는 두 버전 모두에서 작동합니다.',
   },
   fr: {
     addFolderRoot: 'Ajouter un dossier…',
@@ -2583,6 +2610,12 @@ export const strings = {
     socialFollowGroup: 'Suivre FaamOffice',
     socialFollowOn: 'Suivre sur {platform}',
     socialOpenWebsite: 'Visiter le site web',
+    setStoreUpdatesLabel: 'Mises à jour',
+    setStoreUpdatesDesc:
+      'FaamOffice installé depuis le Microsoft Store est mis à jour automatiquement par le Store.',
+    setStoreOpen: 'Ouvrir dans le Microsoft Store',
+    intgCliStore:
+      'La ligne de commande faamoffice n’est pas disponible dans FaamOffice du Microsoft Store. Pour l’utiliser, installez FaamOffice depuis faamoffice.net ; le serveur MCP local ci-dessous fonctionne dans les deux versions.',
   },
   de: {
     addFolderRoot: 'Ordner hinzufügen…',
@@ -3034,6 +3067,12 @@ export const strings = {
     socialFollowGroup: 'FaamOffice folgen',
     socialFollowOn: 'Auf {platform} folgen',
     socialOpenWebsite: 'Website besuchen',
+    setStoreUpdatesLabel: 'Updates',
+    setStoreUpdatesDesc:
+      'FaamOffice aus dem Microsoft Store wird automatisch vom Store aktualisiert.',
+    setStoreOpen: 'Im Microsoft Store öffnen',
+    intgCliStore:
+      'Die faamoffice-Befehlszeile ist in FaamOffice aus dem Microsoft Store nicht verfügbar. Um sie zu nutzen, installieren Sie FaamOffice von faamoffice.net; der lokale MCP-Server unten funktioniert in beiden Versionen.',
   },
   es: {
     addFolderRoot: 'Añadir carpeta…',
@@ -3481,6 +3520,12 @@ export const strings = {
     socialFollowGroup: 'Sigue a FaamOffice',
     socialFollowOn: 'Seguir en {platform}',
     socialOpenWebsite: 'Visitar el sitio web',
+    setStoreUpdatesLabel: 'Actualizaciones',
+    setStoreUpdatesDesc:
+      'FaamOffice de Microsoft Store se actualiza automáticamente desde la Store.',
+    setStoreOpen: 'Abrir en Microsoft Store',
+    intgCliStore:
+      'La línea de comandos faamoffice no está disponible en FaamOffice de Microsoft Store. Para usarla, instala FaamOffice desde faamoffice.net; el servidor MCP local de abajo funciona en ambas versiones.',
   },
   th: {
     addFolderRoot: 'เพิ่มโฟลเดอร์…',
@@ -3906,6 +3951,12 @@ export const strings = {
     socialFollowGroup: 'ติดตาม FaamOffice',
     socialFollowOn: 'ติดตามบน {platform}',
     socialOpenWebsite: 'เยี่ยมชมเว็บไซต์',
+    setStoreUpdatesLabel: 'อัปเดต',
+    setStoreUpdatesDesc:
+      'FaamOffice จาก Microsoft Store จะได้รับการอัปเดตโดยอัตโนมัติผ่าน Microsoft Store',
+    setStoreOpen: 'เปิดใน Microsoft Store',
+    intgCliStore:
+      'FaamOffice เวอร์ชัน Microsoft Store ไม่มีบรรทัดคำสั่ง faamoffice หากต้องการใช้ ให้ติดตั้ง FaamOffice จาก faamoffice.net ส่วนเซิร์ฟเวอร์ MCP ในเครื่องด้านล่างใช้ได้ทั้งสองเวอร์ชัน',
   },
   id: {
     addFolderRoot: 'Tambah folder…',
@@ -4345,6 +4396,11 @@ export const strings = {
     socialFollowGroup: 'Ikuti FaamOffice',
     socialFollowOn: 'Ikuti di {platform}',
     socialOpenWebsite: 'Kunjungi situs web',
+    setStoreUpdatesLabel: 'Pembaruan',
+    setStoreUpdatesDesc: 'FaamOffice dari Microsoft Store diperbarui secara otomatis oleh Store.',
+    setStoreOpen: 'Buka di Microsoft Store',
+    intgCliStore:
+      'Baris perintah faamoffice tidak tersedia di FaamOffice dari Microsoft Store. Untuk menggunakannya, instal FaamOffice dari faamoffice.net; server MCP lokal di bawah berfungsi di kedua versi.',
   },
   ru: {
     addFolderRoot: 'Добавить папку…',
@@ -4787,6 +4843,11 @@ export const strings = {
     socialFollowGroup: 'Следите за FaamOffice',
     socialFollowOn: 'Подписаться в {platform}',
     socialOpenWebsite: 'Открыть сайт',
+    setStoreUpdatesLabel: 'Обновления',
+    setStoreUpdatesDesc: 'FaamOffice из Microsoft Store обновляется автоматически через Store.',
+    setStoreOpen: 'Открыть в Microsoft Store',
+    intgCliStore:
+      'Командная строка faamoffice недоступна в FaamOffice из Microsoft Store. Чтобы пользоваться ею, установите FaamOffice с faamoffice.net; локальный MCP-сервер ниже работает в обеих версиях.',
   },
   ar: {
     addFolderRoot: 'إضافة مجلد…',
@@ -5213,6 +5274,11 @@ export const strings = {
     socialFollowGroup: 'تابع FaamOffice',
     socialFollowOn: 'تابعنا على {platform}',
     socialOpenWebsite: 'زيارة الموقع الإلكتروني',
+    setStoreUpdatesLabel: 'التحديثات',
+    setStoreUpdatesDesc: 'يتم تحديث FaamOffice المثبّت من Microsoft Store تلقائيًا عبر المتجر.',
+    setStoreOpen: 'فتح في Microsoft Store',
+    intgCliStore:
+      'سطر أوامر faamoffice غير متاح في FaamOffice من Microsoft Store. لاستخدامه، ثبّت FaamOffice من faamoffice.net؛ أما خادم MCP المحلي أدناه فيعمل في كلا الإصدارين.',
   },
   pt: {
     addFolderRoot: 'Adicionar pasta…',
@@ -5649,6 +5715,11 @@ export const strings = {
     socialFollowGroup: 'Siga o FaamOffice',
     socialFollowOn: 'Seguir no {platform}',
     socialOpenWebsite: 'Visitar o site',
+    setStoreUpdatesLabel: 'Atualizações',
+    setStoreUpdatesDesc: 'O FaamOffice da Microsoft Store é atualizado automaticamente pela Store.',
+    setStoreOpen: 'Abrir na Microsoft Store',
+    intgCliStore:
+      'A linha de comando faamoffice não está disponível no FaamOffice da Microsoft Store. Para usá-la, instale o FaamOffice a partir de faamoffice.net; o servidor MCP local abaixo funciona nas duas versões.',
   },
   it: {
     addFolderRoot: 'Aggiungi cartella…',
@@ -6083,6 +6154,12 @@ export const strings = {
     socialFollowGroup: 'Segui FaamOffice',
     socialFollowOn: 'Segui su {platform}',
     socialOpenWebsite: 'Visita il sito web',
+    setStoreUpdatesLabel: 'Aggiornamenti',
+    setStoreUpdatesDesc:
+      'FaamOffice dal Microsoft Store viene aggiornato automaticamente dallo Store.',
+    setStoreOpen: 'Apri nel Microsoft Store',
+    intgCliStore:
+      'La riga di comando faamoffice non è disponibile in FaamOffice dal Microsoft Store. Per usarla, installa FaamOffice da faamoffice.net; il server MCP locale qui sotto funziona in entrambe le versioni.',
   },
   pl: {
     addFolderRoot: 'Dodaj folder…',
@@ -6515,6 +6592,12 @@ export const strings = {
     socialFollowGroup: 'Obserwuj FaamOffice',
     socialFollowOn: 'Obserwuj na {platform}',
     socialOpenWebsite: 'Odwiedź stronę internetową',
+    setStoreUpdatesLabel: 'Aktualizacje',
+    setStoreUpdatesDesc:
+      'FaamOffice ze sklepu Microsoft Store jest aktualizowany automatycznie przez sklep.',
+    setStoreOpen: 'Otwórz w Microsoft Store',
+    intgCliStore:
+      'Wiersz poleceń faamoffice nie jest dostępny w FaamOffice ze sklepu Microsoft Store. Aby z niego korzystać, zainstaluj FaamOffice z faamoffice.net; lokalny serwer MCP poniżej działa w obu wersjach.',
   },
   cs: {
     addFolderRoot: 'Přidat složku…',
@@ -6942,6 +7025,12 @@ export const strings = {
     socialFollowGroup: 'Sledujte FaamOffice',
     socialFollowOn: 'Sledovat na {platform}',
     socialOpenWebsite: 'Navštívit web',
+    setStoreUpdatesLabel: 'Aktualizace',
+    setStoreUpdatesDesc:
+      'FaamOffice z Microsoft Storu se aktualizuje automaticky přes Microsoft Store.',
+    setStoreOpen: 'Otevřít v Microsoft Storu',
+    intgCliStore:
+      'Příkazový řádek faamoffice není ve FaamOffice z Microsoft Storu k dispozici. Chcete-li ho používat, nainstalujte FaamOffice z faamoffice.net; místní server MCP níže funguje v obou verzích.',
   },
   nl: {
     addFolderRoot: 'Map toevoegen…',
@@ -7375,6 +7464,12 @@ export const strings = {
     socialFollowGroup: 'Volg FaamOffice',
     socialFollowOn: 'Volgen op {platform}',
     socialOpenWebsite: 'Website bezoeken',
+    setStoreUpdatesLabel: 'Updates',
+    setStoreUpdatesDesc:
+      'FaamOffice uit de Microsoft Store wordt automatisch bijgewerkt door de Store.',
+    setStoreOpen: 'Openen in Microsoft Store',
+    intgCliStore:
+      'De faamoffice-opdrachtregel is niet beschikbaar in FaamOffice uit de Microsoft Store. Installeer FaamOffice via faamoffice.net om hem te gebruiken; de lokale MCP-server hieronder werkt in beide versies.',
   },
   ms: {
     addFolderRoot: 'Tambah folder…',
@@ -7812,6 +7907,12 @@ export const strings = {
     socialFollowGroup: 'Ikuti FaamOffice',
     socialFollowOn: 'Ikuti di {platform}',
     socialOpenWebsite: 'Lawati laman web',
+    setStoreUpdatesLabel: 'Kemas kini',
+    setStoreUpdatesDesc:
+      'FaamOffice daripada Microsoft Store dikemas kini secara automatik oleh Store.',
+    setStoreOpen: 'Buka dalam Microsoft Store',
+    intgCliStore:
+      'Baris perintah faamoffice tidak tersedia dalam FaamOffice daripada Microsoft Store. Untuk menggunakannya, pasang FaamOffice daripada faamoffice.net; pelayan MCP setempat di bawah berfungsi dalam kedua-dua versi.',
   },
   he: {
     addFolderRoot: 'הוספת תיקייה…',
@@ -8223,6 +8324,11 @@ export const strings = {
     socialFollowGroup: 'עקבו אחרי FaamOffice',
     socialFollowOn: 'עקבו ב-{platform}',
     socialOpenWebsite: 'לביקור באתר',
+    setStoreUpdatesLabel: 'עדכונים',
+    setStoreUpdatesDesc: 'FaamOffice מ-Microsoft Store מתעדכן אוטומטית דרך החנות.',
+    setStoreOpen: 'פתח ב-Microsoft Store',
+    intgCliStore:
+      'שורת הפקודה faamoffice אינה זמינה ב-FaamOffice מ-Microsoft Store. כדי להשתמש בה, התקינו את FaamOffice מ-faamoffice.net; שרת ה-MCP המקומי שלמטה פועל בשתי הגרסאות.',
   },
   hi: {
     addFolderRoot: 'फ़ोल्डर जोड़ें…',
@@ -8650,6 +8756,12 @@ export const strings = {
     socialFollowGroup: 'FaamOffice को फ़ॉलो करें',
     socialFollowOn: '{platform} पर फ़ॉलो करें',
     socialOpenWebsite: 'वेबसाइट पर जाएँ',
+    setStoreUpdatesLabel: 'अपडेट',
+    setStoreUpdatesDesc:
+      'Microsoft Store से इंस्टॉल किया गया FaamOffice, Store द्वारा अपने आप अपडेट होता है।',
+    setStoreOpen: 'Microsoft Store में खोलें',
+    intgCliStore:
+      'Microsoft Store वाले FaamOffice में faamoffice कमांड लाइन उपलब्ध नहीं है। इसका उपयोग करने के लिए faamoffice.net से FaamOffice इंस्टॉल करें; नीचे दिया गया लोकल MCP सर्वर दोनों संस्करणों में काम करता है।',
   },
   'zh-TW': {
     addFolderRoot: '加入資料夾…',
@@ -9054,5 +9166,10 @@ export const strings = {
     socialFollowGroup: '追蹤 FaamOffice',
     socialFollowOn: '在 {platform} 上追蹤',
     socialOpenWebsite: '造訪網站',
+    setStoreUpdatesLabel: '更新',
+    setStoreUpdatesDesc: '來自 Microsoft Store 的 FaamOffice 會由 Microsoft Store 自動更新。',
+    setStoreOpen: '在 Microsoft Store 中開啟',
+    intgCliStore:
+      'Microsoft Store 版 FaamOffice 不提供 faamoffice 命令列。如需使用，請從 faamoffice.net 安裝 FaamOffice；下方的本機 MCP 伺服器在兩個版本中皆可使用。',
   },
 } as const

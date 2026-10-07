@@ -17,6 +17,9 @@ name: Release
 #       4. smoke-check the feed URL installed apps read
 # No signing secrets are needed: macOS builds are ad-hoc signed (see
 # apps/shell/electron-builder.cjs) and Windows builds are unsigned.
+# The Windows job also packages the Microsoft Store appx for Partner Center
+# (run artifact faamoffice-store-appx only: never on the GitHub Release, never
+# in the update feed, and its failure never fails the release).
 
 on:
   workflow_dispatch:
@@ -149,6 +152,33 @@ jobs:
             apps/shell/release/*.blockmap
             apps/shell/release/latest*.yml
 
+      # ---- Windows: Microsoft Store package (.appx) for Partner Center ----
+      # A second electron-builder pass with the Store identity (GENOFFICE_APPX=1,
+      # see apps/shell/electron-builder.cjs): unsigned (the Store signs it), no
+      # update feed even on tags (the Store updates it), and its own output dir,
+      # so nothing it writes reaches the installer artifact above, the GitHub
+      # Release or scripts/release-feed.cjs. Best effort: it runs after the
+      # installers are uploaded and can never fail the job.
+      - name: Package Microsoft Store appx (win)
+        id: appx
+        if: matrix.platform == 'win'
+        continue-on-error: true
+        timeout-minutes: 30
+        env:
+          GENOFFICE_APPX: '1'
+          BUILD_DIR: release/store
+        run: npm run dist:win:store -w @genoffice/shell
+
+      - name: Upload Microsoft Store appx (win)
+        if: matrix.platform == 'win' && steps.appx.outcome == 'success'
+        continue-on-error: true
+        uses: actions/upload-artifact@v4
+        with:
+          name: faamoffice-store-appx
+          if-no-files-found: error
+          retention-days: 30
+          path: apps/shell/release/store/*.appx
+
   publish:
     name: publish GitHub Release
     needs: build
@@ -181,10 +211,13 @@ jobs:
         with:
           node-version: 22
 
+      # the per-platform installer artifacts only: faamoffice-store-appx is
+      # uploaded to Partner Center by hand and never becomes a release asset
       - name: Download installers
         uses: actions/download-artifact@v4
         with:
           path: dist
+          pattern: faamoffice-{mac,win,linux}-*
           merge-multiple: true
 
       # A draft is invisible to releases/latest, so installed apps cannot see
@@ -193,7 +226,7 @@ jobs:
       - name: Create draft release
         run: |
           ls -la dist
-          mapfile -t assets < <(find dist -maxdepth 1 -type f ! -name 'latest*.yml' ! -name 'builder-debug.yml' | sort)
+          mapfile -t assets < <(find dist -maxdepth 1 -type f ! -name 'latest*.yml' ! -name 'builder-debug.yml' ! -name '*.appx' | sort)
           if gh release view "$TAG" --repo "$GITHUB_REPOSITORY" > /dev/null 2>&1; then
             gh release upload "$TAG" "${assets[@]}" --repo "$GITHUB_REPOSITORY" --clobber
           else
