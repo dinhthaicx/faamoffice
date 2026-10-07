@@ -71,11 +71,19 @@ build, và người dùng có thể đổi trong Cài đặt → Hồ sơ (ví d
 Bộ cài cho macOS (Apple Silicon và Intel), Windows (x64) và Linux (AppImage, deb, rpm) nằm ở
 trang [Releases](../../releases/latest).
 
-Bản build chưa có chữ ký số của Apple/Microsoft:
+Bản build hiện chưa có chữ ký số của Apple/Microsoft, nên lần mở đầu tiên sẽ bị hệ điều hành hỏi lại:
 
-- **macOS:** lần đầu mở, nhấp chuột phải vào FaamOffice → **Open**, hoặc chạy
-  `xattr -dr com.apple.quarantine /Applications/FaamOffice.app`.
-- **Windows:** SmartScreen cảnh báo → **More info → Run anyway**.
+- **macOS 15 Sequoia trở lên (gồm 26 Tahoe):**
+  1. Kéo FaamOffice vào Applications rồi mở. Khi macOS báo không mở được, bấm **Done**. Đừng bấm Move to Trash.
+  2. Vào **System Settings → Privacy & Security**, kéo xuống mục **Security** và bấm **Open Anyway**. Nút
+     này chỉ hiện khoảng 1 giờ sau lần bị chặn.
+  3. Nhập mật khẩu máy và bấm **Open**. Từ lần sau app mở bình thường.
+- **macOS 14 trở về trước:** nhấp chuột phải (Control-click) vào FaamOffice → **Open** → **Open**.
+- **Cách khác (Terminal):** `xattr -dr com.apple.quarantine /Applications/FaamOffice.app`. Chỉ dùng cách này
+  với bản tải từ trang Releases chính thức.
+- **Windows:** nếu thấy "Windows protected your PC", bấm **More info → Run anyway**. Dòng Publisher ghi
+  "Unknown publisher" là bình thường. Nếu Smart App Control của Windows 11 chặn thì không có nút chạy tiếp;
+  hãy chờ bản đã ký số hoặc bản trên Microsoft Store.
 
 ## Build từ mã nguồn
 
