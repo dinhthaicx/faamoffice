@@ -1,6 +1,8 @@
 /**
  * @vitest-environment jsdom
  */
+import { readFileSync } from 'node:fs'
+import { join } from 'node:path'
 import { act, createElement, useState } from 'react'
 import { createRoot } from 'react-dom/client'
 import type { Root } from 'react-dom/client'
@@ -124,6 +126,7 @@ function Queue({
   const [list, setList] = useState(initial)
   return createElement(AnnouncementDialog, {
     announcements: list,
+    total: initial.length,
     onClose: (id: string) => {
       onClose?.(id)
       setList((current) => current.filter((a) => a.id !== id))
@@ -133,6 +136,21 @@ function Queue({
 
 const dialog = () => host.querySelector<HTMLElement>('[role="dialog"]')
 const closeButton = () => host.querySelector<HTMLButtonElement>('.announcement-close')!
+const footerButtons = () =>
+  Array.from(host.querySelectorAll<HTMLButtonElement>('.announcement-footer button'))
+const media = () => host.querySelector<HTMLElement>('.announcement-media')
+const counter = () => host.querySelector('.announcement-counter')
+
+/** the image decoded at this natural size (jsdom never decodes images) */
+async function loadImage(width: number, height: number): Promise<void> {
+  const image = host.querySelector<HTMLImageElement>('.announcement-media-image')!
+  Object.defineProperty(image, 'naturalWidth', { configurable: true, value: width })
+  Object.defineProperty(image, 'naturalHeight', { configurable: true, value: height })
+  await act(async () => {
+    image.dispatchEvent(new Event('load'))
+    await Promise.resolve()
+  })
+}
 
 async function click(target: HTMLElement): Promise<void> {
   await act(async () => {
@@ -153,7 +171,7 @@ async function key(name: string, shiftKey = false): Promise<KeyboardEvent> {
 describe('AnnouncementDialog', () => {
   it('renders a rich announcement as a labelled modal with image, badge and plain-text body', () => {
     const { announcementAction } = mockApi()
-    render(createElement(AnnouncementDialog, { announcements: [RICH], onClose: vi.fn() }))
+    render(createElement(AnnouncementDialog, { announcements: [RICH], total: 1, onClose: vi.fn() }))
     const box = dialog()!
     expect(box.getAttribute('aria-modal')).toBe('true')
     const title = host.querySelector('h2')!
@@ -165,6 +183,11 @@ describe('AnnouncementDialog', () => {
     expect(box.getAttribute('aria-labelledby')).toBe(`${badge.id} ${title.id}`)
     expect(badge.id).not.toBe('')
     expect(host.querySelector('img')!.getAttribute('src')).toBe(PNG_DATA)
+    // the × sits in the header row with the badge, never over the image
+    expect(closeButton().closest('.announcement-header')).toBe(badge.parentElement)
+    expect(media()!.contains(closeButton())).toBe(false)
+    // a single announcement shows no "1 / 1" counter
+    expect(counter()).toBeNull()
     const body = host.querySelector('.announcement-body')!
     expect(box.getAttribute('aria-describedby')).toBe(body.id)
     // line breaks kept, markup shown as text
@@ -172,6 +195,8 @@ describe('AnnouncementDialog', () => {
     expect(body.querySelector('b')).toBeNull()
     expect(host.querySelector('iframe')).toBeNull()
     expect(host.querySelector('input[type="checkbox"]')).toBeNull()
+    // without a link the footer holds a single "Got it"
+    expect(footerButtons().map((button) => button.textContent)).toEqual(['Got it'])
     // focus starts inside the dialog
     expect(document.activeElement).toBe(box)
     expect(announcementAction).toHaveBeenCalledWith('r1', 'shown')
@@ -182,26 +207,35 @@ describe('AnnouncementDialog', () => {
     render(
       createElement(AnnouncementDialog, {
         announcements: [{ ...RICH, level: 'info' }],
+        total: 1,
         onClose: vi.fn(),
       }),
       'vi',
     )
     expect(host.querySelector('.announcement-badge')!.textContent).toBe('Thông báo')
     expect(closeButton().getAttribute('aria-label')).toBe('Đóng')
+    expect(footerButtons().map((button) => button.textContent)).toEqual(['Đã hiểu'])
     act(() => root.unmount())
     root = createRoot(host)
-    render(createElement(AnnouncementDialog, { announcements: [STICKY], onClose: vi.fn() }), 'vi')
+    render(
+      createElement(AnnouncementDialog, { announcements: [STICKY], total: 1, onClose: vi.fn() }),
+      'vi',
+    )
     expect(host.querySelector('.announcement-badge')!.textContent).toBe('Lưu ý')
+    expect(footerButtons().map((button) => button.textContent)).toEqual(['Đóng', 'Xem chi tiết'])
     act(() => root.unmount())
     root = createRoot(host)
-    render(createElement(AnnouncementDialog, { announcements: [RICH], onClose: vi.fn() }), 'vi')
+    render(
+      createElement(AnnouncementDialog, { announcements: [RICH], total: 1, onClose: vi.fn() }),
+      'vi',
+    )
     expect(host.querySelector('.announcement-badge')!.textContent).toBe('Quan trọng')
   })
 
   it('embeds an html announcement in a script-less sandboxed iframe', async () => {
     vi.useFakeTimers()
     mockApi()
-    render(createElement(AnnouncementDialog, { announcements: [HTML], onClose: vi.fn() }))
+    render(createElement(AnnouncementDialog, { announcements: [HTML], total: 1, onClose: vi.fn() }))
     const frame = host.querySelector('iframe')!
     expect(frame.getAttribute('src')).toBe(HTML.htmlUrl)
     expect(frame.getAttribute('sandbox')).toBe('allow-popups allow-popups-to-escape-sandbox')
@@ -226,7 +260,7 @@ describe('AnnouncementDialog', () => {
   it('shows the failed state when the page never loads', () => {
     vi.useFakeTimers()
     mockApi()
-    render(createElement(AnnouncementDialog, { announcements: [HTML], onClose: vi.fn() }))
+    render(createElement(AnnouncementDialog, { announcements: [HTML], total: 1, onClose: vi.fn() }))
     act(() => {
       vi.advanceTimersByTime(HTML_LOAD_TIMEOUT_MS)
     })
@@ -239,7 +273,7 @@ describe('AnnouncementDialog', () => {
   it('opens the link by announcement id, with a fallback label', async () => {
     const { openAnnouncementLink, announcementAction } = mockApi()
     const onClose = vi.fn()
-    render(createElement(AnnouncementDialog, { announcements: [STICKY], onClose }))
+    render(createElement(AnnouncementDialog, { announcements: [STICKY], total: 1, onClose }))
     const link = host.querySelector<HTMLButtonElement>('.announcement-link')!
     expect(link.textContent).toBe('Learn more')
     await click(link)
@@ -252,6 +286,7 @@ describe('AnnouncementDialog', () => {
     render(
       createElement(AnnouncementDialog, {
         announcements: [{ ...STICKY, link: { label: 'Download' } }],
+        total: 1,
         onClose,
       }),
     )
@@ -261,7 +296,7 @@ describe('AnnouncementDialog', () => {
   it('"Don\'t show this again" turns closing into a dismissal', async () => {
     const { announcementAction } = mockApi()
     const onClose = vi.fn()
-    render(createElement(AnnouncementDialog, { announcements: [STICKY], onClose }))
+    render(createElement(AnnouncementDialog, { announcements: [STICKY], total: 1, onClose }))
     const checkbox = host.querySelector<HTMLInputElement>('input[type="checkbox"]')!
     expect(checkbox.closest('label')!.textContent).toBe("Don't show this again")
     expect(checkbox.checked).toBe(false)
@@ -274,7 +309,9 @@ describe('AnnouncementDialog', () => {
 
   it('closing without the checkbox keeps an until_dismissed announcement', async () => {
     const { announcementAction } = mockApi()
-    render(createElement(AnnouncementDialog, { announcements: [STICKY], onClose: vi.fn() }))
+    render(
+      createElement(AnnouncementDialog, { announcements: [STICKY], total: 1, onClose: vi.fn() }),
+    )
     await click(closeButton())
     expect(announcementAction).toHaveBeenLastCalledWith('s1', 'close')
   })
@@ -310,7 +347,7 @@ describe('AnnouncementDialog', () => {
   it('Escape closes it once', async () => {
     const { announcementAction } = mockApi()
     const onClose = vi.fn()
-    render(createElement(AnnouncementDialog, { announcements: [RICH], onClose }))
+    render(createElement(AnnouncementDialog, { announcements: [RICH], total: 1, onClose }))
     const event = await key('Escape')
     expect(event.defaultPrevented).toBe(true)
     expect(onClose).toHaveBeenCalledTimes(1)
@@ -319,7 +356,9 @@ describe('AnnouncementDialog', () => {
 
   it('traps Tab inside the dialog', async () => {
     mockApi()
-    render(createElement(AnnouncementDialog, { announcements: [STICKY], onClose: vi.fn() }))
+    render(
+      createElement(AnnouncementDialog, { announcements: [STICKY], total: 1, onClose: vi.fn() }),
+    )
     const close = closeButton()
     const link = host.querySelector<HTMLButtonElement>('.announcement-link')!
     // from the dialog container, Tab lands on the first control
@@ -335,11 +374,12 @@ describe('AnnouncementDialog', () => {
     expect(document.activeElement).toBe(link)
   })
 
-  it('keeps Tab inside an html announcement without a footer', async () => {
+  it('keeps Tab inside an html announcement', async () => {
     mockApi()
-    render(createElement(AnnouncementDialog, { announcements: [HTML], onClose: vi.fn() }))
-    expect(host.querySelector('.announcement-footer')).toBeNull()
+    render(createElement(AnnouncementDialog, { announcements: [HTML], total: 1, onClose: vi.fn() }))
     const close = closeButton()
+    const [gotIt] = footerButtons()
+    expect(gotIt.textContent).toBe('Got it')
     const frame = host.querySelector('iframe')!
     const [leading, trailing] = Array.from(
       host.querySelectorAll<HTMLElement>('.announcement-focus-guard'),
@@ -350,13 +390,13 @@ describe('AnnouncementDialog', () => {
     expect(dialog()!.firstElementChild).toBe(leading)
     expect(dialog()!.lastElementChild).toBe(trailing)
 
-    // loading: the hidden page is no tab stop, the close button is the only one
+    // loading: the hidden page is no tab stop, × and "Got it" are the only ones
     await key('Tab')
     expect(document.activeElement).toBe(close)
-    let event = await key('Tab')
+    let event = await key('Tab', true)
     expect(event.defaultPrevented).toBe(true)
-    expect(document.activeElement).toBe(close)
-    event = await key('Tab', true)
+    expect(document.activeElement).toBe(gotIt)
+    event = await key('Tab')
     expect(event.defaultPrevented).toBe(true)
     expect(document.activeElement).toBe(close)
 
@@ -367,11 +407,29 @@ describe('AnnouncementDialog', () => {
     })
     event = await key('Tab')
     expect(event.defaultPrevented).toBe(false)
-    // …and Tab out of the page (unseen by the shell) lands on a guard that wraps back
+    // …and a Tab unseen by the shell that leaves either end lands on a guard that wraps back
     act(() => trailing.focus())
     expect(document.activeElement).toBe(close)
     act(() => leading.focus())
-    expect(document.activeElement).toBe(frame)
+    expect(document.activeElement).toBe(gotIt)
+    // the page sits between the × and the footer in tab order
+    act(() => frame.focus())
+    event = await key('Tab')
+    expect(event.defaultPrevented).toBe(false)
+  })
+
+  it('lets Tab move natively from a stop the trap does not list (an overflowing middle)', async () => {
+    mockApi()
+    render(
+      createElement(AnnouncementDialog, { announcements: [STICKY], total: 1, onClose: vi.fn() }),
+    )
+    // Chromium makes an overflowing scroll region a tab stop of its own
+    const scroll = host.querySelector<HTMLElement>('.announcement-scroll')!
+    scroll.tabIndex = 0
+    act(() => scroll.focus())
+    const event = await key('Tab')
+    expect(event.defaultPrevented).toBe(false)
+    expect(document.activeElement).toBe(scroll)
   })
 
   it('keeps Escape and Tab from the UI behind the modal', async () => {
@@ -381,7 +439,7 @@ describe('AnnouncementDialog', () => {
     window.addEventListener('keydown', behind)
     try {
       const onClose = vi.fn()
-      render(createElement(AnnouncementDialog, { announcements: [STICKY], onClose }))
+      render(createElement(AnnouncementDialog, { announcements: [STICKY], total: 1, onClose }))
       const press = async (name: string) => {
         const target = document.activeElement ?? document.body
         const event = new KeyboardEvent('keydown', { key: name, bubbles: true, cancelable: true })
@@ -404,7 +462,7 @@ describe('AnnouncementDialog', () => {
   it('closes on Escape pressed inside the html page (reported by the main process)', async () => {
     const api = mockApi()
     const onClose = vi.fn()
-    render(createElement(AnnouncementDialog, { announcements: [HTML], onClose }))
+    render(createElement(AnnouncementDialog, { announcements: [HTML], total: 1, onClose }))
     expect(api.escapeHandlers.size).toBe(1)
     // focus in the shell document: the window listener owns Escape
     api.pushEscape()
@@ -421,14 +479,14 @@ describe('AnnouncementDialog', () => {
 
   it('does not subscribe to page reports for a rich announcement', () => {
     const api = mockApi()
-    render(createElement(AnnouncementDialog, { announcements: [RICH], onClose: vi.fn() }))
+    render(createElement(AnnouncementDialog, { announcements: [RICH], total: 1, onClose: vi.fn() }))
     expect(api.escapeHandlers.size).toBe(0)
     expect(window.aiOffice.onAnnouncementFrameFailed).not.toHaveBeenCalled()
   })
 
   it('shows the failed state for a page the main process reports as failed, even once loaded', async () => {
     const api = mockApi()
-    render(createElement(AnnouncementDialog, { announcements: [HTML], onClose: vi.fn() }))
+    render(createElement(AnnouncementDialog, { announcements: [HTML], total: 1, onClose: vi.fn() }))
     const frame = host.querySelector('iframe')!
     const state = () => host.querySelector('.announcement-frame')!.getAttribute('data-state')
     // a 404 / blocked page still fires the load event
@@ -457,7 +515,7 @@ describe('AnnouncementDialog', () => {
       onAnnouncementEscape: undefined,
       onAnnouncementFrameFailed: undefined,
     } as unknown as Partial<HomeApi>)
-    render(createElement(AnnouncementDialog, { announcements: [HTML], onClose: vi.fn() }))
+    render(createElement(AnnouncementDialog, { announcements: [HTML], total: 1, onClose: vi.fn() }))
     expect(host.querySelector('iframe')).not.toBeNull()
   })
 
@@ -477,17 +535,187 @@ describe('AnnouncementDialog', () => {
     outside.remove()
   })
 
+  it('"Got it" closes like the ×, and dismisses with "Don\'t show this again" ticked', async () => {
+    const { announcementAction } = mockApi()
+    const onClose = vi.fn()
+    const noLink: AnnouncementView = { ...STICKY, id: 's2', link: undefined }
+    render(createElement(Queue, { initial: [RICH, noLink], onClose }))
+    await click(footerButtons()[0])
+    expect(announcementAction).toHaveBeenCalledWith('r1', 'close')
+    expect(onClose).toHaveBeenLastCalledWith('r1')
+
+    const [gotIt] = footerButtons()
+    expect(gotIt.textContent).toBe('Got it')
+    await click(host.querySelector<HTMLInputElement>('input[type="checkbox"]')!)
+    await click(gotIt)
+    expect(announcementAction).toHaveBeenLastCalledWith('s2', 'dismiss')
+    expect(onClose).toHaveBeenLastCalledWith('s2')
+    expect(dialog()).toBeNull()
+  })
+
+  it('offers Close next to the link button; Close closes, the link does not', async () => {
+    const { announcementAction, openAnnouncementLink } = mockApi()
+    const onClose = vi.fn()
+    render(createElement(AnnouncementDialog, { announcements: [STICKY], total: 1, onClose }))
+    const [secondary, link] = footerButtons()
+    expect(secondary.textContent).toBe('Close')
+    expect(secondary.classList.contains('is-secondary')).toBe(true)
+    expect(link.classList.contains('announcement-link')).toBe(true)
+    expect(link.classList.contains('is-primary')).toBe(true)
+    await click(link)
+    expect(openAnnouncementLink).toHaveBeenCalledWith('s1')
+    expect(onClose).not.toHaveBeenCalled()
+    await click(secondary)
+    expect(announcementAction).toHaveBeenLastCalledWith('s1', 'close')
+    expect(onClose).toHaveBeenCalledWith('s1')
+  })
+
+  it('counts the announcements shown this session', async () => {
+    mockApi()
+    render(createElement(Queue, { initial: [RICH, HTML, STICKY] }))
+    expect(counter()!.textContent).toBe('1 / 3')
+    expect(counter()!.getAttribute('aria-hidden')).toBe('true')
+    await click(closeButton())
+    expect(counter()!.textContent).toBe('2 / 3')
+    await key('Escape')
+    expect(counter()!.textContent).toBe('3 / 3')
+  })
+
+  it('places the open announcement within the session total the parent keeps', () => {
+    mockApi()
+    // the first of three already closed (e.g. before the dialog was last unmounted)
+    render(
+      createElement(AnnouncementDialog, {
+        announcements: [HTML, STICKY],
+        total: 3,
+        onClose: vi.fn(),
+      }),
+    )
+    expect(counter()!.textContent).toBe('2 / 3')
+    render(
+      createElement(AnnouncementDialog, { announcements: [STICKY], total: 3, onClose: vi.fn() }),
+    )
+    expect(counter()!.textContent).toBe('3 / 3')
+    // a total short of the remaining list still counts from 1
+    render(
+      createElement(AnnouncementDialog, {
+        announcements: [RICH, STICKY],
+        total: 1,
+        onClose: vi.fn(),
+      }),
+    )
+    expect(counter()!.textContent).toBe('1 / 2')
+  })
+
+  it('frames the image after measuring it: hidden at 16:9 until then', async () => {
+    mockApi()
+    render(createElement(AnnouncementDialog, { announcements: [RICH], total: 1, onClose: vi.fn() }))
+    const frame = media()!
+    expect(frame.dataset.fit).toBe('pending')
+    expect(frame.style.getPropertyValue('--announcement-media-ratio')).toBe('')
+    expect(host.querySelector('.announcement-media-backdrop')).toBeNull()
+
+    // a banner close to the frame's shape fills it
+    await loadImage(1600, 900)
+    expect(frame.dataset.fit).toBe('cover')
+    expect(Number(frame.style.getPropertyValue('--announcement-media-ratio'))).toBeCloseTo(16 / 9)
+    expect(host.querySelector('.announcement-media-backdrop')).toBeNull()
+  })
+
+  it('shows a square image whole over a blurred, hidden copy of itself', async () => {
+    mockApi()
+    render(createElement(AnnouncementDialog, { announcements: [RICH], total: 1, onClose: vi.fn() }))
+    await loadImage(1024, 1024)
+    const frame = media()!
+    expect(frame.dataset.fit).toBe('contain')
+    expect(Number(frame.style.getPropertyValue('--announcement-media-ratio'))).toBeCloseTo(1.6)
+    const backdrop = host.querySelector('.announcement-media-backdrop')!
+    expect(backdrop.getAttribute('src')).toBe(PNG_DATA)
+    expect(backdrop.getAttribute('alt')).toBe('')
+    expect(backdrop.getAttribute('aria-hidden')).toBe('true')
+    // the backdrop sits behind the image
+    expect(backdrop.nextElementSibling).toBe(host.querySelector('.announcement-media-image'))
+  })
+
+  it('measures an image that decoded before its load listener was attached', () => {
+    mockApi()
+    // a cached data: URL may be complete by mount: no load event ever reaches onLoad
+    const proto = HTMLImageElement.prototype
+    const spies = [
+      vi.spyOn(proto, 'complete', 'get').mockReturnValue(true),
+      vi.spyOn(proto, 'naturalWidth', 'get').mockReturnValue(1600),
+      vi.spyOn(proto, 'naturalHeight', 'get').mockReturnValue(900),
+    ]
+    try {
+      render(
+        createElement(AnnouncementDialog, { announcements: [RICH], total: 1, onClose: vi.fn() }),
+      )
+      const frame = media()!
+      expect(frame.dataset.fit).toBe('cover')
+      expect(Number(frame.style.getPropertyValue('--announcement-media-ratio'))).toBeCloseTo(16 / 9)
+    } finally {
+      for (const spy of spies) spy.mockRestore()
+    }
+  })
+
+  it('drops the image frame when the image cannot load', async () => {
+    mockApi()
+    render(createElement(AnnouncementDialog, { announcements: [RICH], total: 1, onClose: vi.fn() }))
+    await act(async () => {
+      host.querySelector('.announcement-media-image')!.dispatchEvent(new Event('error'))
+      await Promise.resolve()
+    })
+    expect(media()).toBeNull()
+    expect(host.querySelector('h2')!.textContent).toBe('Scheduled maintenance')
+  })
+
   it('hands focus back when it closes', async () => {
     mockApi()
     const outside = document.createElement('button')
     document.body.append(outside)
     outside.focus()
-    render(createElement(AnnouncementDialog, { announcements: [RICH], onClose: vi.fn() }))
+    render(createElement(AnnouncementDialog, { announcements: [RICH], total: 1, onClose: vi.fn() }))
     expect(document.activeElement).toBe(dialog())
     act(() => root.unmount())
     expect(document.activeElement).toBe(outside)
     outside.remove()
     root = createRoot(host)
+  })
+})
+
+/** a rule's declarations in announcement-dialog.css, in source order, comments
+ * dropped (jsdom does no layout, so the stylesheet is checked as text) */
+function cssDeclarations(selector: string): string[] {
+  const css = readFileSync(join(__dirname, '../src/renderer/src/announcement-dialog.css'), 'utf8')
+  const escaped = selector.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
+  const rule = css.match(new RegExp(`(?:^|\\n)${escaped} \\{([^}]*)\\}`))
+  if (!rule) throw new Error(`no rule for ${selector}`)
+  return rule[1]
+    .replace(/\/\*[\s\S]*?\*\//g, '')
+    .split(';')
+    .map((declaration) => declaration.trim().replace(/\s+/g, ' '))
+    .filter(Boolean)
+}
+
+describe('announcement-dialog.css', () => {
+  it('centers the image frame, keeping a 20px gutter when its height cap narrows it', () => {
+    // max-height carries through aspect-ratio to the width: fixed side margins
+    // would leave a narrowed frame flush left on a short window
+    const media = cssDeclarations('.announcement-media')
+    expect(media).toContain('margin: 14px auto 0')
+    expect(media).toContain('max-width: calc(100% - 40px)')
+    expect(media).toContain('max-height: min(280px, 34vh)')
+  })
+
+  it("gives the footer buttons the dialog's font, not the form-control default", () => {
+    const button = cssDeclarations('.announcement-button')
+    const at = (property: string) =>
+      button.findIndex((declaration) => declaration.startsWith(`${property}:`))
+    expect(button).toContain('font: inherit')
+    // the shorthand comes first, or it would reset the size, weight and line height
+    for (const property of ['font-size', 'font-weight', 'line-height']) {
+      expect(at(property)).toBeGreaterThan(at('font'))
+    }
   })
 })
 
@@ -608,6 +836,40 @@ describe('AppFrame announcements', () => {
     expect(host.querySelector('h2')!.textContent).toBe('Scheduled maintenance')
     // leaving Home never reported the announcement as closed
     expect(frame.announcementAction).not.toHaveBeenCalledWith('r1', 'close')
+  })
+
+  it('keeps the session count when the dialog unmounts mid-queue', async () => {
+    const home: TabSummary = {
+      id: 'home',
+      kind: 'home',
+      title: 'Home',
+      closable: false,
+      active: true,
+    }
+    const editor: TabSummary = {
+      id: 't1',
+      kind: 'docs',
+      title: 'a.docx',
+      closable: true,
+      active: true,
+    }
+    const frame = mockFrame({ pending: async () => [RICH, HTML, STICKY], tabs: [home] })
+    await renderFrame()
+    expect(counter()!.textContent).toBe('1 / 3')
+    await click(closeButton())
+    expect(counter()!.textContent).toBe('2 / 3')
+    // a document opens from the native menu or the OS, then the user comes back to Home
+    act(() => frame.setTabs([{ ...home, active: false }, editor]))
+    expect(announcement()).toBeNull()
+    act(() => frame.setTabs([home, { ...editor, active: false }]))
+    expect(host.querySelector('h2')!.textContent).toBe('Release notes')
+    expect(counter()!.textContent).toBe('2 / 3')
+    await click(closeButton())
+    // the last one keeps its counter after another round trip
+    act(() => frame.setTabs([{ ...home, active: false }, editor]))
+    act(() => frame.setTabs([home, { ...editor, active: false }]))
+    expect(host.querySelector('h2')!.textContent).toBe('Update required')
+    expect(counter()!.textContent).toBe('3 / 3')
   })
 
   it('asks for the prompt only once no announcement is open', async () => {

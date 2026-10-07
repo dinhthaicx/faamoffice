@@ -1,5 +1,6 @@
-import { useEffect, useId, useRef, useState } from 'react'
+import { useEffect, useId, useRef, useState, type CSSProperties } from 'react'
 import type { AnnouncementLevel, AnnouncementView } from '../../shared/home-api'
+import { computeMediaFit, type MediaFit } from './announcement-media'
 import { useI18n, type StringKey } from './locale'
 import './announcement-dialog.css'
 
@@ -32,16 +33,22 @@ const FOCUSABLE = 'button:not([disabled]), input:not([disabled]), a[href], ifram
 interface AnnouncementDialogProps {
   /** announcements still to show, in display order; the first one is open */
   announcements: AnnouncementView[]
+  /** how many announcements this session has, closed ones included, for the
+   * "2 / 3" counter. Kept by the parent: the dialog unmounts whenever Home
+   * leaves the front, so it cannot remember the closed ones itself. */
+  total: number
   /** the open announcement was closed (its action is already reported) */
   onClose: (id: string) => void
 }
 
-export function AnnouncementDialog({ announcements, onClose }: AnnouncementDialogProps) {
+export function AnnouncementDialog({ announcements, total, onClose }: AnnouncementDialogProps) {
   // where focus was before the first announcement opened, read while rendering —
   // before the parent makes the background inert — and handed back when they close
   const [returnFocus] = useState(() => document.activeElement)
   const current = announcements[0]
   if (!current) return null
+  // never below the ones still to show, so the position stays at least 1
+  const sessionTotal = Math.max(total, announcements.length)
   // keyed: each announcement starts with fresh checkbox / frame state and focus
   return (
     <AnnouncementCard
@@ -49,6 +56,8 @@ export function AnnouncementDialog({ announcements, onClose }: AnnouncementDialo
       announcement={current}
       onClose={onClose}
       returnFocus={returnFocus}
+      position={sessionTotal - announcements.length + 1}
+      total={sessionTotal}
     />
   )
 }
@@ -84,6 +93,46 @@ function LevelIcon({ level }: { level: AnnouncementLevel }) {
   )
 }
 
+/** the rich announcement's image in a rounded frame shaped after it (see
+ * announcement-media.ts); hidden until measured, dropped if it cannot load */
+function AnnouncementMedia({ src }: { src: string }) {
+  const imageRef = useRef<HTMLImageElement>(null)
+  const [fit, setFit] = useState<MediaFit | null>(null)
+  const [failed, setFailed] = useState(false)
+
+  const measure = (image: HTMLImageElement) =>
+    setFit(computeMediaFit(image.naturalWidth, image.naturalHeight))
+
+  // an image decoded before React attached onLoad (a cached data: URL) still gets measured
+  useEffect(() => {
+    const image = imageRef.current
+    if (image?.complete && image.naturalWidth > 0) {
+      setFit(computeMediaFit(image.naturalWidth, image.naturalHeight))
+    }
+  }, [])
+
+  if (failed) return null
+  const style = fit
+    ? ({ '--announcement-media-ratio': String(fit.frameRatio) } as CSSProperties)
+    : undefined
+  return (
+    <div className="announcement-media" data-fit={fit?.mode ?? 'pending'} style={style}>
+      {fit?.mode === 'contain' && (
+        <img className="announcement-media-backdrop" src={src} alt="" aria-hidden="true" />
+      )}
+      <img
+        ref={imageRef}
+        className="announcement-media-image"
+        src={src}
+        alt=""
+        draggable={false}
+        onLoad={(event) => measure(event.currentTarget)}
+        onError={() => setFailed(true)}
+      />
+    </div>
+  )
+}
+
 type FrameState = 'loading' | 'ready' | 'failed'
 
 interface AnnouncementCardProps {
@@ -91,6 +140,9 @@ interface AnnouncementCardProps {
   onClose: (id: string) => void
   /** focus goes back here once the dialog closes */
   returnFocus: Element | null
+  /** this announcement's place among the ones shown this session (1-based) */
+  position: number
+  total: number
 }
 
 /** the card's tab stops, in order; the html page counts only once it shows
@@ -104,7 +156,13 @@ function focusablesIn(card: HTMLElement | null): HTMLElement[] {
   )
 }
 
-function AnnouncementCard({ announcement, onClose, returnFocus }: AnnouncementCardProps) {
+function AnnouncementCard({
+  announcement,
+  onClose,
+  returnFocus,
+  position,
+  total,
+}: AnnouncementCardProps) {
   const { t } = useI18n()
   const { id, kind, level, displayMode, title, body, image, htmlUrl, link } = announcement
   const titleId = useId()
@@ -165,13 +223,17 @@ function AnnouncementCard({ announcement, onClose, returnFocus }: AnnouncementCa
       }
       if (event.key !== 'Tab') return
       event.stopPropagation()
-      const focusables = focusablesIn(cardRef.current)
-      if (focusables.length === 0) return
+      const card = cardRef.current
+      const focusables = focusablesIn(card)
+      if (!card || focusables.length === 0) return
       const first = focusables[0]
       const last = focusables[focusables.length - 1]
       const active = document.activeElement
-      const onControl = active instanceof HTMLElement && focusables.includes(active)
-      if (!onControl) {
+      // from the dialog itself (or from outside it) Tab enters at an edge; any
+      // other stop inside it (e.g. the scrolling middle, which Chromium makes
+      // focusable when it overflows) moves on natively, and the focus guards
+      // catch a native move past either end
+      if (active === card || !card.contains(active)) {
         event.preventDefault()
         ;(event.shiftKey ? last : first).focus()
       } else if (event.shiftKey && active === first) {
@@ -220,8 +282,8 @@ function AnnouncementCard({ announcement, onClose, returnFocus }: AnnouncementCa
     void window.aiOffice.openAnnouncementLink(id).catch(() => {})
   }
 
-  // focus guards: Tab out of the html page (whose key events the listener above
-  // never sees) lands on one of these and wraps back into the dialog
+  // focus guards: a Tab the listener above never sees (pressed inside the html
+  // page) that moves past either end lands on one of these and wraps back
   const wrapTo = (edge: 'first' | 'last') => {
     const focusables = focusablesIn(cardRef.current)
     const target = edge === 'first' ? focusables[0] : focusables[focusables.length - 1]
@@ -229,7 +291,6 @@ function AnnouncementCard({ announcement, onClose, returnFocus }: AnnouncementCa
   }
 
   const showFrame = kind === 'html' && !!htmlUrl
-  const showFooter = !!link || displayMode === 'until_dismissed'
 
   return (
     <div className="announcement-overlay">
@@ -249,68 +310,88 @@ function AnnouncementCard({ announcement, onClose, returnFocus }: AnnouncementCa
           aria-hidden="true"
           onFocus={() => wrapTo('last')}
         />
-        <button className="announcement-close" aria-label={t('announcementClose')} onClick={close}>
-          <svg width="12" height="12" viewBox="0 0 12 12" aria-hidden="true">
-            <path
-              d="M2 2l8 8M10 2L2 10"
-              stroke="currentColor"
-              strokeWidth="1.4"
-              strokeLinecap="round"
-            />
-          </svg>
-        </button>
-        {kind === 'rich' && image && <img className="announcement-image" src={image} alt="" />}
-        <div className="announcement-content">
+        <div className="announcement-header">
           <span className="announcement-badge" id={badgeId}>
             <LevelIcon level={level} />
             {t(LEVEL_KEYS[level])}
           </span>
-          <h2 className="announcement-title" id={titleId}>
-            {title}
-          </h2>
-          {kind === 'rich' && body && (
-            <p className="announcement-body" id={bodyId}>
-              {body}
-            </p>
+          {total > 1 && (
+            <span className="announcement-counter" aria-hidden="true">
+              {position} / {total}
+            </span>
           )}
-          {showFrame && (
-            <div className="announcement-frame" data-state={frame}>
-              <iframe
-                ref={frameRef}
-                src={htmlUrl}
-                title={title}
-                sandbox={ANNOUNCEMENT_FRAME_SANDBOX}
-                referrerPolicy="no-referrer"
-                // a failure reported by the main process may arrive before the load event
-                onLoad={() => setFrame((state) => (state === 'loading' ? 'ready' : state))}
+          <button
+            className="announcement-close"
+            aria-label={t('announcementClose')}
+            onClick={close}
+          >
+            <svg width="12" height="12" viewBox="0 0 12 12" aria-hidden="true">
+              <path
+                d="M2 2l8 8M10 2L2 10"
+                stroke="currentColor"
+                strokeWidth="1.4"
+                strokeLinecap="round"
               />
-              {frame === 'loading' && (
-                <p className="announcement-frame-status" role="status">
-                  {t('announcementLoading')}
-                </p>
-              )}
-              {frame === 'failed' && (
-                <p className="announcement-frame-status is-error" role="alert">
-                  {t('announcementLoadFailed')}
-                </p>
-              )}
-            </div>
-          )}
+            </svg>
+          </button>
         </div>
-        {showFooter && (
-          <div className="announcement-footer">
-            {displayMode === 'until_dismissed' && (
-              <label className="announcement-dont-show">
-                <input
-                  type="checkbox"
-                  checked={dontShow}
-                  onChange={(event) => setDontShow(event.target.checked)}
-                />
-                {t('announcementDontShowAgain')}
-              </label>
+        {/* the middle scrolls on a short window; header and footer stay in view */}
+        <div className="announcement-scroll">
+          {kind === 'rich' && image && <AnnouncementMedia src={image} />}
+          <div className="announcement-content">
+            <h2 className="announcement-title" id={titleId}>
+              {title}
+            </h2>
+            {kind === 'rich' && body && (
+              <p className="announcement-body" id={bodyId}>
+                {body}
+              </p>
             )}
-            {link && (
-              <button className="announcement-link" onClick={openLink}>
+            {showFrame && (
+              <div className="announcement-frame" data-state={frame}>
+                <iframe
+                  ref={frameRef}
+                  src={htmlUrl}
+                  title={title}
+                  sandbox={ANNOUNCEMENT_FRAME_SANDBOX}
+                  referrerPolicy="no-referrer"
+                  // a failure reported by the main process may arrive before the load event
+                  onLoad={() => setFrame((state) => (state === 'loading' ? 'ready' : state))}
+                />
+                {frame === 'loading' && (
+                  <p className="announcement-frame-status" role="status">
+                    {t('announcementLoading')}
+                  </p>
+                )}
+                {frame === 'failed' && (
+                  <p className="announcement-frame-status is-error" role="alert">
+                    {t('announcementLoadFailed')}
+                  </p>
+                )}
+              </div>
+            )}
+          </div>
+        </div>
+        <div className="announcement-footer">
+          {displayMode === 'until_dismissed' && (
+            <label className="announcement-dont-show">
+              <input
+                type="checkbox"
+                checked={dontShow}
+                onChange={(event) => setDontShow(event.target.checked)}
+              />
+              {t('announcementDontShowAgain')}
+            </label>
+          )}
+          {link ? (
+            <>
+              <button className="announcement-button is-secondary" onClick={close}>
+                {t('announcementClose')}
+              </button>
+              <button
+                className="announcement-button is-primary announcement-link"
+                onClick={openLink}
+              >
                 {link.label || t('announcementLinkFallback')}
                 <svg width="11" height="11" viewBox="0 0 12 12" fill="none" aria-hidden="true">
                   <path
@@ -322,9 +403,14 @@ function AnnouncementCard({ announcement, onClose, returnFocus }: AnnouncementCa
                   />
                 </svg>
               </button>
-            )}
-          </div>
-        )}
+            </>
+          ) : (
+            // closes exactly like the × (a dismissal when "Don't show again" is ticked)
+            <button className="announcement-button is-primary" onClick={close}>
+              {t('announcementGotIt')}
+            </button>
+          )}
+        </div>
         <span
           className="announcement-focus-guard"
           tabIndex={0}

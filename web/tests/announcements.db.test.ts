@@ -6,6 +6,7 @@ import Database from "better-sqlite3";
 import { mkdtempSync, readdirSync, readFileSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
+import sharp from "sharp";
 import { afterAll, beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
 import type { Prisma } from "@/generated/prisma/client";
 
@@ -425,6 +426,23 @@ describe("admin mutations", () => {
 
     await routes.remove(post(`/api/admin/announcements/${id}/delete`, {}), ctx({ id }));
     expect(await prisma.announcementImage.count()).toBe(0);
+  });
+
+  it("stores uploads cleaned up: upright, at most 1600 px, without metadata", async () => {
+    asAdmin();
+    // A 3200×1800 camera photo stored sideways (EXIF orientation 6): upright it is 1800×3200.
+    const photo = await sharp({ create: { width: 3200, height: 1800, channels: 3, background: "#3366cc" } })
+      .jpeg()
+      .withMetadata({ orientation: 6 })
+      .toBuffer();
+    const res = await routes.upload(upload(new Uint8Array(photo), "photo.jpg", "image/jpeg"), ctx());
+    expect(res.status).toBe(201);
+    const body = (await res.json()) as { id: string; mime: string; width: number; height: number; size: number };
+    expect(body).toMatchObject({ mime: "image/jpeg", width: 900, height: 1600 });
+    const row = await prisma.announcementImage.findUniqueOrThrow({ where: { id: body.id } });
+    expect(body.size).toBe(row.bytes.byteLength);
+    const meta = await sharp(row.bytes).metadata();
+    expect([meta.width, meta.height, meta.orientation, meta.exif]).toEqual([900, 1600, undefined, undefined]);
   });
 
   it("saves an html page despite leftover image fields and replies with what it stored", async () => {

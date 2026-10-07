@@ -1,5 +1,5 @@
 // Announcements without a database: version/platform/locale matching, admin
-// input validation, image magic bytes, the sandboxed frame document and the
+// input validation, image magic bytes and framing, the sandboxed frame document and the
 // routing/header configuration that keeps the frame isolated.
 
 import { buildCustomRoute } from "next/dist/lib/build-custom-route";
@@ -8,6 +8,7 @@ import {
   announcementInputSchema,
   buildFrameDocument,
   compareVersions,
+  computeMediaFit,
   contentLocale,
   fieldErrorsFromIssues,
   FRAME_CSP,
@@ -281,6 +282,46 @@ describe("image magic bytes", () => {
     expect(sniffImage(text("%PDF-1.7"))).toBeNull();
     expect(sniffImage(new Uint8Array(0))).toBeNull();
     expect(sniffImage(PNG_1X1.subarray(0, 7))).toBeNull();
+  });
+});
+
+describe("image fit", () => {
+  const fit = (w: number, h: number) => {
+    const { frameRatio, mode } = computeMediaFit(w, h);
+    return [Math.round(frameRatio * 1000) / 1000, mode];
+  };
+
+  it("fills the frame with images close to its shape", () => {
+    expect(fit(1600, 900)).toEqual([1.778, "cover"]);
+    expect(fit(1200, 600)).toEqual([2, "cover"]);
+    // 3:2 gets the tallest frame (16:10), cropping 6.7% of its width.
+    expect(fit(1500, 1000)).toEqual([1.6, "cover"]);
+    expect(fit(2600, 1000)).toEqual([2.6, "cover"]);
+    expect(fit(3000, 1000)).toEqual([3, "cover"]);
+    // A little past 3:1: the widest frame, cropping under 10% of its width.
+    expect(fit(3300, 1000)).toEqual([3, "cover"]);
+  });
+
+  it("shows square, portrait, very wide and small images whole", () => {
+    expect(fit(1024, 1024)).toEqual([1.6, "contain"]);
+    expect(fit(800, 1200)).toEqual([1.6, "contain"]);
+    // 4:1 would lose 25% of its width in the widest frame.
+    expect(fit(4000, 1000)).toEqual([3, "contain"]);
+    // The right shape, but filling 280+ px would upscale it.
+    expect(fit(200, 112)).toEqual([1.786, "contain"]);
+    expect(fit(280, 158)).toEqual([1.772, "cover"]);
+  });
+
+  it("uses a 16:9 frame for sizes it cannot use", () => {
+    for (const [w, h] of [
+      [0, 100],
+      [100, 0],
+      [-5, 10],
+      [Number.NaN, 10],
+      [10, Number.POSITIVE_INFINITY],
+    ]) {
+      expect(computeMediaFit(w, h)).toEqual({ frameRatio: 16 / 9, mode: "contain" });
+    }
   });
 });
 

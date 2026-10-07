@@ -1,6 +1,6 @@
 // Announcement rules shared by the server and the admin editor (client-safe:
 // no database or Node-only imports). Covers input validation, version and
-// platform matching, localization and the sandboxed frame document.
+// platform matching, localization, image framing and the sandboxed frame document.
 
 import { z } from "zod";
 
@@ -37,6 +37,43 @@ export const PUBLIC_ANNOUNCEMENT_LIMIT = 5;
 
 /** Button label used when an announcement has a link but no label. */
 export const DEFAULT_LINK_LABEL: Record<ContentLocale, string> = { vi: "Xem chi tiết", en: "Learn more" };
+
+// ---------------------------------------------------------------- image fit
+
+// How the app's announcement dialog frames its image, whatever its size or
+// shape: the frame takes the image's own aspect ratio within 16:10…3:1; an
+// image that (nearly) matches fills the frame, any other one is shown whole
+// over a blurred copy of itself and never upscaled.
+// Keep in sync with apps/shell/src/renderer/src/announcement-media.ts (the
+// dialog itself); the editor's preview uses this copy to frame it the same way.
+
+/** The tallest frame (16:10): a square or portrait image is shown whole. */
+const MIN_FRAME_RATIO = 1.6;
+/** The widest frame (3:1, a common banner shape): a wider panorama is shown whole. */
+const MAX_FRAME_RATIO = 3;
+/** An image whose ratio differs from the frame's by at most this factor fills it (losing at most ~11% of one side). */
+const COVER_TOLERANCE = 1.12;
+/** CSS px; a narrower image would visibly upscale when filling the frame. */
+const SMALL_IMAGE_WIDTH = 280;
+/** The frame before the image is measured, and for an unmeasurable one. */
+export const DEFAULT_FRAME_RATIO = 16 / 9;
+
+export type MediaFit = {
+  /** Width / height of the frame. */
+  frameRatio: number;
+  /** "cover": the image fills the frame; "contain": shown whole over a blurred backdrop. */
+  mode: "cover" | "contain";
+};
+
+export function computeMediaFit(width: number, height: number): MediaFit {
+  if (!Number.isFinite(width) || !Number.isFinite(height) || width <= 0 || height <= 0) {
+    return { frameRatio: DEFAULT_FRAME_RATIO, mode: "contain" };
+  }
+  const ratio = width / height;
+  const frameRatio = Math.min(MAX_FRAME_RATIO, Math.max(MIN_FRAME_RATIO, ratio));
+  const mismatch = Math.max(ratio / frameRatio, frameRatio / ratio);
+  return { frameRatio, mode: mismatch <= COVER_TOLERANCE && width >= SMALL_IMAGE_WIDTH ? "cover" : "contain" };
+}
 
 // ---------------------------------------------------------------- versions
 

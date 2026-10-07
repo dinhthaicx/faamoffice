@@ -1,13 +1,18 @@
 // POST /api/admin/announcements/images — upload an announcement image
 // (ADMIN, same-origin, multipart/form-data with a "file" field, at most 2 MB;
 // larger → 413 image_too_large). The type is detected from the file's magic
-// bytes; the client's Content-Type is ignored.
+// bytes; the client's Content-Type is ignored. What is stored is the cleaned-up
+// image (at most 1600 px, metadata stripped; still images also turned upright
+// and trimmed of transparent margins), with its own type, dimensions and size.
+// GIFs, animated PNGs, animated WebPs with an orientation tag and files sharp
+// cannot process are stored as uploaded.
 
 import { MAX_IMAGE_BYTES } from "@/lib/announcement-shared";
 import { ADMIN_IMAGE_SELECT, cleanupOrphanImages } from "@/lib/announcements";
 import { requireApiAdmin } from "@/lib/auth";
 import { prisma } from "@/lib/db";
 import { HttpError, json, rateLimited, readBodyBytes, route } from "@/lib/http";
+import { normalizeImage } from "@/lib/image-normalize";
 import { sniffImage } from "@/lib/image-sniff";
 import { limiters } from "@/lib/rate-limit";
 
@@ -43,10 +48,11 @@ export const POST = route(async (req) => {
   const bytes = new Uint8Array(await file.arrayBuffer());
   const info = sniffImage(bytes);
   if (!info) throw new HttpError(415, "unsupported_image", "Only PNG, JPEG, WebP and GIF images are accepted.");
+  const stored = await normalizeImage(bytes, info);
 
   await cleanupOrphanImages();
   const image = await prisma.announcementImage.create({
-    data: { mime: info.mime, bytes, width: info.width, height: info.height, size: bytes.byteLength },
+    data: { mime: stored.mime, bytes: stored.bytes, width: stored.width, height: stored.height, size: stored.bytes.byteLength },
     select: ADMIN_IMAGE_SELECT,
   });
   return json({ ok: true, ...image, url: `/api/admin/announcements/images/${image.id}` }, { status: 201 });

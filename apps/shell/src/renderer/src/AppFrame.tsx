@@ -19,6 +19,9 @@ export function AppFrame({ initialOnboardingSeen }: AppFrameProps) {
   const [prompt, setPrompt] = useState<HomePrompt | null>(null)
   /** announcements still to show this session, in display order */
   const [announcements, setAnnouncements] = useState<AnnouncementView[]>([])
+  /** how many announcements this session has, closed ones included (the
+   * dialog's "2 / 3" counter; the dialog itself unmounts off Home) */
+  const [announcementTotal, setAnnouncementTotal] = useState(0)
   /** the announcement query has answered (or failed): prompt cards may show */
   const [announcementsSettled, setAnnouncementsSettled] = useState(false)
 
@@ -40,6 +43,7 @@ export function AppFrame({ initialOnboardingSeen }: AppFrameProps) {
     const settle = (list: AnnouncementView[]) => {
       if (!alive) return
       setAnnouncements(list)
+      setAnnouncementTotal(list.length)
       setAnnouncementsSettled(true)
     }
     Promise.resolve()
@@ -110,7 +114,11 @@ export function AppFrame({ initialOnboardingSeen }: AppFrameProps) {
        * renders while the home tab is active — it comes back when home does */}
       {showOnboarding && homeActive && <Onboarding onDone={finishOnboarding} />}
       {announcementVisible && (
-        <AnnouncementDialog announcements={announcements} onClose={closeAnnouncement} />
+        <AnnouncementDialog
+          announcements={announcements}
+          total={announcementTotal}
+          onClose={closeAnnouncement}
+        />
       )}
       {promptVisible && prompt.kind === 'defaultApp' && (
         <DefaultAppPromptCard status={prompt.status} onClose={closePrompt} />

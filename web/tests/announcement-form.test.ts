@@ -1,6 +1,7 @@
 // The announcement editor rendered on the server (no DOM needed): accessibility
-// of the image upload and the preview's mock controls, hints, the saved notice
-// after creating, and the helpers that place field errors.
+// of the image upload and the preview's mock controls, the preview's image
+// frame, hints, the saved notice after creating, and the helpers that place
+// field errors.
 
 import { createElement } from "react";
 import { renderToStaticMarkup } from "react-dom/server";
@@ -12,6 +13,7 @@ import {
   EMPTY_ANNOUNCEMENT,
   splitFieldErrors,
   type AnnouncementFormValues,
+  type ImageSize,
 } from "@/components/announcement-form";
 import { en } from "@/i18n/dictionaries/en";
 import { vi as viDict } from "@/i18n/dictionaries/vi";
@@ -56,6 +58,73 @@ describe("preview", () => {
     const rest = mocks.reduce((acc, m) => acc.replace(m, ""), html);
     expect(rest).not.toMatch(/<(button|input)\b/);
     expect(rest).toContain('<a href="https://faamoffice.net" target="_blank" rel="noopener noreferrer"');
+  });
+});
+
+describe("preview layout", () => {
+  const preview = (values: Partial<AnnouncementFormValues>, imageSrc: string | null = null, imageSize: ImageSize | null = null) =>
+    renderToStaticMarkup(
+      createElement(AnnouncementPreview, {
+        values: { ...EMPTY_ANNOUNCEMENT, titleVi: "Tin", ...values },
+        previewLocale: "vi",
+        imageSrc,
+        imageSize,
+        t,
+      }),
+    );
+  const mocksIn = (html: string) => html.match(/<div inert="" aria-hidden="true"[^>]*>.*?<\/div>/g) ?? [];
+  /** The image frame: its opening tag and its images. */
+  const frameOf = (html: string) => {
+    const match = html.match(/(<div data-fit="[^"]*"[^>]*>)(.*?)<\/div><\/div>/);
+    return { tag: match?.[1] ?? "", images: match?.[2].match(/<img [^>]*>/g) ?? [] };
+  };
+
+  it("closes with a single picture of the app's \"Got it\" button when there is no link", () => {
+    const html = preview({});
+    const mocks = mocksIn(html);
+    expect(mocks).toHaveLength(1);
+    expect(mocks[0]).toMatch(/<button [^>]*>Đã hiểu<\/button>/);
+    expect(html).not.toContain("<a ");
+    expect(mocksIn(preview({ displayMode: "until_dismissed" }))).toHaveLength(2);
+    // The × is a picture too, never a control.
+    expect(html).toMatch(/<span aria-hidden="true"[^>]*><svg [^>]*><path d="M2 2l8 8M10 2L2 10"/);
+    expect(mocksIn(html).reduce((acc, m) => acc.replace(m, ""), html)).not.toMatch(/<(button|input)\b/);
+  });
+
+  it("tints the top by level instead of a color bar", () => {
+    expect(preview({ level: "critical" })).toContain("color-mix(in_srgb,var(--danger)_7%,transparent)");
+    expect(preview({ level: "info" })).toContain("color-mix(in_srgb,var(--accent)_7%,transparent)");
+    expect(preview({})).not.toContain("h-1.5");
+  });
+
+  it("frames an image the way the app does", () => {
+    // Close to the frame's shape: fills it.
+    const cover = frameOf(preview({}, "/img/a", { width: 1600, height: 900 }));
+    expect(cover.tag).toContain('data-fit="cover"');
+    expect(cover.tag).toContain(`aspect-ratio:${1600 / 900}`);
+    expect(cover.images).toHaveLength(1);
+    expect(cover.images[0]).toContain("object-cover");
+
+    // Square: the tallest frame, shown whole over a blurred, hidden copy.
+    const contain = frameOf(preview({}, "/img/b", { width: 1024, height: 1024 }));
+    expect(contain.tag).toContain('data-fit="contain"');
+    expect(contain.tag).toContain("aspect-ratio:1.6");
+    expect(contain.tag).toContain("rounded-[10px]");
+    expect(contain.images).toHaveLength(2);
+    expect(contain.images[0]).toMatch(/aria-hidden="true".*blur-\[28px\]/);
+    expect(contain.images[1]).toContain("max-h-full max-w-full");
+    expect(contain.images[1]).not.toContain("aria-hidden");
+
+    // Not measured yet: 16:9, nothing shown.
+    const html = preview({}, "https://cdn.example/a.png");
+    const pending = frameOf(html);
+    expect(pending.tag).toContain('data-fit="pending"');
+    expect(pending.tag).toContain(`aspect-ratio:${16 / 9}`);
+    expect(pending.images).toHaveLength(1);
+    expect(html).toMatch(/<div class="[^"]*opacity-0"><img /);
+
+    // An html announcement has no image frame.
+    expect(frameOf(preview({ kind: "html", htmlVi: "<p>x</p>" }, "/img/a", { width: 1600, height: 900 })).tag).toBe("");
   });
 });
 

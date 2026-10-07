@@ -8,6 +8,7 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import {
+  useCallback,
   useDeferredValue,
   useEffect,
   useRef,
@@ -26,6 +27,8 @@ import {
   ANNOUNCEMENT_STATUSES,
   announcementInputSchema,
   buildFrameDocument,
+  computeMediaFit,
+  DEFAULT_FRAME_RATIO,
   fieldErrorsFromIssues,
   FRAME_META_CSP,
   FRAME_SANDBOX,
@@ -148,11 +151,26 @@ export const EMPTY_ANNOUNCEMENT: AnnouncementFormValues = {
 const inputBase =
   "block w-full rounded-lg border bg-bg px-3 py-2 text-base text-fg placeholder:text-muted focus:border-accent disabled:opacity-60 sm:text-sm";
 
-const LEVEL_STYLES: Record<AnnouncementLevel, { bar: string; badge: string }> = {
-  info: { bar: "bg-accent", badge: "bg-bg-muted text-fg" },
-  warning: { bar: "bg-warn-fg", badge: "bg-warn-bg text-warn-fg" },
-  critical: { bar: "bg-danger", badge: "bg-danger-bg text-danger-fg" },
+// The dialog's level tone: a faint tint behind its top and the badge colors.
+const LEVEL_STYLES: Record<AnnouncementLevel, { tint: string; badge: string }> = {
+  info: {
+    tint: "bg-[linear-gradient(180deg,color-mix(in_srgb,var(--accent)_7%,transparent)_0,transparent_140px)]",
+    badge: "bg-accent/12 text-link",
+  },
+  warning: {
+    tint: "bg-[linear-gradient(180deg,color-mix(in_srgb,var(--warn-fg)_7%,transparent)_0,transparent_140px)]",
+    badge: "bg-warn-bg text-warn-fg",
+  },
+  critical: {
+    tint: "bg-[linear-gradient(180deg,color-mix(in_srgb,var(--danger)_7%,transparent)_0,transparent_140px)]",
+    badge: "bg-danger-bg text-danger-fg",
+  },
 };
+
+/** The dialog's footer buttons (the app's sizes). */
+const DIALOG_BUTTON = "inline-flex h-[34px] items-center justify-center gap-1.5 rounded-[9px] px-3.5 text-[13px] font-semibold transition-colors";
+const DIALOG_BUTTON_PRIMARY = `${DIALOG_BUTTON} bg-accent text-accent-fg hover:bg-accent-hover`;
+const DIALOG_BUTTON_SECONDARY = `${DIALOG_BUTTON} border border-border text-fg`;
 
 const subscribeNoop = () => () => {};
 
@@ -271,16 +289,97 @@ function ChoiceGroup<T extends string>({
   );
 }
 
+function LevelIcon({ level }: { level: AnnouncementLevel }) {
+  if (level === "info") {
+    return (
+      <svg width="12" height="12" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+        <circle cx="8" cy="8" r="6.5" stroke="currentColor" strokeWidth="1.5" />
+        <path d="M8 7.2v4M8 4.8v.1" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" />
+      </svg>
+    );
+  }
+  return (
+    <svg width="12" height="12" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+      <path
+        d={level === "warning" ? "M8 1.8 14.8 13.8H1.2z" : "M5.2 1.5h5.6l3.7 3.7v5.6l-3.7 3.7H5.2l-3.7-3.7V5.2z"}
+        stroke="currentColor"
+        strokeWidth="1.4"
+        strokeLinejoin="round"
+      />
+      <path d="M8 5.6v3.8M8 11.4v.1" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" />
+    </svg>
+  );
+}
+
+export type ImageSize = { width: number; height: number };
+
+/**
+ * The dialog's image frame, shaped by computeMediaFit like the app's. Until the
+ * image is measured the frame is 16:9 (or shaped from `knownSize`) and the image
+ * invisible; an image that fails to load removes the frame. Keyed by URL.
+ */
+function PreviewMedia({ src, knownSize }: { src: string; knownSize: ImageSize | null }) {
+  const [measured, setMeasured] = useState<ImageSize | null>(null);
+  const [failed, setFailed] = useState(false);
+  // On mount too: an image that finished loading before hydration fires no load event to see.
+  const measureIfLoaded = useCallback((img: HTMLImageElement | null) => {
+    if (img?.complete && img.naturalWidth > 0) setMeasured({ width: img.naturalWidth, height: img.naturalHeight });
+  }, []);
+  if (failed) return null;
+
+  const size = measured ?? knownSize;
+  const fit = size ? computeMediaFit(size.width, size.height) : null;
+
+  return (
+    <div
+      data-fit={fit?.mode ?? "pending"}
+      style={{ aspectRatio: fit?.frameRatio ?? DEFAULT_FRAME_RATIO }}
+      className="relative mx-auto mt-3.5 max-h-[min(280px,34vh)] max-w-[calc(100%-40px)] overflow-hidden rounded-[10px] bg-bg-muted after:pointer-events-none after:absolute after:inset-0 after:rounded-[inherit] after:border after:border-fg/8"
+    >
+      <div className={cx("absolute inset-0 transition-opacity duration-[160ms] motion-reduce:transition-none", measured ? "opacity-100" : "opacity-0")}>
+        {fit?.mode === "contain" ? (
+          // eslint-disable-next-line @next/next/no-img-element -- blurred copy behind an image shown whole
+          <img
+            src={src}
+            alt=""
+            aria-hidden="true"
+            referrerPolicy="no-referrer"
+            className="absolute inset-0 size-full scale-[1.2] object-cover opacity-60 blur-[28px] saturate-[1.3]"
+          />
+        ) : null}
+        {/* eslint-disable-next-line @next/next/no-img-element -- admin-provided image (upload or external https URL) */}
+        <img
+          src={src}
+          alt=""
+          referrerPolicy="no-referrer"
+          ref={measureIfLoaded}
+          // An image without a natural size (an SVG URL) gets the default 16:9 frame.
+          onLoad={(e) => setMeasured({ width: e.currentTarget.naturalWidth, height: e.currentTarget.naturalHeight })}
+          onError={() => setFailed(true)}
+          className={cx(
+            "absolute inset-0",
+            // Cover fills the frame; contain centers the image, never past its natural size.
+            fit?.mode === "cover" ? "size-full object-cover" : "m-auto max-h-full max-w-full",
+          )}
+        />
+      </div>
+    </div>
+  );
+}
+
 /** The dialog as the desktop app shows it (approximation). */
 export function AnnouncementPreview({
   values,
   previewLocale,
   imageSrc,
+  imageSize = null,
   t,
 }: {
   values: AnnouncementFormValues;
   previewLocale: ContentLocale;
   imageSrc: string | null;
+  /** Natural size of an uploaded image, known before it loads. */
+  imageSize?: ImageSize | null;
   t: Texts;
 }) {
   const nullable = (s: string) => (s.trim() ? s.trim() : null);
@@ -303,52 +402,68 @@ export function AnnouncementPreview({
   const title = loc.title || t.untitled;
 
   return (
-    <div className="overflow-hidden rounded-2xl border border-border bg-card shadow-xl" lang={previewLocale}>
-      <div className={cx("h-1.5", style.bar)} aria-hidden="true" />
-      {values.kind === "rich" && imageSrc ? (
-        // eslint-disable-next-line @next/next/no-img-element -- admin-provided image (upload or external https URL)
-        <img src={imageSrc} alt="" className="max-h-60 w-full bg-bg-muted object-contain" referrerPolicy="no-referrer" />
-      ) : null}
-      <div className="p-5">
-        <span className={cx("inline-block rounded-full px-2 py-0.5 text-xs font-medium", style.badge)}>{t.level[values.level]}</span>
-        <h3 className={cx("mt-2 text-lg font-semibold leading-snug", !loc.title && "text-muted")}>{title}</h3>
+    <div className={cx("overflow-hidden rounded-2xl border border-border bg-card shadow-xl", style.tint)} lang={previewLocale}>
+      <div className="flex items-center gap-2 pl-5 pr-4 pt-4">
+        <span className={cx("inline-flex items-center gap-[5px] rounded-full px-[9px] py-[3px] text-[11.5px] font-semibold tracking-[0.02em]", style.badge)}>
+          <LevelIcon level={values.level} />
+          {t.level[values.level]}
+        </span>
+        {/* A picture of the app's × button. */}
+        <span aria-hidden="true" className="ml-auto inline-flex size-[30px] items-center justify-center rounded-lg text-muted">
+          <svg width="12" height="12" viewBox="0 0 12 12">
+            <path d="M2 2l8 8M10 2L2 10" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" />
+          </svg>
+        </span>
+      </div>
+      {values.kind === "rich" && imageSrc ? <PreviewMedia key={imageSrc} src={imageSrc} knownSize={imageSize} /> : null}
+      <div className="px-5 pt-4">
+        <h3 className={cx("mb-1.5 text-lg/[1.35] font-semibold tracking-[-0.01em] [overflow-wrap:anywhere]", !loc.title && "text-muted")}>{title}</h3>
         {values.kind === "rich" ? (
-          loc.body ? <p className="mt-2 whitespace-pre-line text-sm leading-relaxed text-muted">{loc.body}</p> : null
+          loc.body ? <p className="whitespace-pre-wrap text-sm/[1.6] text-muted [overflow-wrap:anywhere]">{loc.body}</p> : null
         ) : loc.html ? (
           <iframe
             title={t.preview.frameTitle}
             sandbox={FRAME_SANDBOX}
             referrerPolicy="no-referrer"
             srcDoc={buildFrameDocument({ html: loc.html, title: loc.title, lang: previewLocale, metaCsp: FRAME_META_CSP })}
-            className="mt-3 h-80 w-full rounded-lg border border-border"
+            className="mt-1 block h-80 w-full rounded-[10px] border border-border"
           />
         ) : (
-          <p className="mt-3 rounded-lg border border-dashed border-border p-6 text-center text-sm text-muted">{t.preview.emptyHtml}</p>
+          <p className="mt-1 rounded-[10px] border border-dashed border-border p-6 text-center text-sm text-muted">{t.preview.emptyHtml}</p>
         )}
-        {/* The checkbox and Close are pictures of the app's controls: inert and hidden
-            from assistive technology. The link button is real and stays usable. */}
-        <div className="mt-5 flex flex-wrap items-center justify-between gap-3">
-          {values.displayMode === "until_dismissed" ? (
-            <div inert aria-hidden="true">
-              <label className="flex items-center gap-2 text-sm text-muted">
-                <input type="checkbox" disabled /> {t.preview.dontShowAgain}
-              </label>
-            </div>
-          ) : (
-            <span />
-          )}
-          <div className="flex gap-2">
-            {showLink ? (
-              <a href={linkUrl} target="_blank" rel="noopener noreferrer" className={buttonClass.primary}>
+      </div>
+      {/* The checkbox, Close and "Got it" are pictures of the app's controls: inert and
+          hidden from assistive technology. The link button is real and stays usable. */}
+      <div className="flex flex-wrap items-center gap-2.5 px-5 pb-5 pt-[18px]">
+        {values.displayMode === "until_dismissed" ? (
+          <div inert aria-hidden="true" className="mr-auto">
+            <label className="flex items-center gap-2 text-[13px] text-muted">
+              <input type="checkbox" disabled /> {t.preview.dontShowAgain}
+            </label>
+          </div>
+        ) : null}
+        <div className="ml-auto flex flex-wrap gap-2.5">
+          {showLink ? (
+            <>
+              <div inert aria-hidden="true" className="flex">
+                <button type="button" className={DIALOG_BUTTON_SECONDARY}>
+                  {t.preview.close}
+                </button>
+              </div>
+              <a href={linkUrl} target="_blank" rel="noopener noreferrer" className={DIALOG_BUTTON_PRIMARY}>
                 {loc.linkLabel}
+                <svg width="11" height="11" viewBox="0 0 12 12" fill="none" aria-hidden="true">
+                  <path d="M3.5 8.5 8.5 3.5M4.5 3.5h4v4" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" />
+                </svg>
               </a>
-            ) : null}
+            </>
+          ) : (
             <div inert aria-hidden="true" className="flex">
-              <button type="button" className={buttonClass.secondary}>
-                {t.preview.close}
+              <button type="button" className={DIALOG_BUTTON_PRIMARY}>
+                {t.preview.gotIt}
               </button>
             </div>
-          </div>
+          )}
         </div>
       </div>
     </div>
@@ -564,6 +679,9 @@ export function AnnouncementForm({
         : isHttpsUrl(preview.imageUrl.trim())
           ? preview.imageUrl.trim()
           : null;
+  // The upload's stored size shapes the preview's frame before the image loads.
+  const imageSize =
+    preview.imageId && image?.id === preview.imageId && image.width && image.height ? { width: image.width, height: image.height } : null;
 
   return (
     <form onSubmit={onSubmit} noValidate aria-busy={pending} className="grid gap-8 lg:grid-cols-[minmax(0,1fr)_400px]">
@@ -886,7 +1004,7 @@ export function AnnouncementForm({
           </div>
         </div>
         <div className="mt-3 rounded-2xl bg-bg-muted p-4 sm:p-6">
-          <AnnouncementPreview values={preview} previewLocale={previewLocale} imageSrc={imageSrc} t={t} />
+          <AnnouncementPreview values={preview} previewLocale={previewLocale} imageSrc={imageSrc} imageSize={imageSize} t={t} />
         </div>
         <p className="mt-2 text-xs text-muted">{t.preview.note}</p>
       </aside>

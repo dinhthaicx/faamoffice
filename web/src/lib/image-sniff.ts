@@ -8,6 +8,7 @@ const ascii = (b: Uint8Array, start: number, length: number) => String.fromCharC
 const u16be = (b: Uint8Array, i: number) => (b[i] << 8) | b[i + 1];
 const u16le = (b: Uint8Array, i: number) => b[i] | (b[i + 1] << 8);
 const u24le = (b: Uint8Array, i: number) => b[i] | (b[i + 1] << 8) | (b[i + 2] << 16);
+const u32le = (b: Uint8Array, i: number) => (b[i] | (b[i + 1] << 8) | (b[i + 2] << 16) | (b[i + 3] << 24)) >>> 0;
 const u32be = (b: Uint8Array, i: number) => ((b[i] << 24) | (b[i + 1] << 16) | (b[i + 2] << 8) | b[i + 3]) >>> 0;
 
 const PNG_SIGNATURE = [0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a];
@@ -54,6 +55,37 @@ function webpSize(b: Uint8Array): { width: number | null; height: number | null 
     };
   }
   return { width: null, height: null };
+}
+
+/** An animated PNG (APNG): its acTL chunk comes before the first IDAT. Expects PNG bytes. */
+export function isAnimatedPng(b: Uint8Array): boolean {
+  let i = PNG_SIGNATURE.length;
+  while (i + 8 <= b.length) {
+    const type = ascii(b, i + 4, 4);
+    if (type === "acTL") return true;
+    if (type === "IDAT") return false;
+    i += 12 + u32be(b, i); // length, type, data, CRC
+  }
+  return false;
+}
+
+/**
+ * A WebP whose first image is stored lossless (VP8L): a still image, one in a
+ * VP8X container, or the first frame of an animation (inside ANMF). Expects WebP bytes.
+ */
+export function isLosslessWebp(b: Uint8Array): boolean {
+  // Chunks: type, little-endian payload size, payload padded to an even length.
+  const firstBitstream = (start: number, end: number): string | null => {
+    for (let i = start; i + 8 <= end; ) {
+      const type = ascii(b, i, 4);
+      if (type === "VP8L" || type === "VP8 ") return type;
+      const size = u32le(b, i + 4);
+      if (type === "ANMF") return firstBitstream(i + 8 + 16, Math.min(end, i + 8 + size)); // 16-byte frame header
+      i += 8 + size + (size & 1);
+    }
+    return null;
+  };
+  return firstBitstream(12, b.length) === "VP8L";
 }
 
 /** PNG, JPEG, WebP or GIF by signature; null for anything else (SVG, HTML, …). */

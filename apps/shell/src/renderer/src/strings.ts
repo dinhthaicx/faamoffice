@@ -398,6 +398,7 @@ export const strings = {
     // Startup announcements from the account server
     announcementClose: '关闭',
     announcementDontShowAgain: '不再显示',
+    announcementGotIt: '知道了',
     announcementLevelInfo: '公告',
     announcementLevelWarning: '注意',
     announcementLevelCritical: '重要',
@@ -820,6 +821,7 @@ export const strings = {
     // Startup announcements from the account server
     announcementClose: 'Close',
     announcementDontShowAgain: "Don't show this again",
+    announcementGotIt: 'Got it',
     announcementLevelInfo: 'Announcement',
     announcementLevelWarning: 'Note',
     announcementLevelCritical: 'Important',
@@ -1240,6 +1242,7 @@ export const strings = {
     // Startup announcements from the account server
     announcementClose: 'Đóng',
     announcementDontShowAgain: 'Không hiển thị lại',
+    announcementGotIt: 'Đã hiểu',
     announcementLevelInfo: 'Thông báo',
     announcementLevelWarning: 'Lưu ý',
     announcementLevelCritical: 'Quan trọng',
@@ -1674,6 +1677,7 @@ export const strings = {
     // Startup announcements from the account server
     announcementClose: '閉じる',
     announcementDontShowAgain: '今後表示しない',
+    announcementGotIt: '了解',
     announcementLevelInfo: 'お知らせ',
     announcementLevelWarning: 'ご注意',
     announcementLevelCritical: '重要',
@@ -2098,6 +2102,7 @@ export const strings = {
     // Startup announcements from the account server
     announcementClose: '닫기',
     announcementDontShowAgain: '다시 표시하지 않기',
+    announcementGotIt: '확인',
     announcementLevelInfo: '공지',
     announcementLevelWarning: '참고',
     announcementLevelCritical: '중요',
@@ -2538,6 +2543,7 @@ export const strings = {
     // Startup announcements from the account server
     announcementClose: 'Fermer',
     announcementDontShowAgain: 'Ne plus afficher',
+    announcementGotIt: 'Compris',
     announcementLevelInfo: 'Annonce',
     announcementLevelWarning: 'À noter',
     announcementLevelCritical: 'Important',
@@ -2983,6 +2989,7 @@ export const strings = {
     // Startup announcements from the account server
     announcementClose: 'Schließen',
     announcementDontShowAgain: 'Nicht mehr anzeigen',
+    announcementGotIt: 'Verstanden',
     announcementLevelInfo: 'Ankündigung',
     announcementLevelWarning: 'Hinweis',
     announcementLevelCritical: 'Wichtig',
@@ -3424,6 +3431,7 @@ export const strings = {
     // Startup announcements from the account server
     announcementClose: 'Cerrar',
     announcementDontShowAgain: 'No volver a mostrar',
+    announcementGotIt: 'Entendido',
     announcementLevelInfo: 'Anuncio',
     announcementLevelWarning: 'Aviso',
     announcementLevelCritical: 'Importante',
@@ -3843,6 +3851,7 @@ export const strings = {
     // Startup announcements from the account server
     announcementClose: 'ปิด',
     announcementDontShowAgain: 'ไม่ต้องแสดงอีก',
+    announcementGotIt: 'เข้าใจแล้ว',
     announcementLevelInfo: 'ประกาศ',
     announcementLevelWarning: 'โปรดทราบ',
     announcementLevelCritical: 'สำคัญ',
@@ -4276,6 +4285,7 @@ export const strings = {
     // Startup announcements from the account server
     announcementClose: 'Tutup',
     announcementDontShowAgain: 'Jangan tampilkan lagi',
+    announcementGotIt: 'Mengerti',
     announcementLevelInfo: 'Pengumuman',
     announcementLevelWarning: 'Catatan',
     announcementLevelCritical: 'Penting',
@@ -4712,6 +4722,7 @@ export const strings = {
     // Startup announcements from the account server
     announcementClose: 'Закрыть',
     announcementDontShowAgain: 'Больше не показывать',
+    announcementGotIt: 'Понятно',
     announcementLevelInfo: 'Объявление',
     announcementLevelWarning: 'Обратите внимание',
     announcementLevelCritical: 'Важно',
@@ -5132,6 +5143,7 @@ export const strings = {
     // Startup announcements from the account server
     announcementClose: 'إغلاق',
     announcementDontShowAgain: 'عدم الإظهار مرة أخرى',
+    announcementGotIt: 'حسنًا',
     announcementLevelInfo: 'إعلان',
     announcementLevelWarning: 'ملاحظة',
     announcementLevelCritical: 'مهم',
@@ -5562,6 +5574,7 @@ export const strings = {
     // Startup announcements from the account server
     announcementClose: 'Fechar',
     announcementDontShowAgain: 'Não mostrar novamente',
+    announcementGotIt: 'Entendi',
     announcementLevelInfo: 'Comunicado',
     announcementLevelWarning: 'Atenção',
     announcementLevelCritical: 'Importante',
@@ -5989,6 +6002,7 @@ export const strings = {
     // Startup announcements from the account server
     announcementClose: 'Chiudi',
     announcementDontShowAgain: 'Non mostrare più',
+    announcementGotIt: 'Ho capito',
     announcementLevelInfo: 'Annuncio',
     announcementLevelWarning: 'Nota',
     announcementLevelCritical: 'Importante',
@@ -6415,6 +6429,7 @@ export const strings = {
     // Startup announcements from the account server
     announcementClose: 'Zamknij',
     announcementDontShowAgain: 'Nie pokazuj ponownie',
+    announcementGotIt: 'Rozumiem',
     announcementLevelInfo: 'Ogłoszenie',
     announcementLevelWarning: 'Uwaga',
     announcementLevelCritical: 'Ważne',
@@ -6835,6 +6850,7 @@ export const strings = {
     // Startup announcements from the account server
     announcementClose: 'Zavřít',
     announcementDontShowAgain: 'Znovu nezobrazovat',
+    announcementGotIt: 'Rozumím',
     announcementLevelInfo: 'Oznámení',
     announcementLevelWarning: 'Upozornění',
     announcementLevelCritical: 'Důležité',
@@ -7262,6 +7278,7 @@ export const strings = {
     // Startup announcements from the account server
     announcementClose: 'Sluiten',
     announcementDontShowAgain: 'Niet meer tonen',
+    announcementGotIt: 'Begrepen',
     announcementLevelInfo: 'Aankondiging',
     announcementLevelWarning: 'Let op',
     announcementLevelCritical: 'Belangrijk',
@@ -7693,6 +7710,7 @@ export const strings = {
     // Startup announcements from the account server
     announcementClose: 'Tutup',
     announcementDontShowAgain: 'Jangan tunjukkan lagi',
+    announcementGotIt: 'Faham',
     announcementLevelInfo: 'Pengumuman',
     announcementLevelWarning: 'Makluman',
     announcementLevelCritical: 'Penting',
@@ -8098,6 +8116,7 @@ export const strings = {
     // Startup announcements from the account server
     announcementClose: 'סגירה',
     announcementDontShowAgain: 'לא להציג שוב',
+    announcementGotIt: 'הבנתי',
     announcementLevelInfo: 'הודעה',
     announcementLevelWarning: 'לתשומת לבך',
     announcementLevelCritical: 'חשוב',
@@ -8519,6 +8538,7 @@ export const strings = {
     // Startup announcements from the account server
     announcementClose: 'बंद करें',
     announcementDontShowAgain: 'फिर से न दिखाएँ',
+    announcementGotIt: 'ठीक है',
     announcementLevelInfo: 'घोषणा',
     announcementLevelWarning: 'ध्यान दें',
     announcementLevelCritical: 'महत्वपूर्ण',
@@ -8917,6 +8937,7 @@ export const strings = {
     // Startup announcements from the account server
     announcementClose: '關閉',
     announcementDontShowAgain: '不再顯示',
+    announcementGotIt: '知道了',
     announcementLevelInfo: '公告',
     announcementLevelWarning: '注意',
     announcementLevelCritical: '重要',
