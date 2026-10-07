@@ -1,5 +1,6 @@
 // Capture the actual Windows executable extracted from the Store release appx.
 // No mocked UI, replacement window frame, marketing overlays or image resizing.
+/* global window */
 const { _electron } = require(
   require('node:path').join(process.env.CAPTURE_TOOLS, 'node_modules/playwright-core'),
 )
