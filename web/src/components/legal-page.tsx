@@ -5,7 +5,13 @@ import type { LegalSection } from "@/i18n/dictionaries/vi";
 import type { Locale } from "@/i18n/config";
 import type { Dictionary } from "@/i18n";
 
-type LegalContent = { title: string; intro: string; sections: LegalSection[] };
+type LegalContent = {
+  title: string;
+  intro: string;
+  sections: LegalSection[];
+  updatedDate?: string;
+  updatedDateTime?: string;
+};
 
 const URL_RE = /(https:\/\/[^\s,;()]*[^\s,;().])/g;
 
@@ -76,7 +82,7 @@ export function LegalPage({
       <article className="mt-6">
         <h1 className="text-4xl font-extrabold tracking-tight">{content.title}</h1>
         <p className="mt-3 text-sm text-muted">
-          {dict.legal.updated}: <time dateTime={dict.legal.updatedDateTime}>{dict.legal.updatedDate}</time>
+          {dict.legal.updated}: <time dateTime={content.updatedDateTime ?? dict.legal.updatedDateTime}>{content.updatedDate ?? dict.legal.updatedDate}</time>
         </p>
         {reviewPending ? (
           <Alert tone="warn" className="mt-6">

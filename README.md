@@ -133,6 +133,14 @@ requires SignPath's review under its conditions for modified upstream software. 
 Windows installer is unsigned; the notarized Apple Developer ID signatures on macOS are separate
 from SignPath.
 
+**Microsoft Store — theo xác nhận của người duy trì ngày 08/10/2026:** đã gửi
+Submission 1; trạng thái **In certification**, bước **Pre-processing**. Hồ sơ được cấu hình
+tự xuất bản sau khi vượt qua xét duyệt. Ứng dụng hiện chưa được công bố trên Store.
+
+**Microsoft Store — confirmed by the maintainer on October 8, 2026:** Submission 1 has been
+submitted and is **In certification**, at **Pre-processing**. The submission is configured to
+publish automatically after passing certification. The app is not yet public on the Store.
+
 Chính sách trên website: [Tiếng Việt](https://faamoffice.net/vi/code-signing) ·
 [English](https://faamoffice.net/en/code-signing). Privacy: [PRIVACY.md](PRIVACY.md) ·
 [Tiếng Việt](https://faamoffice.net/vi/privacy) · [English](https://faamoffice.net/en/privacy).

@@ -167,7 +167,7 @@ export const vi = {
         { q: "Faam AI Cloud là gì?", a: "Faam AI Cloud cho phép bạn dùng các mô hình AI ngay trong ứng dụng chỉ bằng tài khoản FaamOffice, không cần API key: vào Cài đặt → Mô hình AI, chọn Faam AI Cloud rồi đăng nhập là xong. Để dịch vụ ổn định cho mọi người, số lượt dùng mỗi ngày có thể được giới hạn. Lịch sử sử dụng hiển thị trong trang Tài khoản." },
         {
           q: "Vì sao macOS hoặc Windows cảnh báo khi mở lần đầu?",
-          a: "Bộ cài macOS 0.11.2 hiện đã được ký bằng Developer ID và được Apple xác minh (notarization). Nếu bản đã tải trước đây báo “Apple không thể xác minh”, hãy tải lại bộ cài từ trang Tải về, thoát FaamOffice rồi kéo bản mới vào Applications và chọn Thay thế (Replace). Bộ cài Windows .exe chưa có chữ ký Microsoft: khi thấy “Windows đã bảo vệ PC của bạn”, bấm “Thông tin thêm” (More info) rồi “Vẫn chạy” (Run anyway); nếu Smart App Control chặn thì hãy dùng bản trên Microsoft Store.",
+          a: "Bộ cài macOS 0.11.2 hiện đã được ký bằng Developer ID và được Apple xác minh (notarization). Nếu bản đã tải trước đây báo “Apple không thể xác minh”, hãy tải lại bộ cài từ trang Tải về, thoát FaamOffice rồi kéo bản mới vào Applications và chọn Thay thế (Replace). Bộ cài Windows .exe chưa có chữ ký Authenticode: khi thấy “Windows đã bảo vệ PC của bạn”, bấm “Thông tin thêm” (More info) rồi “Vẫn chạy” (Run anyway); nếu Smart App Control chặn thì cần bản cài có chữ ký hợp lệ.",
           storeNote: "Trên Windows 10 và 11, bạn cũng có thể cài FaamOffice từ Microsoft Store: bản này được Microsoft ký nên không có các cảnh báo trên và được Store tự cập nhật.",
         },
         { q: "Mở tệp Word, Excel có giữ nguyên định dạng không?", a: "FaamOffice đọc và ghi trực tiếp định dạng gốc (.docx, .xlsx, .pptx), nên tệp lưu ra vẫn mở được trong Microsoft Office, Google Docs hay LibreOffice. Với tài liệu rất phức tạp, một vài chi tiết hiển thị có thể khác đôi chút." },
@@ -288,6 +288,8 @@ export const vi = {
     metaTitle: "Chính sách ký mã — Code signing policy",
     metaDescription: "FaamOffice đã nộp đơn SignPath, đang chờ phản hồi; trách nhiệm duy trì, rà soát mã nguồn và duyệt bản phát hành.",
     title: "Chính sách ký mã (Code signing policy)",
+    updatedDate: "08/10/2026",
+    updatedDateTime: "2026-10-08",
     intro: "FaamOffice đã nộp đơn vào chương trình ký mã miễn phí của SignPath Foundation và đang chờ phản hồi (pending). Dự án chưa được chấp nhận và chưa có bản phát hành nào mang chữ ký SignPath.",
     sections: [
       {
@@ -305,7 +307,7 @@ export const vi = {
       },
       {
         heading: "4. Chữ ký của các gói hiện có",
-        paragraphs: ["Bộ cài Windows trên GitHub hiện chưa có chữ ký Authenticode. Bộ cài macOS 0.11.2 đã được ký bằng Apple Developer ID và notarize; đó là chữ ký Apple, không phải SignPath. Gói AppX đang được chuẩn bị để nộp Microsoft Store; Store sẽ ký gói phân phối qua Store sau khi được duyệt."],
+        paragraphs: ["Bộ cài Windows trên GitHub hiện chưa có chữ ký Authenticode. Bộ cài macOS 0.11.2 đã được ký bằng Apple Developer ID và notarize; đó là chữ ký Apple, không phải SignPath.", "Theo xác nhận của người duy trì ngày 08/10/2026, gói AppX đã được gửi lên Microsoft Store: Submission 1 đang ở trạng thái In certification, bước Pre-processing. Hồ sơ được cấu hình tự xuất bản sau khi vượt qua xét duyệt. Ứng dụng hiện chưa được công bố trên Store; Microsoft sẽ ký gói phân phối qua Store sau khi được duyệt."],
       },
       {
         heading: "5. Quyền riêng tư và liên hệ",

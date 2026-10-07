@@ -166,7 +166,7 @@ export const en: Dictionary = {
         { q: "What is Faam AI Cloud?", a: "Faam AI Cloud lets you use AI models right inside the app with just your FaamOffice account, no API key: open Settings → AI models, choose Faam AI Cloud and sign in. To keep the service reliable for everyone, daily usage may be limited. Your usage history is on the Account page." },
         {
           q: "Why does macOS or Windows warn me on first launch?",
-          a: "The current macOS 0.11.2 installers are Developer ID signed and notarized by Apple. If an earlier download says “Apple cannot verify”, download the installer again, quit FaamOffice, drag the new copy into Applications and choose Replace. The Windows .exe installer is not yet Microsoft signed: when you see “Windows protected your PC”, choose More info and then Run anyway. If Smart App Control blocks it, use the Microsoft Store version.",
+          a: "The current macOS 0.11.2 installers are Developer ID signed and notarized by Apple. If an earlier download says “Apple cannot verify”, download the installer again, quit FaamOffice, drag the new copy into Applications and choose Replace. The Windows .exe installer has no Authenticode signature: when you see “Windows protected your PC”, choose More info and then Run anyway. If Smart App Control blocks it, a properly signed installer is required.",
           storeNote:
             "On Windows 10 and 11 you can also install FaamOffice from the Microsoft Store. Microsoft signs this version and the Store updates it automatically.",
         },
@@ -289,6 +289,8 @@ export const en: Dictionary = {
     metaTitle: "Code signing policy",
     metaDescription: "FaamOffice's SignPath application is submitted and awaiting a response; responsibilities for maintenance, code review and release approval.",
     title: "Code signing policy",
+    updatedDate: "October 8, 2026",
+    updatedDateTime: "2026-10-08",
     intro: "FaamOffice has submitted an application to the SignPath Foundation free code signing program and is awaiting a response (pending). The project has not been accepted, and no release has a SignPath signature.",
     sections: [
       {
@@ -318,7 +320,8 @@ export const en: Dictionary = {
       {
         heading: "4. Signatures on existing packages",
         paragraphs: [
-          "The Windows installer on GitHub currently has no Authenticode signature. The macOS 0.11.2 installers are Apple Developer ID signed and notarized; that is Apple signing, not SignPath. The AppX package is being prepared for Microsoft Store submission; Microsoft signs Store-distributed packages after approval.",
+          "The Windows installer on GitHub currently has no Authenticode signature. The macOS 0.11.2 installers are Apple Developer ID signed and notarized; that is Apple signing, not SignPath.",
+          "As confirmed by the maintainer on October 8, 2026, the AppX package has been submitted to Microsoft Store: Submission 1 is In certification, at Pre-processing. The submission is configured to publish automatically after passing certification. The app is not yet public on the Store; Microsoft signs Store-distributed packages after approval.",
         ],
       },
       {
