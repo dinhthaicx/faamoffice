@@ -15,6 +15,7 @@
     "typecheck": "prisma generate && next typegen && tsc --noEmit",
     "test": "vitest run",
     "smoke": "tsx scripts/smoke.ts",
+    "smoke:marketing": "tsx scripts/smoke-marketing.ts",
     "make-admin": "tsx scripts/make-admin.ts",
     "db:migrate": "prisma migrate deploy",
     "db:seed": "prisma db seed",

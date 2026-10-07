@@ -8,6 +8,7 @@ import { mkdtempSync, readdirSync, readFileSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { afterAll, beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
+import { defaultSiteSettings, SETTING_KEYS } from "@/lib/site-settings-shared";
 
 type Session = { userId: string; user: { id: string; role: "USER" | "ADMIN"; disabledAt: Date | null } };
 const auth = vi.hoisted(() => ({ session: null as Session | null }));
@@ -24,7 +25,7 @@ let dir = "";
 let prisma: Db["prisma"];
 let settings: Settings;
 let quota: Quota;
-let routes: { patch: Handler; put: Handler; config: Handler; me: Handler; usage: Handler };
+let routes: { patch: Handler; put: Handler; config: Handler; me: Handler; usage: Handler; adsTxt: Handler };
 let adminId = "";
 let userId = "";
 let token = "";
@@ -51,6 +52,7 @@ beforeAll(async () => {
     config: (await import("@/app/api/v1/app/config/route")).GET as Handler,
     me: (await import("@/app/api/v1/me/route")).GET as Handler,
     usage: (await import("@/app/api/v1/usage/route")).GET as Handler,
+    adsTxt: (await import("@/app/ads.txt/route")).GET as Handler,
   };
   const tokens = await import("@/lib/api-token");
   adminId = (await prisma.user.create({ data: { email: "admin@faam.test", name: "Admin", passwordHash: "x", role: "ADMIN" } })).id;
@@ -94,13 +96,13 @@ const fb = (extra: Record<string, unknown> = {}) => ({
 
 describe("settings store", () => {
   it("returns the defaults when nothing is stored", async () => {
-    expect(await settings.getSiteSettings()).toEqual({ creditsEnabled: true, aiDailyRequestLimit: 300, socialLinks: [] });
+    expect(await settings.getSiteSettings()).toEqual(defaultSiteSettings());
   });
 
   it("saves a partial update, keeps the other keys and records who saved it", async () => {
     await settings.updateSiteSettings({ aiDailyRequestLimit: 50 }, adminId);
     const after = await settings.updateSiteSettings({ creditsEnabled: false }, adminId);
-    expect(after).toEqual({ creditsEnabled: false, aiDailyRequestLimit: 50, socialLinks: [] });
+    expect(after).toEqual({ ...defaultSiteSettings(), creditsEnabled: false, aiDailyRequestLimit: 50 });
     const rows = await prisma.siteSetting.findMany({ orderBy: { key: "asc" } });
     expect(rows.map((r) => [r.key, r.value, r.updatedById])).toEqual([
       ["aiDailyRequestLimit", "50", adminId],
@@ -173,8 +175,8 @@ describe("settings store", () => {
     try {
       settings.clearSiteSettingsCache();
       const read = await settings.readSiteSettings(t0);
-      expect(read.settings).toEqual({ creditsEnabled: true, aiDailyRequestLimit: 300, socialLinks: [] });
-      expect(read).toMatchObject({ degraded: ["creditsEnabled", "aiDailyRequestLimit", "socialLinks"], queryFailed: true });
+      expect(read.settings).toEqual(defaultSiteSettings());
+      expect(read).toMatchObject({ degraded: [...SETTING_KEYS], queryFailed: true });
     } finally {
       await prisma.$executeRawUnsafe('ALTER TABLE "SiteSetting_hidden" RENAME TO "SiteSetting"');
       vi.mocked(console.error).mockRestore();
@@ -188,6 +190,23 @@ describe("settings store", () => {
 });
 
 describe("PATCH/PUT /api/admin/settings", () => {
+  it("persists normalized ads and Store settings and rejects invalid values without partial writes", async () => {
+    asAdmin();
+    const ads = { ...defaultSiteSettings().ads, publisherId: " pub-1234567890123456 ",
+      slots: { homeBottom: " 1234567890 " }, adsTxtExtra: "Example.COM, account, direct" };
+    const response = await send("PATCH", { ads, msStore: { enabled: true, productId: "9p0rj9j87znq" } });
+    expect(response.status).toBe(200);
+    const stored = (await response.json()).settings;
+    expect(stored.ads).toEqual({ ...ads, publisherId: "ca-pub-1234567890123456", slots: { homeBottom: "1234567890" }, adsTxtExtra: "example.com, account, DIRECT" });
+    expect(stored.msStore).toEqual({ enabled: true, productId: "9P0RJ9J87ZNQ" });
+    settings.clearSiteSettingsCache();
+    expect(await settings.getSiteSettings()).toEqual(stored);
+    const invalid = await send("PATCH", { creditsEnabled: false, ads: { ...ads, publisherId: "invalid" } });
+    expect(invalid.status).toBe(400);
+    expect((await invalid.json()).fields).toEqual({ "ads.publisherId": "publisher_id" });
+    expect((await settings.getSiteSettings()).creditsEnabled).toBe(true);
+  });
+
   it("requires a same-site Origin and an ADMIN session", async () => {
     let res = await send("PATCH", { creditsEnabled: false });
     expect([res.status, (await res.json()).error]).toEqual([401, "unauthorized"]);
@@ -222,8 +241,10 @@ describe("PATCH/PUT /api/admin/settings", () => {
     expect(await settings.getSiteSettings()).toEqual(body.settings);
 
     // PUT replaces everything.
-    const put = await send("PUT", { creditsEnabled: true, aiDailyRequestLimit: 0, socialLinks: [] });
-    expect((await put.json()).settings).toEqual({ creditsEnabled: true, aiDailyRequestLimit: 0, socialLinks: [] });
+    const replacement = { ...defaultSiteSettings(), aiDailyRequestLimit: 0 };
+    const put = await send("PUT", replacement);
+    expect(put.status).toBe(200);
+    expect((await put.json()).settings).toEqual(replacement);
   });
 
   it("rejects invalid values with field errors and stores nothing", async () => {
@@ -246,6 +267,33 @@ describe("PATCH/PUT /api/admin/settings", () => {
     expect((await send("PUT", { creditsEnabled: true })).status).toBe(400);
     expect((await send("PATCH", "{nope")).status).toBe(400);
     expect(await prisma.siteSetting.count()).toBe(0);
+  });
+});
+
+describe("GET /ads.txt", () => {
+  const get = () => routes.adsTxt(new Request(`${SITE}/ads.txt`));
+
+  it("is absent by default and publishes verification records while ads are off", async () => {
+    expect((await get()).status).toBe(404);
+    await settings.updateSiteSettings({ ads: { ...defaultSiteSettings().ads, publisherId: "ca-pub-1234567890123456" } }, adminId);
+    const response = await get();
+    expect(response.status).toBe(200);
+    expect(response.headers.get("content-type")).toBe("text/plain; charset=utf-8");
+    expect(response.headers.get("cache-control")).toBe("public, max-age=300");
+    expect(await response.text()).toBe("google.com, pub-1234567890123456, DIRECT, f08c47fec0942fa0\n");
+  });
+
+  it("returns a retryable failure rather than a cached absence for corrupt advertising settings", async () => {
+    const log = vi.spyOn(console, "error").mockImplementation(() => {});
+    try {
+      await prisma.siteSetting.create({ data: { key: "ads", value: "{not json" } });
+      const response = await get();
+      expect(response.status).toBe(503);
+      expect(response.headers.get("cache-control")).toBe("no-store");
+      expect(response.headers.get("retry-after")).toBe("60");
+    } finally {
+      log.mockRestore();
+    }
   });
 });
 

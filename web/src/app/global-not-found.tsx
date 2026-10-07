@@ -1,9 +1,9 @@
 // 404 for URLs that match no route at all (outside /vi and /en).
+/* eslint-disable @next/next/no-html-link-for-pages -- Full document loads replace the 404's strict CSP. */
 
 import "@fontsource-variable/inter";
 import "./globals.css";
 import type { Metadata } from "next";
-import Link from "next/link";
 
 export const metadata: Metadata = {
   title: "404 — FaamOffice",
@@ -21,12 +21,13 @@ export default function GlobalNotFound() {
             Page not found
           </p>
           <p className="mt-8 flex justify-center gap-4 text-sm">
-            <Link href="/vi" className="font-semibold text-link hover:underline">
+            {/* Reload the document so the destination receives its own CSP. */}
+            <a href="/vi" className="font-semibold text-link hover:underline">
               Trang chủ
-            </Link>
-            <Link href="/en" lang="en" className="font-semibold text-link hover:underline">
+            </a>
+            <a href="/en" lang="en" className="font-semibold text-link hover:underline">
               Home
-            </Link>
+            </a>
           </p>
         </main>
       </body>

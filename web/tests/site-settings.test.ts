@@ -41,10 +41,19 @@ function patchErrors(body: unknown) {
 
 describe("settings schema", () => {
   it("has the documented defaults", () => {
-    expect(defaultSiteSettings()).toEqual({ creditsEnabled: true, aiDailyRequestLimit: 300, socialLinks: [] });
+    expect(defaultSiteSettings()).toEqual({
+      creditsEnabled: true, aiDailyRequestLimit: 300, socialLinks: [],
+      ads: { enabled: false, publisherId: null, autoAds: true, slots: {}, adsTxtExtra: "" },
+      msStore: { enabled: false, productId: "9P0RJ9J87ZNQ" },
+    });
     // Fresh copies: mutating one never leaks into the next.
     defaultSiteSettings().socialLinks.push({ id: "x", platform: "x", url: "https://x.com/a", label: null, enabled: true });
     expect(defaultSiteSettings().socialLinks).toEqual([]);
+    const mutated = defaultSiteSettings();
+    mutated.ads.slots.homeBottom = "1234567890";
+    mutated.msStore.enabled = true;
+    expect(defaultSiteSettings().ads.slots).toEqual({});
+    expect(defaultSiteSettings().msStore.enabled).toBe(false);
   });
 
   it("only accepts real booleans for creditsEnabled (z.coerce.boolean('false') would be true)", () => {
@@ -68,7 +77,8 @@ describe("settings schema", () => {
     expect(settingsPatchSchema.parse({})).toEqual({});
     expect(settingsPatchSchema.safeParse({ creditsEnabled: true, extra: 1 }).success).toBe(false);
     expect(settingsPutSchema.safeParse({ creditsEnabled: true }).success).toBe(false);
-    expect(settingsPutSchema.parse({ creditsEnabled: false, aiDailyRequestLimit: 10, socialLinks: [] })).toEqual({
+    expect(settingsPutSchema.parse({ ...defaultSiteSettings(), creditsEnabled: false, aiDailyRequestLimit: 10 })).toEqual({
+      ...defaultSiteSettings(),
       creditsEnabled: false,
       aiDailyRequestLimit: 10,
       socialLinks: [],

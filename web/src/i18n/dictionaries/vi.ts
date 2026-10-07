@@ -1,6 +1,7 @@
 // Vietnamese (default locale). This file defines the dictionary shape; en.ts must match it.
 
-export type LegalSection = { heading: string; paragraphs: string[]; list?: string[]; after?: string };
+/** `id` marks a section other code refers to (e.g. "cookies", where the advertising section is inserted). */
+export type LegalSection = { id?: string; heading: string; paragraphs: string[]; list?: string[]; after?: string };
 
 export const vi = {
   meta: {
@@ -59,6 +60,7 @@ export const vi = {
     credits: "credit",
     breadcrumbHome: "Trang chủ",
     breadcrumb: "Đường dẫn trang",
+    advertisement: "Quảng cáo",
   },
   home: {
     metaTitle: "FaamOffice — Bộ văn phòng mã nguồn mở có trợ lý Faam AI",
@@ -150,7 +152,7 @@ export const vi = {
       eyebrow: "Mã nguồn mở",
       title: "Miễn phí thật sự, không giới hạn tính năng",
       description:
-        "FaamOffice phát hành theo giấy phép Apache-2.0 và là bản fork của GenOffice. Không quảng cáo, không khóa tính năng, không thu thập tài liệu của bạn. Bạn có thể đọc mã, báo lỗi hoặc đóng góp trên GitHub.",
+        "FaamOffice phát hành theo giấy phép Apache-2.0 và là bản fork của GenOffice. Ứng dụng không có quảng cáo, không khóa tính năng, không thu thập tài liệu của bạn. Bạn có thể đọc mã, báo lỗi hoặc đóng góp trên GitHub.",
       cta: "Xem mã nguồn trên GitHub",
     },
     faq: {
@@ -162,7 +164,11 @@ export const vi = {
         { q: "Tài liệu của tôi có bị gửi lên máy chủ không?", a: "Tệp luôn nằm trên máy của bạn. Khi bạn nhờ Faam AI, phần nội dung cần thiết được gửi tới dịch vụ AI bạn chọn; với AI cục bộ (Ollama, LM Studio, llama.cpp) thì không có gì rời khỏi máy." },
         { q: "Faam AI dùng được những mô hình nào?", a: "Faam AI Cloud, hoặc API key của OpenAI, Anthropic Claude, Google Gemini, DeepSeek, xAI Grok, Mistral, Groq, OpenRouter, Qwen, Kimi, GLM, MiniMax và mọi máy chủ tương thích OpenAI. Để Faam AI sửa được tài liệu, hãy chọn mô hình hỗ trợ gọi công cụ (tool calling)." },
         { q: "Faam AI Cloud là gì?", a: "Faam AI Cloud cho phép bạn dùng các mô hình AI ngay trong ứng dụng chỉ bằng tài khoản FaamOffice, không cần API key: vào Cài đặt → Mô hình AI, chọn Faam AI Cloud rồi đăng nhập là xong. Để dịch vụ ổn định cho mọi người, số lượt dùng mỗi ngày có thể được giới hạn. Lịch sử sử dụng hiển thị trong trang Tài khoản." },
-        { q: "Vì sao macOS hoặc Windows cảnh báo khi mở lần đầu?", a: "Bản cài chưa được Apple hay Microsoft ký số. Trên macOS 15 trở lên: mở app, bấm Done khi bị chặn, rồi vào System Settings → Privacy & Security và bấm Open Anyway (macOS 14 trở về trước: nhấp chuột phải → Open). Trên Windows, khi thấy “Windows protected your PC”, chọn More info rồi Run anyway; nếu Smart App Control của Windows 11 chặn thì không có nút chạy tiếp. Chúng tôi đang chuẩn bị bản ký số để bỏ các bước này." },
+        {
+          q: "Vì sao macOS hoặc Windows cảnh báo khi mở lần đầu?",
+          a: "Bản cài chưa được Apple hay Microsoft ký số. Trên macOS 15 trở lên: mở app; khi hộp thoại báo “FaamOffice” chưa được mở, bấm “Xong” (Done) — KHÔNG bấm “Chuyển vào Thùng rác” (Move to Trash) — rồi vào Cài đặt hệ thống (System Settings) → Quyền riêng tư & Bảo mật (Privacy & Security) → mục Bảo mật (Security), bấm “Vẫn mở” (Open Anyway; nút này hiện khoảng 1 giờ), nhập mật khẩu hoặc dùng Touch ID rồi bấm “Mở” (Open). Trên macOS 14 trở về trước: nhấp chuột phải → Mở (Open), hoặc chạy lệnh xattr có trong trang Tải về. Trên Windows, khi thấy “Windows đã bảo vệ PC của bạn” (Windows protected your PC), bấm “Thông tin thêm” (More info) rồi “Vẫn chạy” (Run anyway); nếu Smart App Control của Windows 11 chặn thì không có nút chạy tiếp. Chúng tôi đang chuẩn bị bản ký số để bỏ các bước này.",
+          storeNote: "Trên Windows 10 và 11, bạn cũng có thể cài FaamOffice từ Microsoft Store: bản này được Microsoft ký nên không có các cảnh báo trên và được Store tự cập nhật.",
+        },
         { q: "Mở tệp Word, Excel có giữ nguyên định dạng không?", a: "FaamOffice đọc và ghi trực tiếp định dạng gốc (.docx, .xlsx, .pptx), nên tệp lưu ra vẫn mở được trong Microsoft Office, Google Docs hay LibreOffice. Với tài liệu rất phức tạp, một vài chi tiết hiển thị có thể khác đôi chút." },
       ],
     },
@@ -184,6 +190,13 @@ export const vi = {
     recommended: "Đề xuất cho máy của bạn",
     downloadFor: "Tải cho {os}",
     fallbackNote: "Không lấy được danh sách tệp của bản mới nhất, các nút sẽ mở trang phát hành trên GitHub.",
+    store: {
+      recommended: "Khuyên dùng",
+      recommendedOption: "Microsoft Store (khuyên dùng)",
+      badgeAlt: "Tải FaamOffice từ Microsoft Store",
+      note: "Được Microsoft ký, không có cảnh báo SmartScreen và được Microsoft Store tự cập nhật.",
+      orInstaller: "Hoặc tải bộ cài:",
+    },
     platforms: {
       mac: {
         name: "macOS",
@@ -204,8 +217,9 @@ export const vi = {
     firstLaunch: {
       title: "Lần đầu mở ứng dụng",
       intro: "Bản cài chưa được Apple và Microsoft ký số, nên hệ điều hành sẽ cảnh báo ở lần mở đầu tiên. Đây là cách mở an toàn:",
-      mac: "Kéo FaamOffice vào thư mục Applications rồi mở. Trên macOS 15 trở lên, khi macOS báo không mở được, bấm Done, vào System Settings → Privacy & Security, kéo xuống mục Security và bấm Open Anyway (nút này hiện khoảng 1 giờ), rồi nhập mật khẩu và bấm Open. Trên macOS 14 trở về trước: nhấp chuột phải vào FaamOffice → Open → Open. Hoặc chạy lệnh sau trong Terminal:",
-      windows: "Khi thấy “Windows protected your PC”, chọn More info rồi Run anyway (dòng “Unknown publisher” là bình thường). Nếu Smart App Control của Windows 11 chặn thì không có nút chạy tiếp; hãy chờ bản đã ký số.",
+      mac: "Kéo FaamOffice vào thư mục Ứng dụng (Applications) rồi mở. Trên macOS 15 trở lên, khi hộp thoại báo “FaamOffice” chưa được mở, hãy bấm “Xong” (Done) — KHÔNG bấm “Chuyển vào Thùng rác” (Move to Trash). Sau đó mở Cài đặt hệ thống (System Settings) → Quyền riêng tư & Bảo mật (Privacy & Security), kéo xuống mục Bảo mật (Security) và bấm “Vẫn mở” (Open Anyway) — nút này hiện khoảng 1 giờ sau khi ứng dụng bị chặn — rồi nhập mật khẩu hoặc dùng Touch ID và bấm “Mở” (Open). Trên macOS 14 trở về trước: nhấp chuột phải vào FaamOffice → Mở (Open) → Mở (Open). Hoặc chạy lệnh sau trong Terminal:",
+      windows: "Khi thấy “Windows đã bảo vệ PC của bạn” (Windows protected your PC), bấm “Thông tin thêm” (More info) rồi “Vẫn chạy” (Run anyway); nhà phát hành hiện là không xác định (Unknown publisher) là bình thường. Nếu Smart App Control của Windows 11 chặn thì không có nút chạy tiếp; hãy chờ bản đã ký số.",
+      windowsStore: "Cách dễ nhất: cài FaamOffice từ Microsoft Store (nút “Tải từ Microsoft” ở thẻ Windows phía trên). Bản trên Store được Microsoft ký nên không hiện cảnh báo, không bị Smart App Control chặn và được Store tự cập nhật. Nếu dùng bộ cài .exe:",
       linux: "AppImage chạy trực tiếp sau khi cấp quyền thực thi; .deb và .rpm cài qua trình quản lý gói:",
     },
     more: {
@@ -302,6 +316,7 @@ export const vi = {
         ],
       },
       {
+        id: "cookies",
         heading: "4. Cookie",
         paragraphs: ["Trang web chỉ dùng cookie cần thiết:"],
         list: [
@@ -347,6 +362,27 @@ export const vi = {
         paragraphs: ["[TÊN ĐƠN VỊ VẬN HÀNH], [ĐỊA CHỈ], email: [EMAIL LIÊN HỆ]."],
       },
     ] as LegalSection[],
+    // Used only while Google ads are on (admin Settings): replaces the cookie
+    // section's text and is inserted after it; the headings are renumbered.
+    ads: {
+      cookiesIntro: "Trang web dùng các cookie cần thiết sau:",
+      cookiesAfter:
+        "Ngoài ra, khi bạn xem trang chủ hoặc trang Faam AI, Google và các đối tác quảng cáo có thể dùng cookie quảng cáo — xem mục Quảng cáo ngay bên dưới. Các trang khác không có quảng cáo.",
+      section: {
+        heading: "Quảng cáo",
+        paragraphs: [
+          "Trang chủ và trang Faam AI của trang web này hiển thị quảng cáo của Google AdSense. Ứng dụng FaamOffice trên máy tính không có quảng cáo, và trang web không hiển thị quảng cáo trên trang Tải về, các trang tài khoản, quản trị, đăng nhập hay các trang pháp lý.",
+          "Các nhà cung cấp bên thứ ba, bao gồm Google, sử dụng cookie để phân phát quảng cáo dựa trên những lần bạn truy cập trước đây vào trang web này hoặc các trang web khác.",
+          "Việc Google sử dụng cookie quảng cáo cho phép Google và các đối tác của Google phân phát quảng cáo cho bạn dựa trên lượt truy cập của bạn vào trang web này và/hoặc các trang web khác trên Internet.",
+        ],
+        list: [
+          "Bạn có thể chọn không nhận quảng cáo được cá nhân hóa trong Cài đặt quảng cáo của Google: https://www.google.com/settings/ads",
+          "Cách Google sử dụng thông tin từ các trang web dùng dịch vụ của Google: https://policies.google.com/technologies/ads",
+          "Bạn cũng có thể chọn không cho một số nhà cung cấp bên thứ ba dùng cookie cho quảng cáo được cá nhân hóa tại https://www.aboutads.info/choices",
+          "Khách truy cập từ Khu vực kinh tế châu Âu (EEA), Vương quốc Anh và Thụy Sĩ được hỏi ý kiến qua thông báo xin đồng ý của Google (nền tảng quản lý sự đồng ý được Google chứng nhận) trước khi cookie được dùng cho quảng cáo, và có thể thay đổi lựa chọn sau đó.",
+        ],
+      } as LegalSection,
+    },
   },
   terms: {
     metaTitle: "Điều khoản dịch vụ",
@@ -646,6 +682,70 @@ export const vi = {
         unsaved: "Có thay đổi chưa lưu.",
         fixErrors: "Hãy sửa các ô được đánh dấu rồi lưu lại.",
       },
+      ads: {
+        title: "Quảng cáo Google (AdSense)",
+        on: "Đang bật",
+        off: "Đang tắt",
+        explainOn:
+          "Script AdSense đang được tải trên trang chủ và trang Faam AI. Quảng cáo không bao giờ hiện trên trang Tải về, Tài khoản, Quản trị, đăng nhập, các trang pháp lý và trang 404, và không có trong ứng dụng FaamOffice.",
+        explainOff:
+          "Trang web không tải script quảng cáo nào. Nếu đã lưu mã nhà xuất bản, thẻ meta xác minh và /ads.txt vẫn được phục vụ để Google duyệt trang web.",
+        switchLabel: "Hiển thị quảng cáo Google",
+        turnOn: "Bật quảng cáo",
+        turnOff: "Tắt quảng cáo",
+        confirmOn:
+          "Bật quảng cáo Google? Script AdSense sẽ được tải trên trang chủ và trang Faam AI, và chính sách quyền riêng tư sẽ có thêm mục Quảng cáo.",
+        confirmOff: "Tắt quảng cáo Google? Script AdSense và các đơn vị quảng cáo sẽ được gỡ khỏi trang web.",
+        turnedOn: "Đã bật quảng cáo. Trang web cập nhật ngay.",
+        turnedOff: "Đã tắt quảng cáo.",
+        needPublisher: "Hãy nhập và lưu mã nhà xuất bản trước khi bật quảng cáo.",
+        publisherId: "Mã nhà xuất bản (publisher ID)",
+        publisherHint:
+          "Dạng ca-pub- hoặc pub- kèm 16 chữ số (AdSense → Tài khoản → Thông tin tài khoản). Khi đã lưu mã, trang web có thẻ meta google-adsense-account và /ads.txt ngay cả khi quảng cáo đang tắt, để Google xác minh trang web.",
+        autoAds: "Quảng cáo tự động (Auto ads)",
+        autoAdsHint:
+          "Bật: tải script trên cả trang chủ lẫn trang Faam AI để Auto ads (bật và cấu hình trong AdSense → Quảng cáo → Theo trang web) tự đặt quảng cáo. Tắt: chỉ tải script trên trang có đơn vị quảng cáo bên dưới — khi đó hãy tắt luôn Auto ads trong AdSense.",
+        slotsTitle: "Đơn vị quảng cáo (không bắt buộc)",
+        homeBottom: "Trang chủ, phía trên chân trang",
+        contentInline: "Trang Faam AI, giữa nội dung",
+        slotHint: "Mã đơn vị quảng cáo hiển thị đáp ứng (data-ad-slot), chỉ gồm chữ số, ví dụ 1234567890. Để trống nếu không dùng.",
+        adsTxt: "Dòng bổ sung cho ads.txt (không bắt buộc)",
+        adsTxtHint:
+          "Mỗi dòng một bản ghi: tên miền, mã tài khoản, DIRECT hoặc RESELLER, mã chứng nhận (không bắt buộc). Tối đa 50 dòng. Dòng của Google được tự thêm từ mã nhà xuất bản.",
+        viewAdsTxt: "Xem /ads.txt",
+        save: "Lưu cài đặt quảng cáo",
+        saved: "Đã lưu. Trang web cập nhật ngay; /ads.txt có thể được lưu đệm vài phút.",
+        unsaved: "Có thay đổi chưa lưu.",
+        fixErrors: "Hãy sửa các ô được đánh dấu rồi lưu lại.",
+        checklistTitle: "Việc cần làm",
+        checklist: [
+          "Tạo tài khoản AdSense, thêm trang web và chờ Google duyệt. Trang web cần có nội dung thật, hữu ích; việc duyệt có thể mất từ vài ngày đến vài tuần.",
+          "Trong AdSense → Quyền riêng tư và thông báo (Privacy & messaging), tạo và xuất bản thông báo GDPR (nền tảng quản lý sự đồng ý được Google chứng nhận) cho khách truy cập từ EEA, Vương quốc Anh và Thụy Sĩ. Thông báo chạy cùng script AdSense, không cần thêm mã.",
+          "Quảng cáo không bao giờ xuất hiện trong ứng dụng FaamOffice trên máy tính — chính sách của Google không cho phép.",
+          "Quảng cáo không hiển thị trên trang Tải về (tránh bấm nhầm cạnh nút tải), Tài khoản, Quản trị, đăng nhập/đăng ký và các trang pháp lý.",
+          "Khi quảng cáo bật, trang Chính sách quyền riêng tư tự có thêm mục Quảng cáo với nội dung công bố mà Google yêu cầu.",
+        ],
+      },
+      msStore: {
+        title: "Microsoft Store",
+        on: "Đang hiện",
+        off: "Đang ẩn",
+        explainOn:
+          "Thẻ Windows trên trang Tải về đang hiện nút “Tải từ Microsoft” làm lựa chọn khuyên dùng, phía trên bộ cài .exe; phần hướng dẫn mở lần đầu cũng nhắc tới Store.",
+        explainOff: "Nút Microsoft Store đang ẩn. Chỉ bật khi trang FaamOffice trên Microsoft Store đã được duyệt và công khai.",
+        switchLabel: "Microsoft Store: hiện nút tải",
+        turnOn: "Hiện nút Microsoft Store",
+        turnOff: "Ẩn nút Microsoft Store",
+        confirmOn: "Hiện nút Microsoft Store trên trang Tải về? Hãy chắc rằng trang ứng dụng trên Store đã công khai.",
+        confirmOff: "Ẩn nút Microsoft Store trên trang Tải về?",
+        turnedOn: "Đã hiện nút Microsoft Store.",
+        turnedOff: "Đã ẩn nút Microsoft Store.",
+        productId: "Mã sản phẩm (Store ID)",
+        productIdHint: "12 ký tự chữ và số, xem trong Partner Center → Quản lý sản phẩm → Danh tính sản phẩm (Product identity), ví dụ 9P0RJ9J87ZNQ.",
+        save: "Lưu mã sản phẩm",
+        saved: "Đã lưu mã sản phẩm.",
+        openStore: "Mở trang trên Microsoft Store",
+      },
       errors: {
         required: "Bắt buộc.",
         https_only: "Phải là địa chỉ https:// hợp lệ.",
@@ -655,6 +755,11 @@ export const vi = {
         duplicate: "Trùng mã kênh.",
         out_of_range: "Phải là số nguyên từ 0 đến 1.000.000.",
         invalid: "Giá trị không hợp lệ.",
+        publisher_id: "Mã nhà xuất bản phải có dạng ca-pub- (hoặc pub-) và 16 chữ số.",
+        slot_id: "Mã đơn vị chỉ gồm 6–20 chữ số.",
+        ads_txt_line: "Dòng {line} không đúng dạng “tên miền, mã tài khoản, DIRECT hoặc RESELLER[, mã chứng nhận]”.",
+        ads_txt_lines: "Tối đa 50 dòng.",
+        store_id: "Mã sản phẩm gồm 12 chữ cái in hoa và chữ số, ví dụ 9P0RJ9J87ZNQ.",
       },
     },
     announcements: {

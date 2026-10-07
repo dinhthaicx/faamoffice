@@ -76,7 +76,7 @@ payment gateway: admins add credits manually. While Faam credits are off (see
 Settings) the dashboard, user list and user page show request/token counts
 instead of credits; the adjustment form keeps working (balances are preserved).
 
-### Settings (Faam credits, follow channels)
+### Settings (Faam credits, follow channels, ads and Microsoft Store)
 
 `/vi/admin/settings` (`/en/…`, tab "Cài đặt" / "Settings") holds the site-wide
 settings, stored in the `SiteSetting` table (one JSON row per key, validated with
@@ -90,6 +90,8 @@ whole list):
 | `creditsEnabled` | `true` | **On**: every Faam AI Cloud request is charged in credits; an empty balance gets 402. **Off**: signing in is all a user needs — no balance check, no charge, no ledger entry (usage is still recorded with 0 credits) and no credit UI on the website or in the app. Turning it back on restores charging; balances and ledgers are untouched. |
 | `aiDailyRequestLimit` | `300` | Only while credits are off: Faam AI requests per user per day (0 = unlimited). A day is a calendar day in Asia/Ho_Chi_Minh (fixed UTC+7); the count is the user's usage records since local midnight plus their requests still running on this server process. Soft limit: a request finishing at the moment another is checked can let one extra through, and requests that produced no output are not counted. FaamOffice 0.11.1 and older show the limit as "AI service busy" (see the API contract, §3). |
 | `socialLinks` | `[]` | Up to 12 follow buttons `{ id, platform, url, label?, enabled }`, in display order: shown at the bottom of every website page and in the desktop app (above Settings in the Home sidebar). |
+| `ads` | `{ enabled: false, publisherId: null, autoAds: true, slots: {}, adsTxtExtra: "" }` | Google AdSense on the home and Faam AI pages only. A publisher ID enables the verification meta tag and `/ads.txt` even while ads are off. Manual units use `slots.homeBottom` and `slots.contentInline`. |
+| `msStore` | `{ enabled: false, productId: "9P0RJ9J87ZNQ" }` | Shows the Microsoft Store badge on the Windows download card and Store instructions in the home FAQ and first-launch section. Enable only once the Store listing is public. |
 
 Social platforms and the hosts their https URLs must use (subdomains allowed):
 `facebook` (facebook.com, fb.com, fb.me), `youtube` (youtube.com, youtu.be),
@@ -104,6 +106,23 @@ build time (the defaults when the database is unreachable then, e.g. in a Docker
 build). Saving the settings revalidates every page under the `[locale]` layout,
 so the website updates on the next visit; the layout also revalidates hourly so
 a build without database access catches up on its own.
+
+For AdSense, save the publisher ID (`ca-pub-` or `pub-` followed by 16 digits)
+before enabling ads. Publish Google's European regulations consent message in
+AdSense → Privacy & messaging for visitors in the EEA, UK and Switzerland;
+the app does not configure the AdSense account for you. See
+[Google's consent requirements](https://support.google.com/adsense/answer/13554020?hl=en).
+Optional manual units accept 6–20 digits. Extra ads.txt records accept at most
+50 lines of `domain, account, DIRECT|RESELLER[, certificationId]`. The privacy
+page adds advertising disclosures while ads are enabled.
+
+The proxy applies an AdSense-compatible CSP only to pages loading ads, following
+[Google's CSP guidance](https://support.google.com/adsense/answer/16283098?hl=en).
+Links entering or leaving an ad page use a full document navigation so the
+browser receives that page's CSP and removes previous ads. Other pages retain
+the site-wide policy. `/ads.txt` returns 404 before configuration, 200 with
+verification records after saving a publisher, and a retryable 503 when the
+stored advertising settings cannot be read.
 
 ### Announcements (in-app dialogs)
 
@@ -417,10 +436,11 @@ same-site `Origin` header (CSRF), and are rate limited per process:
 `POST /api/account/{profile,password,delete,resend-verification,tokens/revoke}`,
 `POST /api/admin/users/:id/{credits,status}`,
 `PATCH /api/admin/settings` (any subset of `{ creditsEnabled, aiDailyRequestLimit,
-socialLinks }`; `PUT` takes all three; both reply `{ ok: true, settings }` with the
+socialLinks, ads, msStore }`; `PUT` takes all five; both reply `{ ok: true, settings }` with the
 stored values; invalid input → 400 `invalid_request` with `fields`, e.g.
 `{ "socialLinks.2.url": "wrong_host" }`; codes `required`, `https_only`,
-`wrong_host`, `too_long`, `too_many`, `duplicate`, `out_of_range`, `invalid`;
+`wrong_host`, `too_long`, `too_many`, `duplicate`, `out_of_range`, `invalid`,
+`publisher_id`, `slot_id`, `ads_txt_line`, `ads_txt_lines`, `store_id`;
 `creditsEnabled` must be a JSON boolean),
 `POST /api/admin/announcements` (create), `POST /api/admin/announcements/:id`
 (update; replies with the stored editor `values` and `image`),
@@ -430,6 +450,13 @@ stored values; invalid input → 400 `invalid_request` with `fields`, e.g.
 reads: `GET /api/admin/announcements/images/:id` (editor preview, drafts included).
 
 ## Testing
+
+After `npm run build`, run `npm run smoke:marketing` to start a local production
+server with a temporary SQLite database. It verifies authenticated settings,
+page regeneration after saving, ad scripts and CSP, Microsoft Store badges,
+privacy disclosures, ads.txt and disabling both features. It never changes
+the configured database; generated page output is restored afterward and the
+temporary database is removed on success.
 
 ```bash
 npm test

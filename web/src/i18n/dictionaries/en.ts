@@ -59,6 +59,7 @@ export const en: Dictionary = {
     credits: "credits",
     breadcrumbHome: "Home",
     breadcrumb: "Breadcrumb",
+    advertisement: "Advertisement",
   },
   home: {
     metaTitle: "FaamOffice — The open-source office suite with Faam AI",
@@ -150,7 +151,7 @@ export const en: Dictionary = {
       eyebrow: "Open source",
       title: "Truly free, with no feature limits",
       description:
-        "FaamOffice is released under the Apache-2.0 license and is a fork of GenOffice. No ads, no locked features, no collecting your documents. Read the code, report issues or contribute on GitHub.",
+        "FaamOffice is released under the Apache-2.0 license and is a fork of GenOffice. The desktop app has no ads, no locked features, and does not collect your documents. Read the code, report issues or contribute on GitHub.",
       cta: "View the source on GitHub",
     },
     faq: {
@@ -162,7 +163,12 @@ export const en: Dictionary = {
         { q: "Are my documents uploaded to a server?", a: "Your files always stay on your computer. When you ask Faam AI for help, the relevant content is sent to the AI service you chose; with local AI (Ollama, LM Studio, llama.cpp) nothing leaves your machine." },
         { q: "Which models can Faam AI use?", a: "Faam AI Cloud, or your API key for OpenAI, Anthropic Claude, Google Gemini, DeepSeek, xAI Grok, Mistral, Groq, OpenRouter, Qwen, Kimi, GLM, MiniMax, and any OpenAI-compatible server. To let Faam AI edit documents, choose a model that supports tool calling." },
         { q: "What is Faam AI Cloud?", a: "Faam AI Cloud lets you use AI models right inside the app with just your FaamOffice account, no API key: open Settings → AI models, choose Faam AI Cloud and sign in. To keep the service reliable for everyone, daily usage may be limited. Your usage history is on the Account page." },
-        { q: "Why does macOS or Windows warn me on first launch?", a: "The installers are not yet signed by Apple or Microsoft. On macOS 15 and later, open the app, click Done when it is blocked, then go to System Settings → Privacy & Security and click Open Anyway (macOS 14 and earlier: right-click → Open). On Windows, when you see “Windows protected your PC”, choose More info and then Run anyway; if Windows 11 Smart App Control blocks it, there is no way to continue. Signed builds that skip these steps are on the way." },
+        {
+          q: "Why does macOS or Windows warn me on first launch?",
+          a: "The installers are not yet signed by Apple or Microsoft. On macOS 15 and later, open the app and click Done when it is blocked. Then go to System Settings → Privacy & Security → Security, click Open Anyway (shown for about an hour), enter your password or use Touch ID, and click Open. On macOS 14 and earlier: right-click → Open, or use the xattr command on the Download page. On Windows, when you see “Windows protected your PC”, choose More info and then Run anyway; if Windows 11 Smart App Control blocks it, there is no way to continue. Signed builds that skip these steps are on the way.",
+          storeNote:
+            "On Windows 10 and 11 you can also install FaamOffice from the Microsoft Store. Microsoft signs this version and the Store updates it automatically.",
+        },
         { q: "Is formatting preserved when I open Word or Excel files?", a: "FaamOffice reads and writes the real formats (.docx, .xlsx, .pptx), so saved files open in Microsoft Office, Google Docs or LibreOffice. Very complex documents may show small visual differences." },
       ],
     },
@@ -207,12 +213,21 @@ export const en: Dictionary = {
       mac: "Drag FaamOffice to your Applications folder and open it. On macOS 15 and later, when macOS says it can’t be opened, click Done, go to System Settings → Privacy & Security, scroll to Security and click Open Anyway (shown for about an hour), then enter your password and click Open. On macOS 14 and earlier: right-click FaamOffice → Open → Open. Or run this in Terminal:",
       windows: "When you see “Windows protected your PC”, choose More info and then Run anyway (“Unknown publisher” is expected). If Windows 11 Smart App Control blocks it, there is no way to continue; please wait for the signed build.",
       linux: "The AppImage runs directly once it is executable; .deb and .rpm install through your package manager:",
+      windowsStore:
+        "The easiest option is to install FaamOffice from the Microsoft Store using the badge in the Windows card above. Microsoft signs this version and the Store updates it automatically. If you use the .exe installer:",
     },
     more: {
       title: "Releases and source code",
       allReleases: "See all releases",
       source: "Build from source",
       checksum: "Every release on GitHub is built automatically by GitHub Actions from the public source code.",
+    },
+    store: {
+      recommended: "Recommended",
+      recommendedOption: "Microsoft Store (recommended)",
+      badgeAlt: "Get FaamOffice from Microsoft Store",
+      note: "Signed by Microsoft, with automatic updates from the Microsoft Store and no SmartScreen warnings.",
+      orInstaller: "Or download the installer:",
     },
   },
   faamAi: {
@@ -309,6 +324,7 @@ export const en: Dictionary = {
           "A language cookie that remembers whether you chose Vietnamese or English.",
         ],
         after: "We do not use advertising cookies or third-party trackers.",
+        id: "cookies",
       },
       {
         heading: "5. Email",
@@ -347,6 +363,25 @@ export const en: Dictionary = {
         paragraphs: ["[OPERATOR NAME], [ADDRESS], email: [CONTACT EMAIL]."],
       },
     ] as LegalSection[],
+    ads: {
+      cookiesIntro: "This website uses the following necessary cookies:",
+      cookiesAfter:
+        "When you visit the home or Faam AI page, Google and its advertising partners may also use advertising cookies. See the Advertising section below. Other pages have no ads.",
+      section: {
+        heading: "Advertising",
+        paragraphs: [
+          "The home and Faam AI pages of this website display Google AdSense ads. The FaamOffice desktop app has no ads. The website does not display ads on the Download, account, admin, sign-in or legal pages.",
+          "Third-party vendors, including Google, use cookies to serve ads based on your previous visits to this or other websites.",
+          "Google's advertising cookies enable Google and its partners to serve ads based on your visits to this website and other websites on the Internet.",
+        ],
+        list: [
+          "You can opt out of personalized advertising in Google's Ad Settings: https://www.google.com/settings/ads",
+          "How Google uses information from sites that use its services: https://policies.google.com/technologies/ads",
+          "You can also opt out of some third-party vendors' use of cookies for personalized advertising at https://www.aboutads.info/choices",
+          "Visitors from the European Economic Area (EEA), the United Kingdom and Switzerland are asked for consent through Google's certified consent management platform before cookies are used for advertising, and can change their choice later.",
+        ],
+      } as LegalSection,
+    },
   },
   terms: {
     metaTitle: "Terms of service",
@@ -655,6 +690,73 @@ export const en: Dictionary = {
         duplicate: "Duplicate channel id.",
         out_of_range: "Must be a whole number from 0 to 1,000,000.",
         invalid: "Invalid value.",
+        store_id: "Product ID must contain 12 uppercase letters and digits, such as 9P0RJ9J87ZNQ.",
+        ads_txt_lines: "Up to 50 lines are allowed.",
+        ads_txt_line: "Line {line} must be “domain, account, DIRECT or RESELLER[, certification ID]”.",
+        slot_id: "Ad unit ID must contain 6–20 digits.",
+        publisher_id: "Publisher ID must be ca-pub- (or pub-) followed by 16 digits.",
+      },
+      msStore: {
+        title: "Microsoft Store",
+        on: "Visible",
+        off: "Hidden",
+        explainOn:
+          "The Windows card on the Download page shows the Microsoft Store badge as the recommended option above the .exe installer. First-launch instructions also mention the Store.",
+        explainOff: "The Microsoft Store badge is hidden. Enable it once FaamOffice's Store listing is approved and public.",
+        switchLabel: "Show the Microsoft Store badge",
+        turnOn: "Show the Microsoft Store badge",
+        turnOff: "Hide the Microsoft Store badge",
+        confirmOn: "Show the Microsoft Store badge on the Download page? Make sure the app's Store listing is public.",
+        confirmOff: "Hide the Microsoft Store badge on the Download page?",
+        turnedOn: "The Microsoft Store badge is visible.",
+        turnedOff: "The Microsoft Store badge is hidden.",
+        productId: "Product ID (Store ID)",
+        productIdHint: "12 letters and digits from Partner Center → Product management → Product identity, such as 9P0RJ9J87ZNQ.",
+        save: "Save product ID",
+        saved: "Product ID saved.",
+        openStore: "Open the Microsoft Store listing",
+      },
+      ads: {
+        title: "Google ads (AdSense)",
+        on: "On",
+        off: "Off",
+        explainOn:
+          "AdSense is enabled on the home and Faam AI pages. Ads never appear on Download, Account, Admin, sign-in, legal or 404 pages, or in the FaamOffice desktop app.",
+        explainOff: "No advertising script is loaded. A saved publisher ID still enables the verification meta tag and /ads.txt so Google can review the site.",
+        switchLabel: "Show Google ads",
+        turnOn: "Turn ads on",
+        turnOff: "Turn ads off",
+        confirmOn: "Turn Google ads on? The home and Faam AI pages will load AdSense, and the privacy policy will include an Advertising section.",
+        confirmOff: "Turn Google ads off? The advertising script and ad units will be removed from the website.",
+        turnedOn: "Ads are on. The website has been updated.",
+        turnedOff: "Ads are off.",
+        needPublisher: "Enter and save your publisher ID before turning ads on.",
+        publisherId: "Publisher ID",
+        publisherHint:
+          "ca-pub- or pub- followed by 16 digits (AdSense → Account → Account information). Saving it enables the google-adsense-account meta tag and /ads.txt even while ads are off, for site verification.",
+        autoAds: "Auto ads",
+        autoAdsHint:
+          "On: load the script on both the home and Faam AI pages so Auto ads can place ads (configure it in AdSense → Ads → By site). Off: only load the script on pages with a manual unit below; also turn Auto ads off in AdSense.",
+        slotsTitle: "Ad units (optional)",
+        homeBottom: "Home page, above the footer",
+        contentInline: "Faam AI page, within the content",
+        slotHint: "Responsive display ad unit ID (data-ad-slot), digits only, such as 1234567890. Leave blank to omit the unit.",
+        adsTxt: "Extra ads.txt records (optional)",
+        adsTxtHint:
+          "One record per line: domain, account ID, DIRECT or RESELLER, optional certification ID. Up to 50 lines. Google's record is added automatically from your publisher ID.",
+        viewAdsTxt: "View /ads.txt",
+        save: "Save advertising settings",
+        saved: "Saved. The website has been updated; /ads.txt may be cached for a few minutes.",
+        unsaved: "You have unsaved changes.",
+        fixErrors: "Fix the highlighted fields and save again.",
+        checklistTitle: "Before enabling ads",
+        checklist: [
+          "Create an AdSense account, add this website and wait for Google's review. The site needs useful original content; review may take days or weeks.",
+          "In AdSense → Privacy & messaging, create and publish a European regulations message using Google's certified consent management platform for visitors in the EEA, the UK and Switzerland. It runs with the AdSense script; no extra code is needed.",
+          "Ads never appear in the FaamOffice desktop app; Google's policies do not allow that placement.",
+          "Ads do not appear on Download, Account, Admin, sign-in, registration or legal pages.",
+          "When ads are on, the privacy policy includes an Advertising section with Google's required disclosures.",
+        ],
       },
     },
     announcements: {

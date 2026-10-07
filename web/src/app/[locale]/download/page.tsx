@@ -6,11 +6,13 @@ import { JsonLd } from "@/components/json-ld";
 import { Alert, buttonClass, Card, Container, DownloadIcon } from "@/components/ui";
 import { getLatestRelease, type AssetKey, type ReleaseInfo } from "@/lib/releases";
 import { pageMetadata, softwareApplicationLd } from "@/lib/seo";
-import { RELEASES_URL, SOURCE_BUILD_URL } from "@/lib/site";
+import { getSiteSettings } from "@/lib/site-settings";
+import { msStoreUrl, RELEASES_URL, SOURCE_BUILD_URL } from "@/lib/site";
 import { toLocale, type Locale } from "@/i18n/config";
 import { getDictionary } from "@/i18n";
 
-// Static page, refreshed hourly with the latest GitHub release.
+// Static page, refreshed hourly with the latest GitHub release (and whenever an
+// admin saves the site settings: the Microsoft Store badge). Never shows ads.
 export const revalidate = 3600;
 
 export async function generateMetadata({ params }: PageProps<"/[locale]/download">): Promise<Metadata> {
@@ -29,6 +31,18 @@ function formatDate(iso: string | null, locale: Locale): string | null {
   return new Intl.DateTimeFormat(locale === "vi" ? "vi-VN" : "en-US", { dateStyle: "long", timeZone: "UTC" }).format(new Date(iso));
 }
 
+/** Microsoft's "Get it from Microsoft" badge (self-hosted SVGs; the light one on dark backgrounds). */
+function StoreBadge({ url, locale, alt }: { url: string; locale: Locale; alt: string }) {
+  return (
+    <a href={url} rel="noopener" className="inline-flex rounded-lg">
+      <picture>
+        <source srcSet={`/badges/microsoft-store-${locale}-light.svg`} media="(prefers-color-scheme: dark)" />
+        <img src={`/badges/microsoft-store-${locale}-dark.svg`} alt={alt} width={161} height={44} className="h-12 w-auto" />
+      </picture>
+    </a>
+  );
+}
+
 function assetLink(release: ReleaseInfo, key: AssetKey) {
   const asset = release.assets[key];
   return { url: asset?.url ?? release.htmlUrl, fileName: asset?.name, size: asset ? formatSize(asset.size) : "" };
@@ -39,6 +53,9 @@ export default async function DownloadPage({ params }: PageProps<"/[locale]/down
   const dict = getDictionary(locale);
   const d = dict.download;
   const release = await getLatestRelease();
+  const { msStore } = await getSiteSettings();
+  // Shown only once the admin turned it on (the listing has to be live first).
+  const storeUrl = msStore.enabled ? msStoreUrl(msStore.productId) : null;
   const hasAssets = Object.keys(release.assets).length > 0;
   const released = formatDate(release.publishedAt, locale);
 
@@ -114,7 +131,13 @@ export default async function DownloadPage({ params }: PageProps<"/[locale]/down
                 primary: option("macArm", d.platforms.mac.assets.macArm),
                 secondary: [option("macIntel", `${d.platforms.mac.name} — ${d.platforms.mac.assets.macIntel}`)],
               },
-              windows: { name: d.platforms.windows.name, primary: option("winExe", d.platforms.windows.assets.winExe) },
+              windows: storeUrl
+                ? {
+                    name: d.platforms.windows.name,
+                    primary: { label: d.store.recommendedOption, url: storeUrl },
+                    secondary: [option("winExe", `${d.platforms.windows.name} — ${d.platforms.windows.assets.winExe}`)],
+                  }
+                : { name: d.platforms.windows.name, primary: option("winExe", d.platforms.windows.assets.winExe) },
               linux: {
                 name: d.platforms.linux.name,
                 primary: option("appImage", d.platforms.linux.assets.appImage),
@@ -134,7 +157,19 @@ export default async function DownloadPage({ params }: PageProps<"/[locale]/down
                 <Card className="h-full">
                   <h2 className="text-xl font-bold">{p.name}</h2>
                   <p className="mt-1 text-sm text-muted">{p.requirement}</p>
-                  <ul className="mt-5 space-y-3">
+                  {p.id === "windows" && storeUrl ? (
+                    <div className="mt-5">
+                      <p className="inline-flex rounded-full bg-success-bg px-2.5 py-0.5 text-xs font-semibold text-success-fg">
+                        {d.store.recommended}
+                      </p>
+                      <div className="mt-3">
+                        <StoreBadge url={storeUrl} locale={locale} alt={d.store.badgeAlt} />
+                      </div>
+                      <p className="mt-2 text-xs leading-relaxed text-muted">{d.store.note}</p>
+                      <p className="mt-5 text-sm font-medium">{d.store.orInstaller}</p>
+                    </div>
+                  ) : null}
+                  <ul className={p.id === "windows" && storeUrl ? "mt-3 space-y-3" : "mt-5 space-y-3"}>
                     {p.assets.map((a) => {
                       const link = assetLink(release, a.key);
                       return (
@@ -178,6 +213,7 @@ export default async function DownloadPage({ params }: PageProps<"/[locale]/down
             </div>
             <div>
               <h3 className="text-lg font-semibold">{d.platforms.windows.name}</h3>
+              {storeUrl ? <p className="mt-2 text-sm leading-relaxed text-muted">{d.firstLaunch.windowsStore}</p> : null}
               <p className="mt-2 text-sm leading-relaxed text-muted">{d.firstLaunch.windows}</p>
             </div>
             <div>

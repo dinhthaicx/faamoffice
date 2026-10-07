@@ -1,10 +1,12 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { AdsenseScript, AdSlot } from "@/components/ads";
 import { AppIcon } from "@/components/app-icons";
 import { CodeBlock } from "@/components/code-block";
 import { JsonLd } from "@/components/json-ld";
 import { LogoMark } from "@/components/logo";
 import { ArrowRightIcon, buttonClass, Card, CheckIcon, Container, DownloadIcon, Eyebrow, SectionHeading } from "@/components/ui";
+import { adsForPage } from "@/lib/ads";
 import { faqLd, organizationLd, pageMetadata, softwareApplicationLd, websiteLd } from "@/lib/seo";
 import { getSiteSettings, publicSocialLinks } from "@/lib/site-settings";
 import { AI_PROVIDERS, GITHUB_URL, LOCAL_AI } from "@/lib/site";
@@ -98,11 +100,19 @@ export default async function HomePage({ params }: PageProps<"/[locale]">) {
   const locale = toLocale((await params).locale);
   const dict = getDictionary(locale);
   const h = dict.home;
-  const socialUrls = publicSocialLinks((await getSiteSettings()).socialLinks).map((s) => s.url);
+  const settings = await getSiteSettings();
+  const socialUrls = publicSocialLinks(settings.socialLinks).map((s) => s.url);
+  const ads = adsForPage(settings.ads, "home");
+  // The Microsoft Store option is only mentioned while the download page shows its badge.
+  const faqItems = h.faq.items.map((item) => {
+    const storeNote = "storeNote" in item ? item.storeNote : undefined;
+    return { q: item.q, a: settings.msStore.enabled && storeNote ? `${item.a} ${storeNote}` : item.a };
+  });
 
   return (
     <>
-      <JsonLd data={[organizationLd(socialUrls), websiteLd(locale, dict), softwareApplicationLd(locale, dict), faqLd(h.faq.items)]} />
+      <JsonLd data={[organizationLd(socialUrls), websiteLd(locale, dict), softwareApplicationLd(locale, dict), faqLd(faqItems)]} />
+      <AdsenseScript ads={ads} />
 
       {/* Hero */}
       <section className="hero-glow overflow-hidden pb-20 pt-16 sm:pt-24" aria-labelledby="hero-title">
@@ -267,7 +277,7 @@ export default async function HomePage({ params }: PageProps<"/[locale]">) {
             {h.faq.title}
           </h2>
           <div className="mt-10 divide-y divide-border rounded-2xl border border-border bg-card">
-            {h.faq.items.map((item) => (
+            {faqItems.map((item) => (
               <details key={item.q} className="group px-5 py-4 sm:px-6">
                 <summary className="flex cursor-pointer items-start justify-between gap-4 rounded-lg">
                   <h3 className="font-semibold">{item.q}</h3>
@@ -306,6 +316,15 @@ export default async function HomePage({ params }: PageProps<"/[locale]">) {
           </div>
         </Container>
       </section>
+
+      {/* Ad unit above the footer, well clear of the download button (admin Settings → Google ads) */}
+      {ads?.slot ? (
+        <div className="pb-4 pt-16">
+          <Container>
+            <AdSlot ads={ads} label={dict.common.advertisement} />
+          </Container>
+        </div>
+      ) : null}
     </>
   );
 }

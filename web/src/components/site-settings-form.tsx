@@ -39,7 +39,7 @@ function fill(template: string, values: Record<string, string | number>): string
 }
 
 /** PATCH /api/admin/settings with a partial body; maps API errors to localized text. */
-async function saveSettings(body: Record<string, unknown>, errors: Record<string, string>): Promise<SaveResult> {
+export async function saveSettings(body: Record<string, unknown>, errors: Record<string, string>): Promise<SaveResult> {
   try {
     const res = await fetch("/api/admin/settings", {
       method: "PATCH",
@@ -59,7 +59,7 @@ async function saveSettings(body: Record<string, unknown>, errors: Record<string
   }
 }
 
-function Status({ error, success }: { error: string | null; success: string | null }) {
+export function Status({ error, success }: { error: string | null; success: string | null }) {
   return (
     <div aria-live="polite" className="empty:hidden">
       {error ? (

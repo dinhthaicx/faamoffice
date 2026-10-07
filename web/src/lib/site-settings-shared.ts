@@ -102,6 +102,11 @@ export const SETTINGS_ERROR_CODES = [
   "duplicate",
   "out_of_range",
   "invalid",
+  "publisher_id",
+  "slot_id",
+  "ads_txt_line",
+  "ads_txt_lines",
+  "store_id",
 ] as const;
 export type SettingsErrorCode = (typeof SETTINGS_ERROR_CODES)[number];
 const KNOWN_CODES = new Set<string>(SETTINGS_ERROR_CODES);
@@ -183,9 +188,151 @@ export function parseStoredSocialLinks(raw: unknown): { links: SocialLink[]; dro
   return { links, dropped };
 }
 
+// ---------------------------------------------------------------- Google AdSense
+
+/** AdSense publisher id as typed: "ca-pub-" or "pub-" and 16 digits (stored as "ca-pub-…"). */
+export const PUBLISHER_ID_RE = /^(?:ca-)?pub-(\d{16})$/i;
+/** Ad unit id (data-ad-slot): digits only. */
+export const AD_SLOT_RE = /^\d{6,20}$/;
+export const ADS_TXT_MAX_LINES = 50;
+export const ADS_TXT_LINE_MAX = 300;
+/** Whole textarea, blank lines included (generous: 50 lines of up to 300 characters). */
+export const ADS_TXT_TEXT_MAX = 20_000;
+/** Where an ad unit can be placed (admin "slots"): the home page above the footer, inside the Faam AI page. */
+export const AD_SLOT_KEYS = ["homeBottom", "contentInline"] as const;
+export type AdSlotKey = (typeof AD_SLOT_KEYS)[number];
+
+export type AdsSettings = {
+  /** Load the AdSense script on the ad pages (home, Faam AI). Requires publisherId. */
+  enabled: boolean;
+  /** "ca-pub-" + 16 digits; drives the verification meta tag and /ads.txt even while ads are off. */
+  publisherId: string | null;
+  /** Load the script on both ad pages so Auto ads (configured in AdSense) can place ads; off: only where a unit is set. */
+  autoAds: boolean;
+  /** Manual responsive units (data-ad-slot), each optional. */
+  slots: Partial<Record<AdSlotKey, string>>;
+  /** Extra ads.txt records, one per line, normalized ("domain, account, DIRECT|RESELLER[, certId]"). */
+  adsTxtExtra: string;
+};
+
+const ADS_TXT_DOMAIN_RE = /^(?=.{1,253}$)(?:[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?\.)+[a-z][a-z0-9-]{0,62}$/i;
+const ADS_TXT_ACCOUNT_RE = /^[A-Za-z0-9][A-Za-z0-9._:\-]{0,99}$/;
+const ADS_TXT_CERT_RE = /^[A-Za-z0-9]{1,64}$/;
+
+/**
+ * One ads.txt data record in its canonical form ("example.com, 123, DIRECT, abc"),
+ * or null when the line is not a valid record (comments and variables are not accepted).
+ */
+export function normalizeAdsTxtLine(line: string): string | null {
+  const text = line.trim();
+  if (!text || text.length > ADS_TXT_LINE_MAX) return null;
+  const fields = text.split(",").map((f) => f.trim());
+  if (fields.length < 3 || fields.length > 4) return null;
+  const [domain, account, relationship, certId] = fields;
+  if (!ADS_TXT_DOMAIN_RE.test(domain) || !ADS_TXT_ACCOUNT_RE.test(account)) return null;
+  const rel = relationship.toUpperCase();
+  if (rel !== "DIRECT" && rel !== "RESELLER") return null;
+  if (certId !== undefined && !ADS_TXT_CERT_RE.test(certId)) return null;
+  return [domain.toLowerCase(), account, rel, ...(certId !== undefined ? [certId] : [])].join(", ");
+}
+
+const publisherIdSchema = z
+  .string({ error: "invalid" })
+  .trim()
+  .nullish()
+  .transform((value, ctx) => {
+    if (!value) return null;
+    const match = PUBLISHER_ID_RE.exec(value);
+    if (!match) {
+      ctx.addIssue({ code: "custom", message: "publisher_id" });
+      return z.NEVER;
+    }
+    return `ca-pub-${match[1]}`;
+  });
+
+const adSlotSchema = z
+  .string({ error: "invalid" })
+  .trim()
+  .nullish()
+  .transform((value, ctx) => {
+    if (!value) return undefined;
+    if (!AD_SLOT_RE.test(value)) {
+      ctx.addIssue({ code: "custom", message: "slot_id" });
+      return z.NEVER;
+    }
+    return value;
+  });
+
+const adSlotsSchema = z
+  .object({ homeBottom: adSlotSchema, contentInline: adSlotSchema }, { error: "invalid" })
+  .transform((slots) => {
+    const out: Partial<Record<AdSlotKey, string>> = {};
+    for (const key of AD_SLOT_KEYS) if (slots[key]) out[key] = slots[key];
+    return out;
+  });
+
+/** Issues are keyed by the 0-based line number in the text as typed ("adsTxtExtra.3"). */
+const adsTxtExtraSchema = z
+  .string({ error: "invalid" })
+  .max(ADS_TXT_TEXT_MAX, { error: "too_long" })
+  .transform((text, ctx) => {
+    const lines = text.split(/\r\n|\r|\n/);
+    const out: string[] = [];
+    let records = 0;
+    lines.forEach((line, i) => {
+      if (!line.trim()) return;
+      records += 1;
+      const normalized = normalizeAdsTxtLine(line);
+      if (normalized) out.push(normalized);
+      else ctx.addIssue({ code: "custom", path: [i], message: "ads_txt_line" });
+    });
+    if (records > ADS_TXT_MAX_LINES) ctx.addIssue({ code: "custom", message: "ads_txt_lines" });
+    return out.join("\n");
+  });
+
+export const adsSettingsSchema = z
+  .object(
+    {
+      enabled: z.boolean({ error: "invalid" }),
+      publisherId: publisherIdSchema,
+      autoAds: z.boolean({ error: "invalid" }),
+      slots: adSlotsSchema.optional().transform((v) => v ?? {}),
+      adsTxtExtra: adsTxtExtraSchema.optional().transform((v) => v ?? ""),
+    },
+    { error: "invalid" },
+  )
+  .superRefine((ads, ctx) => {
+    if (ads.enabled && !ads.publisherId) ctx.addIssue({ code: "custom", path: ["publisherId"], message: "required" });
+  });
+
+// ---------------------------------------------------------------- Microsoft Store
+
+/** Microsoft Store product id (Store ID), e.g. 9P0RJ9J87ZNQ. */
+export const MS_STORE_ID_RE = /^[0-9A-Z]{12}$/;
+export const MS_STORE_DEFAULT_PRODUCT_ID = "9P0RJ9J87ZNQ";
+
+export type MsStoreSettings = {
+  /** Show the "Get it from Microsoft" badge on the download page (off until the listing is live). */
+  enabled: boolean;
+  productId: string;
+};
+
+export const msStoreSettingsSchema = z.object(
+  {
+    enabled: z.boolean({ error: "invalid" }),
+    productId: z
+      .string({ error: "required" })
+      .trim()
+      .toUpperCase()
+      .min(1, { error: "required" })
+      .regex(MS_STORE_ID_RE, { error: "store_id" }),
+  },
+  { error: "invalid" },
+);
+
 // ---------------------------------------------------------------- settings
 
-export const SETTING_KEYS = ["creditsEnabled", "aiDailyRequestLimit", "socialLinks"] as const;
+export const SETTING_KEYS = ["creditsEnabled", "aiDailyRequestLimit", "socialLinks", "ads", "msStore"] as const;
 export type SettingKey = (typeof SETTING_KEYS)[number];
 
 export type SiteSettings = {
@@ -195,11 +342,21 @@ export type SiteSettings = {
   aiDailyRequestLimit: number;
   /** Follow buttons (website footer, desktop app), in display order. */
   socialLinks: SocialLink[];
+  /** Google AdSense on the website's home and Faam AI pages (never in the desktop app). */
+  ads: AdsSettings;
+  /** Microsoft Store badge on the download page. */
+  msStore: MsStoreSettings;
 };
 
 /** A fresh copy of the defaults (callers may mutate it). */
 export function defaultSiteSettings(): SiteSettings {
-  return { creditsEnabled: true, aiDailyRequestLimit: 300, socialLinks: [] };
+  return {
+    creditsEnabled: true,
+    aiDailyRequestLimit: 300,
+    socialLinks: [],
+    ads: { enabled: false, publisherId: null, autoAds: true, slots: {}, adsTxtExtra: "" },
+    msStore: { enabled: false, productId: MS_STORE_DEFAULT_PRODUCT_ID },
+  };
 }
 
 /** Whole numbers only; numeric strings from form inputs are accepted ("" is not 0). */
@@ -221,6 +378,8 @@ export const settingValueSchemas = {
   creditsEnabled: z.boolean({ error: "invalid" }),
   aiDailyRequestLimit: dailyLimitSchema,
   socialLinks: socialLinksSchema,
+  ads: adsSettingsSchema,
+  msStore: msStoreSettingsSchema,
 } satisfies Record<SettingKey, z.ZodType>;
 
 /** PATCH body: any subset of the settings; unknown keys are rejected. */
@@ -228,6 +387,8 @@ export const settingsPatchSchema = z.strictObject({
   creditsEnabled: settingValueSchemas.creditsEnabled.optional(),
   aiDailyRequestLimit: settingValueSchemas.aiDailyRequestLimit.optional(),
   socialLinks: settingValueSchemas.socialLinks.optional(),
+  ads: settingValueSchemas.ads.optional(),
+  msStore: settingValueSchemas.msStore.optional(),
 });
 
 /** PUT body: every setting. */
@@ -235,6 +396,8 @@ export const settingsPutSchema = z.strictObject({
   creditsEnabled: settingValueSchemas.creditsEnabled,
   aiDailyRequestLimit: settingValueSchemas.aiDailyRequestLimit,
   socialLinks: settingValueSchemas.socialLinks,
+  ads: settingValueSchemas.ads,
+  msStore: settingValueSchemas.msStore,
 });
 
 export type SiteSettingsPatch = Partial<SiteSettings>;

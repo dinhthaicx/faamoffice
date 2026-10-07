@@ -1,9 +1,12 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { AdsenseScript, AdSlot } from "@/components/ads";
 import { Breadcrumbs } from "@/components/breadcrumbs";
 import { CodeBlock } from "@/components/code-block";
 import { Alert, buttonClass, Card, Container } from "@/components/ui";
+import { adsForPage } from "@/lib/ads";
 import { pageMetadata } from "@/lib/seo";
+import { getSiteSettings } from "@/lib/site-settings";
 import { AI_PROVIDERS } from "@/lib/site";
 import { toLocale } from "@/i18n/config";
 import { format, getDictionary } from "@/i18n";
@@ -19,6 +22,7 @@ export default async function FaamAiPage({ params }: PageProps<"/[locale]/faam-a
   const dict = getDictionary(locale);
   const d = dict.faamAi;
   const copy = { copyLabel: dict.common.copy, copiedLabel: dict.common.copied };
+  const ads = adsForPage((await getSiteSettings()).ads, "faamAi");
 
   const localSetups = [
     {
@@ -49,6 +53,7 @@ export default async function FaamAiPage({ params }: PageProps<"/[locale]/faam-a
 
   return (
     <>
+      <AdsenseScript ads={ads} />
       <section className="hero-glow pb-10 pt-10">
         <Container>
           <Breadcrumbs
@@ -108,6 +113,15 @@ export default async function FaamAiPage({ params }: PageProps<"/[locale]/faam-a
           </div>
         </Container>
       </section>
+
+      {/* Ad unit between the comparison table and the sections with buttons (admin Settings → Google ads) */}
+      {ads?.slot ? (
+        <div className="py-10">
+          <Container>
+            <AdSlot ads={ads} label={dict.common.advertisement} />
+          </Container>
+        </div>
+      ) : null}
 
       <section id="cloud" className="scroll-mt-20 py-10" aria-labelledby="cloud-title">
         <Container className="grid gap-8 lg:grid-cols-[1fr_1fr]">

@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { AdminNav } from "@/components/admin-nav";
 import { CreditsSettings, SocialLinksSettings } from "@/components/site-settings-form";
+import { AdsSettings, MsStoreSettings } from "@/components/site-settings-marketing-form";
 import { Container } from "@/components/ui";
 import { requirePageAdmin } from "@/lib/auth";
 import { privateMetadata } from "@/lib/seo";
@@ -38,6 +39,8 @@ export default async function AdminSettingsPage({ params }: Props) {
           errors={dict.errors}
         />
         <SocialLinksSettings initial={settings.socialLinks} t={t} errors={dict.errors} websiteName={dict.footer.website} />
+        <AdsSettings initial={settings.ads} t={t} errors={dict.errors} />
+        <MsStoreSettings initial={settings.msStore} t={t} errors={dict.errors} />
       </div>
     </Container>
   );
