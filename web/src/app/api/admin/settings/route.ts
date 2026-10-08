@@ -1,6 +1,6 @@
 // Site settings (ADMIN, same-origin, JSON):
-//   PATCH /api/admin/settings — any subset of { creditsEnabled, aiDailyRequestLimit, socialLinks }
-//   PUT   /api/admin/settings — all three
+//   PATCH /api/admin/settings — any subset of the site settings
+//   PUT   /api/admin/settings — every setting
 // Both reply { ok: true, settings } with the stored (normalized) values;
 // validation errors are 400 invalid_request with `fields` keyed by path
 // ("socialLinks.2.url": "wrong_host").

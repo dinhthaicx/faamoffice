@@ -1,14 +1,38 @@
 {
   "repository": "dinhthaicx/faamoffice",
-  "version": "0.11.2",
-  "publishedAt": "2026-10-07T10:58:00Z",
-  "htmlUrl": "https://github.com/dinhthaicx/faamoffice/releases/tag/v0.11.2",
+  "version": "0.11.4",
+  "publishedAt": "2026-10-08T10:07:46Z",
+  "htmlUrl": "https://github.com/dinhthaicx/faamoffice/releases/tag/v0.11.4",
   "assets": {
-    "macArm": { "name": "FaamOffice-0.11.2-arm64.dmg", "url": "https://github.com/dinhthaicx/faamoffice/releases/download/v0.11.2/FaamOffice-0.11.2-arm64.dmg", "size": 184856194 },
-    "macIntel": { "name": "FaamOffice-0.11.2.dmg", "url": "https://github.com/dinhthaicx/faamoffice/releases/download/v0.11.2/FaamOffice-0.11.2.dmg", "size": 189871363 },
-    "winExe": { "name": "FaamOffice-Setup-0.11.2.exe", "url": "https://github.com/dinhthaicx/faamoffice/releases/download/v0.11.2/FaamOffice-Setup-0.11.2.exe", "size": 149183779 },
-    "appImage": { "name": "FaamOffice-0.11.2.AppImage", "url": "https://github.com/dinhthaicx/faamoffice/releases/download/v0.11.2/FaamOffice-0.11.2.AppImage", "size": 181255374 },
-    "deb": { "name": "faamoffice_0.11.2_amd64.deb", "url": "https://github.com/dinhthaicx/faamoffice/releases/download/v0.11.2/faamoffice_0.11.2_amd64.deb", "size": 147314596 },
-    "rpm": { "name": "faamoffice-0.11.2.x86_64.rpm", "url": "https://github.com/dinhthaicx/faamoffice/releases/download/v0.11.2/faamoffice-0.11.2.x86_64.rpm", "size": 121797725 }
+    "macArm": {
+      "name": "FaamOffice-0.11.4-arm64.dmg",
+      "url": "https://github.com/dinhthaicx/faamoffice/releases/download/v0.11.4/FaamOffice-0.11.4-arm64.dmg",
+      "size": 184852659
+    },
+    "macIntel": {
+      "name": "FaamOffice-0.11.4.dmg",
+      "url": "https://github.com/dinhthaicx/faamoffice/releases/download/v0.11.4/FaamOffice-0.11.4.dmg",
+      "size": 189862763
+    },
+    "winExe": {
+      "name": "FaamOffice-Setup-0.11.4.exe",
+      "url": "https://github.com/dinhthaicx/faamoffice/releases/download/v0.11.4/FaamOffice-Setup-0.11.4.exe",
+      "size": 149184064
+    },
+    "appImage": {
+      "name": "FaamOffice-0.11.4.AppImage",
+      "url": "https://github.com/dinhthaicx/faamoffice/releases/download/v0.11.4/FaamOffice-0.11.4.AppImage",
+      "size": 181255530
+    },
+    "deb": {
+      "name": "faamoffice_0.11.4_amd64.deb",
+      "url": "https://github.com/dinhthaicx/faamoffice/releases/download/v0.11.4/faamoffice_0.11.4_amd64.deb",
+      "size": 147335872
+    },
+    "rpm": {
+      "name": "faamoffice-0.11.4.x86_64.rpm",
+      "url": "https://github.com/dinhthaicx/faamoffice/releases/download/v0.11.4/faamoffice-0.11.4.x86_64.rpm",
+      "size": 121785345
+    }
   }
 }

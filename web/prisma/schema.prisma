@@ -252,7 +252,7 @@ model Announcement {
 /// Site-wide settings edited on the admin Settings page: one row per setting
 /// key, the value is JSON validated (with defaults) by src/lib/site-settings.ts.
 model SiteSetting {
-  /// "creditsEnabled" | "aiDailyRequestLimit" | "socialLinks".
+  /// "creditsEnabled" | "aiDailyRequestLimit" | "socialLinks" | "ads" | "msStore" | "aiBackend".
   key         String   @id
   /// JSON-encoded value.
   value       String
