@@ -17,6 +17,12 @@ import { getDictionary } from "@/i18n";
 // admin saves the site settings: the Microsoft Store badge). Never shows ads.
 export const revalidate = 3600;
 
+const platformStyle = {
+  mac: { ribbon: "warm-gradient", title: "text-download-text", button: buttonClass.download },
+  windows: { ribbon: "cool-gradient", title: "text-link", button: buttonClass.downloadCool },
+  linux: { ribbon: "violet-gradient", title: "text-ai-text", button: buttonClass.downloadAi },
+};
+
 export async function generateMetadata({ params }: PageProps<"/[locale]/download">): Promise<Metadata> {
   const locale = toLocale((await params).locale);
   const d = getDictionary(locale).download;
@@ -161,8 +167,9 @@ export default async function DownloadPage({ params }: PageProps<"/[locale]/down
           <ul className="grid gap-5 lg:grid-cols-3">
             {platforms.map((p) => (
               <li key={p.id} id={p.id} className="scroll-mt-24">
-                <div className="h-full rounded-2xl border border-accent/30 bg-card p-6 shadow-sm">
-                  <h2 className="text-xl font-bold text-link">{p.name}</h2>
+                <div className="card-elevation relative h-full overflow-hidden rounded-2xl border border-border bg-card p-6">
+                  <div className={`absolute inset-x-0 top-0 h-1.5 ${platformStyle[p.id].ribbon}`} aria-hidden="true" />
+                  <h2 className={`text-xl font-bold ${platformStyle[p.id].title}`}>{p.name}</h2>
                   <p className="mt-1 text-sm text-muted">{p.requirement}</p>
                   {p.id === "windows" && storeUrl ? (
                     <div className="mt-5">
@@ -181,12 +188,12 @@ export default async function DownloadPage({ params }: PageProps<"/[locale]/down
                         <li key={a.key}>
                           {link.url ? <DownloadLink href={link.url} fileName={link.fileName}
                             tracking={release.version ? { asset: a.key, version: release.version, locale, source: "platform" } : undefined}
-                            className={`${buttonClass.download} min-h-12 w-full justify-between`}>
+                            className={`${platformStyle[p.id].button} min-h-12 w-full justify-between`}>
                             <span className="flex items-center gap-2">
                               <DownloadIcon />
                               {a.label}
                             </span>
-                            {link.size ? <span className="shrink-0 rounded-md bg-accent-hover px-2 py-1 text-xs font-medium text-accent-fg">{link.size}</span> : null}
+                            {link.size ? <span className="shrink-0 rounded-md bg-card px-2 py-1 text-xs font-medium text-fg">{link.size}</span> : null}
                           </DownloadLink> : <span aria-disabled="true" className={`${buttonClass.secondary} w-full justify-between opacity-50`}>
                             {a.label}<span className="text-xs">{d.unavailable}</span>
                           </span>}

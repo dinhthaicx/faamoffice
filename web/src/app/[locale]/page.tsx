@@ -34,20 +34,20 @@ const AGENT_COMMANDS = [
 ].join("\n");
 
 const modeAccent: Record<string, string> = {
-  cloud: "from-[#3aac71] to-[#2b95c2]",
-  byok: "from-[#2b95c2] to-[#1d74fa]",
-  local: "from-[#5fac39] to-[#1dfacd]",
+  cloud: "violet-gradient",
+  byok: "cool-gradient",
+  local: "warm-gradient",
 };
 
 function ProductMock({ mock }: { mock: ReturnType<typeof getDictionary>["home"]["mock"] }) {
   return (
     <div aria-hidden="true" className="relative mx-auto mt-14 max-w-5xl">
-      <div className="absolute -inset-4 -z-10 rounded-[2rem] bg-gradient-to-r from-[#3aac71]/20 via-[#2b95c2]/20 to-[#1d74fa]/20 blur-2xl" />
-      <div className="overflow-hidden rounded-2xl border border-border bg-card shadow-2xl shadow-black/10">
+      <div className="product-glow absolute -inset-4 -z-10 rounded-[2rem] blur-2xl" />
+      <div className="product-elevation overflow-hidden rounded-2xl border border-border bg-card">
         <div className="flex items-center gap-2 border-b border-border bg-bg-soft px-4 py-3">
-          <span className="h-3 w-3 rounded-full bg-[#ff5f57]" />
-          <span className="h-3 w-3 rounded-full bg-[#febc2e]" />
-          <span className="h-3 w-3 rounded-full bg-[#28c840]" />
+          <span className="h-3 w-3 rounded-full bg-window-close" />
+          <span className="h-3 w-3 rounded-full bg-window-minimize" />
+          <span className="h-3 w-3 rounded-full bg-window-maximize" />
           <span className="ml-3 truncate text-xs font-medium text-muted">{mock.fileName}</span>
         </div>
         <div className="grid sm:grid-cols-[1fr_280px]">
@@ -79,7 +79,7 @@ function ProductMock({ mock }: { mock: ReturnType<typeof getDictionary>["home"][
               <LogoMark className="h-5 w-5" idPrefix="mock" />
               {mock.aiTitle}
             </div>
-            <div className="ml-6 rounded-xl rounded-tr-sm bg-accent px-3 py-2 text-xs leading-relaxed text-accent-fg">
+            <div className="ml-6 rounded-xl rounded-tr-sm bg-ai px-3 py-2 text-xs leading-relaxed text-ai-fg">
               {mock.userPrompt}
             </div>
             <div className="mr-6 rounded-xl rounded-tl-sm border border-border bg-card px-3 py-2 text-xs leading-relaxed">
@@ -130,7 +130,7 @@ export default async function HomePage({ params }: PageProps<"/[locale]">) {
               <DownloadIcon />
               {h.hero.ctaDownload}
             </Link>
-            <Link href={`/${locale}/faam-ai`} className={`${buttonClass.secondary} ${buttonClass.large}`}>
+            <Link href={`/${locale}/faam-ai`} className={`${buttonClass.ai} ${buttonClass.large}`}>
               {h.hero.ctaAi}
               <ArrowRightIcon />
             </Link>
@@ -167,13 +167,13 @@ export default async function HomePage({ params }: PageProps<"/[locale]">) {
             {h.ai.modes.map((mode) => (
               <li key={mode.key}>
                 <Card className="relative h-full overflow-hidden">
-                  <div className={`absolute inset-x-0 top-0 h-1 bg-gradient-to-r ${modeAccent[mode.key]}`} />
+                  <div className={`absolute inset-x-0 top-0 h-1.5 ${modeAccent[mode.key]}`} />
                   <h3 className="text-lg font-semibold">{mode.title}</h3>
                   <p className="mt-2 text-sm leading-relaxed text-muted">{mode.description}</p>
                   <ul className="mt-4 space-y-2">
                     {mode.points.map((point) => (
                       <li key={point} className="flex gap-2 text-sm">
-                        <CheckIcon className="text-[#2e9a63] dark:text-[#5fd39a]" />
+                        <CheckIcon className="text-success-fg" />
                         {point}
                       </li>
                     ))}
@@ -244,7 +244,7 @@ export default async function HomePage({ params }: PageProps<"/[locale]">) {
             <ul className="mt-6 space-y-3">
               {h.agents.points.map((point) => (
                 <li key={point} className="flex gap-2 text-sm leading-relaxed">
-                  <CheckIcon className="text-[#2e9a63] dark:text-[#5fd39a]" />
+                  <CheckIcon className="text-success-fg" />
                   {point}
                 </li>
               ))}

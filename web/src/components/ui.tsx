@@ -11,7 +11,10 @@ const base =
 
 export const buttonClass = {
   primary: `${base} bg-accent text-accent-fg hover:bg-accent-hover`,
-  download: `${base} border border-accent-hover bg-accent text-accent-fg shadow-md shadow-accent/20 hover:bg-accent-hover`,
+  download: `${base} button-download border border-download-border bg-download text-download-fg shadow-md shadow-download/20 hover:bg-download-hover`,
+  downloadCool: `${base} button-cool border border-accent-hover bg-accent text-accent-fg shadow-md shadow-accent/20 hover:bg-accent-hover`,
+  downloadAi: `${base} button-ai border border-ai-hover bg-ai text-ai-fg shadow-md shadow-ai/20 hover:bg-ai-hover`,
+  ai: `${base} button-ai bg-ai text-ai-fg hover:bg-ai-hover`,
   secondary: `${base} border border-border-strong bg-card text-fg hover:bg-bg-muted`,
   danger: `${base} bg-danger text-white hover:bg-danger-hover`,
   ghost: `${base} text-fg hover:bg-bg-muted`,
@@ -27,7 +30,7 @@ export function Eyebrow({ children }: { children: ReactNode }) {
 }
 
 export function Card({ children, className }: { children: ReactNode; className?: string }) {
-  return <div className={cx("rounded-2xl border border-border bg-card p-6", className)}>{children}</div>;
+  return <div className={cx("card-elevation rounded-2xl border border-border bg-card p-6", className)}>{children}</div>;
 }
 
 export function Alert({

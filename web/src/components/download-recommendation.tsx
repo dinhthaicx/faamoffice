@@ -37,9 +37,10 @@ export function DownloadRecommendation({ title, buttonLabel, options }: Recommen
   if (!os) return null;
   const option = options[os];
   if (!option.primary.url) return null;
+  const downloadButton = { mac: buttonClass.download, windows: buttonClass.downloadCool, linux: buttonClass.downloadAi }[os];
   return (
-    <div className="mt-10 rounded-2xl border border-accent/40 bg-accent/10 p-6 shadow-sm sm:p-8">
-      <p className="text-sm font-semibold text-link">{title}</p>
+    <div className="card-elevation mt-10 rounded-2xl border border-download-border/50 bg-download-soft p-6 sm:p-8">
+      <p className="text-sm font-semibold text-download-text">{title}</p>
       <div className="mt-3 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <p className="text-xl font-bold">
@@ -51,7 +52,7 @@ export function DownloadRecommendation({ title, buttonLabel, options }: Recommen
           href={option.primary.url}
           fileName={option.primary.fileName}
           tracking={option.primary.tracking}
-          className={`${buttonClass.download} ${buttonClass.large} shrink-0`}
+          className={`${downloadButton} ${buttonClass.large} shrink-0`}
         >
           <DownloadIcon />
           {buttonLabel.replace("{os}", option.name)}

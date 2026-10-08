@@ -130,7 +130,7 @@ export default async function FaamAiPage({ params }: PageProps<"/[locale]/faam-a
               {d.cloud.title}
             </h2>
             <p className="mt-3 leading-relaxed text-muted">{d.cloud.text}</p>
-            <Link href={`/${locale}/register`} className={`${buttonClass.primary} mt-6`} prefetch={false}>
+            <Link href={`/${locale}/register`} className={`${buttonClass.ai} mt-6`} prefetch={false}>
               {d.cloud.cta}
             </Link>
           </div>
@@ -138,7 +138,7 @@ export default async function FaamAiPage({ params }: PageProps<"/[locale]/faam-a
             <ol className="space-y-4">
               {d.cloud.steps.map((step, i) => (
                 <li key={step} className="flex gap-3">
-                  <span className="brand-gradient inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-sm font-bold text-white">
+                  <span className="inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-ai text-sm font-bold text-ai-fg">
                     {i + 1}
                   </span>
                   <span className="pt-0.5 text-sm leading-relaxed">{step}</span>
