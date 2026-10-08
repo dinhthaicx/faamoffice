@@ -740,7 +740,12 @@ export function AiPanel({
           () => hfAccessRef.current,
           () => imageGenerationAvailable(settingsRef.current),
           () => ({
-            write: (spec, onProgress, signal) => runDocWriterRef.current(spec, onProgress, signal),
+            write: (spec, onProgress, signal) =>
+              runDocWriterRef.current(
+                { ...spec, instruction: instructionRef.current },
+                onProgress,
+                signal,
+              ),
           }),
           () => pageSetupAccessRef.current,
           () => docExtrasRef.current,
@@ -814,7 +819,9 @@ export function AiPanel({
           patchLastAssistant((last) => ({
             streaming: false,
             turnLimit,
-            text: finalText || (last.tools?.length ? last.text : tModule('aiNoReply')),
+            text:
+              finalText ||
+              (last.tools?.length || runToolsRef.current.length ? last.text : tModule('aiNoReply')),
             // A stop mid-tool can leave a running placeholder behind — drop it
             tools: last.tools?.filter((tl) => !tl.running),
             snapshot: runSnapshotRef.current ?? undefined,

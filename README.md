@@ -188,6 +188,12 @@ phát hành có tự cập nhật. Tag có dấu `-` (ví dụ `v0.12.0-beta.1`)
 Runner macOS trên GitHub hiện chỉ tạo bản ad-hoc; bộ cài macOS chính thức cần được ký và notarize
 trên máy có chứng thư **Developer ID Application**. Với profile đã lưu trong Keychain:
 
+Khi phát hành bằng chứng thư trên máy này, đặt repository variable
+`FAAMOFFICE_RELEASE_PUBLISH_MODE=local-notarized` trước khi đẩy tag. CI sẽ tạo artifacts mà không
+tự công bố release. Ghép artifacts Windows/Linux của đúng tag với bộ cài macOS đã công chứng,
+kiểm tra cả ba update feed bằng `scripts/release-feed.cjs prepare`, rồi công bố draft khi đủ
+bộ cài và feed. Giữ chế độ này để lần chạy lại CI không thay bộ cài macOS đã ký bằng bản ad-hoc.
+
 ```bash
 CSC_NAME='Tên trên chứng thư (TEAM_ID)' \
 APPLE_KEYCHAIN_PROFILE='tên-profile-notarytool' \

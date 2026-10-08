@@ -15,8 +15,11 @@ name: Release
 #       3. publish; mark it Latest (= what installed apps update to) only when
 #          it is newer than the current Latest release
 #       4. smoke-check the feed URL installed apps read
-# No signing secrets are needed: macOS builds are ad-hoc signed (see
-# apps/shell/electron-builder.cjs) and Windows builds are unsigned.
+# No signing secrets are needed for the CI artifacts: macOS builds are ad-hoc
+# signed and Windows builds are unsigned. When FAAMOFFICE_RELEASE_PUBLISH_MODE
+# is local-notarized, CI only builds artifacts; the maintainer combines Windows
+# and Linux artifacts with locally signed/notarized macOS packages before
+# publishing. This keeps unsigned CI macOS packages out of the public feed.
 # The Windows job also packages the Microsoft Store appx for Partner Center
 # (run artifact faamoffice-store-appx only: never on the GitHub Release, never
 # in the update feed, and its failure never fails the release).
@@ -182,7 +185,7 @@ jobs:
   publish:
     name: publish GitHub Release
     needs: build
-    if: startsWith(github.ref, 'refs/tags/v')
+    if: startsWith(github.ref, 'refs/tags/v') && vars.FAAMOFFICE_RELEASE_PUBLISH_MODE != 'local-notarized'
     runs-on: ubuntu-22.04
     # One publish at a time across all tags (the workflow-level group is per
     # tag): "Publish release" reads the current Latest and then edits this

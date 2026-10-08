@@ -149,6 +149,42 @@ describe('write_document tool', () => {
     },
   })
 
+  it('removes every live draft block before landing a slow streamed write with tracked changes', async () => {
+    const editor = await createBlankEditor()
+    const html =
+      '<h1>Report</h1><h2>Results</h2><p>Completed work.</p><h2>Plans</h2><p>Next tasks.</p>'
+    const writer: AiDocWriter = {
+      write: async (_spec, onProgress) => {
+        onProgress('<h1>Report</h1><h2>Results</h2><p>Completed')
+        await tick()
+        onProgress('<h1>Report</h1><h2>Results</h2><p>Completed work.</p><h2>Plans</h2><p>Next')
+        await tick()
+        onProgress(html)
+        return { ok: true, html }
+      },
+    }
+    const exec = await executeTool(
+      editor,
+      { id: 'slow', name: 'write_document', input: { plan: 'Report, results and plans' } },
+      NUM_IDS,
+      { author: 'Faam AI' },
+      undefined,
+      null,
+      undefined,
+      undefined,
+      writer,
+    )
+    expect(exec.isError).toBeFalsy()
+    expect(texts(editor).filter(Boolean)).toEqual([
+      'Report',
+      'Results',
+      'Completed work.',
+      'Plans',
+      'Next tasks.',
+    ])
+    editor.destroy()
+  })
+
   it('lands the streamed fragment as one regular insert on a blank document', async () => {
     const editor = await createBlankEditor()
     const exec = await executeTool(

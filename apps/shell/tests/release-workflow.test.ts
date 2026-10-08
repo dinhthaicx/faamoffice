@@ -112,7 +112,9 @@ describe('release workflow: build job', () => {
 describe('release workflow: publish job', () => {
   it('runs only for tags, after the builds, with the token it needs', () => {
     expect(publish.needs).toBe('build')
-    expect(publish.if).toBe("startsWith(github.ref, 'refs/tags/v')")
+    expect(publish.if).toBe(
+      "startsWith(github.ref, 'refs/tags/v') && vars.FAAMOFFICE_RELEASE_PUBLISH_MODE != 'local-notarized'",
+    )
     expect(publish.env?.GH_TOKEN).toBe('${{ github.token }}')
   })
 

@@ -47,6 +47,7 @@ const WRITER_SYSTEM = [
   '',
   '## Writing rules',
   '- Write the requested content in full: every section in the plan, real prose, no placeholders, no "[to be added]" notes.',
+  '- If a title is provided, write it once as the first <h1> block. Give each named section its own heading; do not omit the title or section headings.',
   '- Real data only: use the facts, figures, names and quotes from the reference material and the plan; never invent facts or numbers beyond them.',
   '- Follow the length the plan asks for; when it gives none, write what the content genuinely needs.',
   '',
