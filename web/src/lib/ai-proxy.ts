@@ -9,6 +9,7 @@ import { z } from "zod";
 import { aiRequestsInFlight, countRequestsToday, quotaResetsAt, secondsUntilReset, trackAiRequest } from "./ai-quota";
 import { authenticateBearer } from "./api-token";
 import { buildUpstreamBody, findModel, parseModels, type ModelConfig } from "./ai-models";
+import { streamWhileConnecting } from "./ai-stream-keepalive";
 import {
   completionChars,
   computeCredits,
@@ -204,126 +205,129 @@ export async function handleChatCompletions(req: Request): Promise<Response> {
   };
   if (cfg.ai.upstreamApiKey) headers.Authorization = `Bearer ${cfg.ai.upstreamApiKey}`;
 
-  let upstream: Response;
-  try {
-    upstream = await fetch(`${cfg.ai.upstreamBaseUrl}/chat/completions`, {
-      method: "POST",
-      headers,
-      body: JSON.stringify(upstreamBody),
-      signal: controller.signal,
-      cache: "no-store",
-    });
-  } catch (err) {
-    cleanup();
-    release();
-    if (req.signal.aborted) return new Response(null, { status: 499 });
-    console.error("[faam-ai] upstream request failed", (err as Error)?.message);
-    return openAiError(502, "Could not reach the Faam AI upstream service.", "upstream_error");
-  }
-  if (!upstream.ok) {
-    cleanup();
-    release();
-    return upstreamFailure(upstream);
-  }
-
-  let billed = false;
-  const bill = async (usage: TokenUsage | null, estimate: () => TokenUsage) => {
-    if (billed) return;
-    billed = true;
-    const final = usage ?? estimate();
-    const record = {
-      userId: user.id,
-      tokenId: token.id,
-      model: model.id,
-      promptTokens: final.promptTokens,
-      completionTokens: final.completionTokens,
-      estimated: usage === null,
-    };
+  const forward = async (): Promise<Response> => {
+    let upstream: Response;
     try {
-      if (charge) await recordAiUsage({ ...record, credits: computeCredits(model, final) });
-      else await recordUnbilledAiUsage(record);
+      upstream = await fetch(`${cfg.ai.upstreamBaseUrl}/chat/completions`, {
+        method: "POST",
+        headers,
+        body: JSON.stringify(upstreamBody),
+        signal: controller.signal,
+        cache: "no-store",
+      });
     } catch (err) {
-      console.error("[faam-ai] failed to record usage", err);
-    } finally {
+      cleanup();
       release();
+      if (req.signal.aborted) return new Response(null, { status: 499 });
+      console.error("[faam-ai] upstream request failed", (err as Error)?.message);
+      return openAiError(502, "Could not reach the Faam AI upstream service.", "upstream_error");
     }
-  };
+    if (!upstream.ok) {
+      cleanup();
+      release();
+      return upstreamFailure(upstream);
+    }
 
-  const contentType = upstream.headers.get("content-type") ?? "";
-  if (wantsStream && contentType.includes("text/event-stream") && upstream.body) {
-    const tracker = new SseUsageTracker();
-    const reader = upstream.body.getReader();
-    const estimate = () => ({
-      promptTokens: estimatePromptTokens(body),
-      completionTokens: estimateTokensFromChars(tracker.outputChars),
-    });
-    const stream = new ReadableStream<Uint8Array>({
-      async pull(ctrl) {
-        try {
-          const { done, value } = await reader.read();
-          if (done) {
-            tracker.end();
-            ctrl.close();
+    let billed = false;
+    const bill = async (usage: TokenUsage | null, estimate: () => TokenUsage) => {
+      if (billed) return;
+      billed = true;
+      const final = usage ?? estimate();
+      const record = {
+        userId: user.id,
+        tokenId: token.id,
+        model: model.id,
+        promptTokens: final.promptTokens,
+        completionTokens: final.completionTokens,
+        estimated: usage === null,
+      };
+      try {
+        if (charge) await recordAiUsage({ ...record, credits: computeCredits(model, final) });
+        else await recordUnbilledAiUsage(record);
+      } catch (err) {
+        console.error("[faam-ai] failed to record usage", err);
+      } finally {
+        release();
+      }
+    };
+
+    const contentType = upstream.headers.get("content-type") ?? "";
+    if (wantsStream && contentType.includes("text/event-stream") && upstream.body) {
+      const tracker = new SseUsageTracker();
+      const reader = upstream.body.getReader();
+      const estimate = () => ({
+        promptTokens: estimatePromptTokens(body),
+        completionTokens: estimateTokensFromChars(tracker.outputChars),
+      });
+      const stream = new ReadableStream<Uint8Array>({
+        async pull(ctrl) {
+          try {
+            const { done, value } = await reader.read();
+            if (done) {
+              tracker.end();
+              ctrl.close();
+              cleanup();
+              await bill(tracker.usage, estimate);
+              return;
+            }
+            tracker.push(value);
+            ctrl.enqueue(value);
+          } catch (err) {
             cleanup();
-            await bill(tracker.usage, estimate);
-            return;
+            // Upstream aborted (client gone / timeout) or broke mid-stream: bill what was produced.
+            if (tracker.chunks > 0 || tracker.usage) await bill(tracker.usage, estimate);
+            release();
+            try {
+              ctrl.error(err);
+            } catch {
+              // stream already closed
+            }
           }
-          tracker.push(value);
-          ctrl.enqueue(value);
-        } catch (err) {
+        },
+        async cancel() {
+          controller.abort();
           cleanup();
-          // Upstream aborted (client gone / timeout) or broke mid-stream: bill what was produced.
+          await reader.cancel().catch(() => {});
           if (tracker.chunks > 0 || tracker.usage) await bill(tracker.usage, estimate);
           release();
-          try {
-            ctrl.error(err);
-          } catch {
-            // stream already closed
-          }
-        }
-      },
-      async cancel() {
-        controller.abort();
-        cleanup();
-        await reader.cancel().catch(() => {});
-        if (tracker.chunks > 0 || tracker.usage) await bill(tracker.usage, estimate);
-        release();
-      },
-    });
-    return new Response(stream, {
-      status: 200,
-      headers: {
-        "Content-Type": "text/event-stream; charset=utf-8",
-        "Cache-Control": "no-cache, no-transform",
-        "X-Accel-Buffering": "no",
-      },
-    });
-  }
+        },
+      });
+      return new Response(stream, {
+        status: 200,
+        headers: {
+          "Content-Type": "text/event-stream; charset=utf-8",
+          "Cache-Control": "no-cache, no-transform",
+          "X-Accel-Buffering": "no",
+        },
+      });
+    }
 
-  // Non-streaming (or an upstream that ignored stream: true).
-  let text: string;
-  try {
-    text = await upstream.text();
-  } catch (err) {
+    // Non-streaming (or an upstream that ignored stream: true).
+    let text: string;
+    try {
+      text = await upstream.text();
+    } catch (err) {
+      cleanup();
+      release();
+      if (req.signal.aborted) return new Response(null, { status: 499 });
+      console.error("[faam-ai] failed to read upstream response", (err as Error)?.message);
+      return openAiError(502, "The Faam AI upstream response was interrupted.", "upstream_error");
+    }
     cleanup();
-    release();
-    if (req.signal.aborted) return new Response(null, { status: 499 });
-    console.error("[faam-ai] failed to read upstream response", (err as Error)?.message);
-    return openAiError(502, "The Faam AI upstream response was interrupted.", "upstream_error");
-  }
-  cleanup();
-  let parsed: unknown = null;
-  try {
-    parsed = JSON.parse(text);
-  } catch {
-    // Non-JSON success body: still bill by estimate below.
-  }
-  await bill(readUsage((parsed as { usage?: unknown } | null)?.usage), () => ({
-    promptTokens: estimatePromptTokens(body),
-    completionTokens: estimateTokensFromChars(parsed ? completionChars(parsed) : text.length),
-  }));
-  return new Response(text, {
-    status: 200,
-    headers: { "Content-Type": contentType || "application/json", "Cache-Control": "no-store" },
-  });
+    let parsed: unknown = null;
+    try {
+      parsed = JSON.parse(text);
+    } catch {
+      // Non-JSON success body: still bill by estimate below.
+    }
+    await bill(readUsage((parsed as { usage?: unknown } | null)?.usage), () => ({
+      promptTokens: estimatePromptTokens(body),
+      completionTokens: estimateTokensFromChars(parsed ? completionChars(parsed) : text.length),
+    }));
+    return new Response(text, {
+      status: 200,
+      headers: { "Content-Type": contentType || "application/json", "Cache-Control": "no-store" },
+    });
+  };
+  return wantsStream ? streamWhileConnecting(forward(), abort) : forward();
 }

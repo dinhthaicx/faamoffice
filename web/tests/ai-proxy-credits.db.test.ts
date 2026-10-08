@@ -190,6 +190,44 @@ describe("credits off", () => {
     expect((await prisma.user.findUniqueOrThrow({ where: { id: user.id } })).credits).toBe(-3);
   });
 
+  it("keeps a cold model connected without billing heartbeat comments or releasing its quota early", async () => {
+    const { user, token } = await makeUser(0);
+    let ready!: (response: Response) => void;
+    vi.stubGlobal("fetch", () => new Promise<Response>((resolve) => { ready = resolve; }));
+    const res = await chat(request(token, { stream: true }));
+    const reader = res.body!.getReader();
+    expect(new TextDecoder().decode((await reader.read()).value)).toMatch(/^: faam-ai keepalive/);
+    expect(await prisma.usageRecord.count({ where: { userId: user.id } })).toBe(0);
+    expect(quota.aiRequestsInFlight(user.id)).toBe(1);
+    ready(new Response(`data: ${JSON.stringify({ choices: [{ delta: { content: "Xin chào" }, finish_reason: "stop" }], usage: USAGE })}\n\ndata: [DONE]\n\n`, { headers: { "content-type": "text/event-stream" } }));
+    while (!(await reader.read()).done) { /* consume the completion */ }
+    await waitForUsage(user.id, 1);
+    await waitFor(() => quota.aiRequestsInFlight(user.id) === 0);
+    const usage = await prisma.usageRecord.findMany({ where: { userId: user.id } });
+    expect(usage.map((u) => [u.credits, u.promptTokens, u.completionTokens, u.estimated])).toEqual([[0, 1200, 800, false]]);
+    expect(quota.aiRequestsInFlight(user.id)).toBe(0);
+  });
+
+  it("cancels a cold model before it generates anything without recording usage or holding quota", async () => {
+    const { user, token } = await makeUser(0);
+    let signal!: AbortSignal;
+    vi.stubGlobal("fetch", (_url: string, init: RequestInit) => new Promise<Response>((_resolve, reject) => {
+      signal = init.signal as AbortSignal;
+      signal.addEventListener("abort", () => reject(new DOMException("Aborted", "AbortError")), { once: true });
+    }));
+    const logger = vi.spyOn(console, "error").mockImplementation(() => {});
+    try {
+      const res = await chat(request(token, { stream: true }));
+      await res.body!.cancel();
+      expect(signal.aborted).toBe(true);
+      await waitFor(() => quota.aiRequestsInFlight(user.id) === 0);
+      expect(quota.aiRequestsInFlight(user.id)).toBe(0);
+      expect(await prisma.usageRecord.count({ where: { userId: user.id } })).toBe(0);
+    } finally {
+      logger.mockRestore();
+    }
+  });
+
   it("limit 0 means unlimited", async () => {
     const { user, token } = await makeUser(0);
     await seedUsage(user.id, new Date(), 20);

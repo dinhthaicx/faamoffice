@@ -17,6 +17,7 @@
     "smoke": "tsx scripts/smoke.ts",
     "smoke:marketing": "tsx scripts/smoke-marketing.ts",
     "smoke:downloads": "tsx scripts/smoke-downloads.ts",
+    "ai:configure-ollama": "tsx scripts/configure-ollama.ts",
     "make-admin": "tsx scripts/make-admin.ts",
     "db:migrate": "prisma migrate deploy",
     "db:seed": "prisma db seed",

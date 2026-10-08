@@ -179,6 +179,38 @@ Cost of a request = `ceil(prompt/1000 × inputPer1K + completion/1000 × outputP
 
 Pick upstream models that support tool calling — Faam AI edits documents through tools.
 
+For local Ollama, configure enough context for the document instructions and tool
+schemas. A 4,096-token context can truncate these instructions even while ordinary
+chat still works. The [OpenAI-compatible API](https://docs.ollama.com/api/openai-compatibility)
+cannot set `num_ctx` per request; set it on the model instead.
+
+After configuring the installed upstream models for both `faam-fast` and
+`faam-pro` in `web/.env`, run from `web/`:
+
+```bash
+npm run ai:configure-ollama -- --apply
+```
+
+This creates dedicated `faamoffice-fast:ctx65536` and
+`faamoffice-pro:ctx65536` aliases using the existing weights, verifies their
+context setting, and updates only `FAAM_AI_MODELS`. Other Ollama models remain
+available. A private backup of `.env` is saved in `web/data/backups` before an
+update. Restart the website process to activate the aliases; the desktop app
+does not need rebuilding. Use `--context=32768` if the server has insufficient
+memory for 65,536 tokens; larger contexts require more memory.
+
+Verify with a real document-writing request: the app should execute a tool and
+insert text into the editor. After that request, Ollama's `/api/ps` should report
+the selected alias and its configured `context_length`.
+
+Cold models can spend more than a minute evaluating document prompts. For
+streaming requests whose upstream headers are not ready within one second, the
+proxy opens SSE and sends comment heartbeats every 15 seconds until those
+headers arrive. These comments keep the desktop connection alive and do not
+count as generated tokens. Cancellation and `FAAM_AI_REQUEST_TIMEOUT_MS` still
+abort the upstream request. Quick upstream failures keep their HTTP status;
+failures after streaming starts are delivered as OpenAI-style SSE errors.
+
 ## Production
 
 ```bash
