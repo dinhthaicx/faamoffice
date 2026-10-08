@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { Logo } from "./logo";
 import { LanguageSwitcher } from "./language-switcher";
+import { MobileMenu } from "./mobile-menu";
 import { buttonClass, Container } from "./ui";
 import type { Locale } from "@/i18n/config";
 import type { Dictionary } from "@/i18n";
@@ -44,8 +45,7 @@ export function SiteHeader({ locale, dict }: { locale: Locale; dict: Dictionary 
           </Link>
         </div>
 
-        {/* Mobile menu: native <details>, no JavaScript required. */}
-        <details className="group relative md:hidden">
+        <MobileMenu>
           <summary className="flex cursor-pointer items-center gap-2 rounded-lg border border-border px-3 py-2 text-sm font-medium">
             <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.8" className="h-4 w-4" aria-hidden="true">
               <path d="M3 6h14M3 10h14M3 14h14" strokeLinecap="round" />
@@ -69,7 +69,7 @@ export function SiteHeader({ locale, dict }: { locale: Locale; dict: Dictionary 
               </li>
             </ul>
           </nav>
-        </details>
+        </MobileMenu>
       </Container>
     </header>
   );

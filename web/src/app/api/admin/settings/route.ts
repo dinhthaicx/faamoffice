@@ -6,6 +6,7 @@
 // ("socialLinks.2.url": "wrong_host").
 
 import { requireApiAdmin } from "@/lib/auth";
+import { checkAiBackend } from "@/lib/ai-backend";
 import { json, readJson, route } from "@/lib/http";
 import { parseSettingsPatch, parseSettingsPut, updateSiteSettings } from "@/lib/site-settings";
 
@@ -14,6 +15,7 @@ const SETTINGS_JSON_LIMIT = 64 * 1024;
 export const PATCH = route(async (req) => {
   const session = await requireApiAdmin(req);
   const patch = parseSettingsPatch(await readJson(req, SETTINGS_JSON_LIMIT));
+  if (patch.aiBackend) await checkAiBackend(patch.aiBackend, req.signal);
   const settings = await updateSiteSettings(patch, session.userId);
   return json({ ok: true, settings });
 });
@@ -21,6 +23,7 @@ export const PATCH = route(async (req) => {
 export const PUT = route(async (req) => {
   const session = await requireApiAdmin(req);
   const all = parseSettingsPut(await readJson(req, SETTINGS_JSON_LIMIT));
+  if (all.aiBackend) await checkAiBackend(all.aiBackend, req.signal);
   const settings = await updateSiteSettings(all, session.userId);
   return json({ ok: true, settings });
 });

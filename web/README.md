@@ -205,6 +205,33 @@ Verify with a real document-writing request: the app should execute a tool and
 insert text into the editor. After that request, Ollama's `/api/ps` should report
 the selected alias and its configured `context_length`.
 
+### Change the LAN AI server in superadmin
+
+Open `/vi/admin/settings` or `/en/admin/settings` → **Internal AI server
+(Ollama)**. Enable the superadmin override, enter a private IP such as
+`http://192.168.1.50:11434/v1`, and map each public Faam AI id to the exact
+Ollama model alias on that machine. Only localhost or private IP literals are
+accepted; hostnames, public IPs, credentials in URLs and redirects are rejected.
+The AI machine must be reachable from the website server, not just from the
+administrator's browser. This form does not open firewall ports or expose Ollama
+on the public internet.
+
+Use **Test connection**, then **Save AI settings**. The server checks the
+OpenAI-compatible model list, native Ollama metadata, tool support and an
+explicit `num_ctx` of at least 65536; saving repeats these checks before writing
+anything. Test failures leave the active configuration unchanged. Create the
+aliases on the AI machine first. Smaller contexts configured through the local
+setup command above are not accepted by this admin switch.
+
+The override is stored in `SiteSetting.aiBackend`, with the saving admin recorded.
+It changes backend routing and default thinking, while retaining public model ids,
+credit prices and output caps from `FAAM_AI_MODELS`. Environment API credentials
+are never forwarded to the new LAN host. New requests pick up the change; running
+requests keep their original backend. Other website workers refresh their settings
+cache within 10 seconds. No desktop rebuild or website restart is needed. Disable
+the override and save to restore the environment configuration. Update the privacy
+policy before changing where document content is processed.
+
 Cold models can spend more than a minute evaluating document prompts. The
 proxy sends SSE comment heartbeats every 15 seconds until the first upstream
 body chunk arrives, opening the response within one second even when upstream

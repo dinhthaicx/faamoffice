@@ -46,7 +46,7 @@ export default async function AccountPage({ params, searchParams }: PageProps<"/
   ]);
   const hasMoreUsage = usageRows.length > USAGE_PAGE_SIZE;
   const usage = usageRows.slice(0, USAGE_PAGE_SIZE);
-  const models = configuredModels();
+  const models = await configuredModels();
 
   const sectionLinks = [
     { href: "#overview", label: t.sections.overview },

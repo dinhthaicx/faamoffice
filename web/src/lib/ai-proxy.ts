@@ -8,7 +8,8 @@
 import { z } from "zod";
 import { aiRequestsInFlight, countRequestsToday, quotaResetsAt, secondsUntilReset, trackAiRequest } from "./ai-quota";
 import { authenticateBearer } from "./api-token";
-import { buildUpstreamBody, findModel, parseModels, type ModelConfig } from "./ai-models";
+import { buildUpstreamBody, findModel, type ModelConfig } from "./ai-models";
+import { resolveAiBackend } from "./ai-backend";
 import { streamWhileConnecting } from "./ai-stream-keepalive";
 import {
   completionChars,
@@ -74,17 +75,12 @@ export function dailyLimitReached(limit: number, now: Date): Response {
   return res;
 }
 
-let modelsCache: { json: string | undefined; models: ModelConfig[] } | null = null;
-
 /** Configured models, or null when Faam AI Cloud is not configured (or misconfigured). */
-export function configuredModels(): ModelConfig[] | null {
-  const { ai } = getConfig();
-  if (!ai.upstreamBaseUrl) return null;
-  if (modelsCache && modelsCache.json === ai.modelsJson) return modelsCache.models;
+export async function configuredModels(): Promise<ModelConfig[] | null> {
   try {
-    const models = parseModels(ai.modelsJson);
-    modelsCache = { json: ai.modelsJson, models };
-    return models;
+    const settings = await getSiteSettings();
+    const backend = resolveAiBackend(settings.aiBackend);
+    return backend.baseUrl ? backend.models : null;
   } catch (err) {
     console.error("[faam-ai]", (err as Error).message);
     return null;
@@ -149,8 +145,13 @@ export async function handleChatCompletions(req: Request): Promise<Response> {
   const burst = limiters().aiUser.check(`ai|${user.id}`);
   if (!burst.ok) return aiRateLimited(burst.retryAfter);
   const cfg = getConfig();
-  const models = configuredModels();
-  if (!models || !cfg.ai.upstreamBaseUrl) return notConfigured();
+  // A request keeps one backend and billing snapshot even if an admin saves meanwhile.
+  const settings = await getSiteSettings();
+  let backend: ReturnType<typeof resolveAiBackend>;
+  try { backend = resolveAiBackend(settings.aiBackend, cfg.ai); }
+  catch { return notConfigured(); }
+  if (!backend.baseUrl) return notConfigured();
+  const models = backend.models;
 
   let body: z.infer<typeof chatRequestSchema>;
   try {
@@ -173,7 +174,6 @@ export async function handleChatCompletions(req: Request): Promise<Response> {
   const wantsStream = body.stream === true;
 
   // Read once: a request keeps the mode it started with, even if an admin flips it meanwhile.
-  const settings = await getSiteSettings();
   const charge = settings.creditsEnabled;
   if (charge) {
     if (user.credits <= 0) return insufficientCredits();
@@ -203,17 +203,18 @@ export async function handleChatCompletions(req: Request): Promise<Response> {
     "HTTP-Referer": cfg.siteUrl,
     "X-Title": "FaamOffice",
   };
-  if (cfg.ai.upstreamApiKey) headers.Authorization = `Bearer ${cfg.ai.upstreamApiKey}`;
+  if (backend.apiKey) headers.Authorization = `Bearer ${backend.apiKey}`;
 
   const forward = async (): Promise<Response> => {
     let upstream: Response;
     try {
-      upstream = await fetch(`${cfg.ai.upstreamBaseUrl}/chat/completions`, {
+      upstream = await fetch(`${backend.baseUrl}/chat/completions`, {
         method: "POST",
         headers,
         body: JSON.stringify(upstreamBody),
         signal: controller.signal,
         cache: "no-store",
+        redirect: "error",
       });
     } catch (err) {
       cleanup();

@@ -42,7 +42,7 @@ function patchErrors(body: unknown) {
 describe("settings schema", () => {
   it("has the documented defaults", () => {
     expect(defaultSiteSettings()).toEqual({
-      creditsEnabled: true, aiDailyRequestLimit: 300, socialLinks: [],
+      creditsEnabled: true, aiDailyRequestLimit: 300, socialLinks: [], aiBackend: null,
       ads: { enabled: false, publisherId: null, autoAds: true, slots: {}, adsTxtExtra: "" },
       msStore: { enabled: false, productId: "9P0RJ9J87ZNQ" },
     });

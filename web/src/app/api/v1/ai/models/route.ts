@@ -6,7 +6,7 @@ import { json, route } from "@/lib/http";
 
 export const GET = route(async (req) => {
   await authenticateBearer(req);
-  const models = configuredModels();
+  const models = await configuredModels();
   if (!models) return notConfigured();
   return json({
     object: "list",

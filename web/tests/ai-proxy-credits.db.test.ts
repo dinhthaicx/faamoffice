@@ -27,7 +27,7 @@ let settings: Settings;
 let quota: Quota;
 let tokens: Tokens;
 let chat: (req: Request) => Promise<Response>;
-const upstreamCalls: { url: string; body: Record<string, unknown> }[] = [];
+const upstreamCalls: { url: string; body: Record<string, unknown>; headers: Headers }[] = [];
 
 beforeAll(async () => {
   dir = mkdtempSync(join(tmpdir(), "faam-web-proxy-"));
@@ -61,7 +61,7 @@ beforeEach(() => {
   upstreamCalls.length = 0;
   vi.stubGlobal("fetch", async (url: string, init: RequestInit) => {
     const body = JSON.parse(String(init.body)) as Record<string, unknown>;
-    upstreamCalls.push({ url, body });
+    upstreamCalls.push({ url, body, headers: new Headers(init.headers) });
     if (body.stream) {
       const sse =
         `data: ${JSON.stringify({ choices: [{ index: 0, delta: { content: "Xin chào" } }] })}\n\n` +
@@ -159,6 +159,27 @@ describe("upstream error privacy", () => {
     } finally {
       logger.mockRestore();
     }
+  });
+});
+
+describe("runtime LAN backend", () => {
+  it("uses a saved backend on the next request without leaking credentials or changing billing", async () => {
+    const { user, token } = await makeUser(100);
+    const override = { baseUrl: "http://192.168.1.50:11434/v1", models: [
+      { id: "faam-fast", upstream: "lan-fast:ctx65536", reasoningEffort: "none" as const },
+      { id: "faam-pro", upstream: "lan-pro:ctx65536" },
+    ] };
+    await settings.updateSiteSettings({ creditsEnabled: true, aiBackend: override }, null);
+    try {
+      expect((await chat(request(token))).status).toBe(200);
+      expect(upstreamCalls[0]).toMatchObject({ url: `${override.baseUrl}/chat/completions`, body: { model: "lan-fast:ctx65536", reasoning_effort: "none" } });
+      expect(upstreamCalls[0].headers.has("Authorization")).toBe(false);
+      expect((await prisma.user.findUniqueOrThrow({ where: { id: user.id } })).credits).toBe(100 - COST);
+      await settings.updateSiteSettings({ aiBackend: null }, null);
+      expect((await chat(request(token))).status).toBe(200);
+      expect(upstreamCalls[1].url).toBe(`${UPSTREAM}/chat/completions`);
+      expect(upstreamCalls[1].headers.get("Authorization")).toBe("Bearer upstream-key");
+    } finally { await settings.updateSiteSettings({ aiBackend: null }, null); }
   });
 });
 

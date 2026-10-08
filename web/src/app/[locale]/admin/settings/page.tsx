@@ -1,5 +1,7 @@
 import type { Metadata } from "next";
 import { AdminNav } from "@/components/admin-nav";
+import { AiBackendSettingsForm } from "@/components/ai-backend-settings";
+import { environmentAiBackend } from "@/lib/ai-backend";
 import { CreditsSettings, SocialLinksSettings } from "@/components/site-settings-form";
 import { AdsSettings, MsStoreSettings } from "@/components/site-settings-marketing-form";
 import { Container } from "@/components/ui";
@@ -33,6 +35,8 @@ export default async function AdminSettingsPage({ params }: Props) {
       <p className="mt-6 max-w-3xl text-sm leading-relaxed text-muted">{t.subtitle}</p>
 
       <div className="mt-6 grid items-start gap-6 lg:grid-cols-[minmax(0,2fr)_minmax(0,3fr)]">
+        <AiBackendSettingsForm initial={settings.aiBackend ?? environmentAiBackend()} override={settings.aiBackend !== null}
+          t={t.aiBackend} errors={dict.errors} />
         <CreditsSettings
           initial={{ creditsEnabled: settings.creditsEnabled, aiDailyRequestLimit: settings.aiDailyRequestLimit }}
           t={t}

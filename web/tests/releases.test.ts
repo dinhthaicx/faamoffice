@@ -1,6 +1,7 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { getLatestRelease, type ReleaseInfo } from "@/lib/releases";
 import { GITHUB_REPO } from "@/lib/site";
+import snapshot from "@/lib/release-snapshot.json";
 
 const state = globalThis as { __faamLastRelease?: { repo: string; release: ReleaseInfo } };
 beforeEach(() => { delete state.__faamLastRelease; });
@@ -14,14 +15,14 @@ describe("verified direct installer links", () => {
     const release = await getLatestRelease();
     expect(Object.values(release.assets)).toHaveLength(6);
     for (const item of Object.values(release.assets)) {
-      expect(item.url).toContain(`/dinhthaicx/faamoffice/releases/download/v0.11.2/`);
+      expect(item.url).toContain(`/${GITHUB_REPO}/releases/download/v${snapshot.version}/`);
       expect(item.downloadCount).toBeUndefined();
     }
   });
 
   it("uses the verified snapshot if the API request times out", async () => {
     vi.stubGlobal("fetch", vi.fn().mockRejectedValue(new Error("timeout")));
-    expect((await getLatestRelease()).assets.winExe?.url).toMatch(/\/releases\/download\/v0\.11\.2\/FaamOffice-Setup-0\.11\.2\.exe$/);
+    expect((await getLatestRelease()).assets.winExe?.url).toBe(snapshot.assets.winExe.url);
   });
 
   it("keeps the newer verified release during subsequent failures without stale counts", async () => {
@@ -43,6 +44,6 @@ describe("verified direct installer links", () => {
       { ...asset("wrong.exe"), browser_download_url: "https://github.com/other/repo/releases/download/v0.12.0/wrong.exe" },
       { ...asset("page.exe"), browser_download_url: `https://github.com/${GITHUB_REPO}/releases/tag/v0.12.0` },
     ] })));
-    expect((await getLatestRelease()).version).toBe("0.11.2");
+    expect((await getLatestRelease()).version).toBe(snapshot.version);
   });
 });

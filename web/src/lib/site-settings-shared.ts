@@ -4,6 +4,7 @@
 
 import { z } from "zod";
 import { isHttpsUrl } from "./announcement-shared";
+import { aiBackendSchema, type AiBackendSettings } from "./ai-backend-shared";
 
 // ---------------------------------------------------------------- social links
 
@@ -107,6 +108,7 @@ export const SETTINGS_ERROR_CODES = [
   "ads_txt_line",
   "ads_txt_lines",
   "store_id",
+  "lan_url",
 ] as const;
 export type SettingsErrorCode = (typeof SETTINGS_ERROR_CODES)[number];
 const KNOWN_CODES = new Set<string>(SETTINGS_ERROR_CODES);
@@ -332,7 +334,7 @@ export const msStoreSettingsSchema = z.object(
 
 // ---------------------------------------------------------------- settings
 
-export const SETTING_KEYS = ["creditsEnabled", "aiDailyRequestLimit", "socialLinks", "ads", "msStore"] as const;
+export const SETTING_KEYS = ["creditsEnabled", "aiDailyRequestLimit", "socialLinks", "ads", "msStore", "aiBackend"] as const;
 export type SettingKey = (typeof SETTING_KEYS)[number];
 
 export type SiteSettings = {
@@ -346,6 +348,8 @@ export type SiteSettings = {
   ads: AdsSettings;
   /** Microsoft Store badge on the download page. */
   msStore: MsStoreSettings;
+  /** null uses the environment; a LAN override applies to the next AI request. */
+  aiBackend: AiBackendSettings | null;
 };
 
 /** A fresh copy of the defaults (callers may mutate it). */
@@ -356,6 +360,7 @@ export function defaultSiteSettings(): SiteSettings {
     socialLinks: [],
     ads: { enabled: false, publisherId: null, autoAds: true, slots: {}, adsTxtExtra: "" },
     msStore: { enabled: false, productId: MS_STORE_DEFAULT_PRODUCT_ID },
+    aiBackend: null,
   };
 }
 
@@ -380,6 +385,7 @@ export const settingValueSchemas = {
   socialLinks: socialLinksSchema,
   ads: adsSettingsSchema,
   msStore: msStoreSettingsSchema,
+  aiBackend: aiBackendSchema.nullable(),
 } satisfies Record<SettingKey, z.ZodType>;
 
 /** PATCH body: any subset of the settings; unknown keys are rejected. */
@@ -389,6 +395,7 @@ export const settingsPatchSchema = z.strictObject({
   socialLinks: settingValueSchemas.socialLinks.optional(),
   ads: settingValueSchemas.ads.optional(),
   msStore: settingValueSchemas.msStore.optional(),
+  aiBackend: settingValueSchemas.aiBackend.optional(),
 });
 
 /** PUT body: every setting. */
@@ -398,6 +405,7 @@ export const settingsPutSchema = z.strictObject({
   socialLinks: settingValueSchemas.socialLinks,
   ads: settingValueSchemas.ads,
   msStore: settingValueSchemas.msStore,
+  aiBackend: settingValueSchemas.aiBackend,
 });
 
 export type SiteSettingsPatch = Partial<SiteSettings>;

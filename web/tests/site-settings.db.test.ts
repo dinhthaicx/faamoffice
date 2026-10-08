@@ -7,7 +7,7 @@ import Database from "better-sqlite3";
 import { mkdtempSync, readdirSync, readFileSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { afterAll, beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
+import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
 import { defaultSiteSettings, SETTING_KEYS } from "@/lib/site-settings-shared";
 
 type Session = { userId: string; user: { id: string; role: "USER" | "ADMIN"; disabledAt: Date | null } };
@@ -25,7 +25,7 @@ let dir = "";
 let prisma: Db["prisma"];
 let settings: Settings;
 let quota: Quota;
-let routes: { patch: Handler; put: Handler; config: Handler; me: Handler; usage: Handler; adsTxt: Handler };
+let routes: { patch: Handler; put: Handler; config: Handler; me: Handler; usage: Handler; adsTxt: Handler; aiTest: Handler };
 let adminId = "";
 let userId = "";
 let token = "";
@@ -53,6 +53,7 @@ beforeAll(async () => {
     me: (await import("@/app/api/v1/me/route")).GET as Handler,
     usage: (await import("@/app/api/v1/usage/route")).GET as Handler,
     adsTxt: (await import("@/app/ads.txt/route")).GET as Handler,
+    aiTest: (await import("@/app/api/admin/settings/ai/test/route")).POST as Handler,
   };
   const tokens = await import("@/lib/api-token");
   adminId = (await prisma.user.create({ data: { email: "admin@faam.test", name: "Admin", passwordHash: "x", role: "ADMIN" } })).id;
@@ -60,6 +61,8 @@ beforeAll(async () => {
   token = tokens.generateApiToken();
   await prisma.apiToken.create({ data: { userId, name: "Mac", tokenHash: tokens.hashApiToken(token) } });
 });
+
+afterEach(() => { vi.unstubAllGlobals(); vi.unstubAllEnvs(); });
 
 afterAll(async () => {
   await prisma?.$disconnect();
@@ -294,6 +297,43 @@ describe("GET /ads.txt", () => {
     } finally {
       log.mockRestore();
     }
+  });
+});
+
+describe("admin LAN AI settings", () => {
+  const config = { baseUrl: "http://192.168.1.50:11434/v1", models: [
+    { id: "faam-fast", upstream: "fast:ctx65536" }, { id: "faam-pro", upstream: "pro:ctx65536" },
+  ] };
+  const test = (origin = SITE) => routes.aiTest(new Request(`${SITE}/api/admin/settings/ai/test`, {
+    method: "POST", headers: { origin, "content-type": "application/json" }, body: JSON.stringify(config),
+  }));
+
+  it("requires an admin and same-site origin before contacting the LAN", async () => {
+    const fetch = vi.fn(); vi.stubGlobal("fetch", fetch);
+    expect((await test()).status).toBe(401);
+    auth.session = { userId, user: { id: userId, role: "USER", disabledAt: null } };
+    expect((await test()).status).toBe(403);
+    asAdmin();
+    expect((await test("https://evil.example")).status).toBe(403);
+    expect(fetch).not.toHaveBeenCalled();
+  });
+
+  it("tests without saving, rechecks on save, and preserves the current settings on failure", async () => {
+    asAdmin(); vi.stubEnv("FAAM_AI_MODELS", "");
+    vi.stubGlobal("fetch", async (url: URL) => Response.json(url.pathname === "/v1/models"
+      ? { data: config.models.map((m) => ({ id: m.upstream })) }
+      : { capabilities: ["tools"], parameters: "num_ctx 65536" }));
+    expect((await test()).status).toBe(200);
+    expect(await prisma.siteSetting.count()).toBe(0);
+    expect((await send("PATCH", { aiBackend: config })).status).toBe(200);
+    expect((await settings.getSiteSettings()).aiBackend).toEqual(config);
+    vi.stubGlobal("fetch", async () => { throw new Error("Unavailable"); });
+    const failed = await send("PATCH", { creditsEnabled: false, aiBackend: { ...config, baseUrl: "http://192.168.1.51/v1" } });
+    expect(failed.status).toBe(502);
+    expect((await settings.getSiteSettings())).toMatchObject({ creditsEnabled: true, aiBackend: config });
+    expect(await (await routes.config(new Request(`${SITE}/api/v1/app/config`))).json()).toEqual({ socials: [] });
+    expect((await send("PATCH", { aiBackend: null })).status).toBe(200);
+    expect((await settings.getSiteSettings()).aiBackend).toBeNull();
   });
 });
 
