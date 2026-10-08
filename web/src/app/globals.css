@@ -15,11 +15,13 @@
   --accent-fg: #ffffff;
   --link: #1559c7;
   --focus: #6d28d9;
-  --download: #ff6410;
-  --download-end: #ffb91a;
-  --download-hover: #ff7b20;
-  --download-hover-end: #ffc632;
-  --download-fg: #3b2105;
+  --warm-start: #ff6410;
+  --warm-end: #ffb91a;
+  --download: #bc4100;
+  --download-end: #ae2b50;
+  --download-hover: #a73700;
+  --download-hover-end: #982344;
+  --download-fg: #ffffff;
   --download-border: #e88624;
   --download-soft: #fff0dc;
   --download-text: #994000;
@@ -73,11 +75,13 @@
   --accent-fg: #ffffff;
   --link: #8cb5ff;
   --focus: #bc9cff;
-  --download: #ff7a1a;
-  --download-end: #ffc437;
-  --download-hover: #ff8e32;
-  --download-hover-end: #ffd05b;
-  --download-fg: #3b2105;
+  --warm-start: #ff7a1a;
+  --warm-end: #ffc437;
+  --download: #bc4100;
+  --download-end: #ae2b50;
+  --download-hover: #a73700;
+  --download-hover-end: #982344;
+  --download-fg: #ffffff;
   --download-border: #e59339;
   --download-soft: #3c2b1d;
   --download-text: #ffc36b;
@@ -132,11 +136,13 @@
     --accent-fg: #ffffff;
     --link: #8cb5ff;
     --focus: #bc9cff;
-    --download: #ff7a1a;
-    --download-end: #ffc437;
-    --download-hover: #ff8e32;
-    --download-hover-end: #ffd05b;
-    --download-fg: #3b2105;
+    --warm-start: #ff7a1a;
+    --warm-end: #ffc437;
+    --download: #bc4100;
+    --download-end: #ae2b50;
+    --download-hover: #a73700;
+    --download-hover-end: #982344;
+    --download-fg: #ffffff;
     --download-border: #e59339;
     --download-soft: #3c2b1d;
     --download-text: #ffc36b;
@@ -190,6 +196,8 @@
   --color-accent-hover: var(--accent-hover);
   --color-accent-fg: var(--accent-fg);
   --color-link: var(--link);
+  --color-warm-start: var(--warm-start);
+  --color-warm-end: var(--warm-end);
   --color-download: var(--download);
   --color-download-end: var(--download-end);
   --color-download-hover: var(--download-hover);
@@ -253,7 +261,7 @@ body {
 }
 
 .brand-gradient {
-  background-image: linear-gradient(100deg, var(--download), var(--blue) 35%, var(--teal) 65%, var(--violet));
+  background-image: linear-gradient(100deg, var(--warm-start), var(--blue) 35%, var(--teal) 65%, var(--violet));
 }
 
 .text-gradient {
@@ -304,7 +312,7 @@ summary {
 
 /* Decorative ribbons use the vivid reference colors; action text uses contrast-safe pairs. */
 .warm-gradient {
-  background-image: linear-gradient(135deg, var(--download), var(--download-end));
+  background-image: linear-gradient(135deg, var(--warm-start), var(--warm-end));
 }
 .cool-gradient {
   background-image: linear-gradient(135deg, var(--blue), var(--teal));

@@ -5,11 +5,11 @@ import type { Dictionary, LegalSection } from "./vi";
 export const en: Dictionary = {
   meta: {
     siteName: "FaamOffice",
-    defaultTitle: "FaamOffice — The open-source office suite with Faam AI",
+    defaultTitle: "FaamOffice — Free Word and Excel file editors",
     defaultDescription:
-      "FaamOffice is a free, open-source office suite for macOS, Windows and Linux: Docs, Sheets, Slides, PDF, Markdown and HTML, with the Faam AI assistant that edits your documents directly.",
-    ogAlt: "FaamOffice — the open-source office suite with Faam AI",
-    ogTagline: "The open-source office suite with Faam AI",
+      "FaamOffice is a free office suite for Windows, macOS and Linux: open, edit and save Word, Excel and PowerPoint files; read, annotate and fill PDFs. Open source under Apache-2.0.",
+    ogAlt: "FaamOffice — a free office suite for Word, Excel, PowerPoint and PDF files",
+    ogTagline: "A free office suite for Word and Excel files",
     ogSub: "Docs · Sheets · Slides · PDF · Markdown · HTML — macOS, Windows, Linux",
   },
   nav: {
@@ -63,14 +63,14 @@ export const en: Dictionary = {
     advertisement: "Advertisement",
   },
   home: {
-    metaTitle: "FaamOffice — The open-source office suite with Faam AI",
+    metaTitle: "FaamOffice — Free Word and Excel file editors",
     metaDescription:
-      "Edit Word, Excel, PowerPoint, PDF, Markdown and HTML files on your computer and save them in their real formats. Faam AI runs in our cloud, with your own API key, or fully local. Free and open source.",
+      "Create Word documents, Excel spreadsheets and PowerPoint presentations for free on your computer; read, annotate and fill PDFs. Open-source FaamOffice includes Faam AI.",
     hero: {
       eyebrow: "Free · Open source · Apache-2.0",
-      title: "The open-source office suite with Faam AI built in",
+      title: "A free office suite for Word and Excel files",
       subtitle:
-        "Write and edit Word, Excel, PowerPoint, PDF, Markdown and HTML files right on your computer. Files are saved in their real formats, and Faam AI edits them with you — using our cloud, your own API key, or AI that runs on your machine.",
+        "Open, edit and save Word documents, Excel spreadsheets and PowerPoint presentations on your computer. FaamOffice also reads, annotates and fills PDF forms, alongside Markdown and HTML editing. No FaamOffice license purchase is needed to use the editors. Faam AI helps edit documents through Cloud, your own API key or local AI.",
       ctaDownload: "Download FaamOffice for free",
       ctaAi: "Discover Faam AI",
       platforms: "For macOS, Windows and Linux",
@@ -85,12 +85,12 @@ export const en: Dictionary = {
     },
     apps: {
       title: "Six apps, one installer",
-      subtitle: "Every app opens and saves the real file format, so your files keep working with Microsoft Office, Google Docs or LibreOffice.",
+      subtitle: "Create Word documents, Excel spreadsheets and PowerPoint presentations for free with FaamOffice apps. Open and save .docx, .xlsx and .pptx files to share with people using Microsoft Office, Google Docs or LibreOffice.",
       items: [
-        { key: "docs", name: "Docs", formats: ".docx", description: "Write documents with styles, tables, images and a table of contents, and save standard .docx files anyone can open." },
-        { key: "sheets", name: "Sheets", formats: ".xlsx · .xlsm · .xls · .csv", description: "Spreadsheets with formulas, formatting and charts. Opens legacy .xls files and .csv data too." },
-        { key: "slides", name: "Slides", formats: ".pptx", description: "Build presentations, adjust layouts, shapes and text, and save them as .pptx." },
-        { key: "pdf", name: "PDF", formats: ".pdf", description: "Read, highlight, annotate and edit text directly in PDF files." },
+        { key: "docs", name: "Docs", formats: ".docx", description: "A free editor for Word files: open, edit and save .docx documents with styles, tables, images and a table of contents." },
+        { key: "sheets", name: "Sheets", formats: ".xlsx · .xlsm · .xls · .csv", description: "Edit Excel spreadsheets for free: open, edit and save .xlsx files with formulas, formatting and charts; legacy .xls files and .csv data are supported too." },
+        { key: "slides", name: "Slides", formats: ".pptx", description: "Open, edit and save PowerPoint .pptx files for free; build presentations with layouts, shapes and text." },
+        { key: "pdf", name: "PDF", formats: ".pdf", description: "Read PDFs, highlight, annotate and fill forms on your computer; save the files to share." },
         { key: "markdown", name: "Markdown", formats: ".md", description: "Write Markdown with a visual editing view — great for notes, technical docs and READMEs." },
         { key: "html", name: "HTML", formats: ".html", description: "Create and edit HTML pages, and export them to Word when you need to share." },
       ],
@@ -159,6 +159,9 @@ export const en: Dictionary = {
       title: "Frequently asked questions",
       items: [
         { q: "Is FaamOffice free?", a: "Yes. FaamOffice is free and open source under the Apache-2.0 license. You only pay if you use an API key from a paid AI provider." },
+        { q: "What should I choose when searching for “Word without a license” or “Excel without a license”?", a: "If you need to open and edit files without buying an editor, FaamOffice is a free option for Word .docx documents and Excel .xlsx spreadsheets. FaamOffice is an independent app, not Microsoft Word, Excel or Microsoft Office, and does not provide cracked Office software or activation keys. Use each product according to its publisher's license." },
+        { q: "Is there a free office suite with no license to buy?", a: "FaamOffice is a free, open-source office suite under Apache-2.0. No FaamOffice license purchase is needed to open, edit and save Word, Excel and PowerPoint files; you can also read, annotate and fill PDF forms. It is an independent alternative to Microsoft Office for Windows, macOS and Linux." },
+        { q: "What should I check if I am concerned about software licensing penalties?", a: "Read the software license and use the product according to its publisher's terms. FaamOffice is a free, open-source office alternative under Apache-2.0; you can review its license and public source code before using it. If you use Microsoft Word, Excel or other software, check the terms for each product." },
         { q: "Which operating systems does FaamOffice support?", a: "macOS (Apple Silicon and Intel), 64-bit Windows, and Linux (AppImage, .deb, .rpm)." },
         { q: "Do I need an account?", a: "No. Every editor — and Faam AI with your own API key or local AI — works without signing in. A FaamOffice account is only needed for Faam AI Cloud." },
         { q: "Are my documents uploaded to a server?", a: "Ordinary editing does not upload documents. With Faam AI Cloud, the prompt and accompanying document content pass through the FaamOffice server to Ollama/Qwen 3.5 on that server. With your own API key, content goes to your selected provider; AI running on your own computer keeps content there." },
@@ -180,11 +183,11 @@ export const en: Dictionary = {
     },
   },
   download: {
-    metaTitle: "Download FaamOffice for macOS, Windows and Linux",
+    metaTitle: "Download FaamOffice — Free Word and Excel file editors",
     metaDescription:
-      "Download the latest FaamOffice installer: macOS (Apple Silicon, Intel) .dmg, Windows .exe, Linux AppImage, .deb and .rpm. Free and open source, with first-launch instructions.",
-    title: "Download FaamOffice",
-    subtitle: "Free and open source. Pick the installer for your computer.",
+      "Download FaamOffice free for Windows, macOS and Linux. Open, edit and save Word, Excel and PowerPoint files; read, annotate and fill PDFs. No FaamOffice license to buy.",
+    title: "Download the free FaamOffice suite",
+    subtitle: "Open, edit and save Word, Excel and PowerPoint files on your computer; read, annotate and fill PDF forms. Choose the free, open-source FaamOffice installer for Windows, macOS or Linux.",
     latest: "Latest release",
     version: "Version",
     released: "Released",

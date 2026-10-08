@@ -115,7 +115,7 @@ export function ApiForm({
         <button
           type="submit"
           disabled={pending}
-          className={`inline-flex items-center justify-center gap-2 rounded-lg px-4 py-2.5 text-sm font-semibold transition-colors disabled:cursor-not-allowed disabled:opacity-60 ${variants[variant]} ${fullWidth ? "w-full" : ""}`}
+          className={`inline-flex items-center justify-center gap-2 rounded-md px-4 py-2.5 text-sm font-semibold transition-colors disabled:cursor-not-allowed disabled:opacity-60 ${variants[variant]} ${fullWidth ? "w-full" : ""}`}
         >
           {pending ? (pendingLabel ?? submitLabel) : submitLabel}
         </button>

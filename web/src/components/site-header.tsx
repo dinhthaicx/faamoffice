@@ -15,7 +15,7 @@ export function SiteHeader({ locale, dict }: { locale: Locale; dict: Dictionary 
   return (
     <header className="sticky top-0 z-40 border-b border-border bg-bg/85 backdrop-blur supports-[backdrop-filter]:bg-bg/70">
       <Container className="flex h-16 items-center justify-between gap-4">
-        <Link href={`/${locale}`} className="rounded-lg" aria-label={`FaamOffice — ${dict.nav.home}`}>
+        <Link href={`/${locale}`} className="rounded-md" aria-label={`FaamOffice — ${dict.nav.home}`}>
           <Logo idPrefix="hdr" />
         </Link>
 
@@ -24,7 +24,7 @@ export function SiteHeader({ locale, dict }: { locale: Locale; dict: Dictionary 
             <Link
               key={item.href}
               href={item.href}
-              className="rounded-lg px-3 py-2 text-sm font-medium text-muted hover:bg-bg-muted hover:text-fg"
+              className="rounded-md px-3 py-2 text-sm font-medium text-muted hover:bg-bg-muted hover:text-fg"
             >
               {item.label}
             </Link>
@@ -35,7 +35,7 @@ export function SiteHeader({ locale, dict }: { locale: Locale; dict: Dictionary 
           <LanguageSwitcher locale={locale} label={dict.nav.switchTo} ariaLabel={dict.nav.language} />
           <Link
             href={`/${locale}/account`}
-            className="rounded-lg px-3 py-2 text-sm font-medium text-muted hover:bg-bg-muted hover:text-fg"
+            className="rounded-md px-3 py-2 text-sm font-medium text-muted hover:bg-bg-muted hover:text-fg"
             prefetch={false}
           >
             {dict.nav.account}
@@ -46,7 +46,7 @@ export function SiteHeader({ locale, dict }: { locale: Locale; dict: Dictionary 
         </div>
 
         <MobileMenu>
-          <summary className="flex cursor-pointer items-center gap-2 rounded-lg border border-border px-3 py-2 text-sm font-medium">
+          <summary className="flex cursor-pointer items-center gap-2 rounded-md border border-border px-3 py-2 text-sm font-medium">
             <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.8" className="h-4 w-4" aria-hidden="true">
               <path d="M3 6h14M3 10h14M3 14h14" strokeLinecap="round" />
             </svg>
@@ -59,7 +59,7 @@ export function SiteHeader({ locale, dict }: { locale: Locale; dict: Dictionary 
             <ul className="flex flex-col">
               {[...nav, { href: `/${locale}/account`, label: dict.nav.account }].map((item) => (
                 <li key={item.href}>
-                  <Link href={item.href} className="block rounded-lg px-3 py-2.5 text-sm font-medium hover:bg-bg-muted">
+                  <Link href={item.href} className="block rounded-md px-3 py-2.5 text-sm font-medium hover:bg-bg-muted">
                     {item.label}
                   </Link>
                 </li>

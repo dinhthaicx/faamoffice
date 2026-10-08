@@ -7,7 +7,7 @@ export function cx(...classes: (string | false | null | undefined)[]): string {
 }
 
 const base =
-  "inline-flex items-center justify-center gap-2 rounded-lg px-4 py-2.5 text-sm font-semibold transition-colors disabled:cursor-not-allowed disabled:opacity-60";
+  "inline-flex items-center justify-center gap-2 rounded-md px-4 py-2.5 text-sm font-semibold transition-colors disabled:cursor-not-allowed disabled:opacity-60";
 
 export const buttonClass = {
   primary: `${base} bg-accent text-accent-fg hover:bg-accent-hover`,

@@ -30,7 +30,7 @@ export function SocialLinks({ socials, dict }: { socials: readonly PublicSocialL
                 rel="noopener noreferrer me"
                 aria-label={label}
                 title={label}
-                className="flex h-9 w-9 items-center justify-center rounded-full border border-border bg-card text-muted transition-colors hover:bg-bg-muted hover:text-fg"
+                className="flex h-9 w-9 items-center justify-center rounded-md border border-border bg-card text-muted transition-colors hover:bg-bg-muted hover:text-fg"
               >
                 <SocialIcon platform={s.platform} className="h-[18px] w-[18px]" />
               </a>

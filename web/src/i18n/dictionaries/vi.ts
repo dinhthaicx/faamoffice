@@ -6,11 +6,11 @@ export type LegalSection = { id?: string; heading: string; paragraphs: string[];
 export const vi = {
   meta: {
     siteName: "FaamOffice",
-    defaultTitle: "FaamOffice — Bộ văn phòng mã nguồn mở có trợ lý Faam AI",
+    defaultTitle: "FaamOffice — Soạn thảo Word, bảng tính Excel miễn phí",
     defaultDescription:
-      "FaamOffice là bộ ứng dụng văn phòng miễn phí, mã nguồn mở cho macOS, Windows và Linux: Docs, Sheets, Slides, PDF, Markdown, HTML, kèm trợ lý Faam AI sửa thẳng vào tài liệu.",
-    ogAlt: "FaamOffice — bộ văn phòng mã nguồn mở có trợ lý Faam AI",
-    ogTagline: "Bộ văn phòng mã nguồn mở có trợ lý Faam AI",
+      "FaamOffice là bộ văn phòng miễn phí cho Windows, macOS và Linux: mở, sửa, lưu tệp Word, Excel, PowerPoint; đọc, ghi chú và điền biểu mẫu PDF. Mã nguồn mở Apache-2.0.",
+    ogAlt: "FaamOffice — bộ văn phòng miễn phí cho tệp Word, Excel, PowerPoint và PDF",
+    ogTagline: "Bộ văn phòng miễn phí cho tệp Word và Excel",
     ogSub: "Docs · Sheets · Slides · PDF · Markdown · HTML — macOS, Windows, Linux",
   },
   nav: {
@@ -64,14 +64,14 @@ export const vi = {
     advertisement: "Quảng cáo",
   },
   home: {
-    metaTitle: "FaamOffice — Bộ văn phòng mã nguồn mở có trợ lý Faam AI",
+    metaTitle: "FaamOffice — Soạn thảo Word, bảng tính Excel miễn phí",
     metaDescription:
-      "Soạn và sửa Word, Excel, PowerPoint, PDF, Markdown, HTML ngay trên máy, lưu đúng định dạng gốc. Faam AI chạy bằng đám mây, API key của bạn hoặc AI cục bộ. Miễn phí, mã nguồn mở.",
+      "Soạn tệp Word, làm bảng tính Excel và trình chiếu PowerPoint miễn phí trên máy; đọc, ghi chú, điền biểu mẫu PDF. FaamOffice mã nguồn mở, có trợ lý Faam AI.",
     hero: {
       eyebrow: "Miễn phí · Mã nguồn mở · Apache-2.0",
-      title: "Bộ văn phòng mã nguồn mở có trợ lý Faam AI",
+      title: "Bộ văn phòng miễn phí cho tệp Word và Excel",
       subtitle:
-        "Soạn và sửa Word, Excel, PowerPoint, PDF, Markdown và HTML ngay trên máy tính. Tệp được lưu đúng định dạng gốc, còn Faam AI sửa tài liệu cùng bạn — bằng AI đám mây, API key của riêng bạn hoặc AI chạy ngay trên máy.",
+        "Mở, soạn thảo và lưu tệp Word, làm bảng tính Excel và bài trình chiếu PowerPoint ngay trên máy. FaamOffice hỗ trợ đọc, ghi chú, điền biểu mẫu PDF, cùng Markdown và HTML. Không cần mua bản quyền FaamOffice để dùng các trình soạn thảo. Faam AI hỗ trợ sửa tài liệu bằng Cloud, API key riêng hoặc AI cục bộ.",
       ctaDownload: "Tải FaamOffice miễn phí",
       ctaAi: "Tìm hiểu Faam AI",
       platforms: "Dành cho macOS, Windows và Linux",
@@ -86,12 +86,12 @@ export const vi = {
     },
     apps: {
       title: "Sáu ứng dụng, một bộ cài",
-      subtitle: "Mỗi ứng dụng mở và lưu trực tiếp định dạng gốc, nên tệp của bạn vẫn dùng được với Microsoft Office, Google Docs hay LibreOffice.",
+      subtitle: "Soạn thảo Word miễn phí, làm bảng tính Excel và bài trình chiếu PowerPoint bằng các ứng dụng FaamOffice. Mở và lưu tệp .docx, .xlsx, .pptx để chia sẻ với người dùng Microsoft Office, Google Docs hoặc LibreOffice.",
       items: [
-        { key: "docs", name: "Docs", formats: ".docx", description: "Soạn văn bản với kiểu chữ, bảng, hình ảnh và mục lục; lưu thành tệp .docx chuẩn để gửi cho bất kỳ ai." },
-        { key: "sheets", name: "Sheets", formats: ".xlsx · .xlsm · .xls · .csv", description: "Bảng tính có công thức, định dạng và biểu đồ. Mở được cả tệp .xls cũ lẫn dữ liệu .csv." },
-        { key: "slides", name: "Slides", formats: ".pptx", description: "Dựng bài trình chiếu, chỉnh bố cục, hình khối và chữ, rồi lưu thành .pptx." },
-        { key: "pdf", name: "PDF", formats: ".pdf", description: "Đọc, đánh dấu, chú thích và sửa chữ ngay trong tệp PDF." },
+        { key: "docs", name: "Docs", formats: ".docx", description: "Phần mềm soạn thảo tệp Word miễn phí: mở, sửa và lưu .docx với kiểu chữ, bảng, hình ảnh và mục lục." },
+        { key: "sheets", name: "Sheets", formats: ".xlsx · .xlsm · .xls · .csv", description: "Làm bảng tính Excel miễn phí: mở, sửa và lưu .xlsx với công thức, định dạng và biểu đồ; hỗ trợ cả tệp .xls cũ và dữ liệu .csv." },
+        { key: "slides", name: "Slides", formats: ".pptx", description: "Mở, sửa và lưu tệp PowerPoint .pptx miễn phí; dựng bài trình chiếu với bố cục, hình khối và chữ." },
+        { key: "pdf", name: "PDF", formats: ".pdf", description: "Đọc PDF, đánh dấu, ghi chú và điền biểu mẫu ngay trên máy; lưu tệp để chia sẻ." },
         { key: "markdown", name: "Markdown", formats: ".md", description: "Viết Markdown với chế độ xem trực quan, hợp cho ghi chú, tài liệu kỹ thuật và README." },
         { key: "html", name: "HTML", formats: ".html", description: "Tạo và chỉnh trang HTML, xuất sang Word khi cần chia sẻ." },
       ],
@@ -160,6 +160,9 @@ export const vi = {
       title: "Câu hỏi thường gặp",
       items: [
         { q: "FaamOffice có miễn phí không?", a: "Có. FaamOffice miễn phí và mã nguồn mở theo giấy phép Apache-2.0. Bạn chỉ trả tiền nếu dùng API key của một nhà cung cấp AI trả phí." },
+        { q: "Tìm “Word không bản quyền” hoặc “Excel không bản quyền” thì nên chọn gì?", a: "Nếu bạn cần mở và sửa tệp mà không mua một ứng dụng soạn thảo, FaamOffice là lựa chọn miễn phí cho tệp Word .docx và bảng tính Excel .xlsx. FaamOffice là phần mềm độc lập, không phải Microsoft Word, Excel hay Microsoft Office và không cung cấp bản crack hoặc khóa kích hoạt Office. Hãy sử dụng từng sản phẩm theo giấy phép của nhà phát hành." },
+        { q: "Có bộ Office miễn phí, không cần mua bản quyền không?", a: "FaamOffice là bộ ứng dụng văn phòng miễn phí, mã nguồn mở theo Apache-2.0. Bạn không cần mua bản quyền FaamOffice để mở, sửa, lưu tệp Word, Excel và PowerPoint; cũng có thể đọc, ghi chú và điền biểu mẫu PDF. Đây là một lựa chọn độc lập với Microsoft Office, chạy trên Windows, macOS và Linux." },
+        { q: "Cần kiểm tra gì khi lo về phạt bản quyền phần mềm?", a: "Hãy đọc giấy phép và sử dụng phần mềm theo điều khoản của nhà phát hành. FaamOffice là lựa chọn văn phòng miễn phí, mã nguồn mở theo giấy phép Apache-2.0; bạn có thể xem giấy phép cùng mã nguồn công khai trước khi sử dụng. Nếu dùng Microsoft Word, Excel hoặc phần mềm khác, hãy kiểm tra điều khoản tương ứng của từng sản phẩm." },
         { q: "FaamOffice chạy trên hệ điều hành nào?", a: "macOS (Apple Silicon và Intel), Windows 64-bit và Linux (AppImage, .deb, .rpm)." },
         { q: "Có cần tạo tài khoản không?", a: "Không. Mọi trình soạn thảo, cùng Faam AI dùng API key riêng hoặc AI cục bộ, đều hoạt động mà không cần đăng nhập. Tài khoản FaamOffice chỉ cần cho Faam AI Cloud." },
         { q: "Tài liệu của tôi có bị gửi lên máy chủ không?", a: "Soạn thảo thông thường không tải tài liệu lên máy chủ. Khi dùng Faam AI Cloud, lời nhắc và phần tài liệu gửi kèm đi qua máy chủ FaamOffice tới Ollama/Qwen 3.5 trên máy chủ đó. Với API key riêng, nội dung đi tới nhà cung cấp bạn chọn; AI chạy trên chính máy bạn giữ nội dung tại máy." },
@@ -180,11 +183,11 @@ export const vi = {
     },
   },
   download: {
-    metaTitle: "Tải FaamOffice cho macOS, Windows và Linux",
+    metaTitle: "Tải FaamOffice — Soạn Word, làm bảng tính Excel miễn phí",
     metaDescription:
-      "Tải bản cài FaamOffice mới nhất: macOS (Apple Silicon, Intel) .dmg, Windows .exe, Linux AppImage, .deb, .rpm. Miễn phí, mã nguồn mở, kèm hướng dẫn mở lần đầu.",
-    title: "Tải FaamOffice",
-    subtitle: "Miễn phí và mã nguồn mở. Chọn bản cài phù hợp với máy của bạn.",
+      "Tải FaamOffice miễn phí cho Windows, macOS và Linux. Mở, sửa, lưu tệp Word, Excel, PowerPoint; đọc, ghi chú và điền biểu mẫu PDF. Không cần mua bản quyền FaamOffice.",
+    title: "Tải bộ văn phòng FaamOffice miễn phí",
+    subtitle: "Mở, sửa và lưu tệp Word, Excel, PowerPoint ngay trên máy; đọc, ghi chú và điền biểu mẫu PDF. Chọn bản cài FaamOffice miễn phí, mã nguồn mở cho Windows, macOS hoặc Linux.",
     latest: "Bản mới nhất",
     version: "Phiên bản",
     released: "Phát hành ngày",

@@ -31,6 +31,7 @@ export async function generateMetadata({ params }: LayoutProps<"/[locale]">): Pr
   const locale = toLocale((await params).locale);
   const dict = getDictionary(locale);
   const { ads } = await getSiteSettings();
+  const shareImage = { ...SOCIAL_SHARE_IMAGE, alt: dict.meta.ogAlt };
   return {
     metadataBase: new URL(getSiteUrl()),
     title: { default: dict.meta.defaultTitle, template: "%s · FaamOffice" },
@@ -40,8 +41,8 @@ export async function generateMetadata({ params }: LayoutProps<"/[locale]">): Pr
     creator: "FaamOffice",
     publisher: "FaamOffice",
     formatDetection: { telephone: false, email: false, address: false },
-    openGraph: { siteName: "FaamOffice", type: "website", locale: localeMeta[locale].ogLocale, images: [SOCIAL_SHARE_IMAGE] },
-    twitter: { card: "summary_large_image", images: [SOCIAL_SHARE_IMAGE] },
+    openGraph: { siteName: "FaamOffice", type: "website", locale: localeMeta[locale].ogLocale, images: [shareImage] },
+    twitter: { card: "summary_large_image", images: [shareImage] },
     // AdSense verification is available while ads are off; it loads no script.
     ...(ads.publisherId ? { other: { "google-adsense-account": ads.publisherId } } : {}),
   };

@@ -26,7 +26,7 @@ const platformStyle = {
 export async function generateMetadata({ params }: PageProps<"/[locale]/download">): Promise<Metadata> {
   const locale = toLocale((await params).locale);
   const d = getDictionary(locale).download;
-  return pageMetadata({ locale, path: "/download", title: d.metaTitle, description: d.metaDescription });
+  return pageMetadata({ locale, path: "/download", title: d.metaTitle, description: d.metaDescription, absoluteTitle: true });
 }
 
 function formatSize(bytes: number): string {

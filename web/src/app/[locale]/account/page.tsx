@@ -104,7 +104,7 @@ export default async function AccountPage({ params, searchParams }: PageProps<"/
 
       <nav aria-label={t.title} className="mt-6 flex flex-wrap gap-2 text-sm">
         {sectionLinks.map((s) => (
-          <a key={s.href} href={s.href} className="rounded-full border border-border bg-card px-3 py-1.5 hover:bg-bg-muted">
+          <a key={s.href} href={s.href} className="rounded-md border border-border bg-card px-3 py-1.5 hover:bg-bg-muted">
             {s.label}
           </a>
         ))}

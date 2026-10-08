@@ -24,7 +24,7 @@ export function AdminNav({ locale, dict, current }: { locale: Locale; dict: Dict
           href={item.href}
           aria-current={item.id === current ? "page" : undefined}
           className={cx(
-            "rounded-full border px-3 py-1.5 font-medium",
+            "rounded-md border px-3 py-1.5 font-medium",
             item.id === current ? "border-accent bg-accent text-accent-fg" : "border-border bg-card hover:bg-bg-muted",
           )}
         >

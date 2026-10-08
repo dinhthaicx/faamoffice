@@ -5,7 +5,7 @@ import socialShareImage from "@/assets/faamoffice-share-1200x630.png";
 import { getSiteUrl } from "./env";
 import { GITHUB_URL, LATEST_RELEASE_URL, LICENSE_URL } from "./site";
 import { localeMeta, locales, type Locale } from "@/i18n/config";
-import type { Dictionary } from "@/i18n";
+import { getDictionary, type Dictionary } from "@/i18n";
 
 export const SOCIAL_SHARE_IMAGE = {
   url: socialShareImage.src,
@@ -38,6 +38,7 @@ export function pageMetadata(input: {
 }): Metadata {
   const { locale, path, title, description } = input;
   const url = `/${locale}${path}`;
+  const shareImage = { ...SOCIAL_SHARE_IMAGE, alt: getDictionary(locale).meta.ogAlt };
   return {
     title: input.absoluteTitle ? { absolute: title } : title,
     description,
@@ -50,9 +51,9 @@ export function pageMetadata(input: {
       description,
       locale: localeMeta[locale].ogLocale,
       alternateLocale: locales.filter((l) => l !== locale).map((l) => localeMeta[l].ogLocale),
-      images: [SOCIAL_SHARE_IMAGE],
+      images: [shareImage],
     },
-    twitter: { card: "summary_large_image", title, description, images: [SOCIAL_SHARE_IMAGE] },
+    twitter: { card: "summary_large_image", title, description, images: [shareImage] },
     ...(input.noindex ? { robots: { index: false, follow: false } } : {}),
   };
 }

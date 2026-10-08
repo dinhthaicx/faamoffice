@@ -66,13 +66,13 @@ export default async function FaamAiPage({ params }: PageProps<"/[locale]/faam-a
           <h1 className="mt-6 max-w-3xl text-4xl font-extrabold tracking-tight sm:text-5xl">{d.title}</h1>
           <p className="mt-5 max-w-3xl text-lg leading-relaxed text-muted">{d.intro}</p>
           <nav aria-label={d.compare.title} className="mt-6 flex flex-wrap gap-2 text-sm">
-            <a href="#cloud" className="rounded-full border border-border bg-card px-3 py-1.5 hover:bg-bg-muted">
+            <a href="#cloud" className="rounded-md border border-border bg-card px-3 py-1.5 hover:bg-bg-muted">
               Faam AI Cloud
             </a>
-            <a href="#byok" className="rounded-full border border-border bg-card px-3 py-1.5 hover:bg-bg-muted">
+            <a href="#byok" className="rounded-md border border-border bg-card px-3 py-1.5 hover:bg-bg-muted">
               {d.byok.title}
             </a>
-            <a href="#local" className="rounded-full border border-border bg-card px-3 py-1.5 hover:bg-bg-muted">
+            <a href="#local" className="rounded-md border border-border bg-card px-3 py-1.5 hover:bg-bg-muted">
               {d.local.title}
             </a>
           </nav>

@@ -16,7 +16,7 @@ export function LanguageSwitcher({ locale, label, ariaLabel }: { locale: Locale;
       hrefLang={other}
       lang={other}
       aria-label={`${ariaLabel}: ${label}`}
-      className="inline-flex items-center gap-1.5 rounded-lg px-2.5 py-2 text-sm font-medium text-muted hover:bg-bg-muted hover:text-fg"
+      className="inline-flex items-center gap-1.5 rounded-md px-2.5 py-2 text-sm font-medium text-muted hover:bg-bg-muted hover:text-fg"
       prefetch={false}
       onClick={() => {
         // Remember the explicit choice for unprefixed URLs ("/", "/device").
