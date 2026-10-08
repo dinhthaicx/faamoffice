@@ -75,6 +75,17 @@ describe("request guards", () => {
     expect(safeNextPath("/\\evil.example", "/x")).toBe("/x");
     expect(safeNextPath(undefined, "/x")).toBe("/x");
   });
+
+  it("rejects control characters that URL parsing can turn into an external redirect", () => {
+    const tabAttack = "/\t/evil.example";
+    expect(new URL(tabAttack, "https://faamoffice.example").origin).toBe("https://evil.example");
+    for (const control of ["\u0000", "\t", "\n", "\r", "\u001f", "\u007f"]) {
+      expect(safeNextPath(`/${control}/evil.example`, "/vi/account")).toBe("/vi/account");
+    }
+    const legitimate = "/vi/device?code=BCDF-GHJK&source=app#authorize";
+    expect(safeNextPath(legitimate, "/vi/account")).toBe(legitimate);
+    expect(safeNextPath("/vi/account?value=%09", "/x")).toBe("/vi/account?value=%09");
+  });
 });
 
 describe("release assets", () => {

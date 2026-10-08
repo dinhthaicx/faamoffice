@@ -5,7 +5,7 @@ import { LocalTime } from "@/components/local-time";
 import { Alert, buttonClass, Card, Container, cx, Field } from "@/components/ui";
 import { configuredModels } from "@/lib/ai-proxy";
 import { getAiQuota } from "@/lib/ai-quota";
-import { requirePageUser } from "@/lib/auth";
+import { requirePageUser, safeNextPath } from "@/lib/auth";
 import { prisma } from "@/lib/db";
 import { PASSWORD_MIN_LENGTH } from "@/lib/password";
 import { privateMetadata } from "@/lib/seo";
@@ -26,6 +26,8 @@ export default async function AccountPage({ params, searchParams }: PageProps<"/
   const user = await requirePageUser(locale, `/${locale}/account`);
   const dict = getDictionary(locale);
   const t = dict.account;
+  const verificationEmailFailed = sp.welcome === "1" && sp.verificationEmail === "failed";
+  const continuePath = verificationEmailFailed && typeof sp.next === "string" ? safeNextPath(sp.next, "") : "";
   const nf = new Intl.NumberFormat(locale === "vi" ? "vi-VN" : "en-US");
   const page = Math.max(1, Math.min(10_000, Number.parseInt(typeof sp.page === "string" ? sp.page : "1", 10) || 1));
 
@@ -73,7 +75,16 @@ export default async function AccountPage({ params, searchParams }: PageProps<"/
       </div>
 
       <div className="mt-6 space-y-3">
-        {sp.welcome === "1" ? <Alert tone="success">{format(t.welcome, { email: user.email })}</Alert> : null}
+        {sp.welcome === "1" ? (
+          <Alert tone={verificationEmailFailed ? "warn" : "success"} className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+            <span>{format(verificationEmailFailed ? t.welcomeEmailFailed : t.welcome, { email: user.email })}</span>
+            {continuePath ? (
+              <Link href={continuePath} className={buttonClass.secondary}>
+                {t.continue}
+              </Link>
+            ) : null}
+          </Alert>
+        ) : null}
         {!user.emailVerifiedAt ? (
           <Alert tone="warn" className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
             <span>{t.verifyBanner}</span>

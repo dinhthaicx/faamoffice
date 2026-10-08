@@ -8,15 +8,15 @@ function escapeHtml(value: string): string {
   return value.replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[c]!);
 }
 
-function layout(title: string, paragraphs: string[], cta: { label: string; url: string }, footer: string): string {
+function layout(locale: Locale, title: string, paragraphs: string[], cta: { label: string; url: string }, footer: string): string {
   const body = paragraphs.map((p) => `<p style="margin:0 0 16px;line-height:1.6">${escapeHtml(p)}</p>`).join("");
-  return `<!doctype html><html><body style="margin:0;background:#f4f7f6;font-family:-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;color:#0f172a">
+  return `<!doctype html><html lang="${locale}"><body style="margin:0;background:#f4f7f6;font-family:-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;color:#0f172a">
 <table role="presentation" width="100%" cellpadding="0" cellspacing="0"><tr><td align="center" style="padding:32px 16px">
 <table role="presentation" width="100%" style="max-width:520px;background:#ffffff;border-radius:12px;padding:32px" cellpadding="0" cellspacing="0"><tr><td>
-<p style="margin:0 0 24px;font-weight:700;font-size:18px;color:#1D74FA">FaamOffice</p>
+<p style="margin:0 0 24px;font-weight:700;font-size:18px;color:#1765d8">FaamOffice</p>
 <h1 style="margin:0 0 16px;font-size:22px">${escapeHtml(title)}</h1>
 ${body}
-<p style="margin:24px 0"><a href="${escapeHtml(cta.url)}" style="display:inline-block;background:#1D74FA;color:#ffffff;text-decoration:none;padding:12px 20px;border-radius:8px;font-weight:600">${escapeHtml(cta.label)}</a></p>
+<p style="margin:24px 0"><a href="${escapeHtml(cta.url)}" style="display:inline-block;background:#1765d8;color:#ffffff;text-decoration:none;padding:12px 20px;border-radius:8px;font-weight:600">${escapeHtml(cta.label)}</a></p>
 <p style="margin:0 0 8px;font-size:13px;color:#475569;word-break:break-all">${escapeHtml(cta.url)}</p>
 <p style="margin:24px 0 0;font-size:13px;color:#64748b">${escapeHtml(footer)}</p>
 </td></tr></table></td></tr></table></body></html>`;
@@ -30,7 +30,7 @@ export function verifyEmailMessage(locale: Locale, name: string, url: string): M
     return {
       subject: "Confirm your FaamOffice email",
       text: `${lines.join("\n\n")}\n\n${url}\n\n${footer}`,
-      html: layout(title, lines, { label: "Confirm email", url }, footer),
+      html: layout(locale, title, lines, { label: "Confirm email", url }, footer),
     };
   }
   const title = "Xác nhận địa chỉ email";
@@ -39,7 +39,7 @@ export function verifyEmailMessage(locale: Locale, name: string, url: string): M
   return {
     subject: "Xác nhận email tài khoản FaamOffice",
     text: `${lines.join("\n\n")}\n\n${url}\n\n${footer}`,
-    html: layout(title, lines, { label: "Xác nhận email", url }, footer),
+    html: layout(locale, title, lines, { label: "Xác nhận email", url }, footer),
   };
 }
 
@@ -51,7 +51,7 @@ export function resetPasswordMessage(locale: Locale, name: string, url: string):
     return {
       subject: "Reset your FaamOffice password",
       text: `${lines.join("\n\n")}\n\n${url}\n\n${footer}`,
-      html: layout(title, lines, { label: "Choose a new password", url }, footer),
+      html: layout(locale, title, lines, { label: "Choose a new password", url }, footer),
     };
   }
   const title = "Đặt lại mật khẩu";
@@ -60,6 +60,6 @@ export function resetPasswordMessage(locale: Locale, name: string, url: string):
   return {
     subject: "Đặt lại mật khẩu FaamOffice",
     text: `${lines.join("\n\n")}\n\n${url}\n\n${footer}`,
-    html: layout(title, lines, { label: "Đặt mật khẩu mới", url }, footer),
+    html: layout(locale, title, lines, { label: "Đặt mật khẩu mới", url }, footer),
   };
 }

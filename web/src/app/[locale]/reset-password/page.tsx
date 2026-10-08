@@ -23,26 +23,31 @@ export default async function ResetPasswordPage({ params, searchParams }: PagePr
   return (
     <AuthShell title={t.title} subtitle={token ? t.subtitle : undefined}>
       {token ? (
-        <ApiForm
-          action="/api/auth/reset-password"
-          submitLabel={t.submit}
-          pendingLabel={t.pending}
-          errors={dict.errors}
-          extra={{ locale, token }}
-          fullWidth
-        >
-          <Field
-            label={t.password}
-            name="password"
-            type="password"
-            autoComplete="new-password"
-            required
-            minLength={PASSWORD_MIN_LENGTH}
-            maxLength={200}
-            hint={dict.auth.register.passwordHint}
-            autoFocus
-          />
-        </ApiForm>
+        <>
+          <ApiForm
+            action="/api/auth/reset-password"
+            submitLabel={t.submit}
+            pendingLabel={t.pending}
+            errors={dict.errors}
+            extra={{ locale, token }}
+            fullWidth
+          >
+            <Field
+              label={t.password}
+              name="password"
+              type="password"
+              autoComplete="new-password"
+              required
+              minLength={PASSWORD_MIN_LENGTH}
+              maxLength={200}
+              hint={dict.auth.register.passwordHint}
+              autoFocus
+            />
+          </ApiForm>
+          <Link href={`/${locale}/forgot-password`} className={`${buttonClass.ghost} mt-4 w-full`}>
+            {t.requestNew}
+          </Link>
+        </>
       ) : (
         <>
           <Alert tone="danger">{t.missing}</Alert>

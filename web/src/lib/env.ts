@@ -8,6 +8,10 @@ export type ServerConfig = {
   cookieSecure: boolean;
   signupBonusCredits: number;
   adminEmails: Set<string>;
+  brevo: {
+    apiKey: string;
+    sender: { email: string; name: string };
+  } | null;
   smtp: {
     host: string;
     port: number;
@@ -59,6 +63,7 @@ export function getConfig(): ServerConfig {
   const siteUrl = getSiteUrl();
   const siteOrigin = new URL(siteUrl).origin;
   const smtpHost = process.env.SMTP_HOST?.trim();
+  const brevoKey = process.env.BREVO_API_KEY?.trim();
   const upstream = process.env.FAAM_AI_UPSTREAM_BASE_URL?.trim();
   return {
     siteUrl,
@@ -67,6 +72,15 @@ export function getConfig(): ServerConfig {
     cookieSecure: bool(process.env.COOKIE_SECURE, siteUrl.startsWith("https://")),
     signupBonusCredits: Math.max(0, int(process.env.SIGNUP_BONUS_CREDITS, 100)),
     adminEmails: parseEmailList(process.env.ADMIN_EMAILS),
+    brevo: brevoKey
+      ? {
+          apiKey: brevoKey,
+          sender: {
+            email: process.env.BREVO_SENDER_EMAIL?.trim() || "",
+            name: process.env.BREVO_SENDER_NAME?.trim() || "FaamOffice",
+          },
+        }
+      : null,
     smtp: smtpHost
       ? {
           host: smtpHost,

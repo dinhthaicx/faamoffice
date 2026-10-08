@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import { AdminNav } from "@/components/admin-nav";
 import { AiBackendSettingsForm } from "@/components/ai-backend-settings";
+import { BrevoSettingsForm } from "@/components/brevo-settings-form";
+import { getBrevoSettingsForAdmin } from "@/lib/brevo-settings";
 import { environmentAiBackend } from "@/lib/ai-backend";
 import { CreditsSettings, SocialLinksSettings } from "@/components/site-settings-form";
 import { AdsSettings, MsStoreSettings } from "@/components/site-settings-marketing-form";
@@ -26,7 +28,7 @@ export default async function AdminSettingsPage({ params }: Props) {
   const t = dict.admin.settings;
   // The editor must start from what is stored, not from a cached copy.
   clearSiteSettingsCache();
-  const settings = await getSiteSettings();
+  const [settings, emailSettings] = await Promise.all([getSiteSettings(), getBrevoSettingsForAdmin()]);
 
   return (
     <Container className="py-10">
@@ -35,6 +37,7 @@ export default async function AdminSettingsPage({ params }: Props) {
       <p className="mt-6 max-w-3xl text-sm leading-relaxed text-muted">{t.subtitle}</p>
 
       <div className="mt-6 grid items-start gap-6 lg:grid-cols-[minmax(0,2fr)_minmax(0,3fr)]">
+        <BrevoSettingsForm initial={emailSettings} t={t.brevoEmail} errors={dict.errors} />
         <AiBackendSettingsForm initial={settings.aiBackend ?? environmentAiBackend()} override={settings.aiBackend !== null}
           t={t.aiBackend} errors={dict.errors} />
         <CreditsSettings

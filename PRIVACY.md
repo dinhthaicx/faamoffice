@@ -45,6 +45,16 @@ policy in [Vietnamese](https://faamoffice.net/vi/privacy) or
 [English](https://faamoffice.net/en/privacy), and Ollama's local-processing
 explanation at https://docs.ollama.com/faq.
 
+Account verification and password recovery email can be sent through **Brevo**.
+For these messages, the server provides Brevo with the recipient email address,
+the name in the greeting and the message containing a short-lived verification
+or reset link. This does not send document content, AI requests or the original
+password to Brevo. Brevo may retain delivery logs and record opens or link clicks
+depending on its configuration; see https://www.brevo.com/legal/privacypolicy/.
+Production email error logs on the FaamOffice server exclude credentials,
+recipient addresses and links containing tokens. Stored SMTP keys are encrypted
+on the server and are never returned to the Superadmin page after saving.
+
 ## Startup checks
 
 ### Announcements

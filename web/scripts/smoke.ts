@@ -13,8 +13,8 @@
 // credits are on, free (0 credits, daily quota) when an admin turned them off;
 // it adapts to the mode the server is in. Admin checks (credit adjustment, 402,
 // the Settings page and API, both credit modes, the daily limit, the public
-// app config, disable/enable) run when the server lists SMOKE_ADMIN_EMAIL in
-// ADMIN_EMAILS; the settings are restored afterwards.
+// app config, disable/enable) run when SMOKE_ADMIN_EMAIL has ADMIN access
+// (verified and allowlisted, or explicitly promoted); settings are restored afterwards.
 
 import "./load-env";
 import assert from "node:assert/strict";
@@ -427,7 +427,7 @@ async function main() {
     }
     const adminPage = admin.cookie ? await call(`/en/admin?q=${encodeURIComponent(email)}`, { cookie: admin.cookie }) : null;
     if (!admin.cookie || adminPage?.status !== 200) {
-      console.log(`  skip  admin checks: add ${ADMIN_EMAIL} to ADMIN_EMAILS on the server to enable them`);
+      console.log(`  skip  admin checks: verify and allowlist ${ADMIN_EMAIL}, or promote it with npm run make-admin`);
     } else {
       assert.ok(adminPage.text.includes(email), "admin search should find the smoke user");
       ok("admin dashboard search finds the user");

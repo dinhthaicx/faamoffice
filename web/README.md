@@ -24,8 +24,10 @@ npx prisma migrate dev      # creates data/faamoffice.db
 npm run dev                 # http://localhost:3000
 ```
 
-Without SMTP settings, verification and password-reset emails are printed to the
-server console. Without `FAAM_AI_UPSTREAM_BASE_URL`, Faam AI Cloud answers 503.
+Email verification and password reset use Brevo configured in Superadmin, or an
+environment-based Brevo API/SMTP provider. Without a provider, only development
+and tests print email links; production never logs them. Without
+`FAAM_AI_UPSTREAM_BASE_URL`, Faam AI Cloud answers 503.
 
 | Script | What it does |
 | --- | --- |
@@ -52,11 +54,13 @@ inlined into static pages at build time — rebuild after changing them.
 | `GITHUB_TOKEN` | – | Optional, avoids GitHub API rate limits for the download page |
 | `DATABASE_URL` | `file:./data/faamoffice.db` | SQLite file (or PostgreSQL URL after switching) |
 | `SIGNUP_BONUS_CREDITS` | `100` | Credits for new accounts (ledger reason `signup_bonus`; granted in both credit modes, only shown while credits are on) |
-| `ADMIN_EMAILS` | – | Comma-separated emails promoted to ADMIN at registration/login |
+| `ADMIN_EMAILS` | – | Comma-separated emails promoted to ADMIN after email verification (or on a later login once verified) |
 | `COOKIE_SECURE` | `true` when `SITE_URL` is https | Secure session cookie (`__Host-fo_session`) |
 | `SEED_ADMIN_EMAIL` / `SEED_ADMIN_PASSWORD` | – | Used by `npm run db:seed` |
 | `SEED_CREDITS_ENABLED` / `SEED_AI_DAILY_LIMIT` | – | Optional for `npm run db:seed`: set the Faam credits mode (`true`/`false`) and the daily request limit (`0` = unlimited), like the admin Settings page |
-| `SMTP_HOST`, `SMTP_PORT`, `SMTP_SECURE`, `SMTP_USER`, `SMTP_PASS`, `MAIL_FROM` | – | Outgoing email; console fallback when `SMTP_HOST` is empty |
+| `FAAMOFFICE_MAIL_SETTINGS_KEY` | – | Private 32-byte base64 key encrypting SMTP keys saved in Superadmin. Keep it on the server and back it up with the database. |
+| `BREVO_API_KEY`, `BREVO_SENDER_EMAIL`, `BREVO_SENDER_NAME` | – / `FaamOffice` name | Optional server-side Brevo HTTP API; requires an API key, not an SMTP key |
+| `SMTP_HOST`, `SMTP_PORT`, `SMTP_SECURE`, `SMTP_USER`, `SMTP_PASS`, `MAIL_FROM` | – | Optional outgoing SMTP fallback. Only development/test can print email links without a provider. |
 | `FAAM_AI_UPSTREAM_BASE_URL` | – | OpenAI-compatible base URL (enables Faam AI Cloud) |
 | `FAAM_AI_UPSTREAM_API_KEY` | – | Upstream key (optional for local servers) |
 | `FAAM_AI_MODELS` | `faam-fast`, `faam-pro` | JSON model catalog and prices (below) |
@@ -64,7 +68,7 @@ inlined into static pages at build time — rebuild after changing them.
 
 ## Admins
 
-1. Put the email in `ADMIN_EMAILS` before the person registers or signs in, **or**
+1. Put the email in `ADMIN_EMAILS` and have the person verify that email, **or**
 2. `npm run make-admin -- you@example.com` after they registered, **or**
 3. Set `SEED_ADMIN_EMAIL` / `SEED_ADMIN_PASSWORD` and run `npm run db:seed`.
 
@@ -76,6 +80,49 @@ desktop tokens are rejected until the account is enabled again. There is no
 payment gateway: admins add credits manually. While Faam credits are off (see
 Settings) the dashboard, user list and user page show request/token counts
 instead of credits; the adjustment form keeps working (balances are preserved).
+
+### Brevo email (verification and password recovery)
+
+Superadmin → Settings → **Brevo email** manages SMTP sending for registration,
+verification resends and password recovery. The form supports Vietnamese and
+English. Enter a verified sender email, sender name, the exact SMTP **Login**
+shown in Brevo → Settings → SMTP & API → SMTP, and a Brevo **SMTP key**. The login
+may differ from the sender address. Use port 587 (required STARTTLS) or 465
+(implicit TLS); the SMTP host is fixed to `smtp-relay.brevo.com`.
+
+Enable email, test the connection, then save. The test authenticates SMTP and
+does not send a message or validate sender verification. Saving an enabled
+configuration rechecks the connection before writing it. A blank key preserves
+the saved key; switching email off preserves settings and stops outgoing email.
+New sends use changed settings immediately in the saving process; other server
+processes refresh their cache within 10 seconds. No desktop rebuild is required.
+
+The internal `SiteSetting` entry `brevoEmail` contains the configuration and an
+AES-256-GCM encrypted SMTP key. It is excluded from public website/app settings;
+admin responses expose only a key-presence flag. Set
+`FAAMOFFICE_MAIL_SETTINGS_KEY` to a private 32-byte base64 key (generate once with
+`openssl rand -base64 32`). Back up this key securely with the database; losing
+it makes saved SMTP credentials unreadable. SMTP/API keys must never use a
+`NEXT_PUBLIC_` environment variable. Stored settings take precedence over
+environment mail providers, including when explicitly disabled.
+
+Registration sends a verification link valid for 24 hours. Account → Resend
+verification invalidates the previous link only after the new email is sent;
+delivery failures preserve the previous link. Sign in → Forgot password sends a
+link valid for one hour and usable once; resetting a password
+also verifies ownership of the email and signs out existing browser sessions.
+Token consumption and account updates run in one transaction so a failed update
+does not burn a link. Delivery errors on registration preserve the created
+account and show a resend notice; verification resends report an error. Forgot
+password keeps the same response for unknown accounts and delivery failures.
+SMTP/API responses and error details containing credentials or tokens are never
+logged in production.
+
+Brevo processes recipient details and message content, and may retain delivery
+or open/click events according to its configuration; this is disclosed in both
+privacy locales and `PRIVACY.md`. For the optional HTTP API, requests include
+`contactPixelTrackingConsent: false`; its effect requires the corresponding
+Brevo account feature and must not be described as disabling all tracking.
 
 ### Settings (Faam credits, follow channels, ads and Microsoft Store)
 
@@ -262,7 +309,7 @@ SITE_URL=https://faamoffice.example npm start -- -p 3000
 ### Docker
 
 ```bash
-cp .env.example .env          # set SITE_URL, SMTP_*, FAAM_AI_*, ADMIN_EMAILS
+cp .env.example .env          # set SITE_URL, FAAM_AI_*, ADMIN_EMAILS and mail encryption key
 docker compose up -d --build  # SITE_URL / NEXT_PUBLIC_GITHUB_REPO become build args
 docker compose exec web npm run make-admin -- you@example.com
 ```
@@ -556,7 +603,8 @@ session), calls `/api/v1/me`, streams and non-streams through the proxy and
 verifies the upstream request, usage records, abort handling and — depending on
 the server's Faam credits mode — credit deduction or free, quota-counted usage
 (with credits off, the daily limit must allow at least 5 requests, or be 0).
-Admin checks run when `smoke-admin@faamoffice.test` is in `ADMIN_EMAILS`: the
+Admin checks run when `smoke-admin@faamoffice.test` has ADMIN access (a verified
+allowlisted email, or one promoted with `npm run make-admin`): the
 Settings page and API, credit adjustment and 402 with credits on, the 0-credit
 path and 429 `daily_limit_reached` with credits off, a social link in
 `/api/v1/app/config`, disable/enable; the original settings are restored at the end. Registration is limited to
@@ -601,14 +649,16 @@ the operator must review and complete them.
 
 ```bash
 cd web
-cp .env.example .env          # chỉnh SITE_URL, SMTP_*, FAAM_AI_*, ADMIN_EMAILS
+cp .env.example .env          # chỉnh SITE_URL, FAAM_AI_*, ADMIN_EMAILS và khóa mã hóa email
 npm install
 npx prisma migrate dev        # tạo cơ sở dữ liệu SQLite tại data/faamoffice.db
 npm run dev                   # http://localhost:3000
 ```
 
-- Chưa cấu hình SMTP thì email xác nhận / đặt lại mật khẩu được in ra console của máy chủ.
-- Tạo quản trị viên: thêm email vào `ADMIN_EMAILS` hoặc chạy `npm run make-admin -- email@cua-ban.vn`.
+- Cấu hình gửi email tại Superadmin → Cài đặt → Email Brevo: địa chỉ gửi đã xác minh, tên gửi, SMTP login và SMTP key. Bật, kiểm tra kết nối rồi lưu; không cần build lại app. Cổng 587 dùng STARTTLS, cổng 465 dùng SSL/TLS.
+- Khóa SMTP lưu mã hóa, không hiển thị lại. Đặt và sao lưu an toàn `FAAMOFFICE_MAIL_SETTINGS_KEY` trên máy chủ. Chỉ môi trường phát triển/test in liên kết email khi chưa có dịch vụ gửi; production không ghi token vào log.
+- Đăng ký gửi liên kết xác minh 24 giờ; trang Tài khoản có nút gửi lại. Trang Đăng nhập có Quên mật khẩu, gửi liên kết khôi phục 1 giờ dùng một lần; đặt mật khẩu mới đăng xuất các phiên web cũ.
+- Tạo quản trị viên: thêm email vào `ADMIN_EMAILS` và xác minh email đó, hoặc chạy `npm run make-admin -- email@cua-ban.vn`.
 - Bật Faam AI Cloud: điền `FAAM_AI_UPSTREAM_BASE_URL` (OpenAI, OpenRouter, hoặc Ollama
   `http://localhost:11434/v1`), `FAAM_AI_UPSTREAM_API_KEY` và bảng giá `FAAM_AI_MODELS`.
 - Chạy bằng Docker: `docker compose up -d --build` (dữ liệu nằm trong volume `faam-data`).

@@ -6,10 +6,10 @@ import { prisma } from "./db";
 import { randomToken, sha256Hex } from "./crypto";
 import { getConfig } from "./env";
 import { HttpError } from "./http";
-import { sendMail } from "./mail";
+import { MailDeliveryError, sendMail, type MailMessage } from "./mail";
 import { resetPasswordMessage, verifyEmailMessage } from "./email-templates";
 import { hashPassword, PASSWORD_MAX_LENGTH, PASSWORD_MIN_LENGTH, verifyDummyPassword, verifyPassword } from "./password";
-import type { EmailTokenKind, User } from "@/generated/prisma/client";
+import type { EmailTokenKind, Prisma, User } from "@/generated/prisma/client";
 import { locales, type Locale } from "@/i18n/config";
 
 export const VERIFY_TOKEN_TTL_MS = 24 * 60 * 60 * 1000;
@@ -57,9 +57,9 @@ function isAdminEmail(email: string): boolean {
   return getConfig().adminEmails.has(normalizeEmail(email));
 }
 
-/** Promote users listed in ADMIN_EMAILS (called at registration and login). */
+/** Promote verified users listed in ADMIN_EMAILS, preserving existing admins. */
 export async function ensureAdminFromEnv(user: User): Promise<User> {
-  if (user.role !== "ADMIN" && isAdminEmail(user.email)) {
+  if (user.role !== "ADMIN" && user.emailVerifiedAt && isAdminEmail(user.email)) {
     return prisma.user.update({ where: { id: user.id }, data: { role: "ADMIN" } });
   }
   return user;
@@ -67,27 +67,63 @@ export async function ensureAdminFromEnv(user: User): Promise<User> {
 
 // ---------------------------------------------------------------- email tokens
 
-async function createEmailToken(userId: string, kind: EmailTokenKind, ttlMs: number): Promise<string> {
+type PendingEmailToken = {
+  token: string;
+  id: string;
+  userId: string;
+  kind: EmailTokenKind;
+  ttlMs: number;
+  previousIds: string[];
+};
+
+async function createEmailToken(userId: string, kind: EmailTokenKind, ttlMs: number): Promise<PendingEmailToken> {
   const token = randomToken(32);
-  const now = new Date();
-  await prisma.$transaction([
-    // Only the newest link of each kind stays valid.
-    prisma.emailToken.updateMany({ where: { userId, kind, usedAt: null }, data: { usedAt: now } }),
-    prisma.emailToken.create({
-      data: { userId, kind, tokenHash: sha256Hex(token), expiresAt: new Date(now.getTime() + ttlMs) },
-    }),
-  ]);
-  return token;
+  return prisma.$transaction(async (tx) => {
+    // Snapshot older IDs, rather than revoking every unused token after mail
+    // delivery: an older request finishing late must not revoke a newer link.
+    const previous = await tx.emailToken.findMany({ where: { userId, kind, usedAt: null }, select: { id: true } });
+    const created = await tx.emailToken.create({
+      // Pending links cannot be consumed, even if failed-delivery cleanup fails.
+      data: { userId, kind, tokenHash: sha256Hex(token), expiresAt: new Date(0) },
+    });
+    return { token, id: created.id, userId, kind, ttlMs, previousIds: previous.map((row) => row.id) };
+  });
 }
 
-/** Atomically mark a token as used. Returns the owning user id, or null if invalid/expired/used. */
-async function consumeEmailToken(token: string, kind: EmailTokenKind): Promise<string | null> {
+async function deliverEmailToken(pending: PendingEmailToken, message: MailMessage): Promise<void> {
+  try {
+    await sendMail(message);
+  } catch (err) {
+    // Retain the original delivery error; a leftover pending row is expired and
+    // unusable if the database is temporarily unavailable during cleanup.
+    await prisma.emailToken.deleteMany({ where: { id: pending.id } }).catch(() => {});
+    throw err;
+  }
+  await prisma.$transaction(async (tx) => {
+    const now = new Date();
+    const activated = await tx.emailToken.updateMany({
+      where: { id: pending.id, usedAt: null, expiresAt: new Date(0) },
+      data: { expiresAt: new Date(now.getTime() + pending.ttlMs) },
+    });
+    // A newer successful request may already have superseded this pending link.
+    // Never reactivate it, and never invalidate links created after its snapshot.
+    if (activated.count === 1 && pending.previousIds.length) {
+      await tx.emailToken.updateMany({
+        where: { id: { in: pending.previousIds }, userId: pending.userId, kind: pending.kind, usedAt: null },
+        data: { usedAt: now },
+      });
+    }
+  });
+}
+
+/** Consume in the same transaction as the action, so failed actions keep their link valid. */
+async function consumeEmailToken(tx: Prisma.TransactionClient, token: string, kind: EmailTokenKind): Promise<string | null> {
   if (!token || token.length > 128) return null;
   const tokenHash = sha256Hex(token);
   const now = new Date();
-  const row = await prisma.emailToken.findUnique({ where: { tokenHash } });
+  const row = await tx.emailToken.findUnique({ where: { tokenHash } });
   if (!row || row.kind !== kind || row.usedAt || row.expiresAt <= now) return null;
-  const res = await prisma.emailToken.updateMany({
+  const res = await tx.emailToken.updateMany({
     where: { id: row.id, usedAt: null, expiresAt: { gt: now } },
     data: { usedAt: now },
   });
@@ -95,9 +131,9 @@ async function consumeEmailToken(token: string, kind: EmailTokenKind): Promise<s
 }
 
 export async function sendVerificationEmail(user: Pick<User, "id" | "email" | "name">, locale: Locale): Promise<void> {
-  const token = await createEmailToken(user.id, "verify", VERIFY_TOKEN_TTL_MS);
-  const url = `${getConfig().siteUrl}/${locale}/verify-email?token=${encodeURIComponent(token)}`;
-  await sendMail({ to: user.email, ...verifyEmailMessage(locale, user.name, url) });
+  const pending = await createEmailToken(user.id, "verify", VERIFY_TOKEN_TTL_MS);
+  const url = `${getConfig().siteUrl}/${locale}/verify-email?token=${encodeURIComponent(pending.token)}`;
+  await deliverEmailToken(pending, { to: user.email, ...verifyEmailMessage(locale, user.name, url) });
 }
 
 /**
@@ -106,13 +142,22 @@ export async function sendVerificationEmail(user: Pick<User, "id" | "email" | "n
  */
 export async function verifyEmailToken(token: string): Promise<boolean> {
   if (!token || token.length > 128) return false;
-  const row = await prisma.emailToken.findUnique({ where: { tokenHash: sha256Hex(token) }, include: { user: true } });
-  if (!row || row.kind !== "verify") return false;
-  if (row.usedAt) return row.user.emailVerifiedAt !== null;
-  const userId = await consumeEmailToken(token, "verify");
-  if (!userId) return false;
-  await prisma.user.updateMany({ where: { id: userId, emailVerifiedAt: null }, data: { emailVerifiedAt: new Date() } });
-  return true;
+  return prisma.$transaction(async (tx) => {
+    const row = await tx.emailToken.findUnique({ where: { tokenHash: sha256Hex(token) }, include: { user: true } });
+    if (!row || row.kind !== "verify") return false;
+    if (row.expiresAt.getTime() === 0) return false;
+    if (row.usedAt) return row.user.emailVerifiedAt !== null;
+    const userId = await consumeEmailToken(tx, token, "verify");
+    if (!userId) return false;
+    await tx.user.update({
+      where: { id: userId },
+      data: {
+        emailVerifiedAt: row.user.emailVerifiedAt ?? new Date(),
+        ...(row.user.role !== "ADMIN" && isAdminEmail(row.user.email) ? { role: "ADMIN" } : {}),
+      },
+    });
+    return true;
+  });
 }
 
 // ---------------------------------------------------------------- registration / login
@@ -132,7 +177,7 @@ export async function registerUser(input: { name: string; email: string; passwor
           email: input.email,
           name: input.name,
           passwordHash,
-          role: isAdminEmail(input.email) ? "ADMIN" : "USER",
+          role: "USER",
           credits: bonus,
         },
       });
@@ -150,7 +195,6 @@ export async function registerUser(input: { name: string; email: string; passwor
     }
     throw err;
   }
-  await sendVerificationEmail(user, input.locale);
   return user;
 }
 
@@ -172,24 +216,29 @@ export async function requestPasswordReset(email: string, locale: Locale): Promi
   const user = await prisma.user.findUnique({ where: { email } });
   // Same response whether or not the account exists (no account enumeration).
   if (!user || user.disabledAt) return;
-  const token = await createEmailToken(user.id, "reset", RESET_TOKEN_TTL_MS);
-  const url = `${getConfig().siteUrl}/${locale}/reset-password?token=${encodeURIComponent(token)}`;
-  await sendMail({ to: user.email, ...resetPasswordMessage(locale, user.name, url) });
+  const pending = await createEmailToken(user.id, "reset", RESET_TOKEN_TTL_MS);
+  const url = `${getConfig().siteUrl}/${locale}/reset-password?token=${encodeURIComponent(pending.token)}`;
+  try {
+    await deliverEmailToken(pending, { to: user.email, ...resetPasswordMessage(locale, user.name, url) });
+  } catch (err) {
+    // Keep the same response for unknown accounts and unavailable mail delivery.
+    if (!(err instanceof MailDeliveryError)) throw err;
+  }
 }
 
 export async function resetPasswordWithToken(token: string, newPassword: string): Promise<void> {
-  const userId = await consumeEmailToken(token, "reset");
-  if (!userId) throw new HttpError(400, "invalid_token", "This reset link is invalid or has expired.");
   const passwordHash = await hashPassword(newPassword);
-  await prisma.$transaction([
+  await prisma.$transaction(async (tx) => {
+    const userId = await consumeEmailToken(tx, token, "reset");
+    if (!userId) throw new HttpError(400, "invalid_token", "This reset link is invalid or has expired.");
     // Receiving the reset email also proves ownership of the address.
-    prisma.user.update({
+    await tx.user.update({
       where: { id: userId },
       data: { passwordHash },
-    }),
-    prisma.user.updateMany({ where: { id: userId, emailVerifiedAt: null }, data: { emailVerifiedAt: new Date() } }),
-    prisma.session.deleteMany({ where: { userId } }),
-  ]);
+    });
+    await tx.user.updateMany({ where: { id: userId, emailVerifiedAt: null }, data: { emailVerifiedAt: new Date() } });
+    await tx.session.deleteMany({ where: { userId } });
+  });
 }
 
 // ---------------------------------------------------------------- profile

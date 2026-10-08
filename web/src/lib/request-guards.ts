@@ -24,7 +24,7 @@ export function assertSameOrigin(req: Request): void {
 /** Only allow same-site relative paths as post-login destinations. */
 export function safeNextPath(next: string | null | undefined, fallback: string): string {
   if (!next || typeof next !== "string") return fallback;
-  if (!next.startsWith("/") || next.startsWith("//") || next.includes("\\") || /[\r\n]/.test(next)) {
+  if (!next.startsWith("/") || next.startsWith("//") || next.includes("\\") || /[\u0000-\u001f\u007f]/.test(next)) {
     return fallback;
   }
   return next.length > 500 ? fallback : next;
