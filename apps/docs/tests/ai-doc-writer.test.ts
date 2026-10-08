@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import { Editor } from '@tiptap/core'
 import { undoDepth } from '@tiptap/pm/history'
+import { Plugin } from '@tiptap/pm/state'
 import {
   BLANK_BULLET_NUM_ID,
   BLANK_ORDERED_NUM_ID,
@@ -11,6 +12,7 @@ import { blocksToPmDoc } from '../src/renderer/editor/convert'
 import {
   buildDocWriterRequest,
   countFragmentBlocks,
+  DRAFT_META,
   DraftLanding,
   extractFragment,
   type AiDocWriter,
@@ -72,6 +74,27 @@ describe('buildDocWriterRequest', () => {
 })
 
 describe('DraftLanding', () => {
+  it('tracks normalization transactions appended to a draft before removing the preview', async () => {
+    const editor = await createBlankEditor()
+    const before = editor.state.doc
+    editor.registerPlugin(
+      new Plugin({
+        appendTransaction(transactions, _oldState, state) {
+          if (!transactions.some((tr) => tr.getMeta(DRAFT_META)) || state.doc.childCount < 2)
+            return null
+          return state.tr.insertText(' normalized', state.doc.child(0).nodeSize - 1)
+        },
+      }),
+    )
+    const draft = new DraftLanding(editor, NUM_IDS, { kind: 'whole' })
+    draft.update('<p>Live preview</p>')
+    await tick()
+    expect(texts(editor)).toEqual(['Live preview normalized', ''])
+    draft.finish()
+    expect(editor.state.doc.eq(before)).toBe(true)
+    editor.destroy()
+  })
+
   it('renders the growing fragment in place, swaps only changed blocks, and leaves no trace on finish', async () => {
     const editor = await createBlankEditor()
     const before = editor.state.doc

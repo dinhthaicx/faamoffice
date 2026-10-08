@@ -108,10 +108,20 @@ export class DraftLanding {
   private timer: ReturnType<typeof setTimeout> | null = null
   private closed = false
   private follow = true
-  private readonly onTransaction = ({ transaction }: { transaction: Transaction }) => {
-    if (!transaction.docChanged || transaction.getMeta(DRAFT_META)) return
-    this.from = transaction.mapping.map(this.from, 1)
-    this.to = Math.max(this.from, transaction.mapping.map(this.to, -1))
+  private readonly onTransaction = ({
+    transaction,
+    appendedTransactions = [],
+  }: {
+    transaction: Transaction
+    appendedTransactions?: Transaction[]
+  }) => {
+    // Tiptap emits the root transaction once, with normalization transactions
+    // appended by editor plugins. Those steps can change the preview's size.
+    for (const tr of [transaction, ...appendedTransactions]) {
+      if (!tr.docChanged || tr.getMeta(DRAFT_META)) continue
+      this.from = tr.mapping.map(this.from, 1)
+      this.to = Math.max(this.from, tr.mapping.map(this.to, -1))
+    }
   }
 
   constructor(
@@ -204,8 +214,11 @@ export class DraftLanding {
     if (keep === live.length && keep === next.length) return
     const at = keep > 0 ? live[keep - 1]!.end : this.from
     const wasVisible = this.follow && this.endVisible()
-    this.editor.view.dispatch(this.draftTr().replaceWith(at, this.to, next.slice(keep)))
+    const tr = this.draftTr().replaceWith(at, this.to, next.slice(keep))
+    // Publish the new range before dispatch: transaction listeners and plugin
+    // normalization run synchronously and must map the inserted range.
     this.to = at + next.slice(keep).reduce((size, n) => size + n.nodeSize, 0)
+    this.editor.view.dispatch(tr)
     if (wasVisible) this.scrollToEnd()
     else this.follow = false
   }
