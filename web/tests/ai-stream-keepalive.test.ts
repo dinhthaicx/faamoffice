@@ -22,6 +22,22 @@ beforeEach(() => vi.useFakeTimers());
 afterEach(() => vi.useRealTimers());
 
 describe("Faam AI slow upstream connection", () => {
+  it("sends heartbeats even when upstream headers are immediate but its first token is delayed", async () => {
+    let source!: ReadableStreamDefaultController<Uint8Array>;
+    const upstream = new Response(new ReadableStream<Uint8Array>({ start(ctrl) { source = ctrl; } }), { headers: { "Content-Type": "text/event-stream" } });
+    const response = await streamWhileConnecting(Promise.resolve(upstream), vi.fn());
+    const reader = response.body!.getReader();
+    expect(decoder.decode((await reader.read()).value)).toMatch(/^: faam-ai keepalive/);
+    const next = reader.read();
+    await vi.advanceTimersByTimeAsync(AI_STREAM_HEARTBEAT_MS);
+    expect(decoder.decode((await next).value)).toMatch(/^:/);
+    source.enqueue(encoder.encode("data: [DONE]\n\n"));
+    source.close();
+    expect(decoder.decode((await reader.read()).value)).toBe("data: [DONE]\n\n");
+    expect((await reader.read()).done).toBe(true);
+    expect(vi.getTimerCount()).toBe(0);
+  });
+
   it("keeps the connection alive before headers and relays native tools and usage unchanged", async () => {
     const { pending, reader } = await waitingStream();
     const waiting = reader.read();

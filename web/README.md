@@ -194,7 +194,9 @@ npm run ai:configure-ollama -- --apply
 This creates dedicated `faamoffice-fast:ctx65536` and
 `faamoffice-pro:ctx65536` aliases using the existing weights, verifies their
 context setting, and updates only `FAAM_AI_MODELS`. Other Ollama models remain
-available. A private backup of `.env` is saved in `web/data/backups` before an
+available. For Qwen 3.5, it also sets `reasoningEffort: "none"` on `faam-fast`
+unless explicitly configured, so short drafts do not wait for lengthy thinking.
+`faam-pro` keeps the model's default thinking. A private backup of `.env` is saved in `web/data/backups` before an
 update. Restart the website process to activate the aliases; the desktop app
 does not need rebuilding. Use `--context=32768` if the server has insufficient
 memory for 65,536 tokens; larger contexts require more memory.
@@ -203,13 +205,15 @@ Verify with a real document-writing request: the app should execute a tool and
 insert text into the editor. After that request, Ollama's `/api/ps` should report
 the selected alias and its configured `context_length`.
 
-Cold models can spend more than a minute evaluating document prompts. For
-streaming requests whose upstream headers are not ready within one second, the
-proxy opens SSE and sends comment heartbeats every 15 seconds until those
-headers arrive. These comments keep the desktop connection alive and do not
+Cold models can spend more than a minute evaluating document prompts. The
+proxy sends SSE comment heartbeats every 15 seconds until the first upstream
+body chunk arrives, opening the response within one second even when upstream
+headers are delayed. These comments keep the desktop connection alive and do not
 count as generated tokens. Cancellation and `FAAM_AI_REQUEST_TIMEOUT_MS` still
 abort the upstream request. Quick upstream failures keep their HTTP status;
 failures after streaming starts are delivered as OpenAI-style SSE errors.
+`reasoningEffort` is an optional model default (`none`, `low`, `medium`, `high`);
+an explicit caller `reasoning_effort` or `reasoning` value takes precedence.
 
 ## Production
 

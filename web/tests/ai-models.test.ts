@@ -20,6 +20,7 @@ describe("model catalog", () => {
     expect(() => parseModels("[]")).toThrow(/invalid/);
     expect(() => parseModels(JSON.stringify([{ id: "x", upstream: "y", inputPer1K: -1, outputPer1K: 1 }]))).toThrow();
     expect(() => parseModels(JSON.stringify([model, model]))).toThrow(/duplicate/);
+    expect(() => parseModels(JSON.stringify([{ ...model, reasoningEffort: "invalid" }]))).toThrow(/invalid/);
   });
 
   it("maps public ids to models and rejects unknown ones", () => {
@@ -31,6 +32,18 @@ describe("model catalog", () => {
 });
 
 describe("upstream request body", () => {
+  it("applies an optional model thinking default while preserving either form of caller override", () => {
+    const fast = parseModels(JSON.stringify([{ ...model, reasoningEffort: "none" }]))[0];
+    const body = { model: "faam-fast", tools: [{ type: "function" }], max_tokens: 500 };
+    expect(buildUpstreamBody(body, fast)).toEqual({ ...body, model: fast.upstream, reasoning_effort: "none" });
+    expect(body).not.toHaveProperty("reasoning_effort");
+    expect(buildUpstreamBody({ ...body, reasoning_effort: "high" }, fast).reasoning_effort).toBe("high");
+    const nested = buildUpstreamBody({ ...body, reasoning: { effort: "high" } }, fast);
+    expect(nested.reasoning).toEqual({ effort: "high" });
+    expect(nested).not.toHaveProperty("reasoning_effort");
+    expect(buildUpstreamBody(body, model)).not.toHaveProperty("reasoning_effort");
+  });
+
   it("maps the model and passes everything else through untouched", () => {
     const body = {
       model: "faam-fast",

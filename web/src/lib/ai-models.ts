@@ -13,6 +13,8 @@ export const modelConfigSchema = z.object({
   outputPer1K: z.number().min(0).max(1_000_000),
   /** Upper bound applied to max_tokens / max_completion_tokens. */
   maxOutputTokens: z.number().int().positive().max(10_000_000).optional(),
+  /** Default upstream thinking effort, only when the caller did not set one. */
+  reasoningEffort: z.enum(["none", "low", "medium", "high"]).optional(),
 });
 
 export type ModelConfig = z.infer<typeof modelConfigSchema>;
@@ -62,9 +64,13 @@ function cap(value: unknown, max: number | undefined): unknown {
  *  - `model` is mapped to the upstream id,
  *  - streaming requests get `stream_options.include_usage = true`,
  *  - max_tokens / max_completion_tokens are capped by `maxOutputTokens`.
+ *  - a configured reasoning effort is used only when the caller did not set one.
  */
 export function buildUpstreamBody(body: Record<string, unknown>, model: ModelConfig): Record<string, unknown> {
   const out: Record<string, unknown> = { ...body, model: model.upstream };
+  if (model.reasoningEffort !== undefined && body.reasoning_effort === undefined && body.reasoning === undefined) {
+    out.reasoning_effort = model.reasoningEffort;
+  }
   if (body.stream === true) {
     const existing =
       body.stream_options && typeof body.stream_options === "object" && !Array.isArray(body.stream_options)

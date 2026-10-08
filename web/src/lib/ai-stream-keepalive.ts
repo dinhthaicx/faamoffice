@@ -1,6 +1,6 @@
 // Local models can take longer than the desktop's 60-second connect timeout
 // to evaluate a document prompt. Send SSE comments while waiting for headers.
-// Stop comments before relaying bytes: an upstream chunk can end mid-SSE-line.
+// Keep them until the first upstream byte, then stop: chunks can end mid-SSE-line.
 
 export const AI_STREAM_HEADERS_WAIT_MS = 1_000;
 export const AI_STREAM_HEARTBEAT_MS = 15_000;
@@ -42,8 +42,9 @@ export async function streamWhileConnecting(response: Promise<Response>, abort: 
     response,
     new Promise<typeof waiting>((resolve) => { headerTimer = setTimeout(() => resolve(waiting), AI_STREAM_HEADERS_WAIT_MS); }),
   ]).finally(() => clearTimeout(headerTimer));
-  // Preserve HTTP errors and JSON fallback responses when the upstream is ready quickly.
-  if (first !== waiting) return first;
+  // Preserve HTTP errors and JSON fallback responses when ready quickly. SSE
+  // headers alone are insufficient: Next/proxies can buffer them until body data.
+  if (first !== waiting && (!first.ok || !first.body || !first.headers.get("content-type")?.includes("text/event-stream"))) return first;
 
   let keepalive: ReturnType<typeof setInterval> | undefined;
   let reader: ReadableStreamDefaultReader<Uint8Array> | undefined;
@@ -60,11 +61,11 @@ export async function streamWhileConnecting(response: Promise<Response>, abort: 
       try {
         if (!reader) {
           const source = await response;
-          stopHeartbeat();
           if (cancelled) { await source.body?.cancel().catch(() => {}); return; }
           if (source.ok && source.headers.get("content-type")?.includes("text/event-stream") && source.body) {
             reader = source.body.getReader();
           } else {
+            stopHeartbeat();
             let body: unknown = null;
             try { body = await source.json(); } catch { /* report a generic error without echoing the body */ }
             if (cancelled) return;
@@ -74,6 +75,7 @@ export async function streamWhileConnecting(response: Promise<Response>, abort: 
           }
         }
         const chunk = await reader.read();
+        stopHeartbeat();
         if (cancelled) return;
         if (chunk.done) ctrl.close();
         else ctrl.enqueue(chunk.value);

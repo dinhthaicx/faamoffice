@@ -42,7 +42,12 @@ async function main() {
     const configured = /^num_ctx\s+(\d+)\s*$/m.exec(metadata.parameters ?? "");
     if (Number(configured?.[1]) !== context) throw new Error(`Ollama did not confirm ${context} context tokens for ${alias}; web/.env is unchanged.`);
     model.upstream = alias;
-    console.log(JSON.stringify({ id: model.id, upstream: alias, contextTokens: context }));
+    // Qwen 3.5's default thinking can use the whole output budget before a
+    // short HTML draft. The fast tier writes directly; preserve explicit config.
+    if (model.id === "faam-fast" && metadata.model_info?.["general.architecture"] === "qwen35" && model.reasoningEffort === undefined) {
+      model.reasoningEffort = "none";
+    }
+    console.log(JSON.stringify({ id: model.id, upstream: alias, contextTokens: context, reasoningEffort: model.reasoningEffort }));
   }
   if (!process.argv.includes("--apply")) {
     console.log("Aliases are ready. Run again with --apply to update web/.env, then restart the website process.");
