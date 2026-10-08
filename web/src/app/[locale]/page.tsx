@@ -126,7 +126,7 @@ export default async function HomePage({ params }: PageProps<"/[locale]">) {
           </h1>
           <p className="mx-auto mt-6 max-w-2xl text-lg leading-relaxed text-muted">{h.hero.subtitle}</p>
           <div className="mt-8 flex flex-col items-center justify-center gap-3 sm:flex-row">
-            <Link href={`/${locale}/download`} className={`${buttonClass.primary} ${buttonClass.large}`}>
+            <Link href={`/${locale}/download`} className={`${buttonClass.download} ${buttonClass.large}`}>
               <DownloadIcon />
               {h.hero.ctaDownload}
             </Link>
@@ -312,7 +312,7 @@ export default async function HomePage({ params }: PageProps<"/[locale]">) {
                 {h.cta.title}
               </h2>
               <p className="mx-auto mt-3 max-w-xl text-muted">{h.cta.subtitle}</p>
-              <Link href={`/${locale}/download`} className={`${buttonClass.primary} ${buttonClass.large} mt-6`}>
+              <Link href={`/${locale}/download`} className={`${buttonClass.download} ${buttonClass.large} mt-6`}>
                 <DownloadIcon />
                 {h.cta.button}
               </Link>

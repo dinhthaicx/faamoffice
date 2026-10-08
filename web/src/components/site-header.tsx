@@ -40,7 +40,7 @@ export function SiteHeader({ locale, dict }: { locale: Locale; dict: Dictionary 
           >
             {dict.nav.account}
           </Link>
-          <Link href={`/${locale}/download`} className={`${buttonClass.primary} ml-1`}>
+          <Link href={`/${locale}/download`} className={`${buttonClass.download} ml-1`}>
             {dict.nav.download}
           </Link>
         </div>

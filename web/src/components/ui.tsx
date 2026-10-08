@@ -11,6 +11,7 @@ const base =
 
 export const buttonClass = {
   primary: `${base} bg-accent text-accent-fg hover:bg-accent-hover`,
+  download: `${base} border border-accent-hover bg-accent text-accent-fg shadow-md shadow-accent/20 hover:bg-accent-hover`,
   secondary: `${base} border border-border-strong bg-card text-fg hover:bg-bg-muted`,
   danger: `${base} bg-danger text-white hover:bg-danger-hover`,
   ghost: `${base} text-fg hover:bg-bg-muted`,

@@ -5,7 +5,7 @@ import { CodeBlock } from "@/components/code-block";
 import { DownloadRecommendation } from "@/components/download-recommendation";
 import { DownloadLink } from "@/components/download-link";
 import { JsonLd } from "@/components/json-ld";
-import { Alert, buttonClass, Card, Container, DownloadIcon } from "@/components/ui";
+import { Alert, buttonClass, Container, DownloadIcon } from "@/components/ui";
 import { getLatestRelease, type AssetKey, type ReleaseInfo } from "@/lib/releases";
 import { pageMetadata, softwareApplicationLd } from "@/lib/seo";
 import { getSiteSettings } from "@/lib/site-settings";
@@ -156,13 +156,13 @@ export default async function DownloadPage({ params }: PageProps<"/[locale]/down
         </Container>
       </section>
 
-      <section className="py-10" aria-label={d.title}>
+      <section className="bg-bg-soft py-10" aria-label={d.title}>
         <Container>
           <ul className="grid gap-5 lg:grid-cols-3">
             {platforms.map((p) => (
               <li key={p.id} id={p.id} className="scroll-mt-24">
-                <Card className="h-full">
-                  <h2 className="text-xl font-bold">{p.name}</h2>
+                <div className="h-full rounded-2xl border border-accent/30 bg-card p-6 shadow-sm">
+                  <h2 className="text-xl font-bold text-link">{p.name}</h2>
                   <p className="mt-1 text-sm text-muted">{p.requirement}</p>
                   {p.id === "windows" && storeUrl ? (
                     <div className="mt-5">
@@ -181,12 +181,12 @@ export default async function DownloadPage({ params }: PageProps<"/[locale]/down
                         <li key={a.key}>
                           {link.url ? <DownloadLink href={link.url} fileName={link.fileName}
                             tracking={release.version ? { asset: a.key, version: release.version, locale, source: "platform" } : undefined}
-                            className={`${buttonClass.secondary} w-full justify-between`}>
+                            className={`${buttonClass.download} min-h-12 w-full justify-between`}>
                             <span className="flex items-center gap-2">
                               <DownloadIcon />
                               {a.label}
                             </span>
-                            {link.size ? <span className="text-xs font-normal text-muted">{link.size}</span> : null}
+                            {link.size ? <span className="shrink-0 rounded-md bg-accent-hover px-2 py-1 text-xs font-medium text-accent-fg">{link.size}</span> : null}
                           </DownloadLink> : <span aria-disabled="true" className={`${buttonClass.secondary} w-full justify-between opacity-50`}>
                             {a.label}<span className="text-xs">{d.unavailable}</span>
                           </span>}
@@ -195,7 +195,7 @@ export default async function DownloadPage({ params }: PageProps<"/[locale]/down
                       );
                     })}
                   </ul>
-                </Card>
+                </div>
               </li>
             ))}
           </ul>

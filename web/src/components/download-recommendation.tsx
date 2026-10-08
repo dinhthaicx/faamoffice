@@ -6,6 +6,7 @@
 
 import { useSyncExternalStore } from "react";
 import { DownloadLink } from "./download-link";
+import { buttonClass, DownloadIcon } from "./ui";
 import type { DownloadClick } from "@/lib/downloads-shared";
 
 type Os = "mac" | "windows" | "linux";
@@ -37,7 +38,7 @@ export function DownloadRecommendation({ title, buttonLabel, options }: Recommen
   const option = options[os];
   if (!option.primary.url) return null;
   return (
-    <div className="mt-10 rounded-2xl border border-border bg-card p-6 shadow-sm sm:p-8">
+    <div className="mt-10 rounded-2xl border border-accent/40 bg-accent/10 p-6 shadow-sm sm:p-8">
       <p className="text-sm font-semibold text-link">{title}</p>
       <div className="mt-3 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
@@ -50,11 +51,9 @@ export function DownloadRecommendation({ title, buttonLabel, options }: Recommen
           href={option.primary.url}
           fileName={option.primary.fileName}
           tracking={option.primary.tracking}
-          className="inline-flex items-center justify-center gap-2 rounded-lg bg-accent px-5 py-3 text-base font-semibold text-accent-fg hover:bg-accent-hover"
+          className={`${buttonClass.download} ${buttonClass.large} shrink-0`}
         >
-          <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.8" className="h-4 w-4" aria-hidden="true">
-            <path d="M10 3v10m0 0-4-4m4 4 4-4M4 16h12" strokeLinecap="round" strokeLinejoin="round" />
-          </svg>
+          <DownloadIcon />
           {buttonLabel.replace("{os}", option.name)}
         </DownloadLink>
       </div>
