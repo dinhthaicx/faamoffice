@@ -10,7 +10,7 @@ export const en: Dictionary = {
       "FaamOffice is a free office suite for Windows, macOS and Linux: open, edit and save Word, Excel and PowerPoint files; read, annotate and fill PDFs. Open source under Apache-2.0.",
     ogAlt: "FaamOffice — a free office suite for Word, Excel, PowerPoint and PDF files",
     ogTagline: "A free office suite for Word and Excel files",
-    ogSub: "Docs · Sheets · Slides · PDF · Markdown · HTML — macOS, Windows, Linux",
+    ogSub: "Docs · Sheets · Slides · PDF · Markdown · HTML — Windows, macOS, Linux",
   },
   nav: {
     skipToContent: "Skip to main content",
@@ -26,7 +26,7 @@ export const en: Dictionary = {
     switchTo: "Tiếng Việt",
   },
   footer: {
-    tagline: "The open-source office suite with the Faam AI assistant. Free for macOS, Windows and Linux.",
+    tagline: "The open-source office suite with the Faam AI assistant. Free for Windows, macOS and Linux.",
     product: "Product",
     resources: "Resources",
     legal: "Legal",
@@ -73,7 +73,7 @@ export const en: Dictionary = {
         "Open, edit and save Word documents, Excel spreadsheets and PowerPoint presentations on your computer. FaamOffice also reads, annotates and fills PDF forms, alongside Markdown and HTML editing. No FaamOffice license purchase is needed to use the editors. Faam AI helps edit documents through Cloud, your own API key or local AI.",
       ctaDownload: "Download FaamOffice for free",
       ctaAi: "Discover Faam AI",
-      platforms: "For macOS, Windows and Linux",
+      platforms: "For Windows, macOS and Linux",
     },
     mock: {
       fileName: "Q3 report.docx",
@@ -162,14 +162,14 @@ export const en: Dictionary = {
         { q: "What should I choose when searching for “Word without a license” or “Excel without a license”?", a: "If you need to open and edit files without buying an editor, FaamOffice is a free option for Word .docx documents and Excel .xlsx spreadsheets. FaamOffice is an independent app, not Microsoft Word, Excel or Microsoft Office, and does not provide cracked Office software or activation keys. Use each product according to its publisher's license." },
         { q: "Is there a free office suite with no license to buy?", a: "FaamOffice is a free, open-source office suite under Apache-2.0. No FaamOffice license purchase is needed to open, edit and save Word, Excel and PowerPoint files; you can also read, annotate and fill PDF forms. It is an independent alternative to Microsoft Office for Windows, macOS and Linux." },
         { q: "What should I check if I am concerned about software licensing penalties?", a: "Read the software license and use the product according to its publisher's terms. FaamOffice is a free, open-source office alternative under Apache-2.0; you can review its license and public source code before using it. If you use Microsoft Word, Excel or other software, check the terms for each product." },
-        { q: "Which operating systems does FaamOffice support?", a: "macOS (Apple Silicon and Intel), 64-bit Windows, and Linux (AppImage, .deb, .rpm)." },
+        { q: "Which operating systems does FaamOffice support?", a: "64-bit Windows, macOS (Apple Silicon and Intel), and Linux (AppImage, .deb, .rpm)." },
         { q: "Do I need an account?", a: "No. Every editor — and Faam AI with your own API key or local AI — works without signing in. A FaamOffice account is only needed for Faam AI Cloud." },
         { q: "Are my documents uploaded to a server?", a: "Ordinary editing does not upload documents. With Faam AI Cloud, the prompt and accompanying document content pass through the FaamOffice server to Ollama/Qwen 3.5 on that server. With your own API key, content goes to your selected provider; AI running on your own computer keeps content there." },
         { q: "Which models can Faam AI use?", a: "Faam AI Cloud, or your API key for OpenAI, Anthropic Claude, Google Gemini, DeepSeek, xAI Grok, Mistral, Groq, OpenRouter, Qwen, Kimi, GLM, MiniMax, and any OpenAI-compatible server. To let Faam AI edit documents, choose a model that supports tool calling." },
         { q: "What is Faam AI Cloud?", a: "Faam AI Cloud lets you use AI models right inside the app with just your FaamOffice account, no API key: open Settings → AI models, choose Faam AI Cloud and sign in. To keep the service reliable for everyone, daily usage may be limited. Your usage history is on the Account page." },
         {
-          q: "Why does macOS or Windows warn me on first launch?",
-          a: "The current macOS 0.11.2 installers are Developer ID signed and notarized by Apple. If an earlier download says “Apple cannot verify”, download the installer again, quit FaamOffice, drag the new copy into Applications and choose Replace. The Windows .exe installer has no Authenticode signature: when you see “Windows protected your PC”, choose More info and then Run anyway. If Smart App Control blocks it, a properly signed installer is required.",
+          q: "Why does Windows or macOS warn me on first launch?",
+          a: "The Windows .exe installer has no Authenticode signature: when you see “Windows protected your PC”, choose More info and then Run anyway. If Smart App Control blocks it, a properly signed installer is required. The current macOS 0.11.2 installers are Developer ID signed and notarized by Apple. If an earlier download says “Apple cannot verify”, download the installer again, quit FaamOffice, drag the new copy into Applications and choose Replace.",
           storeNote:
             "On Windows 10 and 11 you can also install FaamOffice from the Microsoft Store. Microsoft signs this version and the Store updates it automatically.",
         },
@@ -192,7 +192,7 @@ export const en: Dictionary = {
     version: "Version",
     released: "Released",
     recommended: "Recommended for your computer",
-    downloadFor: "Download for {os}",
+    downloadFor: "Free download for {os}",
     unavailable: "Not available",
     fallbackNote: "The latest release files could not be listed, so the buttons open the release page on GitHub.",
     platforms: {
@@ -214,12 +214,12 @@ export const en: Dictionary = {
     },
     firstLaunch: {
       title: "First launch",
-      intro: "Choose the installer for your computer and follow the steps below. The current macOS 0.11.2 installers are Developer ID signed and notarized by Apple; the Windows .exe installer may still show an operating system warning.",
+      intro: "Choose the installer for your computer and follow the steps below. The Windows .exe installer may still show an operating system warning; the current macOS 0.11.2 installers are Developer ID signed and notarized by Apple.",
       mac: "Drag FaamOffice to your Applications folder and open it. If you downloaded 0.11.2 before the signed installers were available and still see “Apple cannot verify”, download it again using the buttons above, quit FaamOffice, drag the new copy into Applications and choose Replace. The version remains 0.11.2; the macOS downloads have been replaced with signed, notarized builds.",
       windows: "When you see “Windows protected your PC”, choose More info and then Run anyway (“Unknown publisher” is expected). If Windows 11 Smart App Control blocks it, there is no way to continue; please wait for the signed build.",
       linux: "The AppImage runs directly once it is executable; .deb and .rpm install through your package manager:",
       windowsStore:
-        "The easiest option is to install FaamOffice from the Microsoft Store using the badge in the Windows card above. Microsoft signs this version and the Store updates it automatically. If you use the .exe installer:",
+        "You can also install FaamOffice from the Microsoft Store using the badge below the .exe installer in the Windows card above. Microsoft signs this version and the Store updates it automatically.",
     },
     more: {
       title: "Releases and source code",
@@ -228,11 +228,11 @@ export const en: Dictionary = {
       checksum: "The installers are built from the public source code. macOS builds are Developer ID signed and submitted to Apple for notarization before release.",
     },
     store: {
-      recommended: "Recommended",
-      recommendedOption: "Microsoft Store (recommended)",
+      recommended: "Or install from Microsoft Store",
+      recommendedOption: "Microsoft Store (another option)",
       badgeAlt: "Get FaamOffice from Microsoft Store",
       note: "Signed by Microsoft, with automatic updates from the Microsoft Store and no SmartScreen warnings.",
-      orInstaller: "Or download the installer:",
+      orInstaller: "Download the .exe installer directly:",
     },
   },
   faamAi: {
@@ -861,7 +861,7 @@ export const en: Dictionary = {
         on: "Visible",
         off: "Hidden",
         explainOn:
-          "The Windows card on the Download page shows the Microsoft Store badge as the recommended option above the .exe installer. First-launch instructions also mention the Store.",
+          "The Windows card on the Download page shows the direct .exe installer first, with the Microsoft Store badge as another option below it. First-launch instructions also mention the Store.",
         explainOff: "The Microsoft Store badge is hidden. Enable it once FaamOffice's Store listing is approved and public.",
         switchLabel: "Show the Microsoft Store badge",
         turnOn: "Show the Microsoft Store badge",

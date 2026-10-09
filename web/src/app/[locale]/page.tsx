@@ -2,11 +2,14 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { AdsenseScript, AdSlot } from "@/components/ads";
 import { AppIcon } from "@/components/app-icons";
+import { AdaptiveDownloadButton } from "@/components/adaptive-download-button";
 import { CodeBlock } from "@/components/code-block";
 import { JsonLd } from "@/components/json-ld";
 import { LogoMark } from "@/components/logo";
-import { ArrowRightIcon, buttonClass, Card, CheckIcon, Container, DownloadIcon, Eyebrow, SectionHeading } from "@/components/ui";
+import { ArrowRightIcon, buttonClass, Card, CheckIcon, Container, Eyebrow, SectionHeading } from "@/components/ui";
 import { adsForPage } from "@/lib/ads";
+import { getDownloadTargets } from "@/lib/download-targets";
+import { getLatestRelease } from "@/lib/releases";
 import { faqLd, organizationLd, pageMetadata, softwareApplicationLd, websiteLd } from "@/lib/seo";
 import { getSiteSettings, publicSocialLinks } from "@/lib/site-settings";
 import { AI_PROVIDERS, GITHUB_URL, LOCAL_AI } from "@/lib/site";
@@ -100,7 +103,18 @@ export default async function HomePage({ params }: PageProps<"/[locale]">) {
   const locale = toLocale((await params).locale);
   const dict = getDictionary(locale);
   const h = dict.home;
-  const settings = await getSiteSettings();
+  const [settings, release] = await Promise.all([getSiteSettings(), getLatestRelease()]);
+  const downloadProps = {
+    fallbackHref: `/${locale}/download`,
+    fallbackLabel: h.hero.ctaDownload,
+    buttonLabel: dict.download.downloadFor,
+    platformNames: {
+      windows: dict.download.platforms.windows.name,
+      mac: dict.download.platforms.mac.name,
+      linux: dict.download.platforms.linux.name,
+    },
+    targets: getDownloadTargets(release, locale),
+  };
   const socialUrls = publicSocialLinks(settings.socialLinks).map((s) => s.url);
   const ads = adsForPage(settings.ads, "home");
   // The Microsoft Store option is only mentioned while the download page shows its badge.
@@ -126,10 +140,7 @@ export default async function HomePage({ params }: PageProps<"/[locale]">) {
           </h1>
           <p className="mx-auto mt-6 max-w-2xl text-lg leading-relaxed text-muted">{h.hero.subtitle}</p>
           <div className="mt-8 flex flex-col items-center justify-center gap-3 sm:flex-row">
-            <Link href={`/${locale}/download`} className={`${buttonClass.download} ${buttonClass.large}`}>
-              <DownloadIcon />
-              {h.hero.ctaDownload}
-            </Link>
+            <AdaptiveDownloadButton {...downloadProps} className={`${buttonClass.download} ${buttonClass.large} min-h-14 w-full shadow-lg shadow-download/25 sm:w-auto`} />
             <Link href={`/${locale}/faam-ai`} className={`${buttonClass.ai} ${buttonClass.large}`}>
               {h.hero.ctaAi}
               <ArrowRightIcon />
@@ -141,7 +152,7 @@ export default async function HomePage({ params }: PageProps<"/[locale]">) {
       </section>
 
       {/* Six apps */}
-      <section id="features" className="scroll-mt-20 py-20" aria-labelledby="apps-title">
+      <section id="features" className="scroll-mt-36 py-20 lg:scroll-mt-20" aria-labelledby="apps-title">
         <Container>
           <SectionHeading id="apps-title" title={h.apps.title} subtitle={h.apps.subtitle} center />
           <ul className="mt-12 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
@@ -312,10 +323,7 @@ export default async function HomePage({ params }: PageProps<"/[locale]">) {
                 {h.cta.title}
               </h2>
               <p className="mx-auto mt-3 max-w-xl text-muted">{h.cta.subtitle}</p>
-              <Link href={`/${locale}/download`} className={`${buttonClass.download} ${buttonClass.large} mt-6`}>
-                <DownloadIcon />
-                {h.cta.button}
-              </Link>
+              <AdaptiveDownloadButton {...downloadProps} fallbackLabel={h.cta.button} className={`${buttonClass.download} ${buttonClass.large} mt-6 min-h-14 shadow-lg shadow-download/25`} />
             </div>
           </div>
         </Container>

@@ -100,7 +100,7 @@ export function softwareApplicationLd(locale: Locale, dict: Dictionary): JsonLd 
     url: absoluteUrl(`/${locale}`),
     downloadUrl: LATEST_RELEASE_URL,
     image: absoluteUrl("/icons/icon-512.png"),
-    operatingSystem: "macOS, Windows, Linux",
+    operatingSystem: "Windows, macOS, Linux",
     applicationCategory: "BusinessApplication",
     applicationSubCategory: "Office suite",
     license: LICENSE_URL,

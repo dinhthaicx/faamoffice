@@ -11,7 +11,7 @@ export const vi = {
       "FaamOffice là bộ văn phòng miễn phí cho Windows, macOS và Linux: mở, sửa, lưu tệp Word, Excel, PowerPoint; đọc, ghi chú và điền biểu mẫu PDF. Mã nguồn mở Apache-2.0.",
     ogAlt: "FaamOffice — bộ văn phòng miễn phí cho tệp Word, Excel, PowerPoint và PDF",
     ogTagline: "Bộ văn phòng miễn phí cho tệp Word và Excel",
-    ogSub: "Docs · Sheets · Slides · PDF · Markdown · HTML — macOS, Windows, Linux",
+    ogSub: "Docs · Sheets · Slides · PDF · Markdown · HTML — Windows, macOS, Linux",
   },
   nav: {
     skipToContent: "Bỏ qua, đến nội dung chính",
@@ -27,7 +27,7 @@ export const vi = {
     switchTo: "English",
   },
   footer: {
-    tagline: "Bộ văn phòng mã nguồn mở có trợ lý Faam AI. Miễn phí cho macOS, Windows và Linux.",
+    tagline: "Bộ văn phòng mã nguồn mở có trợ lý Faam AI. Miễn phí cho Windows, macOS và Linux.",
     product: "Sản phẩm",
     resources: "Tài nguyên",
     legal: "Pháp lý",
@@ -74,7 +74,7 @@ export const vi = {
         "Mở, soạn thảo và lưu tệp Word, làm bảng tính Excel và bài trình chiếu PowerPoint ngay trên máy. FaamOffice hỗ trợ đọc, ghi chú, điền biểu mẫu PDF, cùng Markdown và HTML. Không cần mua bản quyền FaamOffice để dùng các trình soạn thảo. Faam AI hỗ trợ sửa tài liệu bằng Cloud, API key riêng hoặc AI cục bộ.",
       ctaDownload: "Tải FaamOffice miễn phí",
       ctaAi: "Tìm hiểu Faam AI",
-      platforms: "Dành cho macOS, Windows và Linux",
+      platforms: "Dành cho Windows, macOS và Linux",
     },
     mock: {
       fileName: "Báo cáo quý 3.docx",
@@ -163,14 +163,14 @@ export const vi = {
         { q: "Tìm “Word không bản quyền” hoặc “Excel không bản quyền” thì nên chọn gì?", a: "Nếu bạn cần mở và sửa tệp mà không mua một ứng dụng soạn thảo, FaamOffice là lựa chọn miễn phí cho tệp Word .docx và bảng tính Excel .xlsx. FaamOffice là phần mềm độc lập, không phải Microsoft Word, Excel hay Microsoft Office và không cung cấp bản crack hoặc khóa kích hoạt Office. Hãy sử dụng từng sản phẩm theo giấy phép của nhà phát hành." },
         { q: "Có bộ Office miễn phí, không cần mua bản quyền không?", a: "FaamOffice là bộ ứng dụng văn phòng miễn phí, mã nguồn mở theo Apache-2.0. Bạn không cần mua bản quyền FaamOffice để mở, sửa, lưu tệp Word, Excel và PowerPoint; cũng có thể đọc, ghi chú và điền biểu mẫu PDF. Đây là một lựa chọn độc lập với Microsoft Office, chạy trên Windows, macOS và Linux." },
         { q: "Cần kiểm tra gì khi lo về phạt bản quyền phần mềm?", a: "Hãy đọc giấy phép và sử dụng phần mềm theo điều khoản của nhà phát hành. FaamOffice là lựa chọn văn phòng miễn phí, mã nguồn mở theo giấy phép Apache-2.0; bạn có thể xem giấy phép cùng mã nguồn công khai trước khi sử dụng. Nếu dùng Microsoft Word, Excel hoặc phần mềm khác, hãy kiểm tra điều khoản tương ứng của từng sản phẩm." },
-        { q: "FaamOffice chạy trên hệ điều hành nào?", a: "macOS (Apple Silicon và Intel), Windows 64-bit và Linux (AppImage, .deb, .rpm)." },
+        { q: "FaamOffice chạy trên hệ điều hành nào?", a: "Windows 64-bit, macOS (Apple Silicon và Intel) và Linux (AppImage, .deb, .rpm)." },
         { q: "Có cần tạo tài khoản không?", a: "Không. Mọi trình soạn thảo, cùng Faam AI dùng API key riêng hoặc AI cục bộ, đều hoạt động mà không cần đăng nhập. Tài khoản FaamOffice chỉ cần cho Faam AI Cloud." },
         { q: "Tài liệu của tôi có bị gửi lên máy chủ không?", a: "Soạn thảo thông thường không tải tài liệu lên máy chủ. Khi dùng Faam AI Cloud, lời nhắc và phần tài liệu gửi kèm đi qua máy chủ FaamOffice tới Ollama/Qwen 3.5 trên máy chủ đó. Với API key riêng, nội dung đi tới nhà cung cấp bạn chọn; AI chạy trên chính máy bạn giữ nội dung tại máy." },
         { q: "Faam AI dùng được những mô hình nào?", a: "Faam AI Cloud, hoặc API key của OpenAI, Anthropic Claude, Google Gemini, DeepSeek, xAI Grok, Mistral, Groq, OpenRouter, Qwen, Kimi, GLM, MiniMax và mọi máy chủ tương thích OpenAI. Để Faam AI sửa được tài liệu, hãy chọn mô hình hỗ trợ gọi công cụ (tool calling)." },
         { q: "Faam AI Cloud là gì?", a: "Faam AI Cloud cho phép bạn dùng các mô hình AI ngay trong ứng dụng chỉ bằng tài khoản FaamOffice, không cần API key: vào Cài đặt → Mô hình AI, chọn Faam AI Cloud rồi đăng nhập là xong. Để dịch vụ ổn định cho mọi người, số lượt dùng mỗi ngày có thể được giới hạn. Lịch sử sử dụng hiển thị trong trang Tài khoản." },
         {
-          q: "Vì sao macOS hoặc Windows cảnh báo khi mở lần đầu?",
-          a: "Bộ cài macOS 0.11.2 hiện đã được ký bằng Developer ID và được Apple xác minh (notarization). Nếu bản đã tải trước đây báo “Apple không thể xác minh”, hãy tải lại bộ cài từ trang Tải về, thoát FaamOffice rồi kéo bản mới vào Applications và chọn Thay thế (Replace). Bộ cài Windows .exe chưa có chữ ký Authenticode: khi thấy “Windows đã bảo vệ PC của bạn”, bấm “Thông tin thêm” (More info) rồi “Vẫn chạy” (Run anyway); nếu Smart App Control chặn thì cần bản cài có chữ ký hợp lệ.",
+          q: "Vì sao Windows hoặc macOS cảnh báo khi mở lần đầu?",
+          a: "Bộ cài Windows .exe chưa có chữ ký Authenticode: khi thấy “Windows đã bảo vệ PC của bạn”, bấm “Thông tin thêm” (More info) rồi “Vẫn chạy” (Run anyway); nếu Smart App Control chặn thì cần bản cài có chữ ký hợp lệ. Bộ cài macOS 0.11.2 hiện đã được ký bằng Developer ID và được Apple xác minh (notarization). Nếu bản đã tải trước đây báo “Apple không thể xác minh”, hãy tải lại bộ cài từ trang Tải về, thoát FaamOffice rồi kéo bản mới vào Applications và chọn Thay thế (Replace).",
           storeNote: "Trên Windows 10 và 11, bạn cũng có thể cài FaamOffice từ Microsoft Store: bản này được Microsoft ký nên không có các cảnh báo trên và được Store tự cập nhật.",
         },
         { q: "Mở tệp Word, Excel có giữ nguyên định dạng không?", a: "FaamOffice đọc và ghi trực tiếp định dạng gốc (.docx, .xlsx, .pptx), nên tệp lưu ra vẫn mở được trong Microsoft Office, Google Docs hay LibreOffice. Với tài liệu rất phức tạp, một vài chi tiết hiển thị có thể khác đôi chút." },
@@ -192,15 +192,15 @@ export const vi = {
     version: "Phiên bản",
     released: "Phát hành ngày",
     recommended: "Đề xuất cho máy của bạn",
-    downloadFor: "Tải cho {os}",
+    downloadFor: "Tải miễn phí cho {os}",
     unavailable: "Chưa có gói cài",
     fallbackNote: "Không lấy được danh sách tệp của bản mới nhất, các nút sẽ mở trang phát hành trên GitHub.",
     store: {
-      recommended: "Khuyên dùng",
-      recommendedOption: "Microsoft Store (khuyên dùng)",
+      recommended: "Hoặc cài từ Microsoft Store",
+      recommendedOption: "Microsoft Store (lựa chọn khác)",
       badgeAlt: "Tải FaamOffice từ Microsoft Store",
       note: "Được Microsoft ký, không có cảnh báo SmartScreen và được Microsoft Store tự cập nhật.",
-      orInstaller: "Hoặc tải bộ cài:",
+      orInstaller: "Tải trực tiếp bộ cài .exe:",
     },
     platforms: {
       mac: {
@@ -221,10 +221,10 @@ export const vi = {
     },
     firstLaunch: {
       title: "Lần đầu mở ứng dụng",
-      intro: "Chọn bộ cài phù hợp với máy rồi làm theo hướng dẫn bên dưới. Bộ cài macOS 0.11.2 đã được ký bằng Developer ID và được Apple xác minh; bộ cài Windows .exe vẫn có thể hiện cảnh báo của hệ điều hành.",
+      intro: "Chọn bộ cài phù hợp với máy rồi làm theo hướng dẫn bên dưới. Bộ cài Windows .exe vẫn có thể hiện cảnh báo của hệ điều hành; bộ cài macOS 0.11.2 đã được ký bằng Developer ID và được Apple xác minh.",
       mac: "Kéo FaamOffice vào thư mục Ứng dụng (Applications) rồi mở. Nếu bạn đã tải bản 0.11.2 trước khi có chữ ký Apple và vẫn thấy “Apple không thể xác minh”, hãy tải lại bộ cài bằng nút phía trên, thoát FaamOffice rồi kéo bản mới vào Applications và chọn Thay thế (Replace). Số phiên bản vẫn là 0.11.2; các file tải macOS đã được thay bằng bản ký số và xác minh.",
       windows: "Khi thấy “Windows đã bảo vệ PC của bạn” (Windows protected your PC), bấm “Thông tin thêm” (More info) rồi “Vẫn chạy” (Run anyway); nhà phát hành hiện là không xác định (Unknown publisher) là bình thường. Nếu Smart App Control của Windows 11 chặn thì không có nút chạy tiếp; hãy chờ bản đã ký số.",
-      windowsStore: "Cách dễ nhất: cài FaamOffice từ Microsoft Store (nút “Tải từ Microsoft” ở thẻ Windows phía trên). Bản trên Store được Microsoft ký nên không hiện cảnh báo, không bị Smart App Control chặn và được Store tự cập nhật. Nếu dùng bộ cài .exe:",
+      windowsStore: "Bạn cũng có thể cài FaamOffice từ Microsoft Store bằng nút “Tải từ Microsoft” bên dưới bộ cài .exe trong thẻ Windows phía trên. Bản trên Store được Microsoft ký nên không hiện cảnh báo, không bị Smart App Control chặn và được Store tự cập nhật.",
       linux: "AppImage chạy trực tiếp sau khi cấp quyền thực thi; .deb và .rpm cài qua trình quản lý gói:",
     },
     more: {
@@ -861,7 +861,7 @@ export const vi = {
         on: "Đang hiện",
         off: "Đang ẩn",
         explainOn:
-          "Thẻ Windows trên trang Tải về đang hiện nút “Tải từ Microsoft” làm lựa chọn khuyên dùng, phía trên bộ cài .exe; phần hướng dẫn mở lần đầu cũng nhắc tới Store.",
+          "Thẻ Windows trên trang Tải về ưu tiên tải trực tiếp bộ cài .exe; nút “Tải từ Microsoft” nằm bên dưới làm lựa chọn khác. Phần hướng dẫn mở lần đầu cũng nhắc tới Store.",
         explainOff: "Nút Microsoft Store đang ẩn. Chỉ bật khi trang FaamOffice trên Microsoft Store đã được duyệt và công khai.",
         switchLabel: "Microsoft Store: hiện nút tải",
         turnOn: "Hiện nút Microsoft Store",

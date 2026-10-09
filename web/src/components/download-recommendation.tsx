@@ -7,27 +7,20 @@
 import { useSyncExternalStore } from "react";
 import { DownloadLink } from "./download-link";
 import { buttonClass, DownloadIcon } from "./ui";
+import { detectDesktopOs, needsLinuxArchitectureChoice, type DesktopOs } from "@/lib/download-platform";
 import type { DownloadClick } from "@/lib/downloads-shared";
 
-type Os = "mac" | "windows" | "linux";
 type Option = { label: string; url: string | null; fileName?: string; tracking?: DownloadClick };
 
 export type RecommendationProps = {
   title: string;
   /** Button label with an {os} placeholder. */
   buttonLabel: string;
-  options: Record<Os, { name: string; primary: Option; secondary?: Option[] }>;
+  options: Record<DesktopOs, { name: string; primary: Option; secondary?: Option[] }>;
 };
 
-function detectOs(): Os | null {
-  const nav = navigator as Navigator & { userAgentData?: { platform?: string } };
-  const platform = (nav.userAgentData?.platform || navigator.platform || "").toLowerCase();
-  const ua = navigator.userAgent.toLowerCase();
-  if (/iphone|ipad|ipod|android/.test(ua)) return null;
-  if (platform.includes("mac") || ua.includes("mac os x")) return "mac";
-  if (platform.includes("win") || ua.includes("windows")) return "windows";
-  if (platform.includes("linux") || ua.includes("linux") || ua.includes("x11")) return "linux";
-  return null;
+function detectOs(): DesktopOs | null {
+  return detectDesktopOs(navigator);
 }
 
 const subscribe = () => () => {};
@@ -35,6 +28,7 @@ const subscribe = () => () => {};
 export function DownloadRecommendation({ title, buttonLabel, options }: RecommendationProps) {
   const os = useSyncExternalStore(subscribe, detectOs, () => null);
   if (!os) return null;
+  if (os === "linux" && needsLinuxArchitectureChoice(navigator)) return null;
   const option = options[os];
   if (!option.primary.url) return null;
   const downloadButton = { mac: buttonClass.download, windows: buttonClass.downloadCool, linux: buttonClass.downloadAi }[os];

@@ -42,7 +42,7 @@ function formatDate(iso: string | null, locale: Locale): string | null {
 /** Microsoft's "Get it from Microsoft" badge (self-hosted SVGs; the light one on dark backgrounds). */
 function StoreBadge({ url, locale, alt }: { url: string; locale: Locale; alt: string }) {
   return (
-    <a href={url} rel="noopener" className="inline-flex rounded-lg">
+    <a href={url} rel="noopener" className="inline-flex rounded-md">
       <picture>
         <source srcSet={`/badges/microsoft-store-${locale}-light.svg`} media="(prefers-color-scheme: dark)" />
         <img src={`/badges/microsoft-store-${locale}-dark.svg`} alt={alt} width={161} height={44} className="h-12 w-auto" />
@@ -69,6 +69,12 @@ export default async function DownloadPage({ params }: PageProps<"/[locale]/down
 
   const platforms: { id: "mac" | "windows" | "linux"; name: string; requirement: string; assets: { key: AssetKey; label: string }[] }[] = [
     {
+      id: "windows",
+      name: d.platforms.windows.name,
+      requirement: d.platforms.windows.requirement,
+      assets: [{ key: "winExe", label: d.platforms.windows.assets.winExe }],
+    },
+    {
       id: "mac",
       name: d.platforms.mac.name,
       requirement: d.platforms.mac.requirement,
@@ -76,12 +82,6 @@ export default async function DownloadPage({ params }: PageProps<"/[locale]/down
         { key: "macArm", label: d.platforms.mac.assets.macArm },
         { key: "macIntel", label: d.platforms.mac.assets.macIntel },
       ],
-    },
-    {
-      id: "windows",
-      name: d.platforms.windows.name,
-      requirement: d.platforms.windows.requirement,
-      assets: [{ key: "winExe", label: d.platforms.windows.assets.winExe }],
     },
     {
       id: "linux",
@@ -135,18 +135,16 @@ export default async function DownloadPage({ params }: PageProps<"/[locale]/down
             title={d.recommended}
             buttonLabel={d.downloadFor}
             options={{
+              windows: {
+                name: d.platforms.windows.name,
+                primary: option("winExe", d.platforms.windows.assets.winExe),
+                secondary: storeUrl ? [{ label: d.store.recommendedOption, url: storeUrl }] : [],
+              },
               mac: {
                 name: d.platforms.mac.name,
                 primary: option("macArm", d.platforms.mac.assets.macArm),
                 secondary: [option("macIntel", `${d.platforms.mac.name} — ${d.platforms.mac.assets.macIntel}`)],
               },
-              windows: storeUrl
-                ? {
-                    name: d.platforms.windows.name,
-                    primary: { label: d.store.recommendedOption, url: storeUrl },
-                    secondary: [option("winExe", `${d.platforms.windows.name} — ${d.platforms.windows.assets.winExe}`)],
-                  }
-                : { name: d.platforms.windows.name, primary: option("winExe", d.platforms.windows.assets.winExe) },
               linux: {
                 name: d.platforms.linux.name,
                 primary: option("appImage", d.platforms.linux.assets.appImage),
@@ -166,22 +164,12 @@ export default async function DownloadPage({ params }: PageProps<"/[locale]/down
         <Container>
           <ul className="grid gap-5 lg:grid-cols-3">
             {platforms.map((p) => (
-              <li key={p.id} id={p.id} className="scroll-mt-24">
+              <li key={p.id} id={p.id} className="scroll-mt-36 lg:scroll-mt-24">
                 <div className="card-elevation relative h-full overflow-hidden rounded-2xl border border-border bg-card p-6">
                   <div className={`absolute inset-x-0 top-0 h-1.5 ${platformStyle[p.id].ribbon}`} aria-hidden="true" />
                   <h2 className={`text-xl font-bold ${platformStyle[p.id].title}`}>{p.name}</h2>
                   <p className="mt-1 text-sm text-muted">{p.requirement}</p>
-                  {p.id === "windows" && storeUrl ? (
-                    <div className="mt-5">
-                      <p className="inline-flex rounded-full bg-success-bg px-2.5 py-0.5 text-xs font-semibold text-success-fg">{d.store.recommended}</p>
-                      <div className="mt-3">
-                        <StoreBadge url={storeUrl} locale={locale} alt={d.store.badgeAlt} />
-                      </div>
-                      <p className="mt-2 text-xs leading-relaxed text-muted">{d.store.note}</p>
-                      <p className="mt-5 text-sm font-medium">{d.store.orInstaller}</p>
-                    </div>
-                  ) : null}
-                  <ul className={p.id === "windows" && storeUrl ? "mt-3 space-y-3" : "mt-5 space-y-3"}>
+                  <ul className="mt-5 space-y-3">
                     {p.assets.map((a) => {
                       const link = assetLink(release, a.key);
                       return (
@@ -202,6 +190,15 @@ export default async function DownloadPage({ params }: PageProps<"/[locale]/down
                       );
                     })}
                   </ul>
+                  {p.id === "windows" && storeUrl ? (
+                    <div className="mt-5 border-t border-border pt-5">
+                      <p className="text-sm font-medium text-muted">{d.store.recommended}</p>
+                      <div className="mt-3">
+                        <StoreBadge url={storeUrl} locale={locale} alt={d.store.badgeAlt} />
+                      </div>
+                      <p className="mt-2 text-xs leading-relaxed text-muted">{d.store.note}</p>
+                    </div>
+                  ) : null}
                 </div>
               </li>
             ))}
@@ -217,13 +214,13 @@ export default async function DownloadPage({ params }: PageProps<"/[locale]/down
           <p className="mt-3 text-muted">{d.firstLaunch.intro}</p>
           <div className="mt-8 space-y-8">
             <div>
-              <h3 className="text-lg font-semibold">{d.platforms.mac.name}</h3>
-              <p className="mt-2 text-sm leading-relaxed text-muted">{d.firstLaunch.mac}</p>
+              <h3 className="text-lg font-semibold">{d.platforms.windows.name}</h3>
+              <p className="mt-2 text-sm leading-relaxed text-muted">{d.firstLaunch.windows}</p>
+              {storeUrl ? <p className="mt-2 text-sm leading-relaxed text-muted">{d.firstLaunch.windowsStore}</p> : null}
             </div>
             <div>
-              <h3 className="text-lg font-semibold">{d.platforms.windows.name}</h3>
-              {storeUrl ? <p className="mt-2 text-sm leading-relaxed text-muted">{d.firstLaunch.windowsStore}</p> : null}
-              <p className="mt-2 text-sm leading-relaxed text-muted">{d.firstLaunch.windows}</p>
+              <h3 className="text-lg font-semibold">{d.platforms.mac.name}</h3>
+              <p className="mt-2 text-sm leading-relaxed text-muted">{d.firstLaunch.mac}</p>
             </div>
             <div>
               <h3 className="text-lg font-semibold">{d.platforms.linux.name}</h3>

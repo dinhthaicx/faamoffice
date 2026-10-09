@@ -2,11 +2,26 @@ import Link from "next/link";
 import { Logo } from "./logo";
 import { LanguageSwitcher } from "./language-switcher";
 import { MobileMenu } from "./mobile-menu";
+import { AdaptiveDownloadButton } from "./adaptive-download-button";
 import { buttonClass, Container } from "./ui";
+import { getLatestRelease } from "@/lib/releases";
+import { getDownloadTargets } from "@/lib/download-targets";
 import type { Locale } from "@/i18n/config";
 import type { Dictionary } from "@/i18n";
 
-export function SiteHeader({ locale, dict }: { locale: Locale; dict: Dictionary }) {
+export async function SiteHeader({ locale, dict }: { locale: Locale; dict: Dictionary }) {
+  const release = await getLatestRelease();
+  const downloadProps = {
+    fallbackHref: `/${locale}/download`,
+    fallbackLabel: dict.home.hero.ctaDownload,
+    buttonLabel: dict.download.downloadFor,
+    platformNames: {
+      windows: dict.download.platforms.windows.name,
+      mac: dict.download.platforms.mac.name,
+      linux: dict.download.platforms.linux.name,
+    },
+    targets: getDownloadTargets(release, locale),
+  };
   const nav = [
     { href: `/${locale}#features`, label: dict.nav.features },
     { href: `/${locale}/faam-ai`, label: dict.nav.faamAi },
@@ -19,7 +34,7 @@ export function SiteHeader({ locale, dict }: { locale: Locale; dict: Dictionary 
           <Logo idPrefix="hdr" />
         </Link>
 
-        <nav aria-label={dict.nav.primary} className="hidden items-center gap-1 md:flex">
+        <nav aria-label={dict.nav.primary} className="hidden items-center gap-1 lg:flex">
           {nav.map((item) => (
             <Link
               key={item.href}
@@ -31,7 +46,7 @@ export function SiteHeader({ locale, dict }: { locale: Locale; dict: Dictionary 
           ))}
         </nav>
 
-        <div className="hidden items-center gap-1 md:flex">
+        <div className="hidden items-center gap-1 lg:flex">
           <LanguageSwitcher locale={locale} label={dict.nav.switchTo} ariaLabel={dict.nav.language} />
           <Link
             href={`/${locale}/account`}
@@ -40,9 +55,7 @@ export function SiteHeader({ locale, dict }: { locale: Locale; dict: Dictionary 
           >
             {dict.nav.account}
           </Link>
-          <Link href={`/${locale}/download`} className={`${buttonClass.download} ml-1`}>
-            {dict.nav.download}
-          </Link>
+          <AdaptiveDownloadButton {...downloadProps} className={`${buttonClass.download} ml-2 min-h-11 whitespace-nowrap shadow-lg shadow-download/25`} />
         </div>
 
         <MobileMenu>
@@ -54,7 +67,7 @@ export function SiteHeader({ locale, dict }: { locale: Locale; dict: Dictionary 
           </summary>
           <nav
             aria-label={dict.nav.primary}
-            className="absolute right-0 mt-2 w-64 rounded-xl border border-border bg-card p-2 shadow-lg"
+            className="absolute right-0 z-50 mt-2 w-64 rounded-xl border border-border bg-card p-2 shadow-lg"
           >
             <ul className="flex flex-col">
               {[...nav, { href: `/${locale}/account`, label: dict.nav.account }].map((item) => (
@@ -70,6 +83,9 @@ export function SiteHeader({ locale, dict }: { locale: Locale; dict: Dictionary 
             </ul>
           </nav>
         </MobileMenu>
+      </Container>
+      <Container className="pb-3 lg:hidden">
+        <AdaptiveDownloadButton {...downloadProps} className={`${buttonClass.download} min-h-11 w-full shadow-lg shadow-download/25`} />
       </Container>
     </header>
   );

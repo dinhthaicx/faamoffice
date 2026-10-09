@@ -28,7 +28,7 @@ export function MobileMenu({ children }: { children: ReactNode }) {
   return (
     <details
       ref={ref}
-      className="group relative md:hidden"
+      className="group relative lg:hidden"
       onClick={(event) => {
         // Also close on hash links, the current page, and language links.
         if (event.target instanceof Element && event.target.closest("a[href]")) event.currentTarget.open = false;
