@@ -1,6 +1,8 @@
 import type { zh } from './zh'
 
 export const ar = {
+  appImportedDoc:
+    'تم تحويل DOC إلى DOCX. راجع التخطيط واحفظ ملف .docx جديدًا؛ يُحتفظ بملف DOC الأصلي.',
   appScTitle: 'اختصارات لوحة المفاتيح',
   appScFilter: 'البحث عن اختصار',
   appScNone: 'لا توجد اختصارات مطابقة',

@@ -19,6 +19,26 @@ describe('collectLaunchPaths', () => {
     ).toEqual(['/data/variants.tsv'])
   })
 
+  it('collects every DOC and DOCX in a mixed launch, with existing order and deduplication', () => {
+    expect(
+      collectLaunchPaths(
+        ['FaamOffice.exe', 'first.doc', 'second.DOCX', 'third.DOC', 'first.doc', 'notes.rtf'],
+        { launchPaths: ['third.DOC', 'fourth.docx'], launchPath: 'fifth.doc' },
+        () => true,
+      ),
+    ).toEqual(['first.doc', 'second.DOCX', 'third.DOC', 'fourth.docx', 'fifth.doc'])
+  })
+
+  it('does not substitute an unsupported fallback for an existing DOC launch', () => {
+    expect(
+      collectLaunchPaths(
+        ['FaamOffice.app', 'missing.doc', 'legacy.DOC', 'notes.rtf'],
+        undefined,
+        (path) => path !== 'missing.doc',
+      ),
+    ).toEqual(['legacy.DOC'])
+  })
+
   /**
    * A `.txt` or `.json` is now a document the text app opens, so dropping one
    * from argv (or from a second-instance payload, or from a Finder open-file)

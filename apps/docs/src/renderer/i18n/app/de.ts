@@ -1,6 +1,8 @@
 import type { zh } from './zh'
 
 export const de = {
+  appImportedDoc:
+    'DOC wurde in DOCX umgewandelt. Prüfen Sie das Layout und speichern Sie eine neue .docx-Datei; die ursprüngliche DOC-Datei bleibt erhalten.',
   appScTitle: 'Tastenkombinationen',
   appScFilter: 'Tastenkombination suchen',
   appScNone: 'Keine passenden Tastenkombinationen',

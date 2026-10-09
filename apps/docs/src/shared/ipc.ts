@@ -9,6 +9,10 @@ export interface OpenFileResult {
   encrypted?: boolean
   /** content came from a newer crash-recovery copy and still needs an explicit save */
   recovered?: boolean
+  /** legacy DOC opens from a writable DOCX temporary copy; first save must use Save As */
+  suggestSaveAs?: string
+  /** original legacy DOC, never a target for writing the converted OOXML bytes */
+  importedFrom?: string
 }
 
 /** Password-protected (ECMA-376 encrypted) docx: the renderer prompts for the
@@ -366,7 +370,7 @@ export interface DesktopApi {
   ): Promise<{
     ok: boolean
     error?: string
-    reason?: 'external-modified'
+    reason?: 'external-modified' | 'requires-save-as'
     /** a newer password choice arrived after this save's snapshot */
     passwordIntentPending?: boolean
     /** one-shot URL of the saved document in full when an encrypted save absorbed
@@ -426,7 +430,12 @@ export interface DesktopApi {
   }>
   /** MCP-driven output: write the current document to an explicit absolute path
    *  with no dialog; refuses to replace an existing file unless overwrite is true */
-  saveDocxTo(path: string, data: ArrayBuffer, overwrite: boolean): Promise<McpSaveResult>
+  saveDocxTo(
+    path: string,
+    data: ArrayBuffer,
+    overwrite: boolean,
+    sourcePath?: string | null,
+  ): Promise<McpSaveResult>
   /** MCP bridge: receive an editor command pushed by the shell main process */
   onMcpCommand(handler: (message: McpCommandMessage) => void): () => void
   /** MCP bridge: report a command's outcome back to the shell main process */

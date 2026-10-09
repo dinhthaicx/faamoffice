@@ -51,6 +51,7 @@
   WriteRegStr SHELL_CONTEXT "${GENOFFICE_CAPABILITIES_KEY}" "ApplicationDescription" "Edit Word, Excel, PowerPoint, PDF, Markdown and HTML documents."
   WriteRegStr SHELL_CONTEXT "${GENOFFICE_CAPABILITIES_KEY}" "ApplicationIcon" "$INSTDIR\${APP_EXECUTABLE_FILENAME},0"
   !insertmacro GenOfficeCapabilityFileAssoc "docx" "Word Document"
+  !insertmacro GenOfficeCapabilityFileAssoc "doc" "Word 97-2003 Document"
   !insertmacro GenOfficeCapabilityFileAssoc "xlsx" "Excel Workbook"
   !insertmacro GenOfficeCapabilityFileAssoc "xlsm" "Excel Macro-Enabled Workbook"
   !insertmacro GenOfficeCapabilityFileAssoc "pptx" "PowerPoint Presentation"

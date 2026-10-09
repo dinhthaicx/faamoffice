@@ -1,6 +1,8 @@
 import type { zh } from './zh'
 
 export const th = {
+  appImportedDoc:
+    'แปลง DOC เป็น DOCX แล้ว โปรดตรวจสอบเค้าโครงและบันทึกเป็นไฟล์ .docx ใหม่ โดยเก็บไฟล์ DOC ต้นฉบับไว้',
   appScTitle: 'แป้นพิมพ์ลัด',
   appScFilter: 'ค้นหาแป้นพิมพ์ลัด',
   appScNone: 'ไม่พบแป้นพิมพ์ลัดที่ตรงกัน',

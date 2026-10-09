@@ -32,7 +32,13 @@ interface BuilderConfig {
   deb: { packageName?: string }
   rpm: { publish?: unknown; packageName?: string }
   appx?: Record<string, unknown>
-  fileAssociations: Array<{ ext: string }>
+  fileAssociations: Array<{
+    ext: string
+    name?: string
+    role?: string
+    icon?: string
+    mimeType?: string
+  }>
   extraMetadata?: Record<string, unknown>
   beforePack: (context: { targets: Array<{ name: string }> }) => Promise<void>
 }
@@ -112,6 +118,26 @@ describe('electron-builder update feed', () => {
     expect(config.deb.packageName).toBe('faamoffice')
     expect(config.rpm.packageName).toBe('faamoffice')
   })
+})
+
+describe('Word import file associations', () => {
+  it.each([{}, { GENOFFICE_APPX: '1' }] as Record<string, string>[])(
+    'registers legacy DOC as well as DOCX (%j)',
+    (env) => {
+      const associations = loadConfig(env).fileAssociations
+      expect(associations.find((association) => association.ext === 'doc')).toEqual({
+        ext: 'doc',
+        name: 'Word 97-2003 Document',
+        description: 'Word 97-2003 Document',
+        role: 'Editor',
+        icon: 'docx',
+        mimeType: 'application/msword',
+      })
+      expect(associations.find((association) => association.ext === 'docx')?.mimeType).toBe(
+        'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+      )
+    },
+  )
 })
 
 describe('electron-builder Microsoft Store appx (GENOFFICE_APPX=1)', () => {

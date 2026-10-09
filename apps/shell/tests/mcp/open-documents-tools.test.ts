@@ -128,6 +128,17 @@ describe('closeSavePath', () => {
     expect(closeSavePath(DOCUMENTS[0]!, () => dir)).toBe('C:/docs/one.docx')
   })
 
+  it('proposes a sibling DOCX for an imported DOC without selecting its original or temp path', () => {
+    const imported = doc({
+      id: 'imported',
+      kind: 'docs',
+      title: 'old.docx',
+      filePath: 'C:\\Reports\\old.DOC',
+      dirty: true,
+    })
+    expect(closeSavePath(imported, () => dir)).toBe('C:\\Reports\\old.docx')
+  })
+
   it('falls back to the default folder for an untitled document, with its extension', () => {
     const target = closeSavePath(DOCUMENTS[6]!, () => dir)
     expect(target.startsWith(resolve(dir))).toBe(true)

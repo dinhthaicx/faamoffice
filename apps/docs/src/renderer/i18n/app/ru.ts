@@ -1,6 +1,8 @@
 import type { zh } from './zh'
 
 export const ru = {
+  appImportedDoc:
+    'DOC преобразован в DOCX. Проверьте макет и сохраните новый файл .docx; исходный DOC сохранён.',
   appScTitle: 'Сочетания клавиш',
   appScFilter: 'Поиск сочетания',
   appScNone: 'Совпадений не найдено',

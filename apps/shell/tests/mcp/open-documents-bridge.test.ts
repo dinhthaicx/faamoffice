@@ -1,5 +1,6 @@
 import { describe, expect, it, vi } from 'vitest'
-import { mkdtemp } from 'node:fs/promises'
+import { mkdtemp, readFile, rm, writeFile } from 'node:fs/promises'
+import { existsSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import type { WebContents } from 'electron'
@@ -87,6 +88,82 @@ describe('open_documents close: untitled documents', () => {
     const result = await call({ action: 'close', target: 't1' })
     expect(result.closed).toBe(true)
     expect(String(result.savedTo).endsWith(ext)).toBe(true)
+  })
+})
+
+describe('open_documents close: legacy DOC imports', () => {
+  it('saves a DOC import to its sibling DOCX with overwrite disabled before closing', async () => {
+    const doc = tab({
+      id: 'doc-import',
+      kind: 'docs',
+      title: 'report.docx',
+      filePath: '/docs/report.DOC',
+    })
+    const runCommand = vi.fn(async () => ({ ok: true }))
+    const closeTab = vi.fn(() => true)
+    const { call } = await controlWith([doc], {
+      closeTab,
+      docs: { openBlankTab: async () => 1, runCommand },
+    })
+    const result = await call({ action: 'close', target: doc.id })
+    expect(runCommand).toHaveBeenCalledWith(7, 'save_document', {
+      path: '/docs/report.docx',
+      overwrite: false,
+    })
+    expect(result.savedTo).toBe('/docs/report.docx')
+    expect(result.closed).toBe(true)
+    expect(closeTab).toHaveBeenCalledWith(doc.id)
+  })
+
+  it('keeps an existing sibling DOCX and the original DOC intact and leaves the tab open on refusal', async () => {
+    const dir = await mkdtemp(join(tmpdir(), 'genoffice-mcp-doc-copy-'))
+    try {
+      const source = join(dir, 'report.doc')
+      const sibling = join(dir, 'report.docx')
+      await writeFile(source, 'original binary DOC')
+      await writeFile(sibling, 'existing DOCX content')
+      const doc = tab({ id: 'doc-import', kind: 'docs', title: 'report.docx', filePath: source })
+      const closeTab = vi.fn(() => true)
+      const runCommand = vi.fn(async (_wcId: number, _command: string, payload: unknown) => {
+        const { path, overwrite } = payload as { path: string; overwrite: boolean }
+        if (existsSync(path) && !overwrite) throw new Error(`file already exists: ${path}`)
+        await writeFile(path, 'new converted DOCX content')
+        return { ok: true }
+      })
+      const { call } = await controlWith([doc], {
+        closeTab,
+        docs: { openBlankTab: async () => 1, runCommand },
+      })
+      await expect(call({ action: 'close', target: doc.id })).rejects.toThrow(/already exists/)
+      expect(runCommand).toHaveBeenCalledWith(7, 'save_document', {
+        path: sibling,
+        overwrite: false,
+      })
+      expect(closeTab).not.toHaveBeenCalled()
+      expect(await readFile(sibling, 'utf8')).toBe('existing DOCX content')
+      expect(await readFile(source, 'utf8')).toBe('original binary DOC')
+    } finally {
+      await rm(dir, { recursive: true, force: true })
+    }
+  })
+
+  it('keeps the existing overwrite behavior for an ordinary DOCX', async () => {
+    const doc = tab({
+      id: 'docx',
+      kind: 'docs',
+      title: 'report.docx',
+      filePath: '/docs/report.docx',
+    })
+    const runCommand = vi.fn(async () => ({ ok: true }))
+    const { call } = await controlWith([doc], {
+      docs: { openBlankTab: async () => 1, runCommand },
+    })
+    const result = await call({ action: 'close', target: doc.id })
+    expect(runCommand).toHaveBeenCalledWith(7, 'save_document', {
+      path: '/docs/report.docx',
+      overwrite: true,
+    })
+    expect(result.savedTo).toBe('/docs/report.docx')
   })
 })
 

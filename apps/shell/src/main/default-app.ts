@@ -26,6 +26,12 @@ export const OFFICE_TYPES: readonly OfficeType[] = [
     progId: 'Word Document',
   },
   {
+    ext: 'doc',
+    uti: 'com.microsoft.word.doc',
+    mime: 'application/msword',
+    progId: 'Word 97-2003 Document',
+  },
+  {
     ext: 'xlsx',
     uti: 'org.openxmlformats.spreadsheetml.sheet',
     mime: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',

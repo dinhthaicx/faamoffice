@@ -1,6 +1,8 @@
 import type { zh } from './zh'
 
 export const nl = {
+  appImportedDoc:
+    'DOC is omgezet naar DOCX. Controleer de indeling en sla een nieuw .docx-bestand op; het oorspronkelijke DOC blijft behouden.',
   appScTitle: 'Sneltoetsen',
   appScFilter: 'Sneltoets zoeken',
   appScNone: 'Geen overeenkomende sneltoetsen',

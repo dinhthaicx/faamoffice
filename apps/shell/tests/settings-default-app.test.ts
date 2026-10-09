@@ -106,7 +106,7 @@ describe('Settings default-app row', () => {
       getDefaultAppStatus: async () => ({ state: 'other', others: [], manualOnly: false }),
     })
     const field = row()!
-    expect(field.textContent).toContain('Open .docx, .xlsx and .pptx files in FaamOffice')
+    expect(field.textContent).toContain('Open .docx, .doc, .xlsx and .pptx files in FaamOffice')
     expect(field.querySelector<HTMLButtonElement>('button')!.disabled).toBe(false)
   })
 
@@ -141,7 +141,7 @@ describe('Settings default-app row', () => {
       setDefaultApp: set,
     })
     expect(row()?.textContent).not.toContain('Current default')
-    expect(row()?.textContent).toContain('Open .docx, .xlsx and .pptx files in FaamOffice')
+    expect(row()?.textContent).toContain('Open .docx, .doc, .xlsx and .pptx files in FaamOffice')
     const button = row()!.querySelector<HTMLButtonElement>('button')!
     expect(button.textContent).toBe('Open system settings')
     await click(button)

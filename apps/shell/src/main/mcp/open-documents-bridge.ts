@@ -109,12 +109,16 @@ export function createOpenTargetResolver(
 
 export function createOpenDocumentsControl(deps: OpenDocumentsBridgeDeps): OpenDocumentsControl {
   /** save one document to `filePath` through its family's own writer */
-  const saveTo = async (tab: OpenDocumentTab, filePath: string): Promise<void> => {
+  const saveTo = async (
+    tab: OpenDocumentTab,
+    filePath: string,
+    overwrite = true,
+  ): Promise<void> => {
     switch (tab.kind) {
       case 'docs': {
         if (!deps.docs) throw new Error('the Word editor is unavailable in this build')
         const wcId = requireContents(tab, deps).id
-        await deps.docs.runCommand(wcId, 'save_document', { path: filePath, overwrite: true })
+        await deps.docs.runCommand(wcId, 'save_document', { path: filePath, overwrite })
         return
       }
       case 'sheets': {
@@ -206,7 +210,8 @@ export function createOpenDocumentsControl(deps: OpenDocumentsBridgeDeps): OpenD
       let savedPath: string | undefined
       if (unsaved === 'save' && live.dirty) {
         savedPath = closeSavePath(live, deps.defaultSaveDir)
-        await saveTo(live, savedPath)
+        const importedDoc = live.kind === 'docs' && /\.doc$/i.test(live.filePath ?? '')
+        await saveTo(live, savedPath, !importedDoc)
       } else if (unsaved === 'discard') {
         await discardStagedAssets(live)
       }

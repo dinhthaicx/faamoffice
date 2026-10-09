@@ -1,6 +1,7 @@
 import type { zh } from './zh'
 
 export const he = {
+  appImportedDoc: 'DOC הומר ל-DOCX. בדקו את הפריסה ושמרו קובץ .docx חדש; קובץ ה-DOC המקורי נשמר.',
   appScTitle: 'קיצורי מקלדת',
   appScFilter: 'חיפוש קיצור',
   appScNone: 'לא נמצאו קיצורים מתאימים',

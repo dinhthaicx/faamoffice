@@ -4,6 +4,8 @@ import type { DocumentTabKind } from '../shared/tabs-api'
  *  rename gate cannot drift: a rename that moved a file out of its app would
  *  leave a name the shell can no longer open. */
 const DOCX_RE = /\.docx$/i
+/** Legacy Word opens by importing an editable DOCX copy; its bytes stay distinct. */
+const DOC_OPEN_RE = /\.(docx|doc)$/i
 const XLSX_RE = /\.(xlsx|xlsm|xls|csv|tsv)$/i
 const PPTX_RE = /\.pptx$/i
 const PDF_RE = /\.pdf$/i
@@ -17,11 +19,11 @@ const HTML_RE = /\.html?$/i
  */
 const TEXT_RE = /\.(md|markdown|txt|json)$/i
 
-export { DOCX_RE, XLSX_RE, PPTX_RE, PDF_RE, HTML_RE, TEXT_RE }
+export { DOCX_RE, DOC_OPEN_RE, XLSX_RE, PPTX_RE, PDF_RE, HTML_RE, TEXT_RE }
 
 /** The app kind a path belongs to, or undefined when nothing opens it. */
 export function appForPath(path: string): DocumentTabKind | undefined {
-  if (DOCX_RE.test(path)) return 'docs'
+  if (DOC_OPEN_RE.test(path)) return 'docs'
   if (XLSX_RE.test(path)) return 'sheets'
   if (PPTX_RE.test(path)) return 'slides'
   if (PDF_RE.test(path)) return 'pdf'
@@ -43,5 +45,8 @@ export function renameStaysInApp(from: string, newName: string): boolean {
   const current = appForPath(from)
   // a file no app opened has no app to stay in
   if (!current) return true
-  return appForPath(newName) === current
+  if (appForPath(newName) !== current) return false
+  // Renaming does not convert binary DOC into OOXML, or OOXML into binary DOC.
+  if (current === 'docs') return DOCX_RE.test(from) === DOCX_RE.test(newName)
+  return true
 }

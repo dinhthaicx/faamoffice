@@ -303,7 +303,7 @@ import {
 } from './recent-files'
 import { isMoveSource, isUserVisibleFile, type FileTargetSources } from './file-targets'
 import {
-  DOCX_RE,
+  DOC_OPEN_RE,
   HTML_RE,
   PDF_RE,
   PPTX_RE,
@@ -3333,6 +3333,12 @@ function createShellWindow(): void {
     manager.setTabFileFor(wcId, path)
     detachedSetFileFor(wcId, path)
     recordRecentFile(path)
+    if (/\.doc$/i.test(path)) {
+      // This is the read-only import source, never a newly created shell file.
+      // Its first Save As chooses a DOCX destination independently of the blank tab.
+      pendingDirByWc.delete(wcId)
+      return
+    }
     applyPendingDir(wcId, path)
   })
   // markdown untitled first save / Save As lands on a new path
@@ -3415,7 +3421,7 @@ function createShellWindow(): void {
 
 /**
  * Single source of truth for the open-dialog filter. Includes the
- * legacy .doc/.ppt binaries so they are selectable and surface the explicit
+ * legacy .doc for DOCX import, and .ppt so it can surface the explicit
  * "not supported" dialog via openDocumentPath instead of being grayed out.
  */
 const OPEN_DIALOG_EXTENSIONS = [
@@ -3507,7 +3513,7 @@ function routeDocumentPath(filePath: string): boolean {
   // a detached editor window already shows this file — focus it, never a second copy
   if (focusDetachedByPath(filePath)) return true
   if (!tabManager) return false
-  if (DOCX_RE.test(filePath)) {
+  if (DOC_OPEN_RE.test(filePath)) {
     recordRecentFile(filePath)
     const existing = tabManager.findDocsTabByPath(filePath)
     if (existing) tabManager.activateTab(existing)

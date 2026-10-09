@@ -372,6 +372,13 @@ https://www.unicode.org/Public/17.0.0/ucd/EquivalentUnifiedIdeograph.txt
 `
 out += readFileSync(join(ROOT, 'LICENSE-UNICODE.txt'), 'utf8').trim() + '\n'
 
+out += hr('5. Vendored legacy Word document parser')
+out += sub('Legacy Word 97–2003 parser — 0BSD')
+out += 'Source: packages/file-parse/src/vendor/legacy-doc.cjs\n\n'
+out +=
+  readFileSync(join(ROOT, 'packages/file-parse/src/vendor/legacy-doc.LICENSE'), 'utf8').trim() +
+  '\n'
+
 for (const term of ['@embedpdf/pdfium', 'Copyright 2014 PDFium Authors', 'Apache License']) {
   if (!out.includes(term)) {
     throw new Error(`generated third-party notice is missing PDFium term: ${term}`)

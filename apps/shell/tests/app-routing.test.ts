@@ -1,6 +1,12 @@
 import { describe, expect, it } from 'vitest'
 
-import { TEXT_RE, appForPath, renameStaysInApp } from '../src/main/app-routing'
+import {
+  DOCX_RE,
+  DOC_OPEN_RE,
+  TEXT_RE,
+  appForPath,
+  renameStaysInApp,
+} from '../src/main/app-routing'
 
 describe('appForPath', () => {
   it('routes the markdown app at every extension it opens', () => {
@@ -16,6 +22,17 @@ describe('appForPath', () => {
     expect(appForPath('/x/a.pptx')).toBe('slides')
     expect(appForPath('/x/a.pdf')).toBe('pdf')
     expect(appForPath('/x/a.html')).toBe('html')
+  })
+
+  it('routes legacy Word into Docs without treating its bytes as DOCX', () => {
+    for (const path of ['/x/report.doc', '/x/REPORT.DOC']) {
+      expect(appForPath(path)).toBe('docs')
+      expect(DOC_OPEN_RE.test(path)).toBe(true)
+      expect(DOCX_RE.test(path)).toBe(false)
+    }
+    expect(DOC_OPEN_RE.test('/x/report.docx')).toBe(true)
+    expect(DOCX_RE.test('/x/report.docx')).toBe(true)
+    expect(DOC_OPEN_RE.test('/x/report.docm')).toBe(false)
   })
 
   it('has no app for an extension nothing opens', () => {
@@ -70,6 +87,14 @@ describe('renameStaysInApp', () => {
     expect(renameStaysInApp('/x/a.docx', 'a.pdf')).toBe(false)
     expect(renameStaysInApp('/x/a.xlsx', 'a.csv')).toBe(true)
     expect(renameStaysInApp('/x/a.png', 'a.png')).toBe(true)
+  })
+
+  it('allows Word name changes only while preserving the on-disk format', () => {
+    expect(renameStaysInApp('/x/legacy.doc', 'renamed.DOC')).toBe(true)
+    expect(renameStaysInApp('/x/report.DOCX', 'renamed.docx')).toBe(true)
+    expect(renameStaysInApp('/x/legacy.doc', 'renamed.docx')).toBe(false)
+    expect(renameStaysInApp('/x/report.docx', 'renamed.doc')).toBe(false)
+    expect(renameStaysInApp('/x/legacy.doc', 'renamed.docm')).toBe(false)
   })
 
   it('stays put when the file was never openable to begin with', () => {

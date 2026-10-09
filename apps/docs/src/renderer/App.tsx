@@ -362,6 +362,8 @@ import { docBodyFont, docHasCjk, docLineFactor, docStyleCss, docThemeCss } from 
 import { isDocDirty, runGuardedCandidate, runGuardedDocumentAction } from './doc-dirty'
 import {
   EMPTY_HF_VARIANTS,
+  documentRequiresSaveAs,
+  documentAfterRename,
   restingHfAreaVariant,
   type DocState,
   type HfVariantKey,
@@ -2107,15 +2109,7 @@ export function App() {
   useEffect(
     () =>
       window.desktop.onRenamedDocx(({ oldPath, newPath }) => {
-        setDoc((prev) =>
-          prev && prev.filePath === oldPath
-            ? {
-                ...prev,
-                filePath: newPath,
-                fileName: newPath.split(/[\\/]/).pop() ?? prev.fileName,
-              }
-            : prev,
-        )
+        setDoc((prev) => documentAfterRename(prev, oldPath, newPath))
       }),
     [],
   )
@@ -5141,15 +5135,15 @@ export function App() {
     const offCheck = window.desktop.onCloseCheck?.(() => {
       window.desktop.reportCloseCheck({
         dirty: !!doc && (anyDirtyRef.current || dirtyRef.current),
-        autoSave: autoSave && !!doc?.filePath,
+        autoSave: autoSave && !!doc?.filePath && !documentRequiresSaveAs(doc),
         filePath: doc?.filePath ?? null,
       })
     })
     const offSave = window.desktop.onCloseSaveRequest?.(() => {
       // Closing must not report success while edits are still unpersisted, so a
       // save that raced with typing is retried until the file catches up.
-      // save(false) never prompts — a pathless first save lands silently in the
-      // default folder — so retrying is always safe; reporting "persisted" just
+      // A new document saves silently; a DOC import's first Save As is coalesced
+      // and queued retries adopt its final path. Reporting "persisted" just
       // because the snapshot had no path yet would close over mid-save edits.
       void saveUntilPersisted({
         save: () => save(false),
@@ -5168,7 +5162,7 @@ export function App() {
 
   // autosave: every 30s and on window blur, silently persist pending changes
   useEffect(() => {
-    if (tornDown || !autoSave || !doc || !doc.filePath) return
+    if (tornDown || !autoSave || !doc || !doc.filePath || documentRequiresSaveAs(doc)) return
     const tick = () => {
       if (!isDocDirty(fileCtxRef.current)) return
       if (editor?.view.composing) return // don't interrupt IME input

@@ -150,11 +150,15 @@ function describeDocument(doc: OpenDocumentTab): Record<string, unknown> {
 }
 
 /**
- * Where a dialog-free save should land: the document's own file when it has
- * one, else a unique name derived from its title inside the default folder.
+ * Where a dialog-free save should land: a DOC import's sibling DOCX, the
+ * document's own file otherwise, or a unique name inside the default folder.
  */
 export function closeSavePath(doc: OpenDocumentTab, defaultSaveDir: () => string): string {
-  if (doc.filePath) return doc.filePath
+  if (doc.filePath) {
+    if (doc.kind === 'docs' && /\.doc$/i.test(doc.filePath))
+      return doc.filePath.replace(/\.doc$/i, '.docx')
+    return doc.filePath
+  }
   const name = `${sanitizeFileBase(doc.title)}${extensionFor(FAMILY_BY_KIND[doc.kind])}`
   return uniquePathIn(defaultSaveDir(), name)
 }
@@ -173,6 +177,7 @@ export function createOpenDocumentTools(deps: OpenDocumentsDeps): McpToolDefinit
         'closes one, saving it first by default (pass unsaved:"discard" to drop the changes). ' +
         'Note that "close" writes over the document\'s own file when it has a path — it does not ' +
         'stop to ask, so the saved file replaces whatever was on disk. ' +
+        'An imported .doc instead saves a sibling .docx and refuses to replace an existing copy. ' +
         'Identify a document by its path, or by the id from "list" when it has never been saved. ' +
         'To *edit* one of these documents, pass its id (or path) as the `document` argument of the ' +
         'family content tools (insert_content / apply_ops / apply_sheet_ops / apply_slide_ops): no ' +

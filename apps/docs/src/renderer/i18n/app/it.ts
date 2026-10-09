@@ -1,6 +1,8 @@
 import type { zh } from './zh'
 
 export const it = {
+  appImportedDoc:
+    'Il DOC è stato convertito in DOCX. Controlla il layout e salva un nuovo file .docx; il DOC originale viene conservato.',
   appScTitle: 'Scelte rapide da tastiera',
   appScFilter: 'Cerca scelta rapida',
   appScNone: 'Nessuna scelta rapida corrispondente',

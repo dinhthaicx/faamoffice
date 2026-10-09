@@ -1,6 +1,8 @@
 import type { zh } from './zh'
 
 export const ms = {
+  appImportedDoc:
+    'DOC telah ditukar kepada DOCX. Semak susun atur dan simpan fail .docx baharu; DOC asal dikekalkan.',
   appScTitle: 'Pintasan Papan Kekunci',
   appScFilter: 'Cari pintasan',
   appScNone: 'Tiada pintasan yang sepadan',

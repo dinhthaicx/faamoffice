@@ -47,6 +47,7 @@ import type { Dispatch, SetStateAction } from 'react'
 import type { AiDocContent, OpenDocxResult } from '../shared/ipc'
 import {
   hfVariantsFromParsed,
+  documentRequiresSaveAs,
   openedFileStartsDirty,
   type DocState,
   type HfVariantKey,
@@ -437,6 +438,8 @@ export async function loadFile(
       fileName: result.name,
       hash: result.hash,
       encrypted: result.encrypted,
+      suggestSaveAs: result.suggestSaveAs,
+      importedFrom: result.importedFrom,
     })
     ctx.onRevisionsLoaded(blocksHaveRevisions(parsed.blocks))
     // this tab's document was replaced: a password parked for the previous
@@ -513,8 +516,7 @@ export async function loadFile(
     ctx.setRemovePersonalInfoDirty(false)
     ctx.onWriteProtectionLoaded(parsed.writeProtection)
     ctx.setCompareResult(null)
-    // Recovery content still only exists in the autosave copy. Keep it dirty
-    // until an explicit/automatic save lands it on the original path.
+    // Recovery and imported content still need to reach a final save path.
     ctx.dirtyRef.current = openedFileStartsDirty(result)
     const missing = checkMissingFonts(collectDocFonts(parsed))
     // one status line per open: the Read Mode explanation outranks the rest
@@ -529,8 +531,13 @@ export async function loadFile(
         .join(', ')
       ctx.setStatus(t('appFontsMissing', { names: missing.length > 3 ? `${names}…` : names }))
     } else {
-      ctx.setStatus(t('appOpenedFile', { name: result.name }))
+      ctx.setStatus(
+        documentRequiresSaveAs(result)
+          ? t('appImportedDoc')
+          : t('appOpenedFile', { name: result.name }),
+      )
     }
+    if (documentRequiresSaveAs(result)) showToast(t('appImportedDoc'))
     void window.desktop.getRecentFiles().then(ctx.setRecent)
     return 'ok'
   } catch (err) {
@@ -871,11 +878,18 @@ function discardStalePasswordIntents(): void {
  */
 let pathlessDocSavedPath: string | null = null
 
+/** A queued save can still hold the pre-Save-As import snapshot after React adopted the new path. */
+let importedDocSavedPath: string | null = null
+/** Coalesce overlapping first saves, including a cancelled dialog, into one user choice. */
+let importSaveInFlight: { generation: number; promise: Promise<boolean> } | null = null
+
 /** bumps on every document replacement: a save that awaited across it belongs to the old document */
 let docGeneration = 0
 
 export function noteDocumentSwapped(): void {
   pathlessDocSavedPath = null
+  importedDocSavedPath = null
+  importSaveInFlight = null
   docGeneration++
 }
 
@@ -897,15 +911,40 @@ export function save(
   // saveOnce resolves a stale pathless snapshot via pathlessDocSavedPath, so
   // the retry can no longer create a duplicate file.
   const generation = docGeneration
-  return runSerializedSave(
+  const imported = documentRequiresSaveAs(ctx.doc)
+  const hasUnpersistedChanges = () =>
+    isDocDirty(imported && importedDocSavedPath ? { ...ctx, doc: null } : ctx)
+  if (imported && !explicitTarget) {
+    if (auto && !importedDocSavedPath) return Promise.resolve(false)
+    if (!auto && importSaveInFlight?.generation === generation) {
+      return importSaveInFlight.promise.then((ok) => {
+        if (!ok || docGeneration !== generation) return false
+        if (!ctx.saveIncompleteRef.current && !hasUnpersistedChanges()) return true
+        // A successful dialog established the final path. Persist any newer
+        // edits there, while a cancelled dialog is shared without prompting again.
+        return save(ctx, false, false, newDocName)
+      })
+    }
+  }
+  const promise = runSerializedSave(
     async () => {
       const settled = ctx.settleFontSettings ? await ctx.settleFontSettings() : ctx
       if (docGeneration !== generation) return false
       return saveOnce(settled, saveAs, auto, newDocName, explicitTarget)
     },
     // an explicit MCP target must always write, never reuse an earlier pass
-    () => !saveAs && !explicitTarget && !ctx.saveIncompleteRef.current && !isDocDirty(ctx),
+    () => !saveAs && !explicitTarget && !ctx.saveIncompleteRef.current && !hasUnpersistedChanges(),
   )
+  if (imported && !importedDocSavedPath && !explicitTarget && !auto) {
+    const flight = { generation, promise }
+    importSaveInFlight = flight
+    void promise
+      .finally(() => {
+        if (importSaveInFlight === flight) importSaveInFlight = null
+      })
+      .catch(() => {})
+  }
+  return promise
 }
 
 /** an MCP-driven explicit output target: write to this absolute path, no dialog */
@@ -1005,7 +1044,13 @@ async function saveOnce(
     ) as ArrayBuffer
     // a pathless snapshot may belong to a document that an earlier queued pass
     // already landed on disk — overwrite that file instead of creating another
-    let savedPath = doc.filePath ?? pathlessDocSavedPath
+    let savedPath =
+      (documentRequiresSaveAs(doc) ? importedDocSavedPath : null) ??
+      doc.filePath ??
+      pathlessDocSavedPath
+    const importNeedsSaveAs = documentRequiresSaveAs(doc) && !importedDocSavedPath
+    // Recovery covers the temporary DOCX; AutoSave must never finalize an import.
+    if (auto && importNeedsSaveAs && !explicitTarget) return false
     let passwordIntentPending = false
     let fullBytes: Uint8Array | undefined
     if (explicitTarget) {
@@ -1015,6 +1060,7 @@ async function saveOnce(
         explicitTarget.path,
         buffer,
         explicitTarget.overwrite,
+        doc.filePath,
       )
       if (!result.ok) {
         ctx.setStatus(t('appSaveFailed', { error: result.error ?? '' }))
@@ -1026,15 +1072,18 @@ async function saveOnce(
       passwordIntentPending = result.passwordIntentPending === true
       if (result.dataUrl) fullBytes = await fetchDocBytes(result.dataUrl)
       if (!doc.filePath) pathlessDocSavedPath = savedPath
-    } else if (saveAs || !savedPath) {
+    } else if (saveAs || importNeedsSaveAs || !savedPath) {
       // A never-saved document still called "Untitled" gets a name derived from its first heading
       const autoName =
         !doc.filePath && doc.fileName === t('appUntitledDocx') ? deriveAutoFileName(editor) : null
       // Save As keeps the dialog; a new document's first save lands silently in the default
       // folder. The source path identifies the desired password state to snapshot.
-      const result = saveAs
-        ? await window.desktop.saveDocxAs(autoName ?? doc.fileName, buffer, doc.filePath)
-        : await window.desktop.saveDocxNew(newDocName ?? autoName ?? doc.fileName, buffer)
+      // Main-process import metadata derives the default from the original DOC;
+      // the temporary sourcePath preserves password intents and lazy media state.
+      const result =
+        saveAs || importNeedsSaveAs
+          ? await window.desktop.saveDocxAs(autoName ?? doc.fileName, buffer, savedPath)
+          : await window.desktop.saveDocxNew(newDocName ?? autoName ?? doc.fileName, buffer)
       if (!result.ok) {
         if (result.error) {
           ctx.setStatus(t('appSaveFailed', { error: result.error }))
@@ -1060,8 +1109,11 @@ async function saveOnce(
       passwordIntentPending = result.passwordIntentPending === true
       if (result.dataUrl) fullBytes = await fetchDocBytes(result.dataUrl)
     }
+    if (docGeneration !== generation) return false
+    if (documentRequiresSaveAs(doc)) importedDocSavedPath = savedPath
     // parse before the identity check: a document opened during this await must not be rewritten
     const reparsed = await parseDocxOffThread(fullBytes ?? bytes)
+    if (docGeneration !== generation) return false
     if (
       editor.state.doc !== docSnapshot ||
       passwordIntentPending ||
@@ -1079,6 +1131,8 @@ async function saveOnce(
               ...prev,
               filePath: savedPath,
               fileName: savedPath?.split(/[\\/]/).pop() ?? prev.fileName,
+              suggestSaveAs: undefined,
+              importedFrom: undefined,
             }
           : prev,
       )
@@ -1122,6 +1176,8 @@ async function saveOnce(
             parsed: reparsed,
             filePath: savedPath,
             fileName: savedPath?.split(/[\\/]/).pop() ?? prev.fileName,
+            suggestSaveAs: undefined,
+            importedFrom: undefined,
           }
         : prev,
     )

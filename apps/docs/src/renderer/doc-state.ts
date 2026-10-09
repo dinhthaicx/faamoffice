@@ -26,11 +26,45 @@ export interface DocState {
   isBlank?: boolean
   /** desired open password is set for the next save; toggled via Review > Protect */
   encrypted?: boolean
+  /** a converted legacy DOC still needs a user-chosen DOCX destination */
+  suggestSaveAs?: string
+  /** read-only original DOC; filePath points at the editable temporary DOCX */
+  importedFrom?: string
 }
 
-/** A restored recovery snapshot has not reached the original path yet. */
-export function openedFileStartsDirty(result: { recovered?: boolean }): boolean {
-  return result.recovered === true
+export function documentRequiresSaveAs(
+  doc: { suggestSaveAs?: string } | null | undefined,
+): boolean {
+  return !!doc?.suggestSaveAs
+}
+
+/** Recovery and imported copies have not reached their final save destination yet. */
+export function openedFileStartsDirty(result: {
+  recovered?: boolean
+  suggestSaveAs?: string
+}): boolean {
+  return result.recovered === true || documentRequiresSaveAs(result)
+}
+
+/** A DOC source moves independently of its editable temporary DOCX. */
+export function documentAfterRename(
+  doc: DocState | null,
+  oldPath: string,
+  newPath: string,
+): DocState | null {
+  if (!doc) return doc
+  if (documentRequiresSaveAs(doc) && doc.importedFrom === oldPath) {
+    const suggestSaveAs = newPath.replace(/\.doc$/i, '.docx')
+    return {
+      ...doc,
+      importedFrom: newPath,
+      suggestSaveAs,
+      fileName: suggestSaveAs.split(/[\\/]/).pop() ?? doc.fileName,
+    }
+  }
+  return doc.filePath === oldPath
+    ? { ...doc, filePath: newPath, fileName: newPath.split(/[\\/]/).pop() ?? doc.fileName }
+    : doc
 }
 
 /** Pending numbering definitions to append (saved via SaveOptions.numbering) */

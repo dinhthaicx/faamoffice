@@ -139,6 +139,14 @@ import { ATTACHMENT_IMAGE_EXTS } from '../shared/ipc'
 import { ClickClaims } from '../shared/context-menu-claims'
 import { findDocxPath } from '../shared/open-file'
 import { atomicWriteFile, looksLikeZip } from './atomic-write'
+import { createRecoveryWriteQueue } from './recovery-write-queue'
+import {
+  docxSavePath,
+  MAX_LEGACY_DOC_BYTES,
+  prepareLegacyDocForOpen,
+  type LegacyDocImport,
+} from './legacy-doc-open'
+import { legacyDocImportAfterRename, moveLegacyDocRecovery } from './legacy-doc-rename'
 import {
   adoptLazyMediaHashes,
   forgetLazyMediaOwner,
@@ -3161,7 +3169,7 @@ async function opensAsPasswordPrompt(filePath: string, wcId: number): Promise<bo
 }
 
 export function openExternalDocx(filePath: string | null): void {
-  if (!filePath || !/\.docx$/i.test(filePath)) return
+  if (!filePath || !/\.docx?$/i.test(filePath)) return
   const win = BrowserWindow.getFocusedWindow() ?? mainWindow
   if (!rendererReady || !win) {
     pendingOpenPath = filePath
@@ -3248,6 +3256,36 @@ export function removeRecentFiles(filePaths: string[]): void {
  *  the Home list) — push to the matching renderer so it syncs its save path and
  *  title bar (docs keeps path state on the renderer side). */
 export function docsFileRenamed(wc: WebContents, oldPath: string, newPath: string): void {
+  let renamedImport = false
+  for (const [openPath, imported] of legacyDocImports.get(wc.id) ?? []) {
+    const next = legacyDocImportAfterRename(imported, oldPath, newPath)
+    if (!next) continue
+    const oldRecovery = recoveryPathFor(openPath)
+    const newRecovery = recoveryPathFor(newPath)
+    const oldKey = recoveryKeyFor(openPath)
+    const newKey = recoveryKeyFor(newPath)
+    // An already-started recovery tick must not recreate the old key or
+    // remove the migrated snapshot when it finishes after this rename.
+    for (const key of new Set([oldKey, newKey])) {
+      recoveryClearEpochs.set(key, (recoveryClearEpochs.get(key) ?? 0) + 1)
+    }
+    try {
+      moveLegacyDocRecovery(oldRecovery, newRecovery)
+    } catch (error) {
+      console.warn('[docs] move legacy DOC recovery failed:', error)
+    }
+    // Save As may already be awaiting its dialog with this metadata object.
+    // Preserve that reference so its eventual finalPath marks the live import.
+    Object.assign(imported, next)
+    legacyRecoverySources.set(openPath, newPath)
+    renamedImport = true
+  }
+  if (renamedImport) {
+    // The DOC is still a read-only source; grants/password/media stay on the temporary DOCX.
+    if (openDocByWc.get(wc.id) === oldPath) rememberOpenDoc(wc.id, newPath)
+    wc.send('docs:renamed', { oldPath, newPath })
+    return
+  }
   // keep the save allowlist in sync so docs:save accepts the renamed path
   docWritablePaths.get(wc.id)?.delete(oldPath)
   allowDocWrite(wc.id, newPath)
@@ -3317,7 +3355,7 @@ async function archiveOriginal(filePath: string, hash: string, size: number): Pr
   if (size > ORIGINALS_MAX_BYTES) return
   const dir = userDataPath('originals')
   await mkdir(dir, { recursive: true })
-  const target = join(dir, `${hash}.docx`)
+  const target = join(dir, `${hash}${/\.doc$/i.test(filePath) ? '.doc' : '.docx'}`)
   if (!existsSync(target)) await copyFile(filePath, target)
   void pruneOriginals(dir)
 }
@@ -3371,6 +3409,19 @@ const tornDownWcIds = new Set<number>()
  * an untitled document.
  */
 const openDocByWc = new Map<number, string>()
+/** Private converted copies live only for the renderer that imported them. */
+const legacyDocImports = new Map<number, Map<string, LegacyDocImport>>()
+/** Recovery is keyed by the original DOC so reopening it after a crash restores edits. */
+const legacyRecoverySources = new Map<string, string>()
+
+function forgetLegacyDocImports(wcId: number): void {
+  for (const imported of legacyDocImports.get(wcId)?.values() ?? []) {
+    // Keep the small recovery alias until process exit: an in-flight recovery
+    // write must clear the same stable source key even after renderer teardown.
+    void rm(imported.directory, { recursive: true, force: true }).catch(() => {})
+  }
+  legacyDocImports.delete(wcId)
+}
 
 function rememberOpenDoc(wcId: number, filePath: string): void {
   openDocByWc.set(wcId, filePath)
@@ -3386,6 +3437,8 @@ function docsMediaRoots(wcId: number): string[] {
 }
 
 function allowDocWrite(wcId: number, filePath: string): void {
+  // A DOC source may be a shell tab's identity, but is never an OOXML target.
+  if (extname(filePath).toLowerCase() !== '.docx') return
   const set = docWritablePaths.get(wcId) ?? new Set<string>()
   set.add(filePath)
   docWritablePaths.set(wcId, set)
@@ -3447,6 +3500,7 @@ function releaseSpellIgnores(wcId: number): void {
 
 function dropDocWriter(wcId: number): void {
   releaseSpellIgnores(wcId)
+  forgetLegacyDocImports(wcId)
   docWritablePaths.delete(wcId)
   pdfWritablePaths.delete(wcId)
   openDocByWc.delete(wcId)
@@ -3507,6 +3561,7 @@ export function teardownDocsRenderer(contents: WebContents): void {
   // either saved (docs:save already cleared it) or explicitly discarded, so a
   // copy still on disk here is a leftover from an in-flight recovery write.
   for (const p of docWritablePaths.get(contents.id) ?? []) clearRecoveryCopy(p)
+  forgetLegacyDocImports(contents.id)
   // reclaim every per-wcId grant, not just doc saves — the orphaned renderer
   // must also lose its dialog-authorized PDF targets and disk-state cache
   docWritablePaths.delete(contents.id)
@@ -3519,15 +3574,21 @@ export function teardownDocsRenderer(contents: WebContents): void {
 // ── Crash recovery: dirty renderers push a copy every 30s
 // (docs:write-recovery); a normal save cleans it up; open offers Restore/Discard ──
 const recoveryDir = () => userDataPath('docs-autosave')
+const recoveryKeyFor = (filePath: string) => legacyRecoverySources.get(filePath) ?? filePath
 const recoveryPathFor = (filePath: string) =>
-  join(recoveryDir(), `${createHash('sha1').update(filePath).digest('hex').slice(0, 16)}.docx`)
+  join(
+    recoveryDir(),
+    `${createHash('sha1').update(recoveryKeyFor(filePath)).digest('hex').slice(0, 16)}.docx`,
+  )
 
 /** Bumped by every clear: an in-flight docs:write-recovery that started before
  * the bump must not recreate the file it is about to land (stale-recovery race). */
 const recoveryClearEpochs = new Map<string, number>()
+const queueRecoveryWrite = createRecoveryWriteQueue()
 
 function clearRecoveryCopy(filePath: string): void {
-  recoveryClearEpochs.set(filePath, (recoveryClearEpochs.get(filePath) ?? 0) + 1)
+  const key = recoveryKeyFor(filePath)
+  recoveryClearEpochs.set(key, (recoveryClearEpochs.get(key) ?? 0) + 1)
   try {
     unlinkSync(recoveryPathFor(filePath))
   } catch {
@@ -3599,8 +3660,37 @@ async function loadDocx(
   wcId: number,
   password?: string,
 ): Promise<OpenDocxResult> {
-  if (typeof filePath !== 'string' || !/\.docx$/i.test(filePath)) return null
+  if (typeof filePath !== 'string' || !/\.docx?$/i.test(filePath)) return null
   if (!existsSync(filePath)) return null
+  if (tornDownWcIds.has(wcId)) return null
+  let imported: LegacyDocImport | undefined
+  if (/\.doc$/i.test(filePath)) {
+    try {
+      imported = await prepareLegacyDocForOpen(
+        filePath,
+        join(app.getPath('temp'), 'genoffice-doc-imports'),
+      )
+    } catch (error) {
+      await showOpenError(
+        wcId,
+        `${basename(filePath)}: ${
+          error instanceof RangeError
+            ? tm('errTooLarge', { mb: MAX_LEGACY_DOC_BYTES / 1024 / 1024 })
+            : tm('errParseFailed')
+        }`,
+      )
+      return null
+    }
+    if (tornDownWcIds.has(wcId)) {
+      await rm(imported.directory, { recursive: true, force: true })
+      return null
+    }
+    const imports = legacyDocImports.get(wcId) ?? new Map<string, LegacyDocImport>()
+    imports.set(imported.openPath, imported)
+    legacyDocImports.set(wcId, imports)
+    legacyRecoverySources.set(imported.openPath, imported.sourcePath)
+    filePath = imported.openPath
+  }
   const size = (await stat(filePath)).size
   const lazy = await openLazyDocx(filePath, wcId)
   if ((lazy?.bytes.length ?? size) > MAX_OPEN_BYTES) {
@@ -3625,8 +3715,12 @@ async function loadDocx(
   // the archive keeps the on-disk original as-is (encrypted ones included: they
   // reopen with the user's password), so a bad save never loses the source file
   const hash = lazy?.hash ?? sha256Hex(original)
-  await archiveOriginal(filePath, hash, size)
-  const recovery = await maybeRecoverDocBytes(filePath, plainBytes)
+  await archiveOriginal(
+    imported?.sourcePath ?? filePath,
+    imported?.sourceHash ?? hash,
+    imported?.sourceSize ?? size,
+  )
+  const recovery = await maybeRecoverDocBytes(imported?.sourcePath ?? filePath, plainBytes)
   let bytes = recovery.bytes
   let recovered = recovery.recovered
   // recovery copies of a protected document are themselves encrypted (see
@@ -3640,10 +3734,11 @@ async function loadDocx(
     }
   }
   if (recovered) await adoptLazyMediaHashes(bytes, filePath, wcId)
-  pushRecent(filePath)
+  if (tornDownWcIds.has(wcId)) return null
+  pushRecent(imported?.sourcePath ?? filePath)
   allowDocWrite(wcId, filePath)
-  rememberOpenDoc(wcId, filePath)
-  if (fileOpenedHook) fileOpenedHook(wcId, filePath)
+  rememberOpenDoc(wcId, imported?.sourcePath ?? filePath)
+  if (fileOpenedHook) fileOpenedHook(wcId, imported?.sourcePath ?? filePath)
   markDiskEncrypted(wcId, filePath, encrypted)
   // record the on-disk file, not the recovery copy: what matters is what save would overwrite
   await rememberDiskState(wcId, filePath, hash)
@@ -3654,6 +3749,8 @@ async function loadDocx(
     hash,
     encrypted,
     recovered: recovered || undefined,
+    importedFrom: imported?.sourcePath,
+    suggestSaveAs: imported?.suggestSaveAs,
   }
 }
 
@@ -4317,7 +4414,7 @@ export function registerDocsIpc(): void {
   ipcMain.handle('docs:open', async (event) => {
     const result = await openDialog(event, {
       title: tm('dlgOpenDoc'),
-      filters: [{ name: tm('filterWord'), extensions: ['docx'] }],
+      filters: [{ name: tm('filterWord'), extensions: ['docx', 'doc'] }],
       properties: ['openFile'],
     })
     if (result.canceled || result.filePaths.length === 0) return null
@@ -4486,6 +4583,9 @@ export function registerDocsIpc(): void {
         if (typeof filePath !== 'string' || !canDocWrite(event.sender.id, filePath)) {
           return { ok: false, error: 'save target is not an opened document' }
         }
+        if (legacyDocImports.get(event.sender.id)?.has(filePath)) {
+          return { ok: false, reason: 'requires-save-as' }
+        }
         if (await diskChangedExternally(event.sender.id, filePath)) {
           // autosave must never clobber another program's edits silently; the
           // renderer stays dirty and the next manual save raises the dialog
@@ -4555,36 +4655,45 @@ export function registerDocsIpc(): void {
 
   // crash-recovery copy from a dirty renderer; best-effort, never surfaces
   ipcMain.handle('docs:write-recovery', async (event, filePath: string, data: ArrayBuffer) => {
-    try {
-      if (tornDownWcIds.has(event.sender.id)) return { ok: false }
-      if (typeof filePath !== 'string' || !canDocWrite(event.sender.id, filePath))
-        return { ok: false }
-      // snapshot before any await: a save or discard that clears the recovery
-      // copy while this write is in flight bumps the epoch and invalidates it
-      const epoch = recoveryClearEpochs.get(filePath) ?? 0
-      await mkdir(recoveryDir(), { recursive: true })
-      // Recovery follows the current disk state, never the desired next-save
-      // password. Missing state for an encrypted disk file skips the tick so
-      // plaintext can never be written as its recovery copy.
-      const bytes = prepareRecoveryDocx(event.sender.id, filePath, Buffer.from(data))
-      if (!bytes) return { ok: false }
-      await atomicWriteFile(recoveryPathFor(filePath), bytes)
-      // The tab may have been closed ("Don't Save" clears the copy, teardown
-      // revokes access) or the document saved (docs:save clears the copy) while
-      // the write was in flight. A write that lost either race would offer
-      // discarded or already-saved content as recovery on the next open — undo it.
-      if (
-        tornDownWcIds.has(event.sender.id) ||
-        !canDocWrite(event.sender.id, filePath) ||
-        (recoveryClearEpochs.get(filePath) ?? 0) !== epoch
-      ) {
-        clearRecoveryCopy(filePath)
+    if (typeof filePath !== 'string') return { ok: false }
+    // Capture the source identity/epoch at receipt, before waiting behind another
+    // renderer's write. A discard or source rename invalidates queued snapshots.
+    const recoveryKey = recoveryKeyFor(filePath)
+    const recoveryPath = recoveryPathFor(filePath)
+    const epoch = recoveryClearEpochs.get(recoveryKey) ?? 0
+    return queueRecoveryWrite(recoveryKey, async () => {
+      try {
+        if (tornDownWcIds.has(event.sender.id)) return { ok: false }
+        if (typeof filePath !== 'string' || !canDocWrite(event.sender.id, filePath))
+          return { ok: false }
+        if (legacyDocImports.get(event.sender.id)?.get(filePath)?.finalPath) return { ok: false }
+        if ((recoveryClearEpochs.get(recoveryKey) ?? 0) !== epoch) return { ok: false }
+        await mkdir(recoveryDir(), { recursive: true })
+        // Recovery follows the current disk state, never the desired next-save
+        // password. Missing state for an encrypted disk file skips the tick so
+        // plaintext can never be written as its recovery copy.
+        const bytes = prepareRecoveryDocx(event.sender.id, filePath, Buffer.from(data))
+        if (!bytes) return { ok: false }
+        await atomicWriteFile(recoveryPath, bytes)
+        // The tab may have been closed ("Don't Save" clears the copy, teardown
+        // revokes access) or the document saved (docs:save clears the copy) while
+        // the write was in flight. A write that lost either race would offer
+        // discarded or already-saved content as recovery on the next open — undo it.
+        if (
+          tornDownWcIds.has(event.sender.id) ||
+          !canDocWrite(event.sender.id, filePath) ||
+          (recoveryClearEpochs.get(recoveryKey) ?? 0) !== epoch
+        ) {
+          // A DOC source can be renamed while this write is awaiting disk I/O.
+          // Remove the path this write actually touched, not a retargeted alias.
+          await unlink(recoveryPath).catch(() => {})
+          return { ok: false }
+        }
+        return { ok: true }
+      } catch {
         return { ok: false }
       }
-      return { ok: true }
-    } catch {
-      return { ok: false }
-    }
+    })
   })
 
   // Blink only respells an editable as a consequence of real (trusted) typing
@@ -4712,15 +4821,38 @@ export function registerDocsIpc(): void {
     async (event, defaultName: string, data: ArrayBuffer, sourcePath?: string | null) => {
       // an orphaned (closed-tab) renderer must not open dialogs or land new files
       if (tornDownWcIds.has(event.sender.id)) return { ok: false }
+      const imported =
+        typeof sourcePath === 'string'
+          ? legacyDocImports.get(event.sender.id)?.get(sourcePath)
+          : undefined
       const result = await saveDialog(event, {
         title: tm('dlgSaveAs'),
         defaultPath: saveAsSuggestion(
-          typeof sourcePath === 'string' ? sourcePath : null,
-          defaultName,
+          imported?.sourcePath ?? (typeof sourcePath === 'string' ? sourcePath : null),
+          docxSavePath(defaultName),
         ),
         filters: [{ name: tm('filterWord'), extensions: ['docx'] }],
       })
       if (result.canceled || !result.filePath) return { ok: false }
+      const targetPath = docxSavePath(result.filePath)
+      // A user may type a .doc name despite the DOCX filter. If normalizing it
+      // selects another existing file, the OS dialog did not confirm that file.
+      if (targetPath !== result.filePath && existsSync(targetPath)) {
+        const options = {
+          type: 'warning' as const,
+          message: basename(targetPath),
+          buttons: [tm('btnOverwrite'), tm('btnCancel')],
+          defaultId: 1,
+          cancelId: 1,
+          noLink: true,
+        }
+        const parent = dialogParent(event)
+        const { response } =
+          parent && !parent.isDestroyed()
+            ? await dialog.showMessageBox(parent, options)
+            : await dialog.showMessageBox(options)
+        if (response !== 0) return { ok: false }
+      }
       // the tab may have been closed while the dialog was open; checked before the
       // write because Save As may overwrite an existing file (no safe rollback)
       if (tornDownWcIds.has(event.sender.id)) return { ok: false }
@@ -4731,13 +4863,13 @@ export function registerDocsIpc(): void {
         )
         const { bytes: plain, hashes } = await materializeLazyDocx(Buffer.from(data))
         const bytes = passwordState.password ? encryptDocx(plain, passwordState.password) : plain
-        await atomicWriteFile(result.filePath, bytes)
+        await atomicWriteFile(targetPath, bytes)
         if (tornDownWcIds.has(event.sender.id)) return { ok: false }
-        allowDocWrite(event.sender.id, result.filePath)
-        await rememberDiskState(event.sender.id, result.filePath, sha256Hex(bytes))
+        allowDocWrite(event.sender.id, targetPath)
+        await rememberDiskState(event.sender.id, targetPath, sha256Hex(bytes))
         pointLazyMediaAt(
           hashes,
-          result.filePath,
+          targetPath,
           event.sender.id,
           passwordState.password ? plain : undefined,
         )
@@ -4745,12 +4877,15 @@ export function registerDocsIpc(): void {
         const passwordIntentPending = commitDocPasswordSave(
           event.sender.id,
           passwordState,
-          result.filePath,
+          targetPath,
         )
-        pushRecent(result.filePath)
+        if (imported) clearRecoveryCopy(imported.openPath)
+        pushRecent(targetPath)
         // the renderer has no path yet to match a rename notification against,
         // so the reply must carry the path it may save to next
-        const savedPath = notifyFileSaved(event.sender, result.filePath)
+        const savedPath = notifyFileSaved(event.sender, targetPath)
+        if (imported) imported.finalPath = savedPath
+        rememberOpenDoc(event.sender.id, savedPath)
         return {
           ok: true,
           path: savedPath,
@@ -4817,7 +4952,13 @@ export function registerDocsIpc(): void {
   // clobber an existing file unless the caller asked for overwrite.
   ipcMain.handle(
     'docs:save-to',
-    async (event, filePath: string, data: ArrayBuffer, overwrite: boolean) => {
+    async (
+      event,
+      filePath: string,
+      data: ArrayBuffer,
+      overwrite: boolean,
+      sourcePath?: string | null,
+    ) => {
       try {
         if (tornDownWcIds.has(event.sender.id)) return { ok: false }
         if (typeof filePath !== 'string' || !isAbsolute(filePath)) {
@@ -4837,8 +4978,16 @@ export function registerDocsIpc(): void {
             error: `file already exists: ${filePath} (pass overwrite:true to replace it)`,
           }
         }
+        const imported =
+          typeof sourcePath === 'string'
+            ? legacyDocImports.get(event.sender.id)?.get(sourcePath)
+            : undefined
+        const passwordSource =
+          typeof sourcePath === 'string' && canDocWrite(event.sender.id, sourcePath)
+            ? sourcePath
+            : null
         await mkdir(dirname(filePath), { recursive: true })
-        const passwordState = snapshotDocPassword(event.sender.id, null)
+        const passwordState = snapshotDocPassword(event.sender.id, passwordSource)
         const { bytes: plain, hashes } = await materializeLazyDocx(Buffer.from(data))
         const bytes = passwordState.password ? encryptDocx(plain, passwordState.password) : plain
         await atomicWriteFile(filePath, bytes)
@@ -4865,6 +5014,10 @@ export function registerDocsIpc(): void {
         pushRecent(filePath)
         rememberOpenDoc(event.sender.id, filePath)
         notifyFileSaved(event.sender, filePath)
+        if (imported) {
+          clearRecoveryCopy(imported.openPath)
+          imported.finalPath = filePath
+        }
         return {
           ok: true,
           path: filePath,

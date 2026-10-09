@@ -1,5 +1,6 @@
 /** app strings, zh: defines the key set every other locale shard must match. */
 export const zh = {
+  appImportedDoc: '已将 DOC 转换为 DOCX。请检查布局并保存为新的 .docx 文件；原始 DOC 保持不变。',
   appScTitle: '键盘快捷键',
   appScFilter: '搜索快捷键',
   appScNone: '没有匹配的快捷键',

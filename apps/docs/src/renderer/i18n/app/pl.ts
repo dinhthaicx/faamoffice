@@ -1,6 +1,8 @@
 import type { zh } from './zh'
 
 export const pl = {
+  appImportedDoc:
+    'DOC został przekonwertowany na DOCX. Sprawdź układ i zapisz nowy plik .docx; oryginalny DOC zostaje zachowany.',
   appScTitle: 'Skróty klawiaturowe',
   appScFilter: 'Szukaj skrótu',
   appScNone: 'Brak pasujących skrótów',

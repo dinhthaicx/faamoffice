@@ -1,6 +1,8 @@
 import type { zh } from './zh'
 
 export const cs = {
+  appImportedDoc:
+    'DOC byl převeden na DOCX. Zkontrolujte rozložení a uložte nový soubor .docx; původní DOC zůstane zachován.',
   appScTitle: 'Klávesové zkratky',
   appScFilter: 'Hledat zkratky',
   appScNone: 'Žádné odpovídající zkratky',

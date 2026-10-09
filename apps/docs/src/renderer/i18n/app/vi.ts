@@ -1,6 +1,8 @@
 import type { zh } from './zh'
 
 export const vi = {
+  appImportedDoc:
+    'DOC đã được chuyển sang DOCX. Kiểm tra lại bố cục và lưu thành tệp .docx mới; tệp DOC gốc được giữ nguyên.',
   appScTitle: 'Phím tắt bàn phím',
   appScFilter: 'Tìm kiếm phím tắt',
   appScNone: 'Không có phím tắt phù hợp',

@@ -1,6 +1,8 @@
 import type { zh } from './zh'
 
 export const ko = {
+  appImportedDoc:
+    'DOC를 DOCX로 변환했습니다. 레이아웃을 확인하고 새 .docx 파일로 저장하세요. 원본 DOC는 유지됩니다.',
   appScTitle: '키보드 바로 가기',
   appScFilter: '바로 가기 검색',
   appScNone: '일치하는 바로 가기가 없습니다',

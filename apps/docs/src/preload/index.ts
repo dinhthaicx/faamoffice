@@ -133,8 +133,8 @@ const api: DesktopApi = {
     ipcRenderer.invoke('docs:save-as', defaultName, data, sourcePath ?? null),
   saveDocxNew: (defaultName: string, data: ArrayBuffer) =>
     ipcRenderer.invoke('docs:save-new', defaultName, data),
-  saveDocxTo: (path: string, data: ArrayBuffer, overwrite: boolean) =>
-    ipcRenderer.invoke('docs:save-to', path, data, overwrite === true),
+  saveDocxTo: (path: string, data: ArrayBuffer, overwrite: boolean, sourcePath?: string | null) =>
+    ipcRenderer.invoke('docs:save-to', path, data, overwrite === true, sourcePath ?? null),
   onMcpCommand: (handler) => {
     const listener = (_event: IpcRendererEvent, message: Parameters<typeof handler>[0]) =>
       handler(message)

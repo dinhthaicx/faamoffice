@@ -144,9 +144,18 @@ describe('partitionDropPayload', () => {
   })
 
   it('collects known-unsupported extensions uniquely, first-seen order', () => {
-    const result = partitionDropPayload(['old.doc', 'x.pages', 'y.rtf', 'z.doc'])
+    const result = partitionDropPayload(['old.ppt', 'x.pages', 'y.rtf', 'z.ppt'])
     expect(result.supported).toEqual([])
-    expect(result.unsupportedExts).toEqual(['doc', 'pages', 'rtf'])
+    expect(result.unsupportedExts).toEqual(['ppt', 'pages', 'rtf'])
+  })
+
+  it('opens legacy DOC beside DOCX while keeping unrelated legacy formats unsupported', () => {
+    expect(
+      partitionDropPayload(['old.doc', 'new.docx', 'UPPER.DOC', 'old.doc', 'slides.ppt']),
+    ).toEqual({
+      supported: ['old.doc', 'new.docx', 'UPPER.DOC'],
+      unsupportedExts: ['ppt'],
+    })
   })
 
   it('caps the number of openable files at 20', () => {
@@ -274,10 +283,10 @@ describe('installDropOpenBridge', () => {
     electronMocks.getPathForFile.mockImplementation((f: { name: string }) => `/tmp/${f.name}`)
     const win = install()
     try {
-      const ev = fileDrag(['legacy.doc'])
+      const ev = fileDrag(['legacy.ppt'])
       win.fire('drop', ev)
       await vi.waitFor(() =>
-        expect(electronMocks.send).toHaveBeenCalledWith(DROP_OPEN_CHANNEL, ['/tmp/legacy.doc']),
+        expect(electronMocks.send).toHaveBeenCalledWith(DROP_OPEN_CHANNEL, ['/tmp/legacy.ppt']),
       )
     } finally {
       uninstall(win)

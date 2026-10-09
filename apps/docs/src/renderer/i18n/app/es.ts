@@ -1,6 +1,8 @@
 import type { zh } from './zh'
 
 export const es = {
+  appImportedDoc:
+    'El DOC se ha convertido en DOCX. Revise el diseño y guarde un nuevo archivo .docx; se conserva el DOC original.',
   appScTitle: 'Atajos de teclado',
   appScFilter: 'Buscar atajo',
   appScNone: 'No hay atajos coincidentes',

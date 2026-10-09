@@ -1,6 +1,8 @@
 import type { zh } from './zh'
 
 export const hi = {
+  appImportedDoc:
+    'DOC को DOCX में बदल दिया गया है। लेआउट की जाँच करें और नई .docx फ़ाइल सहेजें; मूल DOC सुरक्षित रहता है।',
   appScTitle: 'कीबोर्ड शॉर्टकट',
   appScFilter: 'शॉर्टकट खोजें',
   appScNone: 'कोई मेल खाता शॉर्टकट नहीं',

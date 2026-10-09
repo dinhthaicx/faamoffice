@@ -64,6 +64,12 @@
         "ext": "docx",
         "name": "Word Document",
         "role": "Editor"
+      },
+      {
+        "ext": "doc",
+        "name": "Word 97-2003 Document",
+        "role": "Editor",
+        "mimeType": "application/msword"
       }
     ],
     "npmRebuild": false,

@@ -4,7 +4,7 @@
  *
  * The authority is the shell's own routing and each editor's Save-As dialog:
  *   - open routing:      apps/shell/src/main/index.ts  (routeDocumentPath,
- *                        OPEN_DIALOG_EXTENSIONS, UNSUPPORTED_DOC_RE)
+ *                        OPEN_DIALOG_EXTENSIONS)
  *   - save/export filters: apps/docs|sheets|slides|markdown|html/src/main/*
  *
  * `editor` mirrors that matrix exactly; `mcp` is the subset this server exposes
@@ -55,7 +55,8 @@ export const FORMAT_FAMILIES: readonly FormatFamily[] = [
   {
     family: 'docx',
     label: 'Word document',
-    editorOpen: ['docx'],
+    // Legacy .doc is imported into DOCX; the editor never writes binary DOC.
+    editorOpen: ['docx', 'doc'],
     editorSave: ['docx'],
     editorExport: ['pdf'],
     mcp: { generate: 'docx', save: ['docx'], read: 'docx' },

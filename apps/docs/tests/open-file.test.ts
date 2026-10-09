@@ -17,6 +17,15 @@ describe('findDocxPath', () => {
       findDocxPath(['FaamOffice Docs', '--inspect=document.docx', '/tmp/notes.txt']),
     ).toBeNull()
   })
+
+  it('accepts legacy DOC arguments and keeps the first Word file in mixed arguments', () => {
+    expect(findDocxPath(['FaamOffice Docs.exe', 'C:\\Users\\Me\\REPORT.DOC'])).toBe(
+      'C:\\Users\\Me\\REPORT.DOC',
+    )
+    expect(findDocxPath(['FaamOffice Docs', '/tmp/old.doc', '/tmp/new.docx'])).toBe('/tmp/old.doc')
+    expect(findDocxPath(['FaamOffice Docs', '/tmp/new.docx', '/tmp/old.doc'])).toBe('/tmp/new.docx')
+    expect(findDocxPath(['FaamOffice Docs', '--inspect=old.doc', '/tmp/notes.docm'])).toBeNull()
+  })
 })
 
 describe('runGuardedCandidate', () => {

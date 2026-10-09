@@ -16,7 +16,7 @@ import {
 
 describe('format registry', () => {
   it('mirrors the shell open routing for the mcp-driven families', () => {
-    expect(formatFamily('docx').editorOpen).toEqual(['docx'])
+    expect(formatFamily('docx').editorOpen).toEqual(['docx', 'doc'])
     expect(formatFamily('xlsx').editorOpen).toEqual(['xlsx', 'xlsm', 'xls', 'csv', 'tsv'])
     expect(formatFamily('pptx').editorOpen).toEqual(['pptx'])
   })
@@ -26,6 +26,14 @@ describe('format registry', () => {
     expect(sheet.editorOpen).toContain('tsv')
     expect(sheet.editorSave).not.toContain('tsv')
     expect(sheet.mcp?.save).not.toContain('tsv')
+  })
+
+  it('keeps binary DOC open-only and saves edited Word documents as DOCX', () => {
+    const word = formatFamily('docx')
+    expect(word.editorOpen).toContain('doc')
+    expect(word.editorSave).toEqual(['docx'])
+    expect(word.mcp?.save).toEqual(['docx'])
+    expect(() => withSaveExtension('docx', '/tmp/legacy.doc')).toThrow(/must be saved as \.docx/)
   })
 
   it('keeps the editor-only families (md/html) without an mcp block', () => {
@@ -97,7 +105,7 @@ describe('capabilityReport', () => {
     const report = capabilityReport()
     expect(report.map((r) => r.family)).toEqual(['docx', 'xlsx', 'pptx', 'md', 'html', 'pdf'])
     const docx = report.find((r) => r.family === 'docx')!
-    expect(docx.editor.open).toEqual(['docx'])
+    expect(docx.editor.open).toEqual(['docx', 'doc'])
     expect(docx.editor.export).toEqual(['pdf'])
     expect(docx.mcp).toEqual({ generate: 'docx', save: ['docx'], read: 'docx' })
     // editor-only family carries no mcp key

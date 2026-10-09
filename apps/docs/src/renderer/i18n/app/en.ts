@@ -1,6 +1,8 @@
 import type { zh } from './zh'
 
 export const en = {
+  appImportedDoc:
+    'DOC has been converted to DOCX. Review the layout and save a new .docx file; the original DOC is preserved.',
   appScTitle: 'Keyboard Shortcuts',
   appScFilter: 'Search shortcuts',
   appScNone: 'No matching shortcuts',

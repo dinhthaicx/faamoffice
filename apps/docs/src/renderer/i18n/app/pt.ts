@@ -1,6 +1,8 @@
 import type { zh } from './zh'
 
 export const pt = {
+  appImportedDoc:
+    'O DOC foi convertido em DOCX. Confira o layout e salve um novo arquivo .docx; o DOC original é preservado.',
   appScTitle: 'Atalhos de Teclado',
   appScFilter: 'Pesquisar atalho',
   appScNone: 'Nenhum atalho correspondente',

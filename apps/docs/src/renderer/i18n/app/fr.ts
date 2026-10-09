@@ -1,6 +1,8 @@
 import type { zh } from './zh'
 
 export const fr = {
+  appImportedDoc:
+    'Le DOC a été converti en DOCX. Vérifiez la mise en page et enregistrez un nouveau fichier .docx ; le DOC original est conservé.',
   appScTitle: 'Raccourcis clavier',
   appScFilter: 'Rechercher un raccourci',
   appScNone: 'Aucun raccourci correspondant',

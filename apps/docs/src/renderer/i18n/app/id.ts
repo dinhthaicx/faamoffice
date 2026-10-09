@@ -1,6 +1,8 @@
 import type { zh } from './zh'
 
 export const id = {
+  appImportedDoc:
+    'DOC telah dikonversi ke DOCX. Periksa tata letak dan simpan sebagai file .docx baru; DOC asli tetap disimpan.',
   appScTitle: 'Pintasan Papan Ketik',
   appScFilter: 'Cari pintasan',
   appScNone: 'Tidak ada pintasan yang cocok',

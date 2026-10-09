@@ -5,8 +5,8 @@
  */
 import type { DefaultFonts, HeaderFooter, SectionInfo, StyleUpsert } from '@genoffice/docx-engine'
 
-import { EMPTY_PENDING_NUMBERING } from './doc-state'
-import type { PendingNumbering } from './doc-state'
+import { documentRequiresSaveAs, EMPTY_PENDING_NUMBERING } from './doc-state'
+import type { DocState, PendingNumbering } from './doc-state'
 
 export async function runGuardedDocumentAction(
   confirm: () => Promise<boolean>,
@@ -39,6 +39,7 @@ export async function runGuardedCandidate<T>(
 }
 
 export interface DocDirtyState {
+  doc?: Pick<DocState, 'suggestSaveAs'> | null
   dirtyRef: { current: boolean }
   sectionDirty: boolean
   sectionsDirty: readonly number[]
@@ -72,6 +73,7 @@ export interface DocDirtyState {
 
 export function isDocDirty(s: DocDirtyState): boolean {
   return (
+    documentRequiresSaveAs(s.doc) ||
     s.dirtyRef.current ||
     s.sectionDirty ||
     s.sectionsDirty.length > 0 ||

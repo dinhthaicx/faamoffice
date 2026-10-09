@@ -1,6 +1,8 @@
 import type { zh } from './zh'
 
 export const ja = {
+  appImportedDoc:
+    'DOC を DOCX に変換しました。レイアウトを確認し、新しい .docx ファイルとして保存してください。元の DOC は保持されます。',
   appScTitle: 'キーボードショートカット',
   appScFilter: 'ショートカットを検索',
   appScNone: '一致するショートカットがありません',

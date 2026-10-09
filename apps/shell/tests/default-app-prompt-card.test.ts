@@ -121,7 +121,7 @@ describe('DefaultAppPromptCard', () => {
     render(MAC_OTHER, vi.fn())
     const dialog = card()!
     expect(dialog.getAttribute('aria-label')).toBe('Open Office files with FaamOffice?')
-    expect(dialog.textContent).toContain('Word (.docx), Excel (.xlsx, .xls, .xlsm)')
+    expect(dialog.textContent).toContain('Word (.docx, .doc), Excel (.xlsx, .xls, .xlsm)')
     expect(dialog.textContent).toContain('PowerPoint (.pptx)')
     expect(dialog.textContent).toContain('Currently opened by: Microsoft Word')
     expect(dialog.textContent).not.toContain('Default apps page')
@@ -190,7 +190,7 @@ describe('DefaultAppPromptCard', () => {
     expect(card()!.textContent).not.toContain('Currently opened by')
     expect(card()!.textContent).not.toContain('Microsoft Word Document')
     expect(card()!.textContent).toContain(
-      'Windows will open the Default apps page. Choose FaamOffice for .docx, .xlsx, .xls, .xlsm and .pptx.',
+      'Windows will open the Default apps page. Choose FaamOffice for .docx, .doc, .xlsx, .xls, .xlsm and .pptx.',
     )
     expect(
       Array.from(host.querySelectorAll('button')).some((b) => b.textContent === 'Set as default'),
@@ -199,7 +199,7 @@ describe('DefaultAppPromptCard', () => {
     await click(button('Open Default apps'))
     expect(action).toHaveBeenCalledWith('set')
     expect(statusText()).toBe(
-      'On the Default apps page, choose FaamOffice for .docx, .xlsx, .xls, .xlsm and .pptx.',
+      'On the Default apps page, choose FaamOffice for .docx, .doc, .xlsx, .xls, .xlsm and .pptx.',
     )
     expect(card()!.textContent).not.toContain("Couldn't set it")
 

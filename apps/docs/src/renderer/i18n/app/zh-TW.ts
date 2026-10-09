@@ -1,6 +1,8 @@
 import type { zh } from './zh'
 
 export const zhTW = {
+  appImportedDoc:
+    '已將 DOC 轉換為 DOCX。請檢查版面配置並儲存為新的 .docx 檔案；原始 DOC 保持不變。',
   appScTitle: '鍵盤快速鍵',
   appScFilter: '搜尋快速鍵',
   appScNone: '沒有相符的快速鍵',

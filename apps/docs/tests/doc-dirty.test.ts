@@ -56,6 +56,14 @@ describe('isDocDirty', () => {
     expect(openedFileStartsDirty({})).toBe(false)
   })
 
+  it('keeps a converted DOC unsaved until a final DOCX destination is chosen', () => {
+    const imported = { suggestSaveAs: '/documents/report.docx' }
+    expect(openedFileStartsDirty(imported)).toBe(true)
+    // The import flag itself protects close even if a body-only dirty flag was reset.
+    expect(isDocDirty({ ...cleanState(), doc: imported })).toBe(true)
+    expect(isDocDirty({ ...cleanState(), doc: { suggestSaveAs: undefined } })).toBe(false)
+  })
+
   // the regression: autosave ignored comment/protection edits; the recovery push ignored everything but the body
   it.each([
     ['commentsDirty', { commentsDirty: true }],
